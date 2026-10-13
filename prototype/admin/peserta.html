@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kelola Peserta — LONTAR Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="admin" data-base="../" data-active="peserta">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Admin Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Peserta</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Pengguna</span>
+        <h1 style="margin-top:.5rem">Kelola Peserta</h1>
+        <p>Lihat data peserta, ubah informasinya, dan aktifkan atau nonaktifkan akun.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn--ghost" type="button" onclick="L.toast('Daftar peserta diunduh sebagai CSV.','success')"><svg data-icon="download"></svg> Ekspor</button>
+        <button class="btn btn--ghost" type="button" onclick="L.toast('Broadcast dikirim ke 1.284 peserta.','success')"><svg data-icon="send"></svg> Broadcast</button>
+      </div>
+    </header>
+
+    <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
+      <article class="stat">
+        <span class="stat__icon"><svg data-icon="users"></svg></span>
+        <div><div class="stat__label">Total Peserta</div><div class="stat__value" data-count-to="12480">0</div><div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +8,2% bulan ini</div></div>
+      </article>
+      <article class="stat">
+        <span class="stat__icon ico--mint"><svg data-icon="check"></svg></span>
+        <div><div class="stat__label">Akun Aktif</div><div class="stat__value" data-count-to="11940">0</div><div class="stat__delta text-soft">95,7 persen</div></div>
+      </article>
+      <article class="stat">
+        <span class="stat__icon ico--amber"><svg data-icon="crown"></svg></span>
+        <div><div class="stat__label">Pengguna Berlangganan</div><div class="stat__value" data-count-to="6340">0</div><div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +312 bulan ini</div></div>
+      </article>
+      <article class="stat">
+        <span class="stat__icon ico--pink"><svg data-icon="x-circle"></svg></span>
+        <div><div class="stat__label">Akun Nonaktif</div><div class="stat__value" data-count-to="540">0</div><div class="stat__delta text-soft">Perlu tinjauan</div></div>
+      </article>
+    </section>
+
+    <div class="flex items-center justify-between flex-wrap" style="gap:1rem;margin-bottom:1.25rem">
+      <div class="pills">
+        <button class="pill is-active" type="button">Semua</button>
+        <button class="pill" type="button">Aktif</button>
+        <button class="pill" type="button">Nonaktif</button>
+        <button class="pill" type="button">Berlangganan</button>
+      </div>
+      <div class="input-group" style="min-width:250px">
+        <span class="input-group__icon"><svg data-icon="search"></svg></span>
+        <input class="input" type="search" placeholder="Cari nama atau email..." aria-label="Cari peserta" data-table-filter="tabelPeserta">
+      </div>
+    </div>
+
+    <section class="card card--pad-0">
+      <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+        <table class="table" id="tabelPeserta">
+          <thead>
+            <tr>
+              <th>Peserta</th>
+              <th>Tanggal Registrasi</th>
+              <th>Status Akun</th>
+              <th>Paket</th>
+              <th class="is-sortable num" aria-sort="descending">Aktivitas<span class="sort-ind">↕</span></th>
+              <th class="num">Nilai Terakhir</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="userchip"><span class="avatar avatar--sm avatar--pink">R</span><div><strong>Rani Kusuma</strong><span>rani.kusuma@mail.com</span></div></div></td>
+              <td>24 Sep 2026</td>
+              <td><span class="badge badge--mint badge--flat">Aktif</span></td>
+              <td><span class="badge badge--premium badge--flat">Premium</span></td>
+              <td class="num" data-sort="19">19</td>
+              <td class="num">452</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="detailModal" aria-label="Detail"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Mode edit peserta dibuka.','info')" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Nonaktifkan akun?',body:'Peserta tidak bisa masuk sampai akun diaktifkan kembali.',ok:'Nonaktifkan',tone:'coral',onOk:function(){L.toast('Akun dinonaktifkan.','warn')}})" aria-label="Nonaktifkan"><svg data-icon="x-circle"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="userchip"><span class="avatar avatar--sm avatar--mint">D</span><div><strong>Dewi Anggraini</strong><span>dewi.anggraini@mail.com</span></div></div></td>
+              <td>12 Sep 2026</td>
+              <td><span class="badge badge--mint badge--flat">Aktif</span></td>
+              <td><span class="badge badge--violet badge--flat">Ultimate</span></td>
+              <td class="num" data-sort="41">41</td>
+              <td class="num">481</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="detailModal" aria-label="Detail"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Mode edit peserta dibuka.','info')" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Nonaktifkan akun?',body:'Peserta tidak bisa masuk sampai akun diaktifkan kembali.',ok:'Nonaktifkan',tone:'coral',onOk:function(){L.toast('Akun dinonaktifkan.','warn')}})" aria-label="Nonaktifkan"><svg data-icon="x-circle"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="userchip"><span class="avatar avatar--sm">A</span><div><strong>Ahmad Fauzi</strong><span>ahmad.fauzi@mail.com</span></div></div></td>
+              <td>10 Sep 2026</td>
+              <td><span class="badge badge--mint badge--flat">Aktif</span></td>
+              <td><span class="badge badge--premium badge--flat">Premium</span></td>
+              <td class="num" data-sort="28">28</td>
+              <td class="num">472</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="detailModal" aria-label="Detail"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Mode edit peserta dibuka.','info')" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Nonaktifkan akun?',body:'Peserta tidak bisa masuk sampai akun diaktifkan kembali.',ok:'Nonaktifkan',tone:'coral',onOk:function(){L.toast('Akun dinonaktifkan.','warn')}})" aria-label="Nonaktifkan"><svg data-icon="x-circle"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="userchip"><span class="avatar avatar--sm avatar--amber">Y</span><div><strong>Yoga Pratama</strong><span>yoga.pratama@mail.com</span></div></div></td>
+              <td>08 Sep 2026</td>
+              <td><span class="badge badge--danger badge--flat">Nonaktif</span></td>
+              <td><span class="badge badge--flat">Tidak ada</span></td>
+              <td class="num" data-sort="3">3</td>
+              <td class="num">268</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="detailModal" aria-label="Detail"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Mode edit peserta dibuka.','info')" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Akun diaktifkan kembali.','success')" aria-label="Aktifkan"><svg data-icon="check-circle"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="userchip"><span class="avatar avatar--sm avatar--coral">N</span><div><strong>Nadia Putri</strong><span>nadia.putri@mail.com</span></div></div></td>
+              <td>05 Sep 2026</td>
+              <td><span class="badge badge--mint badge--flat">Aktif</span></td>
+              <td><span class="badge badge--violet badge--flat">Ultimate</span></td>
+              <td class="num" data-sort="35">35</td>
+              <td class="num">466</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="detailModal" aria-label="Detail"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Mode edit peserta dibuka.','info')" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Nonaktifkan akun?',body:'Peserta tidak bisa masuk sampai akun diaktifkan kembali.',ok:'Nonaktifkan',tone:'coral',onOk:function(){L.toast('Akun dinonaktifkan.','warn')}})" aria-label="Nonaktifkan"><svg data-icon="x-circle"></svg></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty" data-table-empty hidden style="margin:1.5rem">
+        <span class="empty__icon"><svg data-icon="search"></svg></span>
+        <strong style="color:var(--ink);font-family:var(--font-display)">Peserta tidak ditemukan</strong>
+      </div>
+
+      <div class="flex items-center justify-between flex-wrap" style="gap:1rem;padding:1.25rem 1.5rem;border-top:2px solid var(--border)">
+        <span class="text-xs text-soft">Menampilkan 5 dari 12.480 peserta</span>
+        <div class="pager" style="margin-top:0">
+          <button class="pager__btn" type="button" disabled aria-label="Sebelumnya"><svg data-icon="chevron-left"></svg></button>
+          <button class="pager__btn is-active" type="button">1</button>
+          <button class="pager__btn" type="button">2</button>
+          <button class="pager__btn" type="button">3</button>
+          <button class="pager__btn" type="button" aria-label="Berikutnya"><svg data-icon="chevron-right"></svg></button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ MODAL DETAIL PESERTA ============ -->
+<div class="modal" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detTitle" aria-hidden="true">
+  <div class="modal__backdrop"></div>
+  <div class="modal__panel modal__panel--wide">
+    <button class="modal__close" type="button" data-modal-close aria-label="Tutup"><svg data-icon="close"></svg></button>
+
+    <div class="flex items-center gap-3" style="margin-bottom:1.5rem">
+      <span class="avatar avatar--lg avatar--pink" style="width:64px;height:64px;flex-basis:64px;font-size:1.5rem">RK</span>
+      <div>
+        <h2 class="modal__title" id="detTitle" style="padding-right:0">Rani Kusuma</h2>
+        <p class="text-sm text-soft">rani.kusuma@mail.com - Terdaftar 24 September 2026</p>
+        <div class="flex items-center gap-2 flex-wrap" style="margin-top:.5rem">
+          <span class="badge badge--mint badge--flat">Aktif</span>
+          <span class="badge badge--premium badge--flat">Premium</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="--gap:1.5rem">
+      <div>
+        <div class="card__title" style="margin-bottom:.75rem">Informasi Akun</div>
+        <div class="kv">
+          <div class="kv__row"><span class="kv__key">Nomor telepon</span><span class="kv__val">0812 3456 7890</span></div>
+          <div class="kv__row"><span class="kv__key">Kota domisili</span><span class="kv__val">Bandung</span></div>
+          <div class="kv__row"><span class="kv__key">Target seleksi</span><span class="kv__val">CPNS 2027</span></div>
+          <div class="kv__row"><span class="kv__key">Paket aktif sampai</span><span class="kv__val">28 Nov 2026</span></div>
+          <div class="kv__row"><span class="kv__key">Peringkat leaderboard</span><span class="kv__val">18</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="card__title" style="margin-bottom:.75rem">Aktivitas Terakhir</div>
+        <div class="stack" style="--stack:.6rem">
+          <div class="flex items-center gap-2 text-sm"><span class="badge badge--primary badge--flat">Tryout</span><span class="text-soft">Tryout SKD #4 - nilai 452</span></div>
+          <div class="flex items-center gap-2 text-sm"><span class="badge badge--amber badge--flat">Latihan</span><span class="text-soft">Penalaran Analitis - nilai 85</span></div>
+          <div class="flex items-center gap-2 text-sm"><span class="badge badge--mint badge--flat">Materi</span><span class="text-soft">Menyelesaikan Logika Silogisme 2</span></div>
+        </div>
+        <div class="alert alert--info" style="margin-top:1rem">
+          <span class="alert__icon"><svg data-icon="info"></svg></span>
+          <div>Data peserta pada prototipe hanya contoh, bukan data asli.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal__foot">
+      <button class="btn btn--ghost" type="button" data-modal-close>Tutup</button>
+      <button class="btn btn--primary" type="button" onclick="L.toast('Perubahan disimpan.','success')">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/icons.js"></script>
+<script src="../assets/js/shell.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

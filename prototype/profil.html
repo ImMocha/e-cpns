@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profil Saya — LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="profil">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Profil Saya</span>
+    </nav>
+
+    <header class="page-head">
+      <h1>Profil Saya</h1>
+      <p>Kelola informasi akun dan preferensi notifikasi kamu.</p>
+    </header>
+
+    <!-- ============ KARTU PROFIL ============ -->
+    <section class="card card--pop pattern-dots-primary" style="margin-bottom:1.5rem;overflow:hidden">
+      <div class="flex items-center gap-4 flex-wrap" style="position:relative">
+        <div style="position:relative">
+          <span class="avatar avatar--lg avatar--pink" style="width:104px;height:104px;flex-basis:104px;font-size:2.5rem">RK</span>
+          <button class="appbar__icon" type="button" onclick="L.toast('Pemilih file adalah simulasi pada prototipe.','info')" aria-label="Ganti foto profil" style="position:absolute;right:-6px;bottom:-6px;width:38px;height:38px;background:var(--pop-amber)">
+            <svg data-icon="image"></svg>
+          </button>
+        </div>
+        <div style="flex:1;min-width:220px">
+          <h2 style="font-size:var(--fs-xl)">Rani Kusuma</h2>
+          <p class="text-soft">rani.kusuma@mail.com</p>
+          <div class="flex items-center gap-2 flex-wrap" style="margin-top:.75rem">
+            <span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Akun terverifikasi</span>
+            <span class="badge badge--premium badge--flat"><svg data-icon="crown"></svg> Peserta Premium</span>
+            <span class="badge badge--primary badge--flat">Bergabung Sep 2026</span>
+          </div>
+        </div>
+        <div class="kv" style="min-width:200px">
+          <div class="kv__row"><span class="kv__key">Peringkat</span><span class="kv__val">#18</span></div>
+          <div class="kv__row"><span class="kv__key">Nilai terakhir</span><span class="kv__val">452</span></div>
+          <div class="kv__row"><span class="kv__key">Tryout</span><span class="kv__val">4</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="panes" style="--gap:1.5rem;" id="pengaturan">
+
+      <!-- ============ FORM ============ -->
+      <form class="card card--pop" data-demo-submit="Profil berhasil disimpan.">
+        <div class="card__head">
+          <div><div class="card__title">Informasi Profil</div><div class="card__sub">Data ini dipakai untuk sertifikat dan laporan</div></div>
+          <span class="stat__icon" style="width:42px;height:42px;flex-basis:42px;border-radius:12px"><svg data-icon="user"></svg></span>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label class="label" for="nama">Nama Lengkap</label>
+            <input class="input" type="text" id="nama" value="Rani Kusuma" required>
+          </div>
+          <div class="field">
+            <label class="label" for="email">Email</label>
+            <input class="input" type="email" id="email" value="rani.kusuma@mail.com" required>
+            <span class="field__hint">Email tidak bisa diubah sendiri. Hubungi admin bila perlu.</span>
+          </div>
+          <div class="field">
+            <label class="label" for="telp">Nomor Telepon</label>
+            <input class="input" type="tel" id="telp" value="0812 3456 7890">
+          </div>
+          <div class="field">
+            <label class="label" for="kota">Kota Domisili</label>
+            <select class="select" id="kota">
+              <option>Jakarta Selatan</option>
+              <option selected>Bandung</option>
+              <option>Surabaya</option>
+              <option>Yogyakarta</option>
+              <option>Makassar</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="target">Target Seleksi</label>
+            <select class="select" id="target">
+              <option>CPNS 2026</option>
+              <option selected>CPNS 2027</option>
+              <option>PPPK 2026</option>
+              <option>Belum ditentukan</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="jurusan">Jurusan Favorit</label>
+            <input class="input" type="text" id="jurusan" value="Akuntansi">
+          </div>
+          <div class="field span-2">
+            <label class="label" for="bio">Tentang Saya <span class="label__opt">(opsional)</span></label>
+            <textarea class="textarea" id="bio" placeholder="Ceritakan sedikit target dan motivasimu belajar."></textarea>
+            <span class="field__hint">Muncul di halaman profil publik dan pada sertifikat digital.</span>
+          </div>
+        </div>
+
+        <div class="btn-row" style="margin-top:1.5rem">
+          <button class="btn btn--primary" type="submit">Simpan Perubahan</button>
+          <button class="btn btn--ghost" type="reset">Batalkan</button>
+        </div>
+      </form>
+
+      <!-- ============ SISI KANAN ============ -->
+      <aside class="stack" style="--stack:1.5rem">
+
+        <section class="card">
+          <div class="card__head">
+            <div><div class="card__title">Keamanan Akun</div><div class="card__sub">Kata sandi dan perangkat aktif</div></div>
+            <span class="stat__icon ico--violet" style="width:42px;height:42px;flex-basis:42px;border-radius:12px"><svg data-icon="shield"></svg></span>
+          </div>
+
+          <button class="card card--tight card--dashed flex items-center justify-between" type="button" style="width:100%;text-align:left;cursor:pointer" onclick="L.toast('Tautan ubah kata sandi dikirim ke email.','success')">
+            <div class="flex items-center gap-3">
+              <svg data-icon="lock" style="width:20px;height:20px;color:var(--text-soft)"></svg>
+              <div><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Ubah Kata Sandi</strong><span class="text-xs text-soft">Terakhir diubah 2 bulan lalu</span></div>
+            </div>
+            <svg data-icon="chevron-right" style="width:18px;height:18px;color:var(--text-soft)"></svg>
+          </button>
+
+          <button class="card card--tight card--dashed flex items-center justify-between" type="button" style="width:100%;text-align:left;cursor:pointer;margin-top:.6rem" onclick="L.toast('Kode verifikasi dikirim ke email.','success')">
+            <div class="flex items-center gap-3">
+              <svg data-icon="mail" style="width:20px;height:20px;color:var(--text-soft)"></svg>
+              <div><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Verifikasi Email</strong><span class="text-xs text-soft">Email sudah terverifikasi</span></div>
+            </div>
+            <span class="badge badge--mint badge--flat">Aktif</span>
+          </button>
+
+          <div class="card card--tight card--dashed" style="margin-top:1.25rem">
+            <div class="flex items-center justify-between" style="margin-bottom:.5rem">
+              <strong style="font-family:var(--font-display);color:var(--ink)">Perangkat aktif</strong>
+              <span class="badge badge--flat">2</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm" style="margin-top:.5rem">
+              <svg data-icon="smartphone" style="width:18px;height:18px;color:var(--text-soft)"></svg>
+              <span class="text-soft">Android - Jakarta</span>
+              <span class="badge badge--mint badge--flat" style="margin-left:auto">Sekarang</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm" style="margin-top:.4rem">
+              <svg data-icon="monitor" style="width:18px;height:18px;color:var(--text-soft)"></svg>
+              <span class="text-soft">Chrome - Windows</span>
+              <button class="btn btn--ghost btn--sm" type="button" style="margin-left:auto" onclick="L.toast('Perangkat dikeluarkan.','warn')">Keluarkan</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__head">
+            <div><div class="card__title">Notifikasi</div><div class="card__sub">Pilih informasi yang ingin kamu terima</div></div>
+          </div>
+          <div class="stack" style="--stack:1rem">
+            <label class="switch"><input type="checkbox" checked><span>Pengingat tryout baru</span></label>
+            <label class="switch"><input type="checkbox" checked><span>Pengingat materi diperbarui</span></label>
+            <label class="switch"><input type="checkbox" checked><span>Status pembayaran dan invoice</span></label>
+            <label class="switch"><input type="checkbox"><span>Rekomendasi paket belajar</span></label>
+            <label class="switch"><input type="checkbox"><span>Berita dan pengumuman platform</span></label>
+          </div>
+          <button class="btn btn--ghost btn--block" type="button" style="margin-top:1.25rem" onclick="L.toast('Preferensi notifikasi disimpan.','success')">Simpan Preferensi</button>
+        </section>
+
+        <section class="card card--tight" style="border-color:var(--danger);box-shadow:4px 4px 0 #F5C6C7">
+          <div class="flex items-center gap-3">
+            <svg data-icon="alert" style="width:22px;height:22px;color:var(--danger)"></svg>
+            <div><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Hapus akun</strong><span class="text-xs text-soft">Tindakan ini tidak bisa dibatalkan.</span></div>
+          </div>
+          <button class="btn btn--ghost btn--block" type="button" style="margin-top:1rem;border-color:var(--danger);color:var(--danger)"
+            onclick="L.confirmAction({title:'Hapus akun?',body:'Semua riwayat tryout, paket, dan sertifikat akan dihapus permanen.',ok:'Ya, hapus',cancel:'Batal',tone:'coral',onOk:function(){L.toast('Permintaan penghapusan dikirim ke admin.','info')}})">
+            Hapus Akun Saya
+          </button>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

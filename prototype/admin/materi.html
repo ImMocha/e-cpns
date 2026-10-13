@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kelola Materi &amp; Kategori — LONTAR Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="admin" data-base="../" data-active="materi">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Admin Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Materi &amp; Kategori</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Konten</span>
+        <h1 style="margin-top:.5rem">Kelola Materi &amp; Kategori</h1>
+        <p>Buat kategori, unggah materi PDF, dan kelola video pembelajaran.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn--ghost" type="button" data-modal-open="kategoriModal"><svg data-icon="folder"></svg> Kelola Kategori</button>
+        <button class="btn btn--primary" type="button" data-modal-open="materiModal"><svg data-icon="plus"></svg> Tambah Materi</button>
+      </div>
+    </header>
+
+    <!-- ============ KATEGORI ============ -->
+    <section style="margin-bottom:1.75rem">
+      <div class="section-head section-head--split">
+        <div>
+          <h2 style="font-size:var(--fs-lg)">Kategori</h2>
+          <p>Struktur kategori: kategori, lalu materi, lalu isi materi (PDF atau video).</p>
+        </div>
+      </div>
+
+      <div class="grid-auto grid-auto--sm">
+        <article class="card card--tight card--pop">
+          <div class="flex items-center gap-3">
+            <span class="stat__icon" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="book"></svg></span>
+            <div style="flex:1"><strong style="display:block;color:var(--ink);font-family:var(--font-display)">TWK</strong><span class="text-xs text-soft">12 materi - 1.240 soal</span></div>
+            <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="kategoriModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+          </div>
+        </article>
+
+        <article class="card card--tight card--pop">
+          <div class="flex items-center gap-3">
+            <span class="stat__icon ico--pink" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="layers"></svg></span>
+            <div style="flex:1"><strong style="display:block;color:var(--ink);font-family:var(--font-display)">TIU</strong><span class="text-xs text-soft">8 materi - 1.180 soal</span></div>
+            <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="kategoriModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+          </div>
+        </article>
+
+        <article class="card card--tight card--pop">
+          <div class="flex items-center gap-3">
+            <span class="stat__icon ico--amber" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="shield"></svg></span>
+            <div style="flex:1"><strong style="display:block;color:var(--ink);font-family:var(--font-display)">TKP</strong><span class="text-xs text-soft">4 materi - 820 soal</span></div>
+            <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="kategoriModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+          </div>
+        </article>
+
+        <article class="card card--tight card--pop">
+          <div class="flex items-center gap-3">
+            <span class="stat__icon ico--mint" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="target"></svg></span>
+            <div style="flex:1"><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Strategi</strong><span class="text-xs text-soft">3 materi - 0 soal</span></div>
+            <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="kategoriModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+          </div>
+        </article>
+
+        <button class="card card--tight card--dashed" type="button" data-modal-open="kategoriModal" style="cursor:pointer;border-style:dashed;display:grid;place-items:center;min-height:88px">
+          <div style="text-align:center">
+            <svg data-icon="plus" style="width:22px;height:22px;color:var(--text-soft);margin:0 auto .35rem"></svg>
+            <span class="text-sm fw-700" style="color:var(--ink)">Tambah kategori</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ TABEL MATERI ============ -->
+    <section class="card card--pad-0">
+      <div class="flex items-center justify-between flex-wrap" style="gap:1rem;padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
+        <div>
+          <div class="card__title">Daftar Materi</div>
+          <div class="card__sub">27 materi, 3 di antaranya belum dipublikasikan</div>
+        </div>
+        <div class="input-group" style="min-width:240px">
+          <span class="input-group__icon"><svg data-icon="search"></svg></span>
+          <input class="input" type="search" placeholder="Cari materi..." aria-label="Cari materi" data-table-filter="tabelMateri">
+        </div>
+      </div>
+
+      <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+        <table class="table" id="tabelMateri">
+          <thead>
+            <tr>
+              <th>Materi</th>
+              <th>Kategori</th>
+              <th>Format</th>
+              <th class="num">Ukuran</th>
+              <th>Status</th>
+              <th class="is-sortable num" aria-sort="ascending">Akses<span class="sort-ind">↕</span></th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--ink)">Rangkuman Pengetahuan Umum Indonesia</strong><div class="text-xs text-soft">Diperbarui 2 hari lalu</div></td>
+              <td><span class="badge badge--primary badge--flat">TWK</span></td>
+              <td>PDF</td><td class="num">2,4 MB</td>
+              <td><span class="badge badge--mint badge--flat">Terbit</span></td>
+              <td class="num">Gratis</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pratinjau materi dibuka.','info')" aria-label="Pratinjau"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="materiModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Hapus materi?',body:'Materi beserta Berkas akan dihapus permanen.',ok:'Hapus',tone:'coral',onOk:function(){L.toast('Materi dihapus.','success')}})" aria-label="Hapus"><svg data-icon="trash"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Modul Matematika Dasar untuk ASN</strong><div class="text-xs text-soft">Diperbarui 1 minggu lalu</div></td>
+              <td><span class="badge badge--pink badge--flat">TIU</span></td>
+              <td>PDF</td><td class="num">4,8 MB</td>
+              <td><span class="badge badge--mint badge--flat">Terbit</span></td>
+              <td class="num">Premium</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pratinjau materi dibuka.','info')" aria-label="Pratinjau"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="materiModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Hapus materi?',body:'Materi beserta Berkas akan dihapus permanen.',ok:'Hapus',tone:'coral',onOk:function(){L.toast('Materi dihapus.','success')}})" aria-label="Hapus"><svg data-icon="trash"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Teknik Membaca Tabel dan Grafik</strong><div class="text-xs text-soft">Video 24 menit</div></td>
+              <td><span class="badge badge--pink badge--flat">TIU</span></td>
+              <td>Video</td><td class="num">118 MB</td>
+              <td><span class="badge badge--mint badge--flat">Terbit</span></td>
+              <td class="num">Premium</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pemutaran video adalah simulasi.','info')" aria-label="Putar"><svg data-icon="play"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="materiModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Hapus materi?',body:'Materi beserta Berkas akan dihapus permanen.',ok:'Hapus',tone:'coral',onOk:function(){L.toast('Materi dihapus.','success')}})" aria-label="Hapus"><svg data-icon="trash"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Panduan Integritas dan Etika ASN</strong><div class="text-xs text-soft">Diperbarui 3 minggu lalu</div></td>
+              <td><span class="badge badge--amber badge--flat">TKP</span></td>
+              <td>PDF</td><td class="num">1,1 MB</td>
+              <td><span class="badge badge--mint badge--flat">Terbit</span></td>
+              <td class="num">Gratis</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pratinjau materi dibuka.','info')" aria-label="Pratinjau"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="materiModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Hapus materi?',body:'Materi beserta Berkas akan dihapus permanen.',ok:'Hapus',tone:'coral',onOk:function(){L.toast('Materi dihapus.','success')}})" aria-label="Hapus"><svg data-icon="trash"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Penalaran Silogisme: 12 Pola</strong><div class="text-xs text-soft">Draft - belum ada pembahasan</div></td>
+              <td><span class="badge badge--pink badge--flat">TIU</span></td>
+              <td>PDF</td><td class="num">2,0 MB</td>
+              <td><span class="badge badge--amber badge--flat">Draft</span></td>
+              <td class="num">Premium</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pratinjau materi dibuka.','info')" aria-label="Pratinjau"><svg data-icon="eye"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="materiModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Hapus materi?',body:'Materi beserta Berkas akan dihapus permanen.',ok:'Hapus',tone:'coral',onOk:function(){L.toast('Materi dihapus.','success')}})" aria-label="Hapus"><svg data-icon="trash"></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Mengenali Lima Skenario TKP</strong><div class="text-xs text-soft">Video 15 menit</div></td>
+              <td><span class="badge badge--amber badge--flat">TKP</span></td>
+              <td>Video</td><td class="num">76 MB</td>
+              <td><span class="badge badge--mint badge--flat">Terbit</span></td>
+              <td class="num">Gratis</td>
+              <td>
+                <div class="flex" style="--gap:.35rem">
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pemutaran video adalah simulasi.','info')" aria-label="Putar"><svg data-icon="play"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="materiModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
+                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.confirmAction({title:'Hapus materi?',body:'Materi beserta Berkas akan dihapus permanen.',ok:'Hapus',tone:'coral',onOk:function(){L.toast('Materi dihapus.','success')}})" aria-label="Hapus"><svg data-icon="trash"></svg></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty" data-table-empty hidden style="margin:1.5rem">
+        <span class="empty__icon"><svg data-icon="search"></svg></span>
+        <strong style="color:var(--ink);font-family:var(--font-display)">Materi tidak ditemukan</strong>
+      </div>
+
+      <div class="pager" style="padding:1.25rem 0 0">
+        <button class="pager__btn" type="button" disabled aria-label="Sebelumnya"><svg data-icon="chevron-left"></svg></button>
+        <button class="pager__btn is-active" type="button">1</button>
+        <button class="pager__btn" type="button">2</button>
+        <button class="pager__btn" type="button">3</button>
+        <button class="pager__btn" type="button" aria-label="Berikutnya"><svg data-icon="chevron-right"></svg></button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ MODAL KATEGORI ============ -->
+<div class="modal" id="kategoriModal" role="dialog" aria-modal="true" aria-labelledby="katTitle" aria-hidden="true">
+  <div class="modal__backdrop"></div>
+  <div class="modal__panel">
+    <button class="modal__close" type="button" data-modal-close aria-label="Tutup"><svg data-icon="close"></svg></button>
+    <h2 class="modal__title" id="katTitle">Kelola Kategori</h2>
+    <form class="stack" style="--stack:1.15rem;margin-top:1.25rem" data-demo-submit="Kategori disimpan.">
+      <div class="field">
+        <label class="label" for="namaKat">Nama Kategori</label>
+        <input class="input" type="text" id="namaKat" placeholder="Contoh: Penalaran Verbal" required>
+      </div>
+      <div class="field">
+        <label class="label" for="kodeKat">Kode Kategori</label>
+        <input class="input" type="text" id="kodeKat" placeholder="Contoh: TIU-VER" required>
+        <span class="field__hint">Kode dipakai pada URL dan filter bank soal.</span>
+      </div>
+      <div class="field">
+        <label class="label" for="deskKat">Deskripsi</label>
+        <textarea class="textarea" id="deskKat" placeholder="Penjelasan singkat kategori ini."></textarea>
+      </div>
+      <div class="field">
+        <label class="label" for="urutKat">Urutan Tampil</label>
+        <input class="input" type="number" id="urutKat" value="1" min="1">
+      </div>
+      <div class="modal__foot" style="margin-top:0">
+        <button class="btn btn--ghost" type="button" data-modal-close>Batal</button>
+        <button class="btn btn--primary" type="submit">Simpan Kategori</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL MATERI ============ -->
+<div class="modal" id="materiModal" role="dialog" aria-modal="true" aria-labelledby="matTitle" aria-hidden="true">
+  <div class="modal__backdrop"></div>
+  <div class="modal__panel modal__panel--wide">
+    <button class="modal__close" type="button" data-modal-close aria-label="Tutup"><svg data-icon="close"></svg></button>
+    <h2 class="modal__title" id="matTitle">Tambah Materi</h2>
+    <form class="stack" style="--stack:1.15rem;margin-top:1.25rem" data-demo-submit="Materi disimpan.">
+      <div class="form-grid">
+        <div class="field span-2">
+          <label class="label" for="judul">Judul Materi</label>
+          <input class="input" type="text" id="judul" placeholder="Contoh: Rangkuman Penalaran Verbal" required>
+        </div>
+        <div class="field">
+          <label class="label" for="kategori">Kategori</label>
+          <select class="select" id="kategori">
+            <option>TWK - Pengetahuan Umum</option>
+            <option>TIU - Intelektual Umum</option>
+            <option>TKP - Karakteristik dan Potensi</option>
+            <option>Strategi - Persiapan</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="format">Format</label>
+          <select class="select" id="format">
+            <option>Materi PDF</option>
+            <option>Video pembelajaran</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="akses">Level Akses</label>
+          <select class="select" id="akses">
+            <option>Gratis</option>
+            <option selected>Premium</option>
+            <option>Paket tertentu</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="status">Status</label>
+          <select class="select" id="status">
+            <option>Draft</option>
+            <option selected>Terbit</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" id="fieldPDF">
+        <label class="label" for="berkas">Unggah Berkas PDF</label>
+        <div class="dropzone" onclick="L.toast('Pemilih file adalah simulasi pada prototipe.','info')">
+          <span class="dropzone__icon"><svg data-icon="download"></svg></span>
+          <strong style="display:block;color:var(--ink);font-family:var(--font-display)">Letakkan berkas di sini</strong>
+          <span class="text-sm text-soft">atau klik untuk memilih berkas. Maksimal 20 MB, format PDF.</span>
+        </div>
+        <span class="field__hint">Validasi berkas: ekstensi PDF, ukuran maksimal, dan tidak rusak.</span>
+      </div>
+
+      <div class="field" id="fieldVideo" style="display:none">
+        <label class="label" for="urlVideo">URL Video</label>
+        <input class="input" type="url" id="urlVideo" placeholder="https://">
+        <span class="field__hint">Sumber video belum ditentukan pada invoice. <span class="badge badge--amber badge--flat">TBD</span></span>
+      </div>
+
+      <div class="field">
+        <label class="label" for="ringkas">Ringkasan</label>
+        <textarea class="textarea" id="ringkas" placeholder="Deskripsi singkat yang tampil di kartu materi."></textarea>
+      </div>
+
+      <div class="modal__foot" style="margin-top:0">
+        <button class="btn btn--ghost" type="button" data-modal-close>Batal</button>
+        <button class="btn btn--primary" type="submit">Simpan Materi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/icons.js"></script>
+<script src="../assets/js/shell.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+  /* Ganti area unggah sesuai format materi */
+  (function () {
+    var sel = document.getElementById('format');
+    var pdf = document.getElementById('fieldPDF');
+    var vid = document.getElementById('fieldVideo');
+    if (!sel) return;
+    var sync = function () {
+      var isPdf = sel.value === 'Materi PDF';
+      pdf.style.display = isPdf ? '' : 'none';
+      vid.style.display = isPdf ? 'none' : '';
+    };
+    sel.addEventListener('change', sync);
+    sync();
+  })();
+</script>
+</body>
+</html>

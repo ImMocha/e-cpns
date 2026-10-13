@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Masuk — LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body style="min-height:100dvh;display:flex;flex-direction:column">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+
+<!-- ===================== HEADER ===================== -->
+<header class="nav">
+  <div class="container container--wide nav__inner">
+    <a class="logo" href="index.html">
+      <span class="logo__mark"><svg data-icon="book"></svg></span>
+      <span>LONTAR<span class="logo__sub">CPNS Online</span></span>
+    </a>
+    <a class="btn btn--ghost btn--sm" href="index.html" style="margin-left:auto">
+      <svg data-icon="arrow-left"></svg> Kembali ke beranda
+    </a>
+  </div>
+</header>
+
+<main id="main" class="container container--wide" style="flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2rem,5vw,4rem);align-items:center;padding-block:clamp(2rem,5vw,4rem)">
+
+  <!-- ===================== FORM ===================== -->
+  <div>
+    <span class="eyebrow">Selamat Datang Kembali</span>
+    <h1 style="font-size:var(--fs-2xl);margin:.75rem 0 .5rem">Masuk ke Akunmu</h1>
+    <p class="text-soft" style="margin-bottom:1.75rem">Lanjutkan belajar dan lanjutkan tryout-mu.</p>
+
+    <form class="card card--pop" data-validate data-validate-redirect="dashboard.html" data-validate-msg="Berhasil masuk. Selamat belajar kembali!" novalidate>
+      <div class="stack" style="--stack:1.15rem">
+
+        <div class="field">
+          <label class="label" for="email">Email</label>
+          <div class="input-group">
+            <span class="input-group__icon"><svg data-icon="mail"></svg></span>
+            <input class="input" type="email" id="email" name="email" placeholder="nama@email.com" required autocomplete="email">
+          </div>
+          <span class="field__error"><svg data-icon="alert"></svg><span>Wajib diisi.</span></span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="password">Password</label>
+          <div class="input-group">
+            <span class="input-group__icon"><svg data-icon="lock"></svg></span>
+            <input class="input" type="password" id="password" name="password" placeholder="Minimal 8 karakter" required minlength="8" autocomplete="current-password" style="padding-right:3.25rem">
+            <button class="input-group__action" type="button" data-toggle-password="#password" aria-label="Tampilkan sandi">
+              <svg data-icon="eye"></svg>
+            </button>
+          </div>
+          <span class="field__error"><svg data-icon="alert"></svg><span>Wajib diisi.</span></span>
+        </div>
+
+        <div class="flex items-center justify-between flex-wrap" style="gap:.75rem">
+          <label class="check">
+            <input type="checkbox" name="remember" checked>
+            <span>Ingat saya</span>
+          </label>
+          <a class="text-sm fw-700 text-primary" href="#" style="text-underline-offset:3px">Lupa password?</a>
+        </div>
+
+        <button class="btn btn--primary btn--lg btn--block" type="submit">
+          Masuk
+          <span class="btn__icon"><svg data-icon="arrow-right"></svg></span>
+        </button>
+
+        <div class="flex items-center gap-3">
+          <span style="flex:1;height:2px;background:var(--border)"></span>
+          <span class="text-xs text-soft fw-700">ATAU</span>
+          <span style="flex:1;height:2px;background:var(--border)"></span>
+        </div>
+
+        <button class="btn btn--ghost btn--block" type="button" onclick="L.toast('Login Google belum tersedia di prototipe.','info')">
+          <svg data-icon="mail"></svg> Lanjutkan dengan Google
+        </button>
+
+        <p class="text-center text-sm text-soft">
+          Belum punya akun? <a class="fw-700 text-primary" href="register.html">Daftar gratis</a>
+        </p>
+      </div>
+    </form>
+
+    <div class="alert alert--info" style="margin-top:1.25rem">
+      <span class="alert__icon"><svg data-icon="info"></svg></span>
+      <div>
+        <strong>Akun demo</strong>
+        Ini prototipe, jadi form tidak benar-benar memverifikasi data. Tekan <em>Masuk</em> untuk langsung ke dashboard.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SIDE PANEL ===================== -->
+  <aside class="split-media reveal" style="display:none">
+    <div class="split-media__blob" style="background:var(--primary-100)" aria-hidden="true"></div>
+    <div class="card card--pad-0" style="position:relative;z-index:1;border-radius:var(--r-lg);overflow:hidden">
+      <div style="aspect-ratio:4/3;overflow:hidden;border-bottom:2px solid var(--ink)">
+        <img src="../hero-tryout.jpg" alt="Ilustrasi peserta belajar prepping CPNS" style="width:100%;height:100%;object-fit:cover" width="960" height="720">
+      </div>
+      <div style="padding:1.75rem">
+        <blockquote>
+          <svg data-icon="quote" style="width:26px;height:26px;color:var(--primary-300)"></svg>
+          <p style="margin:.75rem 0 1.25rem;font-size:var(--fs-lg);line-height:1.55;color:var(--ink);font-family:var(--font-display);font-weight:600">
+            "Nilai tryout pertamaku 312, yang sekarang 452. Yang berubah cuma cara mengatur waktu pengerjaan."
+          </p>
+          <footer class="userchip">
+            <span class="avatar avatar--amber">D</span>
+            <div><strong>Dewi Anggraini</strong><span>Peserta Ultimate · 12 tryout</span></div>
+          </footer>
+        </blockquote>
+      </div>
+    </div>
+
+    <div class="card card--tight card--pop" style="position:absolute;right:-20px;top:24px;z-index:3;max-width:200px">
+      <span class="badge badge--mint badge--flat"><svg data-icon="check-circle"></svg> Autosave aktif</span>
+      <p class="text-xs text-soft" style="margin-top:.5rem">Progress tryout tidak hilang meski tab tertutup.</p>
+    </div>
+  </aside>
+</main>
+
+<footer class="footer" style="padding-block:1.5rem">
+  <div class="container container--wide flex items-center justify-between flex-wrap" style="gap:1rem">
+    <span class="text-sm">© <span data-year>2026</span> LONTAR · Prototipe demonstrasi.</span>
+    <div class="footer__links" style="display:flex;gap:1.25rem">
+      <a href="#">Syarat &amp; Ketentuan</a>
+      <a href="#">Kebijakan Privasi</a>
+      <a href="admin/index.html">Admin Panel</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  /* Panel samping hanya tampil di layar lebar agar form tetap fokus di mobile */
+  (function () {
+    var panel = document.querySelector('main aside');
+    if (!panel) return;
+    var mq = (typeof matchMedia === 'function') ? matchMedia('(min-width: 1000px)') : { matches: true, addEventListener: function () {} };
+    var sync = function () { panel.style.display = mq.matches ? '' : 'none'; };
+    sync();
+    mq.addEventListener('change', sync);
+  })();
+</script>
+</body>
+</html>

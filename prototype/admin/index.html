@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard — LONTAR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="admin" data-base="../" data-active="dashboard">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Ringkasan Platform</span>
+        <h1 style="margin-top:.5rem">Admin Dashboard</h1>
+        <p>Data per 3 Oktober 2026. Widget dan angka mengikuti data yang benar-benar tersedia di sistem.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn--ghost" type="button" data-print><svg data-icon="printer"></svg> Cetak Laporan</button>
+        <button class="btn btn--primary" type="button" data-modal-open="quickModal"><svg data-icon="plus"></svg> Tambah Konten</button>
+      </div>
+    </header>
+
+    <!-- ============ KPI ============ -->
+    <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
+      <article class="stat reveal">
+        <span class="stat__icon"><svg data-icon="users"></svg></span>
+        <div>
+          <div class="stat__label">Total Peserta</div>
+          <div class="stat__value" data-count-to="12480">0</div>
+          <div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +8,2% bulan ini</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="70">
+        <span class="stat__icon ico--pink"><svg data-icon="layers"></svg></span>
+        <div>
+          <div class="stat__label">Total Soal</div>
+          <div class="stat__value" data-count-to="3240">0</div>
+          <div class="stat__delta text-soft">12 belum punya pembahasan</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="140">
+        <span class="stat__icon ico--amber"><svg data-icon="timer"></svg></span>
+        <div>
+          <div class="stat__label">Total Tryout</div>
+          <div class="stat__value" data-count-to="48">0</div>
+          <div class="stat__delta text-soft">6 tryout aktif</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="210">
+        <span class="stat__icon ico--mint"><svg data-icon="credit-card"></svg></span>
+        <div>
+          <div class="stat__label">Pendapatan Bulan Ini</div>
+          <div class="stat__value" data-count-to="18450000" data-count-prefix="Rp">0</div>
+          <div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +12,4% dari Agustus</div>
+        </div>
+      </article>
+    </section>
+
+    <div class="panes panes--wide" style="--gap:1.5rem;">
+
+      <!-- ---- KOLOM KIRI ---- -->
+      <div class="stack" style="--stack:1.5rem">
+
+        <section class="card">
+          <div class="card__head">
+            <div><div class="card__title">Pendapatan 6 Bulan Terakhir</div><div class="card__sub">Dari paket belajar yang berhasil dibayar</div></div>
+            <span class="badge badge--mint badge--flat"><svg data-icon="trending-up"></svg> Stabil</span>
+          </div>
+          <div style="height:250px" data-chart='{"type":"bar","labels":["Mei","Jun","Jul","Agu","Sep","Okt"],"values":[11200000,13800000,15400000,16400000,17900000,18450000],"max":22000000,"height":250,"colors":["#0191ED","#0191ED","#4FB6F5","#4FB6F5","#0191ED","#2DD4A7"],"aria":"Grafik pendapatan enam bulan"}'></div>
+        </section>
+
+        <section class="card card--pad-0">
+          <div class="flex items-center justify-between" style="padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
+            <div><div class="card__title">Transaksi Terbaru</div><div class="card__sub">8 transaksi terakhir</div></div>
+            <a class="btn btn--ghost btn--sm" href="transaksi.html">Lihat semua<svg data-icon="arrow-right"></svg></a>
+          </div>
+          <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+            <table class="table" style="min-width:620px">
+              <thead><tr><th>ID</th><th>Peserta</th><th>Paket</th><th class="num">Total</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><code class="text-mono text-xs">TRX-90412</code></td><td><strong style="color:var(--ink)">Sari Wulandari</strong></td><td>Premium</td><td class="num">Rp99.000</td><td><span class="badge badge--mint badge--flat">Paid</span></td></tr>
+                <tr><td><code class="text-mono text-xs">TRX-90411</code></td><td><strong style="color:var(--ink)">Rizky Aditya</strong></td><td>Basic</td><td class="num">Rp49.000</td><td><span class="badge badge--mint badge--flat">Paid</span></td></tr>
+                <tr><td><code class="text-mono text-xs">TRX-90410</code></td><td><strong style="color:var(--ink)">Dewi Lestari</strong></td><td>Ultimate</td><td class="num">Rp249.000</td><td><span class="badge badge--amber badge--flat">Pending</span></td></tr>
+                <tr><td><code class="text-mono text-xs">TRX-90409</code></td><td><strong style="color:var(--ink)">Yoga Pratama</strong></td><td>Premium</td><td class="num">Rp79.000</td><td><span class="badge badge--mint badge--flat">Paid</span></td></tr>
+                <tr><td><code class="text-mono text-xs">TRX-90408</code></td><td><strong style="color:var(--ink)">Intan Permata</strong></td><td>Basic</td><td class="num">Rp49.000</td><td><span class="badge badge--danger badge--flat">Failed</span></td></tr>
+                <tr><td><code class="text-mono text-xs">TRX-90407</code></td><td><strong style="color:var(--ink)">Bayu Pamungkas</strong></td><td>Premium</td><td class="num">Rp99.000</td><td><span class="badge badge--mint badge--flat">Paid</span></td></tr>
+                <tr><td><code class="text-mono text-xs">TRX-90406</code></td><td><strong style="color:var(--ink)">Ayu Anggraini</strong></td><td>Ultimate</td><td class="num">Rp224.100</td><td><span class="badge badge--mint badge--flat">Paid</span></td></tr>
+                <tr><td><code class="text-mono text-xs">TRX-90405</code></td><td><strong style="color:var(--ink)">Fajar Nugroho</strong></td><td>Basic</td><td class="num">Rp49.000</td><td><span class="badge badge--flat">Expired</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__head">
+            <div><div class="card__title">Aktivitas Tryout Terbesar</div><div class="card__sub">Lima tryout dengan jumlah peserta terbanyak</div></div>
+          </div>
+          <div class="grid" style="--gap:1rem">
+            <div class="scorebar"><span class="fw-700" style="color:var(--ink)">Tryout SKD #5</span><div class="scorebar__track"><div class="scorebar__fill" data-pct="100"></div></div><span class="scorebar__val">1.284</span></div>
+            <div class="scorebar"><span class="fw-700" style="color:var(--ink)">Tryout TWK Mingguan #12</span><div class="scorebar__track"><div class="scorebar__fill" data-pct="82" style="background:var(--pop-pink)"></div></div><span class="scorebar__val">1.053</span></div>
+            <div class="scorebar"><span class="fw-700" style="color:var(--ink)">Tryout SKD #4</span><div class="scorebar__track"><div class="scorebar__fill" data-pct="96"></div></div><span class="scorebar__val">1.231</span></div>
+            <div class="scorebar"><span class="fw-700" style="color:var(--ink)">Tryout TKP Kontekstual</span><div class="scorebar__track"><div class="scorebar__fill" data-pct="61" style="background:var(--pop-amber)"></div></div><span class="scorebar__val">784</span></div>
+            <div class="scorebar"><span class="fw-700" style="color:var(--ink)">Tryout TIU Intensif</span><div class="scorebar__track"><div class="scorebar__fill" data-pct="47" style="background:var(--pop-violet)"></div></div><span class="scorebar__val">604</span></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ---- KOLOM KANAN ---- -->
+      <aside class="stack" style="--stack:1.5rem">
+
+        <section class="card card--pop card--amber">
+          <span class="card__icon ico--coral" style="position:static"><svg data-icon="alert"></svg></span>
+          <h2 class="card__title" style="margin-top:.75rem">Perlu Tindakan</h2>
+          <div class="stack" style="--stack:.75rem;margin-top:1rem">
+            <button class="card card--tight card--dashed flex items-center gap-3" type="button" style="width:100%;text-align:left;cursor:pointer" onclick="location.href='soal.html'">
+              <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="alert"></svg></span>
+              <div style="flex:1"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">12 soal tanpa pembahasan</strong><span class="text-xs text-soft">Perbaiki sebelum peserta melihat</span></div>
+              <svg data-icon="chevron-right" style="width:18px;height:18px;color:var(--text-soft)"></svg>
+            </button>
+            <button class="card card--tight card--dashed flex items-center gap-3" type="button" style="width:100%;text-align:left;cursor:pointer" onclick="location.href='transaksi.html'">
+              <span class="price__check" style="background:var(--danger)"><svg data-icon="credit-card"></svg></span>
+              <div style="flex:1"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">3 transaksi gagal</strong><span class="text-xs text-soft">Perlu tindak lanjut peserta</span></div>
+              <svg data-icon="chevron-right" style="width:18px;height:18px;color:var(--text-soft)"></svg>
+            </button>
+            <button class="card card--tight card--dashed flex items-center gap-3" type="button" style="width:100%;text-align:left;cursor:pointer" onclick="location.href='materi.html'">
+              <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="video"></svg></span>
+              <div style="flex:1"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Sumber video belum ditentukan</strong><span class="text-xs text-soft">Menunggu keputusan client</span></div>
+              <svg data-icon="chevron-right" style="width:18px;height:18px;color:var(--text-soft)"></svg>
+            </button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__head">
+            <div><div class="card__title">Sebaran Peserta</div><div class="card__sub">Status langganan</div></div>
+          </div>
+          <div style="width:180px;height:180px;margin:0 auto 1.25rem" data-chart='{"type":"donut","size":190,"segments":[{"value":6140,"color":"#0191ED"},{"value":4210,"color":"#FFC53D"},{"value":2130,"color":"#FF6B9D"}],"aria":"Sebaran langganan peserta"}'></div>
+          <div class="legend">
+            <div class="legend__item"><span class="legend__swatch" style="background:var(--primary)"></span> Tidak aktif - 6.140</div>
+            <div class="legend__item"><span class="legend__swatch" style="background:var(--pop-amber)"></span> Paket aktif - 4.210</div>
+            <div class="legend__item"><span class="legend__swatch" style="background:var(--pop-pink)"></span> Paket Ultimate - 2.130</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__head">
+            <div><div class="card__title">Konten Terakhir</div><div class="card__sub">Yang baru ditambahkan</div></div>
+          </div>
+          <div class="stack" style="--stack:.75rem">
+            <div class="flex items-center gap-3"><span class="tile__glyph" style="width:38px;height:38px;border-radius:11px;flex:0 0 38px"><svg data-icon="file"></svg></span><div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Rangkuman TIU Bank Soal</strong><span class="text-xs text-soft">2 jam lalu - oleh Admin</span></div></div>
+            <div class="flex items-center gap-3"><span class="tile__glyph" style="width:38px;height:38px;border-radius:11px;flex:0 0 38px;background:var(--pop-pink-050);color:var(--pop-pink)"><svg data-icon="layers"></svg></span><div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">35 soal silogisme</strong><span class="text-xs text-soft">Kemarin - oleh Admin</span></div></div>
+            <div class="flex items-center gap-3"><span class="tile__glyph" style="width:38px;height:38px;border-radius:11px;flex:0 0 38px;background:var(--pop-amber-050);color:#B4830C"><svg data-icon="quote"></svg></span><div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Artikel: alokasi waktu</strong><span class="text-xs text-soft">2 hari lalu - oleh Admin</span></div></div>
+          </div>
+          <a class="btn btn--ghost btn--block" href="materi.html" style="margin-top:1.25rem">Kelola konten<svg data-icon="arrow-right"></svg></a>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL CEPAT ============ -->
+<div class="modal" id="quickModal" role="dialog" aria-modal="true" aria-labelledby="quickTitle" aria-hidden="true">
+  <div class="modal__backdrop"></div>
+  <div class="modal__panel">
+    <button class="modal__close" type="button" data-modal-close aria-label="Tutup"><svg data-icon="close"></svg></button>
+    <h2 class="modal__title" id="quickTitle">Tambah Konten</h2>
+    <p class="text-soft text-sm" style="margin-top:.4rem">Pilih jenis konten yang ingin kamu tambahkan.</p>
+    <div class="grid grid-2" style="--gap:.75rem;margin-top:1.25rem">
+      <a class="card card--tight card--dashed flex items-center gap-3" href="materi.html" data-modal-close>
+        <span class="tile__glyph" style="width:44px;height:44px;border-radius:13px;flex:0 0 44px"><svg data-icon="file"></svg></span>
+        <div><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Materi PDF</strong><span class="text-xs text-soft">Unggah berkas</span></div>
+      </a>
+      <a class="card card--tight card--dashed flex items-center gap-3" href="materi.html" data-modal-close>
+        <span class="tile__glyph" style="width:44px;height:44px;border-radius:13px;flex:0 0 44px;background:var(--pop-pink-050);color:var(--pop-pink)"><svg data-icon="video"></svg></span>
+        <div><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Video</strong><span class="text-xs text-soft">Tambah tautan</span></div>
+      </a>
+      <a class="card card--tight card--dashed flex items-center gap-3" href="soal-form.html" data-modal-close>
+        <span class="tile__glyph" style="width:44px;height:44px;border-radius:13px;flex:0 0 44px;background:var(--pop-amber-050);color:#B4830C"><svg data-icon="layers"></svg></span>
+        <div><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Soal Baru</strong><span class="text-xs text-soft">Beserta pembahasan</span></div>
+      </a>
+      <a class="card card--tight card--dashed flex items-center gap-3" href="artikel.html" data-modal-close>
+        <span class="tile__glyph" style="width:44px;height:44px;border-radius:13px;flex:0 0 44px;background:var(--pop-mint-050);color:var(--success)"><svg data-icon="quote"></svg></span>
+        <div><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Artikel</strong><span class="text-xs text-soft">Tulis dan terbitkan</span></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/icons.js"></script>
+<script src="../assets/js/charts.js"></script>
+<script src="../assets/js/shell.js"></script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

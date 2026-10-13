@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LONTAR — Belajar & Tryout CPNS Online</title>
+<meta name="description" content="Platform belajar dan simulasi tryout CAT CPNS: materi PDF, video pembelajaran, bank soal, latihan, pembahasan, statistik nilai, dan leaderboard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+
+<!-- ===================== NAV ===================== -->
+<header class="nav">
+  <div class="container container--wide nav__inner">
+    <a class="logo" href="index.html">
+      <span class="logo__mark"><svg data-icon="book"></svg></span>
+      <span>LONTAR<span class="logo__sub">CPNS Online</span></span>
+    </a>
+
+    <nav class="nav__links" aria-label="Navigasi utama">
+      <a class="nav__link" href="#fitur">Fitur</a>
+      <a class="nav__link" href="#materi">Materi</a>
+      <a class="nav__link" href="#tryout">Tryout</a>
+      <a class="nav__link" href="#paket">Paket</a>
+      <a class="nav__link" href="#faq">FAQ</a>
+    </nav>
+
+    <div class="nav__actions">
+      <a class="btn btn--ghost btn--sm" href="login.html">Masuk</a>
+      <a class="btn btn--primary btn--sm" href="register.html">Daftar Gratis</a>
+    </div>
+
+    <button class="nav__toggle" data-nav-toggle="navMobile" aria-expanded="false" aria-controls="navMobile" aria-label="Buka menu">
+      <svg data-icon="menu"></svg>
+    </button>
+  </div>
+
+  <div class="nav__mobile" id="navMobile">
+    <a class="nav__link" href="#fitur">Fitur</a>
+    <a class="nav__link" href="#materi">Materi</a>
+    <a class="nav__link" href="#tryout">Tryout</a>
+    <a class="nav__link" href="#paket">Paket Belajar</a>
+    <a class="nav__link" href="#faq">FAQ</a>
+    <a class="btn btn--ghost" href="login.html">Masuk</a>
+    <a class="btn btn--primary" href="register.html">Daftar Gratis</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="hero__bg deco"></div>
+  <div class="hero__bg-2 deco"></div>
+  <div class="deco deco--circle pattern-dots-primary" style="width:180px;height:180px;top:14%;right:6%;opacity:.5" aria-hidden="true"></div>
+
+  <div class="container container--wide">
+    <div class="split">
+      <div>
+        <span class="eyebrow">Seleksi CPNS 2026</span>
+        <h1 style="margin:1rem 0 1.25rem">
+          Belajar Lebih <span class="underline-squiggle">Cerdas</span>,<br>
+          Hadapi Tryout <span style="color:var(--primary-700)">Tanpa Panik</span>.
+        </h1>
+        <p class="lead" style="margin-bottom:1.75rem">
+          Materi PDF, video pembelajaran, bank soal latihan, dan simulasi Try Out CAT
+          dengan timer, autosave, pembahasan, serta grafik perkembangan nilai.
+          Semua dalam satu platform.
+        </p>
+
+        <div class="btn-row" style="margin-bottom:2rem">
+          <a class="btn btn--primary btn--lg" href="register.html">
+            Mulai Gratis Sekarang
+            <span class="btn__icon"><svg data-icon="arrow-right"></svg></span>
+          </a>
+          <a class="btn btn--ghost btn--lg" href="tryout.html">
+            <svg data-icon="play-circle"></svg> Lihat Simulasi Tryout
+          </a>
+        </div>
+
+        <div class="hero-stats">
+          <div>
+            <div class="hero-stat__num" data-count-to="12480" data-count-suffix="+">0</div>
+            <div class="hero-stat__label">Peserta Aktif</div>
+          </div>
+          <div>
+            <div class="hero-stat__num" data-count-to="3200" data-count-suffix="+">0</div>
+            <div class="hero-stat__label">Bank Soal</div>
+          </div>
+          <div>
+            <div class="hero-stat__num" data-count-to="48" data-count-suffix=" Tryout">0</div>
+            <div class="hero-stat__label">Simulasi CAT</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="split-media reveal">
+        <div class="split-media__blob" aria-hidden="true"></div>
+        <div class="split-media__img" style="aspect-ratio:4/3">
+          <img src="../hero-tryout.jpg" alt="Ilustrasi peserta belajar prepping CPNS dengan buku TWK, TIU, TKP, dan CAT CPNS" width="960" height="720">
+        </div>
+
+        <!-- floating sticker cards -->
+        <div class="card card--tight card--pop" style="position:absolute;left:-28px;bottom:34px;max-width:210px;z-index:3">
+          <div class="flex items-center gap-2">
+            <span class="stat__icon ico--mint" style="width:38px;height:38px;flex-basis:38px;border-radius:12px"><svg data-icon="target"></svg></span>
+            <div>
+              <div class="text-xs text-soft fw-700">Nilai Tryout</div>
+              <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink);line-height:1">452</div>
+            </div>
+          </div>
+          <div class="progress progress--mint" style="height:12px;margin-top:.7rem">
+            <div class="progress__bar" data-progress="78"></div>
+          </div>
+          <p class="text-xs text-soft" style="margin-top:.4rem">Naik 34 poin dari tryout lalu</p>
+        </div>
+
+        <div class="card card--tight" style="position:absolute;right:-18px;top:26px;z-index:3;box-shadow:var(--sh-soft-amber)">
+          <div class="badge badge--premium"><svg data-icon="zap"></svg> Rata-rata naik</div>
+          <p class="fw-800" style="font-family:var(--font-display);font-size:1.05rem;color:var(--ink);margin-top:.5rem">+12%</p>
+          <p class="text-xs text-soft">setelah 3 sesi tryout</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MARQUEE ===================== -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> TWK</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> TIU</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> TKP</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Timer CAT</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Autosave Jawaban</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Pembahasan Lengkap</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Grafik Perkembangan</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Leaderboard</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> TWK</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> TIU</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> TKP</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Timer CAT</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Autosave Jawaban</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Pembahasan Lengkap</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Grafik Perkembangan</span>
+    <span class="marquee__item"><svg data-icon="check-circle"></svg> Leaderboard</span>
+  </div>
+</div>
+
+<!-- ===================== FITUR ===================== -->
+<section class="section" id="fitur">
+  <div class="container container--wide">
+    <div class="section-head section-head--center reveal">
+      <span class="eyebrow" style="justify-content:center">Semua Yang Kamu Butuh</span>
+      <h2 style="margin:.75rem 0 0">Satu Platform, <span class="underline-squiggle">Alur Belajar Lengkap</span></h2>
+      <p>Dari baca materi sampai tahu posisimu di leaderboard — semuanya tercatat dalam satu akun.</p>
+    </div>
+
+    <div class="grid grid-3" style="--gap:1.75rem">
+      <article class="card card--icon card--pop reveal" data-delay="0">
+        <span class="card__icon ico--primary"><svg data-icon="book"></svg></span>
+        <h3>Materi Ringkas</h3>
+        <p class="text-sm text-soft">Materi PDF, video pembelajaran, dan artikel ringkas per kategori. Progress belajar langsung tercatat di dashboard.</p>
+        <div class="tile__foot">
+          <span class="badge badge--primary badge--flat">Gratis + Premium</span>
+          <a class="btn btn--ghost btn--sm" href="materi.html">Lihat<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+
+      <article class="card card--icon card--pop reveal" data-delay="90">
+        <span class="card__icon ico--pink"><svg data-icon="timer"></svg></span>
+        <h3>Simulasi Try Out CAT</h3>
+        <p class="text-sm text-soft">Timer, navigasi nomor soal, randomisasi soal, dan autosave jawaban, sehingga latihan terasa seperti ujian CAT sungguhan.</p>
+        <div class="tile__foot">
+          <span class="badge badge--pink badge--flat">Fitur Utama</span>
+          <a class="btn btn--ghost btn--sm" href="tryout.html">Coba<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+
+      <article class="card card--icon card--pop reveal" data-delay="180">
+        <span class="card__icon ico--amber"><svg data-icon="layers"></svg></span>
+        <h3>Bank Soal & Pembahasan</h3>
+        <p class="text-sm text-soft">Ribuan soal TWK, TIU, TKP dengan pembahasan di setiap soal. Bisa latihan per kategori.</p>
+        <div class="tile__foot">
+          <span class="badge badge--amber badge--flat">3.200+ soal</span>
+          <a class="btn btn--ghost btn--sm" href="bank-soal.html">Buka<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+
+      <article class="card card--icon card--pop reveal" data-delay="0">
+        <span class="card__icon ico--mint"><svg data-icon="chart"></svg></span>
+        <h3>Statistik & Grafik</h3>
+        <p class="text-sm text-soft">Nilai tertinggi, nilai terbaru, dan grafik perkembangan nilai dari tryout pertama sampai sekarang.</p>
+        <div class="tile__foot">
+          <span class="badge badge--mint badge--flat">Real-time</span>
+          <a class="btn btn--ghost btn--sm" href="statistik.html">Analisis<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+
+      <article class="card card--icon card--pop reveal" data-delay="90">
+        <span class="card__icon ico--violet"><svg data-icon="trophy"></svg></span>
+        <h3>Leaderboard</h3>
+        <p class="text-sm text-soft">Bandingkan posisimu dengan peserta lain. Papan peringkat diperbarui setelah setiap tryout.</p>
+        <div class="tile__foot">
+          <span class="badge badge--violet badge--flat">Peringkat</span>
+          <a class="btn btn--ghost btn--sm" href="leaderboard.html">Lihat<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+
+      <article class="card card--icon card--pop reveal" data-delay="180">
+        <span class="card__icon ico--coral"><svg data-icon="award"></svg></span>
+        <h3>Sertifikat Digital</h3>
+        <p class="text-sm text-soft">Selesaikan program belajar dan dapatkan sertifikat yang bisa diunduh kapan saja.</p>
+        <div class="tile__foot">
+          <span class="badge badge--pink badge--flat">Reward</span>
+          <a class="btn btn--ghost btn--sm" href="sertifikat.html">Detail<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ALUR BELAJAR ===================== -->
+<section class="section section--alt">
+  <div class="container container--wide">
+    <div class="split">
+      <div class="reveal">
+        <span class="eyebrow">Alur Belajar</span>
+        <h2 style="margin:.75rem 0 1rem">Empat Langkah, <span class="underline-squiggle">Selesai</span></h2>
+        <p class="lead" style="margin-bottom:2rem">Alur belajar yang sama dari hari pertama sampai kamu merasa siap.</p>
+
+        <div class="acc" data-accordion="single">
+          <div class="acc-item">
+            <button class="acc-trigger" aria-expanded="true" aria-controls="s1">
+              <span>1 · Pilih materi yang dibutuhkan</span><svg data-icon="chevron-down" class="acc-icon"></svg>
+            </button>
+            <div class="acc-panel is-open" id="s1">
+              Browse kategori TWK, TIU, atau TKP. Setiap materi punya indikator progress supaya kamu tahu apa yang belum selesai.
+            </div>
+          </div>
+          <div class="acc-item">
+            <button class="acc-trigger" aria-expanded="false" aria-controls="s2">
+              <span>2 · Latihan dengan bank soal</span><svg data-icon="chevron-down" class="acc-icon"></svg>
+            </button>
+            <div class="acc-panel" id="s2">
+              Kerjakan soal latihan per kategori. Jawaban langsung dinilai dan pembahasan muncul setelah submit.
+            </div>
+          </div>
+          <div class="acc-item">
+            <button class="acc-trigger" aria-expanded="false" aria-controls="s3">
+              <span>3 · Simulasi Try Out CAT</span><svg data-icon="chevron-down" class="acc-icon"></svg>
+            </button>
+            <div class="acc-panel" id="s3">
+              Ikuti simulasi dengan timer, navigasi nomor soal, dan autosave. Otomatis submit saat waktu habis.
+            </div>
+          </div>
+          <div class="acc-item">
+            <button class="acc-trigger" aria-expanded="false" aria-controls="s4">
+              <span>4 · Pantau perkembangan</span><svg data-icon="chevron-down" class="acc-icon"></svg>
+            </button>
+            <div class="acc-panel" id="s4">
+              Lihat grafik nilai, riwayat pengerjaan, dan posisimu di leaderboard untuk tahu area yang perlu diperkuat.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" data-delay="120">
+        <div class="card card--pop">
+          <div class="card__head">
+            <div>
+              <div class="card__title">Preview Dashboard</div>
+              <div class="card__sub">Ringkasan progres belajar kamu</div>
+            </div>
+            <span class="badge badge--mint badge--flat">Live</span>
+          </div>
+
+          <div class="result-hero" style="grid-template-columns:auto 1fr;gap:1.5rem;justify-items:start">
+            <div class="ring ring--sm ring--mint" data-pct="78">
+              <div class="ring__label">
+                <div class="ring__value">78%</div>
+                <div class="ring__unit">Progres</div>
+              </div>
+            </div>
+            <div class="kv" style="width:100%">
+              <div class="kv__row"><span class="kv__key">Materi selesai</span><span class="kv__val">8 / 10</span></div>
+              <div class="kv__row"><span class="kv__key">Quiz dikerjakan</span><span class="kv__val">15 / 20</span></div>
+              <div class="kv__row"><span class="kv__key">Tryout berturut-turut</span><span class="kv__val">3</span></div>
+            </div>
+          </div>
+
+          <div class="grid" style="--gap:.9rem;margin-top:1.25rem">
+            <div class="progress-wrap">
+              <div class="progress__row"><span>TWK</span><span>82%</span></div>
+              <div class="progress"><div class="progress__bar" data-progress="82"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress__row"><span>TIU</span><span>64%</span></div>
+              <div class="progress"><div class="progress__bar" data-progress="64"></div></div>
+            </div>
+            <div class="progress-wrap">
+              <div class="progress__row"><span>TKP</span><span>91%</span></div>
+              <div class="progress progress--amber"><div class="progress__bar" data-progress="91"></div></div>
+            </div>
+          </div>
+
+          <a class="btn btn--primary btn--block" href="dashboard.html" style="margin-top:1.25rem">
+            Buka Dashboard<svg data-icon="arrow-right"></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MATERI ===================== -->
+<section class="section" id="materi">
+  <div class="container container--wide">
+    <div class="section-head section-head--split reveal">
+      <div>
+        <span class="eyebrow">Konten Belajar</span>
+        <h2 style="margin:.75rem 0 0">Materi, Video, <span class="underline-squiggle">dan Artikel</span></h2>
+        <p style="max-width:52ch">Tiga format materi agar kamu bisa belajar dengan cara yang paling nyaman.</p>
+      </div>
+      <a class="btn btn--ghost" href="materi.html">Semua Materi<svg data-icon="arrow-right"></svg></a>
+    </div>
+
+    <div data-tabs>
+      <div class="tabs" role="tablist" aria-label="Format materi">
+        <button class="tab is-active" data-tab="t-pdf" role="tab" aria-selected="true">Materi PDF</button>
+        <button class="tab" data-tab="t-video" role="tab" aria-selected="false">Video Pembelajaran</button>
+        <button class="tab" data-tab="t-artikel" role="tab" aria-selected="false">Artikel</button>
+      </div>
+
+      <div class="tab-panel is-active" id="t-pdf" data-tab-panel>
+        <div class="grid-auto grid-auto--lg">
+          <article class="card card--pad-0 tile reveal">
+            <div class="tile__media">
+              <span class="tile__glyph"><svg data-icon="file"></svg></span>
+              <span class="badge badge--primary tile__badge">Gratis</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TWK · Tes Pengetahuan Umum</span>
+              <h3 class="tile__title">Rangkuman Pengetahuan Umum Indonesia</h3>
+              <p class="tile__desc">Sejarah, Pancasila, konstitusi, dan geopolitik dalam 48 halaman ringkas.</p>
+              <div class="tile__meta"><span><svg data-icon="file"></svg> 48 hal</span><span><svg data-icon="download"></svg> 2.4 MB</span></div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="100"><span>100%</span></div>
+                <a class="btn btn--sm btn--primary" href="materi.html">Baca<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pad-0 tile reveal" data-delay="90">
+            <div class="tile__media tile__media--pink">
+              <span class="tile__glyph" style="color:var(--pop-pink)"><svg data-icon="file"></svg></span>
+              <span class="badge badge--premium tile__badge"><svg data-icon="lock"></svg> Premium</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TIU · Tes Intelektual Umum</span>
+              <h3 class="tile__title">Modul Matematika Dasar untuk ASN</h3>
+              <p class="tile__desc">Perbandingan, persentase, dan penalaran logis. Disertai latihan soal bertingkat.</p>
+              <div class="tile__meta"><span><svg data-icon="file"></svg> 72 hal</span><span><svg data-icon="clock"></svg> ± 3 jam</span></div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="35"><span>35%</span></div>
+                <a class="btn btn--sm btn--ghost" href="paket.html">Buka Paket</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pad-0 tile reveal" data-delay="180">
+            <div class="tile__media tile__media--mint">
+              <span class="tile__glyph" style="color:var(--success)"><svg data-icon="file"></svg></span>
+              <span class="badge badge--primary tile__badge">Gratis</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TKP · Karakteristik &amp; Potensi</span>
+              <h3 class="tile__title">Panduan Integritas & Etika ASN</h3>
+              <p class="tile__desc">Contoh perilaku integritas di tempat kerja beserta simulasi kasus TKP.</p>
+              <div class="tile__meta"><span><svg data-icon="file"></svg> 36 hal</span><span><svg data-icon="download"></svg> 1.1 MB</span></div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="0"><span>0%</span></div>
+                <a class="btn btn--sm btn--ghost" href="materi.html">Mulai</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="t-video" data-tab-panel>
+        <div class="grid grid-2" style="--gap:1.75rem">
+          <div class="card card--pad-0 tile reveal">
+            <div class="tile__media" style="aspect-ratio:16/9;padding:0">
+              <div class="video-frame" style="border:none;border-radius:0;box-shadow:none">
+                <span class="video-frame__label">Video · 24 menit</span>
+                <button class="video-frame__play" type="button" aria-label="Putar video"><svg data-icon="play"></svg></button>
+                <div class="video-frame__ctrl">
+                  <svg data-icon="play"></svg>
+                  <div class="video-frame__track"><div class="video-frame__played"></div></div>
+                  <svg data-icon="volume"></svg>
+                  <svg data-icon="maximize"></svg>
+                </div>
+              </div>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TIU · Penalaran Analitis</span>
+              <h3 class="tile__title">Teknik Membaca Tabel & Grafik untuk Soal TIU</h3>
+              <p class="tile__meta"><span><svg data-icon="users"></svg> 4.210 peserta</span><span><svg data-icon="star"></svg> 4.8</span></p>
+            </div>
+          </div>
+
+          <div class="grid grid-auto--sm" style="--gap:1rem;align-content:start">
+            <div class="card card--tight flex items-center gap-3">
+              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px"><svg data-icon="play-circle"></svg></span>
+              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Logika Silogisme</strong><span class="text-xs text-soft">18 menit · TIU</span></div>
+            </div>
+            <div class="card card--tight flex items-center gap-3">
+              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px;background:var(--pop-pink-050);color:var(--pop-pink)"><svg data-icon="play-circle"></svg></span>
+              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Pancasila dalam Kehidupan ASN</strong><span class="text-xs text-soft">22 menit · TWK</span></div>
+            </div>
+            <div class="card card--tight flex items-center gap-3">
+              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px;background:var(--pop-mint-050);color:var(--success)"><svg data-icon="play-circle"></svg></span>
+              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Mengenal TKP: 5 Skenario</strong><span class="text-xs text-soft">15 menit · TKP</span></div>
+            </div>
+            <div class="card card--tight flex items-center gap-3">
+              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px;background:var(--pop-amber-050);color:#B4830C"><svg data-icon="play-circle"></svg></span>
+              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Tips Manajemen Waktu CAT</strong><span class="text-xs text-soft">12 menit · Strategi</span></div>
+            </div>
+            <a class="btn btn--ghost btn--block" href="materi.html">Lihat semua video<svg data-icon="arrow-right"></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="t-artikel" data-tab-panel>
+        <div class="grid grid-2">
+          <article class="card reveal">
+            <div class="flex items-center gap-2" style="margin-bottom:.75rem">
+              <span class="badge badge--primary badge--flat">Strategi</span>
+              <span class="text-xs text-soft">6 menit baca</span>
+            </div>
+            <h3>7 Kesalahan yang Bikin Nilaimu Turun di Tryout CAT</h3>
+            <p class="text-sm text-soft" style="margin-top:.6rem">Mulai soal dari mana? Berapa lama per soal? Ini kesalahan yang paling sering terjadi beserta cara mengatasinya.</p>
+            <a class="btn btn--ghost btn--sm" href="materi.html" style="margin-top:1rem">Baca artikel<svg data-icon="arrow-right"></svg></a>
+          </article>
+          <article class="card reveal" data-delay="90">
+            <div class="flex items-center gap-2" style="margin-bottom:.75rem">
+              <span class="badge badge--pink badge--flat">Jadwal</span>
+              <span class="text-xs text-soft">4 menit baca</span>
+            </div>
+            <h3>Jadwal Pengerjaan SKD 2026: Berapa Lama per Bagian?</h3>
+            <p class="text-sm text-soft" style="margin-top:.6rem">Alokasi waktu yang sering dipakai peserta di setiap sesi, plus ritme pengerjaan yang stabil.</p>
+            <a class="btn btn--ghost btn--sm" href="materi.html" style="margin-top:1rem">Baca artikel<svg data-icon="arrow-right"></svg></a>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TRYOUT SHOWCASE ===================== -->
+<section class="section section--alt" id="tryout">
+  <div class="container container--wide">
+    <div class="split split--reverse">
+      <div class="reveal">
+        <div class="card card--pop">
+          <div class="flex items-center justify-between" style="margin-bottom:1rem">
+            <span class="badge badge--ink"><svg data-icon="timer"></svg> Tryout SKD #4</span>
+            <span class="timer" id="demoTimer"><svg data-icon="clock"></svg>01:23:45</span>
+          </div>
+
+          <div class="qhead" style="margin-bottom:.75rem">
+            <span class="qnum">12</span>
+            <span class="badge badge--primary badge--flat">TWK</span>
+          </div>
+          <p class="qstem" style="font-size:var(--fs-base)">12. Salah satu konsep berikut yang paling tepat menggambarkan Bonus Point dalam ujian CAT adalah ...</p>
+
+          <div class="grid" style="--gap:.55rem;margin-top:1rem">
+            <div class="opt is-selected">
+              <span class="opt__key">A</span>
+              <span class="opt__text">Menguatkan ruang kebebasan berpendapat</span>
+            </div>
+            <div class="opt"><span class="opt__key">B</span><span class="opt__text">Membatasi perbedaan suku dan agama</span></div>
+            <div class="opt"><span class="opt__key">C</span><span class="opt__text">Menegakkan budaya yang dominan</span></div>
+            <div class="opt"><span class="opt__key">D</span><span class="opt__text">Mengganti identitas nasional</span></div>
+          </div>
+
+          <div class="flex items-center justify-between" style="margin-top:1.25rem">
+            <div class="palette" style="flex:1;max-width:220px;grid-template-columns:repeat(6,1fr)">
+              <span class="pal is-answered">1</span><span class="pal is-answered">2</span><span class="pal is-answered">3</span>
+              <span class="pal is-answered">4</span><span class="pal is-answered">5</span><span class="pal is-answered">6</span>
+              <span class="pal">7</span><span class="pal">8</span><span class="pal">9</span><span class="pal">10</span>
+              <span class="pal is-answered">11</span><span class="pal is-answered is-flagged">12</span><span class="pal is-answered">13</span>
+              <span class="pal">14</span><span class="pal">15</span><span class="pal">16</span>
+              <span class="pal is-answered">17</span><span class="pal is-answered">18</span><span class="pal is-answered">19</span>
+              <span class="pal">20</span>
+            </div>
+            <a class="btn btn--primary btn--sm" href="tryout.html">Mulai<svg data-icon="arrow-right"></svg></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal" data-delay="100">
+        <span class="eyebrow">Fitur Utama</span>
+        <h2 style="margin:.75rem 0 1rem">Simulasi <span class="underline-squiggle">Try Out CAT</span> yang Serius</h2>
+        <p class="lead" style="margin-bottom:1.75rem">
+          Didesain untuk membiasakan kamu dengan tekanan waktu dan format CAT sebelum hari-H.
+        </p>
+
+        <div class="grid" style="--gap:.85rem">
+          <div class="card card--tight flex items-start gap-3">
+            <span class="stat__icon ico--pink" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="timer"></svg></span>
+            <div><strong style="font-family:var(--font-display);color:var(--ink)">Timer & auto-submit</strong><p class="text-sm text-soft">Saat waktu habis, sistem otomatis mengumpulkan jawaban dan menghitung nilai.</p></div>
+          </div>
+          <div class="card card--tight flex items-start gap-3">
+            <span class="stat__icon ico--mint" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="check-circle"></svg></span>
+            <div><strong style="font-family:var(--font-display);color:var(--ink)">Autosave jawaban</strong><p class="text-sm text-soft">Jawaban tersimpan otomatis. Refresh atau pindah halaman tidak menghapus progress.</p></div>
+          </div>
+          <div class="card card--tight flex items-start gap-3">
+            <span class="stat__icon ico--amber" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="refresh"></svg></span>
+            <div><strong style="font-family:var(--font-display);color:var(--ink)">Randomisasi soal</strong><p class="text-sm text-soft">Urutan soal berbeda untuk setiap peserta agar latihan lebih jujur.</p></div>
+          </div>
+          <div class="card card--tight flex items-start gap-3">
+            <span class="stat__icon ico--violet" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="grid"></svg></span>
+            <div><strong style="font-family:var(--font-display);color:var(--ink)">Navigasi nomor soal</strong><p class="text-sm text-soft">Pindah antar soal dengan bebas, tandai soal yang masih ragu, lalu kembali lagi.</p></div>
+          </div>
+        </div>
+
+        <a class="btn btn--dark btn--lg" href="tryout.html" style="margin-top:1.75rem">
+          Coba Tryout Sekarang<span class="btn__icon"><svg data-icon="zap"></svg></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PAKET / PRICING ===================== -->
+<section class="section" id="paket">
+  <div class="container container--wide">
+    <div class="section-head section-head--center reveal">
+      <span class="eyebrow" style="justify-content:center">Paket Belajar</span>
+      <h2 style="margin:.75rem 0 0">Pilih Paket <span class="underline-squiggle">Sesuai Targetmu</span></h2>
+      <p>Setiap paket memberi akses ke materi, video, quiz, dan tryout tertentu. Bisa naik kelas kapan saja.</p>
+    </div>
+
+    <div class="grid grid-3" style="--gap:1.75rem;align-items:start">
+
+      <article class="card card--pop price reveal">
+        <div>
+          <span class="badge badge--flat">Mulai belajar</span>
+          <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Basic</h3>
+        </div>
+        <div>
+          <div class="price__amount"><small>Rp</small>49.000</div>
+          <div class="price__period">Akses 30 hari</div>
+        </div>
+        <ul class="price__list">
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Materi PDF gratis + ringkasan</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> 20 soal latihan per kategori</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> 2x Try Out CAT</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Riwayat & statistik nilai</li>
+        </ul>
+        <div class="price__foot">
+          <a class="btn btn--ghost btn--block" href="checkout.html">Pilih Basic</a>
+        </div>
+      </article>
+
+      <article class="card card--pop price price--featured reveal" data-delay="90">
+        <span class="star-badge">Paling Populer</span>
+        <div>
+          <span class="badge badge--premium"><svg data-icon="crown"></svg> Paling Disukai</span>
+          <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Premium</h3>
+        </div>
+        <div>
+          <div class="price__amount"><small>Rp</small>99.000</div>
+          <div class="price__period">Akses 90 hari</div>
+        </div>
+        <ul class="price__list">
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Semua materi PDF lengkap</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Seluruh video pembelajaran</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Bank soal tanpa batas</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> 12x Try Out CAT + pembahasan</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Leaderboard & grafik lengkap</li>
+        </ul>
+        <div class="price__foot">
+          <a class="btn btn--primary btn--block" href="checkout.html">Pilih Premium<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
+        </div>
+      </article>
+
+      <article class="card card--pop price reveal" data-delay="180">
+        <div>
+          <span class="badge badge--flat">Untuk yang serius</span>
+          <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Ultimate</h3>
+        </div>
+        <div>
+          <div class="price__amount"><small>Rp</small>249.000</div>
+          <div class="price__period">Akses 12 bulan</div>
+        </div>
+        <ul class="price__list">
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Semua konten Premium</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Try Out CAT tanpa batas</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Sertifikat digital kelulusan</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Review jawaban bersama admin</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Update materi otomatis</li>
+        </ul>
+        <div class="price__foot">
+          <a class="btn btn--ghost btn--block" href="checkout.html">Pilih Ultimate</a>
+        </div>
+      </article>
+    </div>
+
+    <p class="text-center text-xs text-soft" style="margin-top:1.75rem">
+      Harga, masa berlaku, dan isi paket bersifat <strong>TBD</strong> — menunggu konfirmasi final client.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== LEADERBOARD PREVIEW ===================== -->
+<section class="section section--alt">
+  <div class="container container--wide">
+    <div class="grid grid-2" style="--gap:2.5rem;align-items:center">
+      <div class="reveal">
+        <span class="eyebrow">Leaderboard</span>
+        <h2 style="margin:.75rem 0 1rem">Tahu Posisimu <span class="underline-squiggle">di Antara Peserta Lain</span></h2>
+        <p class="lead">
+          Papan peringkat diperbarui setelah setiap tryout. Mekanisme ranking final akan ditentukan bersama client —
+          saat ini prototipe memakai skor tryout terakhir.
+        </p>
+        <div class="btn-row" style="margin-top:1.75rem">
+          <a class="btn btn--primary" href="leaderboard.html">Lihat Leaderboard<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
+        </div>
+      </div>
+
+      <div class="reveal" data-delay="120">
+        <div class="card">
+          <div class="card__head">
+            <div><div class="card__title">Top 3 Tryout SKD #4</div><div class="card__sub">Diperbarui 3 Oktober 2026</div></div>
+            <span class="badge badge--amber badge--flat"><svg data-icon="trophy"></svg> Mingguan</span>
+          </div>
+          <div>
+            <div class="lb-row"><span class="lb-rank lb-rank--1">1</span>
+              <div><div class="lb-name">Dewi Anggraini</div><div class="lb-meta">12 tryout · rata-rata 468</div></div>
+              <span class="lb-score">481</span></div>
+            <div class="lb-row"><span class="lb-rank lb-rank--2">2</span>
+              <div><div class="lb-name">Ahmad Fauzi</div><div class="lb-meta">9 tryout · rata-rata 455</div></div>
+              <span class="lb-score">472</span></div>
+            <div class="lb-row lb-row--me"><span class="lb-rank">18</span>
+              <div><div class="lb-name">Rani Kusuma <span class="badge badge--primary badge--flat">Kamu</span></div><div class="lb-meta">4 tryout · rata-rata 428</div></div>
+              <span class="lb-score">452</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONI ===================== -->
+<section class="section">
+  <div class="container container--wide">
+    <div class="section-head section-head--center reveal">
+      <span class="eyebrow" style="justify-content:center">Kata Peserta</span>
+      <h2 style="margin:.75rem 0 0">Cerita dari <span class="underline-squiggle">Peserta</span></h2>
+    </div>
+    <div class="grid grid-3">
+      <blockquote class="card card--pop reveal" style="border-left:6px solid var(--primary)">
+        <!-- <svg data-icon="quote" style="width:26px;height:26px;color:var(--primary-300)"></svg> -->
+        <p class="text-sm" style="margin:.75rem 0 1rem">Timer-nya bantu banget. Aku biasa panik di 10 menit terakhir, sekarang bisa manage waktu per soal.</p>
+        <footer class="userchip"><span class="avatar avatar--sm avatar--amber">S</span><div><strong>Sarah Nur</strong><span>Peserta Premium</span></div></footer>
+      </blockquote>
+      <blockquote class="card card--pop reveal" data-delay="90" style="border-left:6px solid var(--pop-pink)">
+        <!-- <svg data-icon="quote" style="width:26px;height:26px;color:var(--pop-pink)"></svg> -->
+        <p class="text-sm" style="margin:.75rem 0 1rem">Grafik perkembangan nilai bikin semangat. Keliatan jelas area mana yang masih perlu dibenahi.</p>
+        <footer class="userchip"><span class="avatar avatar--sm avatar--pink">B</span><div><strong>Bima Saputra</strong><span>Peserta Basic</span></div></footer>
+      </blockquote>
+      <blockquote class="card card--pop reveal" data-delay="180" style="border-left:6px solid var(--pop-mint)">
+        <!-- <svg data-icon="quote" style="width:26px;height:26px;color:var(--pop-mint)"></svg> -->
+        <p class="text-sm" style="margin:.75rem 0 1rem">Pembahasannya jelas dan tidak berbelit. Langsung ke jawaban benar beserta alasannya.</p>
+        <footer class="userchip"><span class="avatar avatar--sm avatar--mint">N</span><div><strong>Nadia Putri</strong><span>Peserta Ultimate</span></div></footer>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="section section--alt" id="faq">
+  <div class="container" style="max-width:860px">
+    <div class="section-head section-head--center reveal">
+      <span class="eyebrow" style="justify-content:center">Pertanyaan Umum</span>
+      <h2 style="margin:.75rem 0 0">Yang <span class="underline-squiggle">Paling Sering Ditanya</span></h2>
+    </div>
+
+    <div class="acc" data-accordion="single">
+      <div class="acc-item reveal">
+        <button class="acc-trigger" aria-expanded="true" aria-controls="f1">Apakah materi dan soal ini gratis?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+        <div class="acc-panel is-open" id="f1">Ada materi dasar dan soal latihan gratis. Materi premium (video, modul lengkap, tryout tambahan) terbuka setelah kamu punya paket yang aktif.</div>
+      </div>
+      <div class="acc-item reveal" data-delay="60">
+        <button class="acc-trigger" aria-expanded="false" aria-controls="f2">Bagaimana cara mengikuti Try Out CAT?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+        <div class="acc-panel" id="f2">Masuk ke menu Tryout CAT, pilih tryout yang tersedia, lalu klik Mulai. Timer langsung berjalan dan jawaban tersimpan otomatis.</div>
+      </div>
+      <div class="acc-item reveal" data-delay="120">
+        <button class="acc-trigger" aria-expanded="false" aria-controls="f3">Kalau waktu habis saat mengerjakan?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+        <div class="acc-panel" id="f3">Sistem melakukan submit otomatis, lalu nilai dan pembahasan tetap bisa kamu lihat seperti biasa.</div>
+      </div>
+      <div class="acc-item reveal" data-delay="180">
+        <button class="acc-trigger" aria-expanded="false" aria-controls="f4">Apakah saya bisa melakukan refund?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+        <div class="acc-panel" id="f4">Kebijakan refund mengikuti aturan paket belajar yang berlaku. <span class="badge badge--amber badge--flat">TBD — perlu konfirmasi client</span></div>
+      </div>
+      <div class="acc-item reveal" data-delay="240">
+        <button class="acc-trigger" aria-expanded="false" aria-controls="f5">Apakah bisa belajar lewat HP?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+        <div class="acc-panel" id="f5">Bisa. Seluruh halaman dibuat responsive untuk desktop, tablet, dan smartphone.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="section section--tight">
+  <div class="container container--wide">
+    <div class="card card--pop pattern-dots-primary" style="text-align:center;padding:clamp(2rem,6vw,3.5rem);border-radius:var(--r-lg)">
+      <span class="deco deco--circle" style="width:120px;height:120px;background:var(--pop-amber);top:-40px;left:-30px"></span>
+      <span class="deco deco--leaf" style="width:90px;height:90px;background:var(--pop-pink);bottom:-30px;right:-20px"></span>
+      <h2 style="position:relative">Siap Mulai <span class="underline-squiggle">Belajar?</span></h2>
+      <p class="lead" style="margin:.85rem auto 1.75rem;position:relative">Daftar gratis, coba tryout pertama, dan lihat sendiri perkembangan nilaimu.</p>
+      <div class="btn-row justify-center" style="position:relative">
+        <a class="btn btn--primary btn--lg" href="register.html">Daftar Gratis<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
+        <a class="btn btn--ghost btn--lg" href="login.html">Saya Sudah Punya Akun</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="container container--wide">
+    <div class="footer__grid">
+      <div>
+        <a class="logo" href="index.html" style="color:#fff">
+          <span class="logo__mark"><svg data-icon="book"></svg></span>
+          <span>LONTAR<span class="logo__sub" style="color:#8FAAC2">CPNS Online</span></span>
+        </a>
+        <p class="text-sm" style="margin-top:1rem;max-width:34ch">Platform belajar dan simulasi tryout CPNS untuk peserta yang mempersiapkan diri dengan cara yang lebih terukur.</p>
+        <div class="socials" style="margin-top:1.25rem">
+          <a href="#" aria-label="Instagram"><svg data-icon="image"></svg></a>
+          <a href="#" aria-label="Telegram"><svg data-icon="send"></svg></a>
+          <a href="#" aria-label="Email"><svg data-icon="mail"></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4>Belajar</h4>
+        <div class="footer__links">
+          <a href="materi.html">Materi Pembelajaran</a>
+          <a href="bank-soal.html">Bank Soal</a>
+          <a href="quiz.html">Latihan Soal</a>
+          <a href="tryout.html">Try Out CAT</a>
+        </div>
+      </div>
+      <div>
+        <h4>Akun</h4>
+        <div class="footer__links">
+          <a href="login.html">Masuk</a>
+          <a href="register.html">Daftar</a>
+          <a href="paket.html">Paket Belajar</a>
+          <a href="sertifikat.html">Sertifikat</a>
+        </div>
+      </div>
+      <div>
+        <h4>Informasi</h4>
+        <div class="footer__links">
+          <a href="#faq">FAQ</a>
+          <a href="#">Syarat &amp; Ketentuan</a>
+          <a href="#">Kebijakan Privasi</a>
+          <a href="admin/index.html">Admin Panel</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© <span data-year>2026</span> LONTAR · Prototipe demonstrasi, bukan situs produksi.</span>
+      <span class="badge badge--flat" style="background:rgba(255,255,255,.08);color:#A9C1D6;border-color:rgba(255,255,255,.2);box-shadow:none">v0.1 Prototype</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+  /* Demo countdown on the landing page (purely decorative) */
+  (function () {
+    var el = document.getElementById('demoTimer');
+    if (!el) return;
+    var left = 5025;
+    setInterval(function () {
+      left = Math.max(0, left - 1);
+      var h = String(Math.floor(left / 3600)).padStart(2, '0');
+      var m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
+      var s = String(left % 60).padStart(2, '0');
+      el.innerHTML = '<svg data-icon="clock"></svg>' + h + ':' + m + ':' + s;
+      window.LIcons && window.LIcons.hydrate(el);
+    }, 1000);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bank Soal — LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="bank-soal">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Bank Soal</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Kumpulan Soal</span>
+        <h1 style="margin-top:.5rem">Bank Soal</h1>
+        <p>Telusuri soal per kategori, lalu kerjakan sebagai latihan. Pembahasan tersedia setelah kamu menjawab.</p>
+      </div>
+      <a class="btn btn--primary" href="latihan-kerjakan.html"><svg data-icon="pen-line"></svg> Kerjakan Latihan</a>
+    </header>
+
+    <!-- ============ RINGKASAN KATEGORI ============ -->
+    <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
+      <article class="stat reveal">
+        <span class="stat__icon"><svg data-icon="layers"></svg></span>
+        <div>
+          <div class="stat__label">Total Soal</div>
+          <div class="stat__value" data-count-to="3240">0</div>
+          <div class="stat__delta text-soft">dari 5 kategori</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="70">
+        <span class="stat__icon ico--pink"><svg data-icon="check"></svg></span>
+        <div>
+          <div class="stat__label">Sudah Dikerjakan</div>
+          <div class="stat__value">286</div>
+          <div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +42 minggu ini</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="140">
+        <span class="stat__icon ico--amber"><svg data-icon="target"></svg></span>
+        <div>
+          <div class="stat__label">Akurasi Rata-rata</div>
+          <div class="stat__value">78%</div>
+          <div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +4 persen</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="210">
+        <span class="stat__icon ico--mint"><svg data-icon="file"></svg></span>
+        <div>
+          <div class="stat__label">Ada Pembahasan</div>
+          <div class="stat__value">3.180</div>
+          <div class="stat__delta text-soft">98 persen</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ KATEGORI ============ -->
+    <section class="grid grid-3" style="--gap:1.25rem;margin-bottom:1.75rem">
+      <article class="card card--pop">
+        <div class="flex items-center justify-between" style="margin-bottom:.75rem">
+          <span class="badge badge--primary badge--flat">TWK</span>
+          <span class="text-xs text-soft fw-700">1.240 soal</span>
+        </div>
+        <h2 class="card__title">Pengetahuan Umum</h2>
+        <p class="text-sm text-soft" style="margin-top:.35rem">Sejarah, kebangsaan, konstitusi, geografi, dan teknologi.</p>
+        <div class="progress-wrap" style="margin-top:1rem">
+          <div class="progress__row"><span>Akurasi kamu</span><span>82%</span></div>
+          <div class="progress"><div class="progress__bar" data-progress="82"></div></div>
+        </div>
+        <a class="btn btn--ghost btn--block btn--sm" href="latihan-kerjakan.html" style="margin-top:1rem">Latihan TWK</a>
+      </article>
+
+      <article class="card card--pop">
+        <div class="flex items-center justify-between" style="margin-bottom:.75rem">
+          <span class="badge badge--pink badge--flat">TIU</span>
+          <span class="text-xs text-soft fw-700">1.180 soal</span>
+        </div>
+        <h2 class="card__title">Intelektual Umum</h2>
+        <p class="text-sm text-soft" style="margin-top:.35rem">Matematika, logika, penalaran verbal dan analitis.</p>
+        <div class="progress-wrap" style="margin-top:1rem">
+          <div class="progress__row"><span>Akurasi kamu</span><span>64%</span></div>
+          <div class="progress" style="box-shadow:none"><div class="progress__bar" data-progress="64" style="background:var(--pop-pink)"></div></div>
+        </div>
+        <a class="btn btn--ghost btn--block btn--sm" href="latihan-kerjakan.html" style="margin-top:1rem">Latihan TIU</a>
+      </article>
+
+      <article class="card card--pop">
+        <div class="flex items-center justify-between" style="margin-bottom:.75rem">
+          <span class="badge badge--amber badge--flat">TKP</span>
+          <span class="text-xs text-soft fw-700">820 soal</span>
+        </div>
+        <h2 class="card__title">Karakteristik &amp; Potensi</h2>
+        <p class="text-sm text-soft" style="margin-top:.35rem">Skenario integritas, kerja sama, dan pelayanan publik.</p>
+        <div class="progress-wrap" style="margin-top:1rem">
+          <div class="progress__row"><span>Akurasi kamu</span><span>77%</span></div>
+          <div class="progress progress--amber"><div class="progress__bar" data-progress="77"></div></div>
+        </div>
+        <a class="btn btn--ghost btn--block btn--sm" href="latihan-kerjakan.html" style="margin-top:1rem">Latihan TKP</a>
+      </article>
+    </section>
+
+    <!-- ============ DAFTAR SOAL ============ -->
+    <section class="card card--pad-0">
+      <div class="flex items-center justify-between flex-wrap" style="gap:1rem;padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
+        <div>
+          <div class="card__title">Daftar Soal</div>
+          <div class="card__sub">Contoh 8 soal terakhir yang kamu akses</div>
+        </div>
+        <div class="input-group" style="min-width:240px">
+          <span class="input-group__icon"><svg data-icon="search"></svg></span>
+          <input class="input" type="search" id="soalSearch" placeholder="Cari soal..." aria-label="Cari soal" data-table-filter="tabelSoal">
+        </div>
+      </div>
+
+      <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+        <table class="table" id="tabelSoal">
+          <thead>
+            <tr>
+              <th>Soal</th>
+              <th>Kategori</th>
+              <th>Level</th>
+              <th>Status</th>
+              <th class="num">Akurasi</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Danau terbesar di Indonesia berdasarkan luas daerah adalah...</strong></td>
+              <td><span class="badge badge--primary badge--flat">TWK</span></td>
+              <td>Mudah</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Benar</span></td>
+              <td class="num" data-sort="88">88%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Semua guru adalah sarjana. Semua sarjana aktif mengikuti pelatihan. Kesimpulan...</strong></td>
+              <td><span class="badge badge--pink badge--flat">TIU</span></td>
+              <td>Sedang</td>
+              <td><span class="badge badge--danger badge--flat"><svg data-icon="close"></svg> Salah</span></td>
+              <td class="num" data-sort="61">61%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Rekan setim sering terlambat mengumpulkan tugas. Sikap yang tepat adalah...</strong></td>
+              <td><span class="badge badge--amber badge--flat">TKP</span></td>
+              <td>Mudah</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Benar</span></td>
+              <td class="num" data-sort="92">92%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Bilangan prima terkecil yang lebih besar dari 20 adalah...</strong></td>
+              <td><span class="badge badge--pink badge--flat">TIU</span></td>
+              <td>Mudah</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Benar</span></td>
+              <td class="num" data-sort="79">79%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Candi Borobudur terutama dibangun pada masa pemerintahan...</strong></td>
+              <td><span class="badge badge--primary badge--flat">TWK</span></td>
+              <td>Sedang</td>
+              <td><span class="badge badge--flat">Belum dikerjakan</span></td>
+              <td class="num" data-sort="74">74%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Dari 100 peserta, 60 lolos tahap pertama dan 75 persennya lolos tahap kedua...</strong></td>
+              <td><span class="badge badge--pink badge--flat">TIU</span></td>
+              <td>Sedang</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Benar</span></td>
+              <td class="num" data-sort="66">66%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Anda menemukan kesalahan pada laporan yang sudah dikirim ke atasan. Sikap tepat...</strong></td>
+              <td><span class="badge badge--amber badge--flat">TKP</span></td>
+              <td>Sulit</td>
+              <td><span class="badge badge--flat">Belum dikerjakan</span></td>
+              <td class="num" data-sort="58">58%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+            <tr>
+              <td style="max-width:320px"><strong style="color:var(--ink)">Anton lebih tinggi daripada Budi, Budi lebih tinggi daripada Citra. Siapa yang terendah?</strong></td>
+              <td><span class="badge badge--pink badge--flat">TIU</span></td>
+              <td>Mudah</td>
+              <td><span class="badge badge--danger badge--flat"><svg data-icon="close"></svg> Salah</span></td>
+              <td class="num" data-sort="83">83%</td>
+              <td><button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Pembahasan dibuka pada mode latihan.','info')" aria-label="Lihat"><svg data-icon="eye"></svg></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty" data-table-empty hidden style="margin:1.5rem">
+        <span class="empty__icon"><svg data-icon="search"></svg></span>
+        <strong style="color:var(--ink);font-family:var(--font-display)">Soal tidak ditemukan</strong>
+        <p class="text-sm text-soft">Coba kata kunci lain atau pilih kategori berbeda.</p>
+      </div>
+
+      <div style="padding:1.25rem 1.5rem;border-top:2px solid var(--border)">
+        <div class="pager">
+          <button class="pager__btn" type="button" disabled aria-label="Halaman sebelumnya"><svg data-icon="chevron-left"></svg></button>
+          <button class="pager__btn is-active" type="button">1</button>
+          <button class="pager__btn" type="button">2</button>
+          <button class="pager__btn" type="button">3</button>
+          <button class="pager__btn" type="button">4</button>
+          <button class="pager__btn" type="button" aria-label="Halaman berikutnya"><svg data-icon="chevron-right"></svg></button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

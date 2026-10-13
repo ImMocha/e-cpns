@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Materi Pembelajaran &mdash; LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="materi">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Materi</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Konten Belajar</span>
+        <h1 style="margin-top:.5rem">Materi Pembelajaran</h1>
+        <p>Materi PDF, video pembelajaran, dan artikel. Progress tersimpan otomatis di dashboard.</p>
+      </div>
+      <div class="card card--tight" style="min-width:230px">
+        <div class="stat__label">Progres Belajar</div>
+        <div class="flex items-center justify-between" style="margin:.35rem 0 .5rem">
+          <span class="fw-800" style="font-family:var(--font-display);font-size:1.35rem;color:var(--ink)">78%</span>
+          <span class="text-xs text-soft">8 dari 10 materi</span>
+        </div>
+        <div class="progress progress--lg"><div class="progress__bar" data-progress="78"></div></div>
+      </div>
+    </header>
+
+    <div class="flex items-center justify-between flex-wrap" style="gap:1rem;margin-bottom:1.5rem">
+      <div class="pills" data-pill-filter=".materi-card">
+        <button class="pill is-active" type="button" data-value="all">Semua kategori</button>
+        <button class="pill" type="button" data-value="TWK">TWK</button>
+        <button class="pill" type="button" data-value="TIU">TIU</button>
+        <button class="pill" type="button" data-value="TKP">TKP</button>
+        <button class="pill" type="button" data-value="Strategi">Strategi</button>
+      </div>
+      <div class="input-group" style="min-width:260px">
+        <span class="input-group__icon"><svg data-icon="search"></svg></span>
+        <input class="input" type="search" placeholder="Cari materi..." aria-label="Cari materi">
+      </div>
+    </div>
+
+    <div data-tabs>
+      <div class="tabs" role="tablist" aria-label="Format materi">
+        <button class="tab is-active" data-tab="mPdf" role="tab" aria-selected="true">Materi PDF <span class="tab__count">24</span></button>
+        <button class="tab" data-tab="mVideo" role="tab" aria-selected="false">Video <span class="tab__count">12</span></button>
+        <button class="tab" data-tab="mArtikel" role="tab" aria-selected="false">Artikel <span class="tab__count">18</span></button>
+      </div>
+
+      <!-- ============ PDF ============ -->
+      <div class="tab-panel is-active" id="mPdf" data-tab-panel>
+        <div class="grid-auto grid-auto--lg">
+
+          <article class="card card--pad-0 tile card--pop materi-card" data-category="TWK">
+            <div class="tile__media">
+              <span class="tile__glyph"><svg data-icon="file"></svg></span>
+              <span class="badge badge--mint tile__badge">Selesai</span>
+              <span class="badge badge--mint tile__badge tile__badge--right badge--flat"><svg data-icon="check"></svg> 100%</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TWK - Pengetahuan Umum</span>
+              <h2 class="tile__title">Rangkuman Pengetahuan Umum Indonesia</h2>
+              <p class="tile__desc">Sejarah, Pancasila, konstitusi, dan geopolitik dalam 48 halaman ringkas.</p>
+              <div class="tile__meta">
+                <span><svg data-icon="file"></svg> 48 halaman</span>
+                <span><svg data-icon="download"></svg> 2,4 MB</span>
+              </div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="100"><span>100%</span></div>
+                <a class="btn btn--primary btn--sm" href="#materi-reader">Baca PDF<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pad-0 tile card--pop materi-card" data-category="TWK">
+            <div class="tile__media tile__media--pink">
+              <span class="tile__glyph" style="color:var(--pop-pink)"><svg data-icon="file"></svg></span>
+              <span class="badge badge--primary tile__badge">68%</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TWK - Sejarah Indonesia</span>
+              <h2 class="tile__title">Sejarah Indonesia Modern: Proklamasi hingga Reformasi</h2>
+              <p class="tile__desc">Timeline penting yang sering muncul dalam soal TWK.</p>
+              <div class="tile__meta">
+                <span><svg data-icon="file"></svg> 64 halaman</span>
+                <span><svg data-icon="clock"></svg> ± 2 jam</span>
+              </div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="68"><span>68%</span></div>
+                <a class="btn btn--primary btn--sm" href="#materi-reader">Lanjutkan<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pad-0 tile card--pop materi-card" data-category="TIU">
+            <div class="tile__media tile__media--mint">
+              <span class="tile__glyph" style="color:var(--success)"><svg data-icon="file"></svg></span>
+              <span class="badge badge--premium tile__badge"><svg data-icon="lock"></svg> Premium</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TIU - Intelektual Umum</span>
+              <h2 class="tile__title">Modul Matematika Dasar untuk ASN</h2>
+              <p class="tile__desc">Perbandingan, persentase, dan penalaran logis dengan latihan bertingkat.</p>
+              <div class="tile__meta">
+                <span><svg data-icon="file"></svg> 72 halaman</span>
+                <span><svg data-icon="lock"></svg> Paket Premium</span>
+              </div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="35"><span>35%</span></div>
+                <a class="btn btn--primary btn--sm" href="#materi-reader">Lanjutkan<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pad-0 tile card--pop materi-card" data-category="TIU">
+            <div class="tile__media tile__media--violet">
+              <span class="tile__glyph" style="color:var(--pop-violet)"><svg data-icon="file"></svg></span>
+              <span class="badge badge--premium tile__badge"><svg data-icon="lock"></svg> Premium</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TIU - Logika</span>
+              <h2 class="tile__title">Penalaran Silogisme: 12 Pola yang Sering Muncul</h2>
+              <p class="tile__desc">Bedakan silogisme valid dan invalid, lengkap dengan latihan.</p>
+              <div class="tile__meta">
+                <span><svg data-icon="file"></svg> 40 halaman</span>
+                <span><svg data-icon="lock"></svg> Paket Premium</span>
+              </div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="0"><span>0%</span></div>
+                <a class="btn btn--primary btn--sm" href="#materi-reader">Mulai<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pad-0 tile card--pop materi-card" data-category="TKP">
+            <div class="tile__media tile__media--amber">
+              <span class="tile__glyph" style="color:#B4830C"><svg data-icon="file"></svg></span>
+              <span class="badge badge--mint tile__badge">Selesai</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">TKP - Karakteristik &amp; Potensi</span>
+              <h2 class="tile__title">Panduan Integritas &amp; Etika ASN</h2>
+              <p class="tile__desc">Contoh perilaku integritas di tempat kerja beserta simulasi kasus TKP.</p>
+              <div class="tile__meta">
+                <span><svg data-icon="file"></svg> 36 halaman</span>
+                <span><svg data-icon="download"></svg> 1,1 MB</span>
+              </div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="100"><span>100%</span></div>
+                <a class="btn btn--primary btn--sm" href="#materi-reader">Baca PDF<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pad-0 tile card--pop materi-card" data-category="Strategi">
+            <div class="tile__media">
+              <span class="tile__glyph" style="color:var(--pop-coral)"><svg data-icon="clipboard"></svg></span>
+              <span class="badge badge--ink tile__badge">Baru</span>
+            </div>
+            <div class="tile__body">
+              <span class="tile__cat">Strategi - Persiapan</span>
+              <h2 class="tile__title">Panduan Persiapan Menuju Seleksi CPNS</h2>
+              <p class="tile__desc">Checklist persiapan dari sekarang sampai hari-H, termasuk jadwal tryout.</p>
+              <div class="tile__meta">
+                <span><svg data-icon="file"></svg> 28 halaman</span>
+                <span><svg data-icon="clock"></svg> ± 1 jam</span>
+              </div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="12"><span>12%</span></div>
+                <a class="btn btn--primary btn--sm" href="#materi-reader">Mulai<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- ============ VIDEO ============ -->
+      <div class="tab-panel" id="mVideo" data-tab-panel>
+        <div class="grid grid-2" style="--gap:1.75rem;align-items:start">
+          <article class="card card--pad-0 tile card--pop materi-card" data-category="TIU">
+            <div style="aspect-ratio:16/9">
+              <div class="video-frame" style="border:none;border-radius:0;box-shadow:none">
+                <span class="video-frame__label">Video - 24 menit</span>
+                <button class="video-frame__play" type="button" aria-label="Putar video" onclick="L.toast('Pemutaran video adalah simulasi pada prototipe.','info')"><svg data-icon="play"></svg></button>
+                <div class="video-frame__ctrl">
+                  <svg data-icon="play"></svg>
+                  <div class="video-frame__track"><div class="video-frame__played"></div></div>
+                  <svg data-icon="volume"></svg>
+                  <svg data-icon="maximize"></svg>
+                </div>
+              </div>
+            </div>
+            <div class="tile__body">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="tile__cat">TIU - Penalaran Analitis</span>
+                <span class="badge badge--mint tile__badge" style="position:static">72% ditonton</span>
+              </div>
+              <h2 class="tile__title">Teknik Membaca Tabel dan Grafik untuk Soal TIU</h2>
+              <div class="tile__meta">
+                <span><svg data-icon="users"></svg> 4.210 peserta</span>
+                <span><svg data-icon="star"></svg> 4,8 dari 5</span>
+              </div>
+              <div class="tile__foot">
+                <div class="mini-ring" data-pct="72"><span>72%</span></div>
+                <a class="btn btn--primary btn--sm" href="#materi-reader">Lanjutkan<svg data-icon="arrow-right"></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <div class="grid" style="--gap:1rem;align-content:start">
+            <article class="card card--tight card--pop card--dashed flex items-center gap-3 materi-card" data-category="TWK">
+              <span class="tile__glyph" style="width:52px;height:52px;flex:0 0 52px"><svg data-icon="play-circle"></svg></span>
+              <div style="flex:1;min-width:0">
+                <span class="tile__cat">TWK - Remedial Pancasila</span>
+                <strong style="display:block;font-family:var(--font-display);color:var(--ink)">Pancasila dalam Kehidupan ASN</strong>
+                <span class="text-xs text-soft">22 menit - belum ditonton</span>
+              </div>
+              <a class="btn btn--ghost btn--square" href="#materi-reader" aria-label="Putar"><svg data-icon="play"></svg></a>
+            </article>
+
+            <article class="card card--tight card--pop card--dashed flex items-center gap-3 materi-card" data-category="TKP">
+              <span class="tile__glyph" style="width:52px;height:52px;flex:0 0 52px;background:var(--pop-mint-050);color:var(--success)"><svg data-icon="play-circle"></svg></span>
+              <div style="flex:1;min-width:0">
+                <span class="tile__cat">TKP - Skenario</span>
+                <strong style="display:block;font-family:var(--font-display);color:var(--ink)">Mengenali Lima Skenario TKP</strong>
+                <span class="text-xs text-soft">15 menit - selesai</span>
+              </div>
+              <a class="btn btn--ghost btn--square" href="#materi-reader" aria-label="Putar"><svg data-icon="play"></svg></a>
+            </article>
+
+            <article class="card card--tight card--pop card--dashed flex items-center gap-3 materi-card" data-category="Strategi">
+              <span class="tile__glyph" style="width:52px;height:52px;flex:0 0 52px;background:var(--pop-amber-050);color:#B4830C"><svg data-icon="play-circle"></svg></span>
+              <div style="flex:1;min-width:0">
+                <span class="tile__cat">Strategi - Time Management</span>
+                <strong style="display:block;font-family:var(--font-display);color:var(--ink)">Tips Manajemen Waktu CAT</strong>
+                <span class="text-xs text-soft">12 menit - belum ditonton</span>
+              </div>
+              <a class="btn btn--ghost btn--square" href="#materi-reader" aria-label="Putar"><svg data-icon="play"></svg></a>
+            </article>
+
+            <article class="card card--tight card--pop card--dashed flex items-center gap-3 materi-card" data-category="TIU">
+              <span class="tile__glyph" style="width:52px;height:52px;flex:0 0 52px;background:var(--pop-pink-050);color:var(--pop-pink)"><svg data-icon="play-circle"></svg></span>
+              <div style="flex:1;min-width:0">
+                <span class="tile__cat">TIU - Logika</span>
+                <strong style="display:block;font-family:var(--font-display);color:var(--ink)">Logika Silogisme Bagian 2</strong>
+                <span class="text-xs text-soft">18 menit - 72% ditonton</span>
+              </div>
+              <a class="btn btn--ghost btn--square" href="#materi-reader" aria-label="Putar"><svg data-icon="play"></svg></a>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ ARTIKEL ============ -->
+      <div class="tab-panel" id="mArtikel" data-tab-panel>
+        <div class="grid grid-2">
+          <article class="card card--pop card--icon materi-card" data-category="Strategi">
+            <span class="card__icon ico--primary"><svg data-icon="quote"></svg></span>
+            <div class="flex items-center gap-2">
+              <span class="badge badge--primary badge--flat">Strategi</span>
+              <span class="text-xs text-soft">6 menit baca</span>
+            </div>
+            <h2 class="tile__title" style="margin-top:.5rem">Tujuh Kesalahan yang Bikin Nilaimu Turun di Tryout CAT</h2>
+            <p class="tile__desc">Mulai soal dari mana, berapa lama per soal, dan kesalahan umum lainnya beserta cara mengatasinya.</p>
+            <a class="btn btn--ghost btn--sm" href="#materi-reader" style="margin-top:1rem">Baca artikel<svg data-icon="arrow-right"></svg></a>
+          </article>
+
+          <article class="card card--pop card--icon materi-card" data-category="Strategi">
+            <span class="card__icon ico--pink"><svg data-icon="quote"></svg></span>
+            <div class="flex items-center gap-2">
+              <span class="badge badge--pink badge--flat">Jadwal</span>
+              <span class="text-xs text-soft">4 menit baca</span>
+            </div>
+            <h2 class="tile__title" style="margin-top:.5rem">Alokasi Waktu per Bagian pada Ujian SKD</h2>
+            <p class="tile__desc">Pembagian waktu yang sering dipakai peserta di setiap sesi tryout.</p>
+            <a class="btn btn--ghost btn--sm" href="#materi-reader" style="margin-top:1rem">Baca artikel<svg data-icon="arrow-right"></svg></a>
+          </article>
+
+          <article class="card card--pop card--icon materi-card" data-category="TWK">
+            <span class="card__icon ico--amber"><svg data-icon="quote"></svg></span>
+            <div class="flex items-center gap-2">
+              <span class="badge badge--amber badge--flat">TWK</span>
+              <span class="text-xs text-soft">8 menit baca</span>
+            </div>
+            <h2 class="tile__title" style="margin-top:.5rem">Mengenal Semboyan, Logo, dan Semboyan Dunia</h2>
+            <p class="tile__desc">Kumpulan lambang dan semboyan yang sering ditanyakan dalam TWK.</p>
+            <a class="btn btn--ghost btn--sm" href="#materi-reader" style="margin-top:1rem">Baca artikel<svg data-icon="arrow-right"></svg></a>
+          </article>
+
+          <article class="card card--pop card--icon materi-card" data-category="TKP">
+            <span class="card__icon ico--mint"><svg data-icon="quote"></svg></span>
+            <div class="flex items-center gap-2">
+              <span class="badge badge--mint badge--flat">TKP</span>
+              <span class="text-xs text-soft">5 menit baca</span>
+            </div>
+            <h2 class="tile__title" style="margin-top:.5rem">Membaca Situasi TKP: Kata Kunci yang Sering Muncul</h2>
+            <p class="tile__desc">Pola kata pada pilihan jawaban TKP dan cara memilih yang paling tepat.</p>
+            <a class="btn btn--ghost btn--sm" href="#materi-reader" style="margin-top:1rem">Baca artikel<svg data-icon="arrow-right"></svg></a>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PEMBACA PDF (simulasi) ============ -->
+    <section class="section" id="materi-reader" style="padding-top:2.5rem">
+      <div class="section-head">
+        <span class="eyebrow">Pratinjau Pembaca</span>
+        <h2 style="margin-top:.75rem">Tampilan Pembaca Materi</h2>
+        <p>Prototipe memakai tampilan PDF bawaan browser. Pada implementasi final, opsi embed dan unduh perlu ditentukan.</p>
+      </div>
+
+      <div class="panes panes--aside" style="--gap:1.5rem;">
+        <div class="pdf-frame">
+          <div class="pdf-frame__bar">
+            <svg data-icon="file"></svg>
+            <span>Rangkuman-Pengetahuan-Umum-Indonesia.pdf</span>
+            <span style="margin-left:auto">48 / 48 halaman</span>
+            <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Unduh PDF adalah simulasi pada prototipe.','info')" aria-label="Unduh"><svg data-icon="download"></svg></button>
+          </div>
+          <div class="pdf-frame__page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+          </div>
+        </div>
+
+        <aside class="stack" style="--stack:1.25rem">
+          <div class="card card--tight">
+            <div class="card__title" style="margin-bottom:.75rem">Daftar Isi</div>
+            <div class="stack" style="--stack:.35rem">
+              <a class="side__link is-active" href="#materi-reader">1. Pengetahuan Umum</a>
+              <a class="side__link" href="#materi-reader">2. Sejarah Indonesia</a>
+              <a class="side__link" href="#materi-reader">3. Pancasila &amp; UUD 1945</a>
+              <a class="side__link" href="#materi-reader">4. Geopolitik</a>
+              <a class="side__link" href="#materi-reader">5. Ekonomi</a>
+            </div>
+          </div>
+          <div class="card card--tight card--dashed">
+            <div class="card__title" style="margin-bottom:.5rem">Progres Materi Ini</div>
+            <div class="progress__row"><span>Sudah dibaca</span><span>100%</span></div>
+            <div class="progress"><div class="progress__bar" data-progress="100"></div></div>
+            <a class="btn btn--primary btn--block" href="bank-soal.html" style="margin-top:1rem">Latihan Soal Materi Ini<svg data-icon="arrow-right"></svg></a>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Try Out CAT — LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="tryout">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Try Out CAT</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Simulasi Ujian</span>
+        <h1 style="margin-top:.5rem">Try Out CAT</h1>
+        <p>Kerjakan soal dengan timer, navigasi nomor soal, dan autosave. Saat waktu habis, jawaban dikirim otomatis.</p>
+      </div>
+      <div class="card card--tight" style="text-align:right">
+        <div class="stat__label">Sisa Kuota Paket Premium</div>
+        <div class="stat__value" style="font-size:var(--fs-lg)">8 dari 12</div>
+        <div class="progress" style="height:10px;margin-top:.5rem"><div class="progress__bar" data-progress="33"></div></div>
+      </div>
+    </header>
+
+    <!-- ============ INFO STRIP ============ -->
+    <section class="grid grid-4" style="--gap:1rem;margin-bottom:1.75rem">
+      <div class="card card--tight flex items-center gap-3">
+        <span class="stat__icon ico--pink" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="timer"></svg></span>
+        <div><div class="text-xs text-soft fw-700">Timer otomatis</div><div class="text-sm fw-700" style="color:var(--ink)">Auto-submit saat habis</div></div>
+      </div>
+      <div class="card card--tight flex items-center gap-3">
+        <span class="stat__icon ico--mint" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="check-circle"></svg></span>
+        <div><div class="text-xs text-soft fw-700">Autosave</div><div class="text-sm fw-700" style="color:var(--ink)">Progres aman</div></div>
+      </div>
+      <div class="card card--tight flex items-center gap-3">
+        <span class="stat__icon ico--amber" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="refresh"></svg></span>
+        <div><div class="text-xs text-soft fw-700">Randomisasi</div><div class="text-sm fw-700" style="color:var(--ink)">Urutan berbeda tiap sesi</div></div>
+      </div>
+      <div class="card card--tight flex items-center gap-3">
+        <span class="stat__icon ico--violet" style="width:40px;height:40px;flex-basis:40px;border-radius:12px"><svg data-icon="file"></svg></span>
+        <div><div class="text-xs text-soft fw-700">Pembahasan</div><div class="text-sm fw-700" style="color:var(--ink)">Tersedia setelah submit</div></div>
+      </div>
+    </section>
+
+    <!-- ============ FILTER ============ -->
+    <div class="flex items-center justify-between flex-wrap" style="gap:1rem;margin-bottom:1.25rem">
+      <div class="pills" data-pill-filter=".tryout-card">
+        <button class="pill is-active" type="button" data-value="all">Semua</button>
+        <button class="pill" type="button" data-value="TWK">TWK</button>
+        <button class="pill" type="button" data-value="TIU">TIU</button>
+        <button class="pill" type="button" data-value="TKP">TKP</button>
+      </div>
+      <p class="text-xs text-soft"><svg data-icon="info" style="width:14px;height:14px;display:inline;vertical-align:-2px"></svg> Mekanisme randomisasi dan rumus nilai final menunggu konfirmasi client.</p>
+    </div>
+
+    <!-- ============ DAFTAR TRYOUT ============ -->
+    <section class="grid grid-2" style="--gap:1.5rem;align-items:start" data-tabs>
+
+      <!-- Tryout utama -->
+      <article class="card card--pop card--amber tryout-card" data-category="TWK TIU TKP">
+        <div class="flex items-start justify-between" style="gap:1rem">
+          <div class="flex items-start gap-3">
+            <span class="card__icon ico--coral" style="position:static"><svg data-icon="timer"></svg></span>
+            <div>
+              <span class="badge badge--premium"><svg data-icon="zap"></svg> Baru tersedia</span>
+              <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Tryout SKD #5 — Penuh</h2>
+              <p class="text-sm text-soft" style="margin-top:.25rem">Simulasi penuh dengan komposisi TWK, TIU, dan TKP.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-3" style="--gap:.6rem;margin:1.25rem 0">
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Jumlah soal</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">100</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Durasi</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">120′</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Nilai ambang</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">320</div>
+          </div>
+        </div>
+
+        <div class="alert alert--info" style="margin-bottom:1.25rem">
+          <span class="alert__icon"><svg data-icon="info"></svg></span>
+          <div>Pastikan koneksi stabil dan browser tetap terbuka. Kamu bisa keluar dan melanjutkan progres kapan saja.</div>
+        </div>
+
+        <div class="btn-row">
+          <a class="btn btn--primary btn--lg" href="tryout-kerjakan.html">
+            Mulai Sekarang<span class="btn__icon"><svg data-icon="arrow-right"></svg></span>
+          </a>
+          <button class="btn btn--ghost" type="button" data-modal-open="rulesModal">Lihat Ketentuan</button>
+        </div>
+      </article>
+
+      <!-- Tryout mingguan -->
+      <article class="card card--pop card--blue tryout-card" data-category="TWK">
+        <div class="flex items-start gap-3">
+          <span class="card__icon ico--primary" style="position:static"><svg data-icon="calendar"></svg></span>
+          <div style="flex:1">
+            <span class="badge badge--primary badge--flat">Mingguan</span>
+            <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Tryout TWK Mingguan #12</h2>
+            <p class="text-sm text-soft" style="margin-top:.25rem">Fokus pada pengetahuan umum, sejarah, dan konstitusi.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-3" style="--gap:.6rem;margin:1.25rem 0">
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Jumlah soal</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">35</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Durasi</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">45′</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Nilai ambang</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">70</div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn--primary" type="button" onclick="L.toast('Membuka sesi tryout TWK…','info');setTimeout(function(){location.href='tryout-kerjakan.html'},600)">Mulai<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></button>
+          <a class="btn btn--ghost" href="tryout-hasil.html">Lihat Hasil Terakhir</a>
+        </div>
+      </article>
+
+      <!-- Terkunci -->
+      <article class="card card--pop tryout-card" data-category="TIU">
+        <div class="tile__lock" style="border-radius:var(--r-lg)">
+          <span><svg data-icon="lock"></svg> Butuh Paket Ultimate</span>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="card__icon ico--violet" style="position:static"><svg data-icon="zap"></svg></span>
+          <div>
+            <span class="badge badge--violet badge--flat">Premium</span>
+            <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Tryout TIU Intensif</h2>
+            <p class="text-sm text-soft" style="margin-top:.25rem">50 soal penalaran analitis dengan tingkat kesulitan tinggi.</p>
+          </div>
+        </div>
+        <div class="grid grid-3" style="--gap:.6rem;margin:1.25rem 0">
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Jumlah soal</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">50</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Durasi</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">75′</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Nilai ambang</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">75</div>
+          </div>
+        </div>
+        <a class="btn btn--dark btn--block" href="paket.html">Upgrade Paket<svg data-icon="arrow-right"></svg></a>
+      </article>
+
+      <!-- TKP -->
+      <article class="card card--pop card--mint tryout-card" data-category="TKP">
+        <div class="flex items-start gap-3">
+          <span class="card__icon ico--mint" style="position:static"><svg data-icon="shield"></svg></span>
+          <div style="flex:1">
+            <span class="badge badge--mint badge--flat">Gratis</span>
+            <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Tryout TKP Kontekstual</h2>
+            <p class="text-sm text-soft" style="margin-top:.25rem">25 soal skenario perilaku kerja ASN. Tidak ada timer.</p>
+          </div>
+        </div>
+        <div class="grid grid-3" style="--gap:.6rem;margin:1.25rem 0">
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Jumlah soal</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">25</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Durasi</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">∞</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Nilai ambang</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">68</div>
+          </div>
+        </div>
+        <a class="btn btn--primary btn--block" href="tryout-kerjakan.html">Mulai<svg data-icon="arrow-right"></svg></a>
+      </article>
+
+      <!-- Selesai -->
+      <article class="card card--pop tryout-card" data-category="TWK TIU TKP">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <span class="card__icon ico--amber" style="position:static"><svg data-icon="history"></svg></span>
+            <div>
+              <span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Selesai</span>
+              <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Tryout SKD #4</h2>
+              <p class="text-sm text-soft" style="margin-top:.25rem">Dikerjakan 3 Oktober 2026 · 60 soal</p>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="text-xs text-soft fw-700">Nilai</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:2rem;color:var(--primary-700);line-height:1">452</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between flex-wrap" style="gap:.75rem;margin-top:1.25rem;padding-top:1rem;border-top:2px dashed var(--border)">
+          <div class="flex items-center gap-2" style="flex-wrap:wrap">
+            <span class="badge badge--mint badge--flat">TWK 34/35</span>
+            <span class="badge badge--mint badge--flat">TIU 31/35</span>
+            <span class="badge badge--danger badge--flat">TKP 27/35</span>
+          </div>
+          <a class="btn btn--ghost btn--sm" href="tryout-hasil.html">Hasil &amp; Pembahasan<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+
+      <!-- Selesai 2 -->
+      <article class="card card--pop tryout-card" data-category="TWK TIU TKP">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <span class="card__icon ico--amber" style="position:static"><svg data-icon="history"></svg></span>
+            <div>
+              <span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Selesai</span>
+              <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Tryout SKD #3</h2>
+              <p class="text-sm text-soft" style="margin-top:.25rem">Dikerjakan 1 Oktober 2026 · 60 soal</p>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="text-xs text-soft fw-700">Nilai</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:2rem;color:var(--primary-700);line-height:1">418</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between flex-wrap" style="gap:.75rem;margin-top:1.25rem;padding-top:1rem;border-top:2px dashed var(--border)">
+          <div class="flex items-center gap-2" style="flex-wrap:wrap">
+            <span class="badge badge--mint badge--flat">TWK 30/35</span>
+            <span class="badge badge--amber badge--flat">TIU 29/35</span>
+            <span class="badge badge--mint badge--flat">TKP 33/35</span>
+          </div>
+          <a class="btn btn--ghost btn--sm" href="tryout-hasil.html">Hasil &amp; Pembahasan<svg data-icon="arrow-right"></svg></a>
+        </div>
+      </article>
+    </section>
+  </main>
+</div>
+
+<!-- ============ MODAL KETENTENTUAN ============ -->
+<div class="modal" id="rulesModal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle" aria-hidden="true">
+  <div class="modal__backdrop"></div>
+  <div class="modal__panel">
+    <button class="modal__close" type="button" data-modal-close aria-label="Tutup"><svg data-icon="close"></svg></button>
+    <h2 class="modal__title" id="rulesTitle">Ketentuan Try Out</h2>
+    <div class="stack" style="--stack:1rem;margin-top:1.25rem">
+      <div class="explain explain--info">
+        <div class="explain__title"><svg data-icon="timer"></svg> Timer</div>
+        Timer berjalan selama sesi. Saat waktu habis, sistem mengirim jawaban otomatis dan menghitung nilai.
+      </div>
+      <div class="explain explain--neutral">
+        <div class="explain__title"><svg data-icon="check-circle"></svg> Autosave</div>
+        Setiap jawaban tersimpan otomatis. Menutup tab atau me-refresh halaman tidak menghapus progres.
+      </div>
+      <div class="explain explain--neutral">
+        <div class="explain__title"><svg data-icon="refresh"></svg> Randomisasi</div>
+        Urutan soal dan urutan pilihan jawaban dapat diacak. <span class="badge badge--amber badge--flat">Mekanisme final TBD</span>
+      </div>
+      <div class="explain explain--neutral">
+        <div class="explain__title"><svg data-icon="gauge"></svg> Penilaian</div>
+        Nilai dihitung dari jawaban yang tersimpan pada sesi ini. <span class="badge badge--amber badge--flat">Rumus final TBD</span>
+      </div>
+      <div class="alert alert--warn">
+        <span class="alert__icon"><svg data-icon="alert"></svg></span>
+        <div>Kurangi kuotamu setiap kali memulai sesi, termasuk saat kamu keluar di tengah pengerjaan.</div>
+      </div>
+    </div>
+    <div class="modal__foot">
+      <button class="btn btn--ghost" type="button" data-modal-close>Tutup</button>
+      <a class="btn btn--primary" href="tryout-kerjakan.html" data-modal-close>Mulai Tryout</a>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

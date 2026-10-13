@@ -1,9 +1,21 @@
 @import 'tailwindcss';
 
+@import './lontar/tokens.css';
+@import './lontar/base.css';
+@import './lontar/components.css';
+@import './lontar/pdf-view.css';
+@import './lontar/lessons.css';
+@import './lontar/content-workspace.css';
+@import './lontar/articles.css';
+@import './lontar/questions.css';
+@import './lontar/exams.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+@source '../js/**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }

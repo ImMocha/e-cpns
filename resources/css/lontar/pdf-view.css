@@ -1,0 +1,216 @@
+/* ==========================================================================
+   17 · PDF VIEWER — penampil PDF tanpa tombol unduh / cetak
+   ==========================================================================
+   Berkas dirender ke <canvas> oleh pdf.js, jadi browser tidak pernah
+   menerima dokumen PDF sebagai dokumen. Tanpa `<object>` / `<embed>` /
+   `<iframe>`, toolbar Unduh dan Cetak bawaan browser juga ikut hilang.
+
+   `.pdfview__text` sengaja `user-select: text`: peserta masih bisa menyorot
+   dan mencari kata. Menyembunyikan teks demi keamanan hanya akan merusak
+   pengalaman baca tanpa benar-benar mencegah apa pun. */
+
+.pdfview {
+  border: 2px solid var(--ink);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-md);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.pdfview__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--surface);
+  border-bottom: 2px solid var(--ink);
+}
+
+.pdfview__file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--text-soft);
+}
+.pdfview__file svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--pop-coral); }
+.pdfview__file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pdfview__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.pdfview__page-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink);
+}
+.pdfview__page-nav input {
+  width: 2.5rem;
+  border: 0;
+  background: transparent;
+  text-align: right;
+  font: inherit;
+  color: inherit;
+  /* Spin button bawaan browser tidak berguna di sini dan bikin baris meleset. */
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.pdfview__page-nav input::-webkit-outer-spin-button,
+.pdfview__page-nav input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+.pdfview__page-nav input:focus { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
+.pdfview__btn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color var(--t) var(--ease-out), border-color var(--t) var(--ease-out);
+}
+.pdfview__btn svg { width: 16px; height: 16px; }
+.pdfview__btn:hover:not(:disabled) { background: var(--primary); border-color: var(--primary); color: #fff; }
+.pdfview__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pdfview__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.pdfview__btn.is-active { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+.pdfview__pages {
+  --pdf-page-ratio: 1.414;
+  --pdf-page-width: auto;
+  max-height: min(76vh, 900px);
+  overflow: auto;
+  padding: 1.5rem;
+  background: var(--surface-2);
+}
+
+/* Penanda fokus. Hanya muncul saat keyboard yang memakai — supaya peserta
+   tahu area baca bisa dikendalikan panah. */
+.pdfview__pages:focus { outline: none; }
+.pdfview__pages:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: -3px;
+}
+
+/* Cangkang halaman punya tinggi A4 sejak awal, sebelum isinya dirender.
+   Tanpa itu semua halaman menumpuk di koordinat yang sama, IntersectionObserver
+   menganggap semuanya sekaligus terlihat, dan seluruh dokumen dirender
+   sekaligus — lambat, dan halaman kosong melompat-lompat saat mulai terisi. */
+
+.pdfview__page {
+  position: relative;
+  width: var(--pdf-page-width, fit-content);
+  aspect-ratio: var(--pdf-page-ratio, 1.414);
+  margin: 0 auto 1.5rem;
+  background: #fff;
+  box-shadow: var(--sh-md);
+  overflow: hidden;
+}
+
+.pdfview__page canvas { display: block; }
+
+.pdfview__page-no {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--r-full);
+  background: rgba(22, 50, 79, 0.72);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+/* Lapisan teks transparan di atas canvas: menyorot & pencarian tetap jalan
+   walau dokumennya sendiri tidak bisa diunduh. */
+.pdfview__text {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  line-height: 1;
+  opacity: 0.22;
+}
+.pdfview__text span {
+  position: absolute;
+  transform-origin: 0 0;
+  white-space: pre;
+  color: transparent;
+  cursor: text;
+}
+.pdfview__text::selection { background: var(--pop-amber); }
+
+.pdfview__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 3px solid var(--border-strong);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: pdfview-spin 0.9s linear infinite;
+}
+@keyframes pdfview-spin { to { transform: rotate(360deg); } }
+
+.pdfview__state {
+  display: grid;
+  place-items: center;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+.pdfview__state-icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  box-shadow: var(--sh-sm);
+}
+.pdfview__state-icon svg { width: 26px; height: 26px; }
+.pdfview__state-icon--bad { color: var(--danger); }
+
+.pdfview__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+}
+.pdfview__note svg { width: 15px; height: 15px; flex: 0 0 auto; margin-top: 1px; }
+
+@media (max-width: 720px) {
+  .pdfview__pages { max-height: 68vh; padding: 0.85rem; }
+  .pdfview__bar { padding: 0.6rem; }
+}
+
+@media print {
+  /* Penjaga terakhir: kalau ada yang managed membuka dialog cetak, jangan
+     sampai halaman aplikasi ikut tercetak. */
+  .pdfview { display: none !important; }
+}

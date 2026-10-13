@@ -1,0 +1,120 @@
+/* ==========================================================================
+   LONTAR · Design Tokens
+   Single source of truth for the whole prototype.
+   Change a value here and it propagates to every page.
+   ========================================================================== */
+
+:root {
+  /* ---- Brand ------------------------------------------------------------
+     Primary #0191ED (requested). The -600/-700 are derived for hard-shadow
+     and hover states so we never need opacity hacks on the brand color.     */
+  --primary:       #0191ED;
+  --primary-600:   #0177BC;
+  --primary-700:   #01609B;
+  --primary-400:   #4FB6F5;
+  --primary-300:   #9AD6FA;
+  --primary-100:   #D9F0FE;
+  --primary-050:   #EFF9FE;
+
+  /* ---- Pop accents ------------------------------------------------------
+     Rotated decoratively (shapes, icons, badges, chart series). Never used
+     for body text or as the only signal of state.                          */
+  --pop-pink:      #FF6B9D;
+  --pop-amber:     #FFC53D;
+  --pop-mint:      #2DD4A7;
+  --pop-coral:     #FF7A5C;
+  --pop-violet:    #8B5CF6;
+
+  /* ---- Pop tints (for soft backgrounds) --------------------------------- */
+  --pop-pink-050:  #FFF0F5;
+  --pop-amber-050: #FFF8E6;
+  --pop-mint-050:  #E8FBF4;
+  --pop-coral-050: #FFF1ED;
+  --pop-violet-050:#F3EEFE;
+
+  /* ---- Neutrals --------------------------------------------------------- */
+  --bg:            #FFFDF7;   /* warm cream — paper feel */
+  --bg-alt:        #F2F8FD;
+  --surface:       #FFFFFF;
+  --surface-2:     #F7FAFC;
+  --ink:           #16324F;   /* chunky borders + hard shadows */
+  --text:          #2A4257;
+  --text-soft:     #64809A;
+  --border:        #DCE8F2;
+  --border-strong: #B9CFE0;
+
+  /* ---- Semantic --------------------------------------------------------- */
+  --success:       #12A97C;
+  --success-050:   #E4F8F1;
+  --warning:       #E8A317;
+  --warning-050:   #FFF6E0;
+  --danger:        #E5484D;
+  --danger-050:    #FDECEC;
+
+  /* ---- Typography ------------------------------------------------------- */
+  --font-display: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body:    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Fluid scale — 1.25 major third at the base, clamped at both ends */
+  --fs-xs:    0.75rem;
+  --fs-sm:    0.8125rem;
+  --fs-base:  0.9375rem;
+  --fs-md:    1rem;
+  --fs-lg:    clamp(1.0625rem, 0.25vw + 1rem, 1.1875rem);
+  --fs-xl:    clamp(1.375rem, 0.9vw + 1.15rem, 1.75rem);
+  --fs-2xl:   clamp(1.75rem, 1.9vw + 1.3rem, 2.5rem);
+  --fs-3xl:   clamp(2.25rem, 4vw + 1.2rem, 4rem);
+  --fs-4xl:   clamp(2.75rem, 6.5vw + 0.6rem, 5.75rem);
+
+  --lh-tight: 1.12;
+  --lh-snug:  1.3;
+  --lh-body:  1.65;
+
+  /* ---- Radius ----------------------------------------------------------- */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   16px;
+  --r-lg:   24px;
+  --r-xl:   32px;
+  --r-full: 999px;
+
+  /* ---- Hard shadows (no blur — the "sticker" feel) ---------------------- */
+  --sh-xs:      2px 2px 0 var(--ink);
+  --sh-sm:      3px 3px 0 var(--ink);
+  --sh-md:      5px 5px 0 var(--ink);
+  --sh-lg:      8px 8px 0 var(--ink);
+  --sh-xl:      12px 12px 0 var(--ink);
+  --sh-primary: 5px 5px 0 var(--primary-600);
+  --sh-mint:    5px 5px 0 var(--success);
+
+  /* Soft-tinted hard shadows for cards that should feel lighter */
+  --sh-soft:       6px 6px 0 var(--border);
+  --sh-soft-pink:  6px 6px 0 var(--pop-pink);
+  --sh-soft-amber: 6px 6px 0 var(--pop-amber);
+  --sh-soft-mint:  6px 6px 0 var(--pop-mint);
+  --sh-soft-blue:  6px 6px 0 var(--primary-100);
+
+  /* ---- Motion ----------------------------------------------------------- */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-fast:  140ms;
+  --t:       240ms;
+  --t-slow:  420ms;
+
+  /* ---- Layout ----------------------------------------------------------- */
+  --container: 1180px;
+  --container-wide: 1360px;
+  --nav-h: 72px;
+  --gutter: clamp(1rem, 4vw, 2rem);
+  --section-y: clamp(3.5rem, 8vw, 6.5rem);
+}
+
+/* Reduced-motion: collapse every decorative animation, keep opacity cues. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 1ms;
+    --t: 1ms;
+    --t-slow: 1ms;
+  }
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daftar Latihan — LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="quiz">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Latihan Soal</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Latihan Soal</span>
+        <h1 style="margin-top:.5rem">Daftar Latihan</h1>
+        <p>Kerjakan soal di luar simulasi tryout. Tidak ada timer, dan kamu boleh berhenti kapan saja.</p>
+      </div>
+      <div class="card card--tight" style="min-width:220px">
+        <div class="stat__label">Latihan Selesai</div>
+        <div class="fw-800" style="font-family:var(--font-display);font-size:1.6rem;color:var(--ink);line-height:1.1">15</div>
+        <p class="text-xs text-soft">dari 20 latihan tersedia</p>
+      </div>
+    </header>
+
+    <div class="flex items-center justify-between flex-wrap" style="gap:1rem;margin-bottom:1.5rem">
+      <div class="pills">
+        <button class="pill is-active" type="button">Semua</button>
+        <button class="pill" type="button">TWK</button>
+        <button class="pill" type="button">TIU</button>
+        <button class="pill" type="button">TKP</button>
+      </div>
+      <p class="text-xs text-soft"><svg data-icon="info" style="width:14px;height:14px;display:inline;vertical-align:-2px"></svg> Soal latihan diambil acak dari bank soal kategori terkait.</p>
+    </div>
+
+    <section class="grid grid-2" style="--gap:1.5rem;align-items:start">
+
+      <article class="card card--pop card--amber">
+        <div class="flex items-start justify-between" style="gap:1rem">
+          <div class="flex items-start gap-3">
+            <span class="card__icon ico--pink" style="position:static"><svg data-icon="pen-line"></svg></span>
+            <div>
+              <span class="badge badge--premium"><svg data-icon="zap"></svg> Disarankan</span>
+              <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Silogisme &amp; Penalaran</h2>
+              <p class="text-sm text-soft" style="margin-top:.25rem">8 soal tentang pola penalaran deduktif.</p>
+            </div>
+          </div>
+          <div class="mini-ring" data-pct="75"><span>75%</span></div>
+        </div>
+        <div class="grid grid-3" style="--gap:.6rem;margin:1.25rem 0">
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Jumlah soal</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">8</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Waktu</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">Tanpa batas</div>
+          </div>
+          <div class="card card--tight card--dashed" style="text-align:center">
+            <div class="text-xs text-soft fw-700">Akurasi</div>
+            <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink)">75%</div>
+          </div>
+        </div>
+        <div class="progress-wrap" style="margin-bottom:1rem">
+          <div class="progress__row"><span>Progres latihan</span><span>6 dari 8 dijawab</span></div>
+          <div class="progress"><div class="progress__bar" data-progress="75"></div></div>
+        </div>
+        <div class="btn-row">
+          <a class="btn btn--primary" href="latihan-kerjakan.html">Lanjutkan<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
+          <a class="btn btn--ghost" href="tryout-hasil.html?id=latihan-1">Hasil Terakhir</a>
+        </div>
+      </article>
+
+      <article class="card card--pop card--pink">
+        <div class="flex items-start gap-3">
+          <span class="card__icon ico--coral" style="position:static"><svg data-icon="shield"></svg></span>
+          <div style="flex:1">
+            <span class="badge badge--amber badge--flat">TKP</span>
+            <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Skenario Integritas ASN</h2>
+            <p class="text-sm text-soft" style="margin-top:.25rem">10 soal tentang perilaku integritas di tempat kerja.</p>
+          </div>
+        </div>
+        <div class="progress-wrap" style="margin:1.25rem 0 1rem">
+          <div class="progress__row"><span>Progres latihan</span><span>92%</span></div>
+          <div class="progress progress--amber"><div class="progress__bar" data-progress="92"></div></div>
+        </div>
+        <a class="btn btn--primary btn--block" href="latihan-kerjakan.html">Kerjakan<svg data-icon="arrow-right"></svg></a>
+      </article>
+
+      <article class="card card--pop card--blue">
+        <div class="flex items-start gap-3">
+          <span class="card__icon ico--primary" style="position:static"><svg data-icon="file"></svg></span>
+          <div style="flex:1">
+            <span class="badge badge--primary badge--flat">TWK</span>
+            <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Sejarah Indonesia</h2>
+            <p class="text-sm text-soft" style="margin-top:.25rem">15 soal dari periode kolonial sampai Reformasi.</p>
+          </div>
+        </div>
+        <div class="progress-wrap" style="margin:1.25rem 0 1rem">
+          <div class="progress__row"><span>Progres latihan</span><span>40%</span></div>
+          <div class="progress"><div class="progress__bar" data-progress="40"></div></div>
+        </div>
+        <a class="btn btn--primary btn--block" href="latihan-kerjakan.html">Kerjakan<svg data-icon="arrow-right"></svg></a>
+      </article>
+
+      <article class="card card--pop">
+        <div class="tile__lock" style="border-radius:var(--r-lg)">
+          <span><svg data-icon="lock"></svg> Butuh Paket Ultimate</span>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="card__icon ico--violet" style="position:static"><svg data-icon="zap"></svg></span>
+          <div>
+            <span class="badge badge--violet badge--flat">Premium</span>
+            <h2 class="card__title" style="font-size:var(--fs-lg);margin-top:.5rem">Matematika Dasar Lanjutan</h2>
+            <p class="text-sm text-soft" style="margin-top:.25rem">20 soal soal cerita dan pola bilangan.</p>
+          </div>
+        </div>
+        <a class="btn btn--dark btn--block" href="paket.html" style="margin-top:1.5rem">Upgrade Paket<svg data-icon="arrow-right"></svg></a>
+      </article>
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

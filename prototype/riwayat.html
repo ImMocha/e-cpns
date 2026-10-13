@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Riwayat Pengerjaan — LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="riwayat">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Riwayat</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Semua Aktivitas</span>
+        <h1 style="margin-top:.5rem">Riwayat Pengerjaan</h1>
+        <p>Setiap tryout dan latihan yang sudah selesai tersimpan di sini.</p>
+      </div>
+      <button class="btn btn--ghost" type="button" onclick="L.toast('Riwayat diunduh sebagai PDF.','success')">
+        <svg data-icon="download"></svg> Unduh Riwayat
+      </button>
+    </header>
+
+    <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
+      <article class="stat">
+        <span class="stat__icon"><svg data-icon="timer"></svg></span>
+        <div><div class="stat__label">Total Tryout</div><div class="stat__value">4</div></div>
+      </article>
+      <article class="stat">
+        <span class="stat__icon ico--pink"><svg data-icon="pen-line"></svg></span>
+        <div><div class="stat__label">Total Latihan</div><div class="stat__value">15</div></div>
+      </article>
+      <article class="stat">
+        <span class="stat__icon ico--amber"><svg data-icon="gauge"></svg></span>
+        <div><div class="stat__label">Total Waktu</div><div class="stat__value">9,4 jam</div></div>
+      </article>
+      <article class="stat">
+        <span class="stat__icon ico--mint"><svg data-icon="star"></svg></span>
+        <div><div class="stat__label">Rata-rata Nilai</div><div class="stat__value">390</div></div>
+      </article>
+    </section>
+
+    <section class="card card--pad-0">
+      <div class="flex items-center justify-between flex-wrap" style="gap:1rem;padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
+        <div class="pills">
+          <button class="pill is-active" type="button">Semua</button>
+          <button class="pill" type="button">Tryout</button>
+          <button class="pill" type="button">Latihan</button>
+        </div>
+        <div class="input-group" style="min-width:240px">
+          <span class="input-group__icon"><svg data-icon="search"></svg></span>
+          <input class="input" type="search" placeholder="Cari riwayat..." aria-label="Cari riwayat" data-table-filter="tabelRiwayat">
+        </div>
+      </div>
+
+      <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+        <table class="table" id="tabelRiwayat">
+          <thead>
+            <tr>
+              <th>Aktivitas</th>
+              <th>Kategori</th>
+              <th class="is-sortable" aria-sort="descending">Tanggal<span class="sort-ind">↕</span></th>
+              <th class="num">Durasi</th>
+              <th class="is-sortable num">Nilai<span class="sort-ind">↕</span></th>
+              <th>Hasil</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--ink)">Tryout SKD #4</strong></td>
+              <td>TWK / TIU / TKP</td>
+              <td data-sort="3">03 Okt 2026</td>
+              <td class="num">85 menit</td>
+              <td class="num" data-sort="452">452</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Quiz Penalaran Analitis</strong></td>
+              <td>TIU</td>
+              <td data-sort="2">02 Okt 2026</td>
+              <td class="num">18 menit</td>
+              <td class="num" data-sort="85">85</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html?id=latihan-1" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Tryout SKD #3</strong></td>
+              <td>TWK / TIU / TKP</td>
+              <td data-sort="1">01 Okt 2026</td>
+              <td class="num">90 menit</td>
+              <td class="num" data-sort="418">418</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Quiz Integritas ASN</strong></td>
+              <td>TKP</td>
+              <td data-sort="9">29 Sep 2026</td>
+              <td class="num">12 menit</td>
+              <td class="num" data-sort="92">92</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html?id=latihan-1" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Tryout SKD #2</strong></td>
+              <td>TWK / TIU / TKP</td>
+              <td data-sort="8">27 Sep 2026</td>
+              <td class="num">120 menit</td>
+              <td class="num" data-sort="378">378</td>
+              <td><span class="badge badge--amber badge--flat">Belum lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Quiz Sejarah Indonesia</strong></td>
+              <td>TWK</td>
+              <td data-sort="7">26 Sep 2026</td>
+              <td class="num">24 menit</td>
+              <td class="num" data-sort="81">81</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html?id=latihan-1" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Tryout SKD #1</strong></td>
+              <td>TWK / TIU / TKP</td>
+              <td data-sort="6">24 Sep 2026</td>
+              <td class="num">120 menit</td>
+              <td class="num" data-sort="312">312</td>
+              <td><span class="badge badge--amber badge--flat">Belum lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">Quiz Matematika Dasar</strong></td>
+              <td>TIU</td>
+              <td data-sort="5">23 Sep 2026</td>
+              <td class="num">20 menit</td>
+              <td class="num" data-sort="74">74</td>
+              <td><span class="badge badge--amber badge--flat">Belum lulus</span></td>
+              <td><a class="btn btn--ghost btn--square btn--sm" href="tryout-hasil.html?id=latihan-1" aria-label="Lihat hasil"><svg data-icon="eye"></svg></a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty" data-table-empty hidden style="margin:1.5rem">
+        <span class="empty__icon"><svg data-icon="search"></svg></span>
+        <strong style="color:var(--ink);font-family:var(--font-display)">Riwayat tidak ditemukan</strong>
+        <p class="text-sm text-soft">Coba kata kunci lain atau pilih jenis aktivitas berbeda.</p>
+      </div>
+
+      <div style="padding:1.25rem 1.5rem;border-top:2px solid var(--border)" class="flex items-center justify-between flex-wrap">
+        <span class="text-xs text-soft">Menampilkan 1 sampai 8 dari 19 riwayat</span>
+        <div class="pager" style="margin-top:0">
+          <button class="pager__btn" type="button" disabled aria-label="Halaman sebelumnya"><svg data-icon="chevron-left"></svg></button>
+          <button class="pager__btn is-active" type="button">1</button>
+          <button class="pager__btn" type="button">2</button>
+          <button class="pager__btn" type="button">3</button>
+          <button class="pager__btn" type="button" aria-label="Halaman berikutnya"><svg data-icon="chevron-right"></svg></button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

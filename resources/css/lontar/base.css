@@ -1,0 +1,385 @@
+/* ==========================================================================
+   LONTAR · Base layer
+   Reset, document defaults, typography, layout primitives, decoration.
+   ========================================================================== */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-h) + 16px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  color: var(--text);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video { display: block; max-width: 100%; }
+
+img { height: auto; }
+
+/* Inline icon sizing
+   --------------------------------------------------------------------------
+   An <svg> without width/height is a replaced element that falls back to the
+   300x150 default box, which is why a bare arrow inside a .btn used to stretch
+   the whole button. Every icon therefore gets a scalable default relative to
+   the current font size. `svg[data-icon]` covers the brief window before
+   icons.js hydrates; `.icon` is what hydration leaves behind.
+   Component rules like `.stat__icon svg` override this on purpose. */
+svg[data-icon],
+.icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex: 0 0 auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button { cursor: pointer; background: none; border: none; }
+
+a { color: inherit; text-decoration: none; }
+
+ul, ol { list-style: none; padding: 0; }
+
+table { border-collapse: collapse; width: 100%; }
+
+/* ---- Headings ----------------------------------------------------------- */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--fs-3xl); }
+h2 { font-size: var(--fs-2xl); }
+h3 { font-size: var(--fs-xl); }
+h4 { font-size: var(--fs-lg); }
+
+p { text-wrap: pretty; }
+
+/* ---- Focus & a11y ------------------------------------------------------- */
+:focus { outline: none; }
+
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: var(--r-xs);
+}
+
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 12px;
+  z-index: 200;
+  padding: 12px 20px;
+  background: var(--primary);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  border: 2px solid var(--ink);
+  border-radius: var(--r-full);
+  box-shadow: var(--sh-sm);
+  transition: top var(--t) var(--ease-pop);
+}
+.skip-link:focus { top: 12px; }
+
+/* ---- Layout primitives -------------------------------------------------- */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container--wide { max-width: var(--container-wide); }
+
+.section { padding-block: var(--section-y); }
+.section--tight { padding-block: clamp(2rem, 5vw, 3.5rem); }
+.section--alt { background: var(--bg-alt); }
+
+.stack > * + * { margin-top: var(--stack, 1rem); }
+
+.grid { display: grid; gap: var(--gap, 1.5rem); }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 900px) {
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Two-pane layout: content + sidebar. Collapses to a single column on
+   tablet and below so nothing gets squeezed. Never write the columns inline —
+   use .panes so the responsive rule can win. */
+.panes {
+  display: grid;
+  gap: var(--gap, 1.5rem);
+  align-items: start;
+  grid-template-columns: var(--panes, minmax(0, 1.5fr) minmax(0, 1fr));
+}
+.panes--wide { --panes: minmax(0, 1.65fr) minmax(0, 1fr); }
+.panes--aside { --panes: minmax(0, 1fr) 300px; }
+.panes--center { align-items: center; }
+.panes--lead { --panes: auto minmax(0, 1fr); }
+
+@media (max-width: 960px) {
+  .panes { grid-template-columns: minmax(0, 1fr); }
+}
+
+.flex { display: flex; gap: var(--gap, 1rem); }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+
+@media (max-width: 560px) {
+  .flex--stack-sm { flex-direction: column; align-items: stretch; }
+}
+
+/* ---- Text utilities ----------------------------------------------------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary-700);
+}
+.eyebrow::before {
+  content: "";
+  width: 22px; height: 8px;
+  background: var(--pop-amber);
+  border: 2px solid var(--ink);
+  border-radius: var(--r-full);
+}
+
+.lead {
+  font-size: var(--fs-lg);
+  line-height: 1.6;
+  color: var(--text-soft);
+  max-width: 60ch;
+}
+
+.text-soft { color: var(--text-soft); }
+.text-ink { color: var(--ink); }
+.text-primary { color: var(--primary-700); }
+.text-center { text-align: center; }
+.text-sm { font-size: var(--fs-sm); }
+.text-xs { font-size: var(--fs-xs); }
+.text-mono { font-family: var(--font-mono); }
+.fw-700 { font-weight: 700; }
+.fw-800 { font-weight: 800; }
+
+.measure { max-width: 68ch; }
+
+.underline-squiggle {
+  position: relative;
+  display: inline-block;
+}
+.underline-squiggle::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -0.28em;
+  height: 10px;
+  background-repeat: repeat-x;
+  background-size: 22px 10px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='10' viewBox='0 0 22 10'%3E%3Cpath d='M0 5 Q5.5 0 11 5 T22 5' fill='none' stroke='%23FFC53D' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  z-index: -1;
+}
+
+mark {
+  background: var(--pop-amber);
+  color: var(--ink);
+  padding: 0 4px;
+  border-radius: var(--r-xs);
+  font-weight: 700;
+}
+
+/* ---- Patterns (the "wild decoration" layer) ----------------------------- */
+.pattern-dots {
+  background-image: radial-gradient(var(--border-strong) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+.pattern-dots-primary {
+  background-image: radial-gradient(var(--primary-300) 2px, transparent 2px);
+  background-size: 22px 22px;
+}
+.pattern-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+.pattern-stripe {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--primary-100) 0 10px,
+    transparent 10px 20px
+  );
+}
+.pattern-stripe-amber {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--pop-amber-050) 0 10px,
+    transparent 10px 20px
+  );
+}
+
+/* Floating decorative shapes — never interactive, hidden on small screens */
+.deco {
+  position: absolute;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+.deco--circle { border-radius: 50%; }
+.deco--blob {
+  border-radius: 58% 42% 46% 54% / 44% 52% 48% 56%;
+}
+.deco--arch { border-radius: 999px 999px 0 0; }
+.deco--leaf { border-radius: 0 var(--r-lg) 0 var(--r-lg); }
+
+@media (max-width: 720px) {
+  .deco--hide-sm { display: none; }
+}
+
+/* Confetti scatter used behind hero / CTA blocks */
+.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.confetti span {
+  position: absolute;
+  display: block;
+  width: 12px; height: 12px;
+  border: 2px solid var(--ink);
+}
+.confetti span:nth-child(1) { background: var(--pop-amber); border-radius: 50%; top: 12%; left: 6%;  width: 18px; height: 18px; }
+.confetti span:nth-child(2) { background: var(--pop-pink);  top: 68%; left: 12%; transform: rotate(18deg); }
+.confetti span:nth-child(3) { background: var(--primary);    top: 22%; left: 88%; transform: rotate(45deg); border-radius: 4px; }
+.confetti span:nth-child(4) { background: var(--pop-mint);   top: 80%; left: 78%; border-radius: 50%; width: 16px; height: 16px; }
+.confetti span:nth-child(5) { background: var(--pop-violet); top: 46%; left: 94%; transform: rotate(12deg); }
+.confetti span:nth-child(6) { background: var(--pop-coral);  top: 6%;  left: 46%; border-radius: 50%; width: 10px; height: 10px; }
+
+/* ---- Section heading ---------------------------------------------------- */
+.section-head { max-width: 62ch; margin-bottom: clamp(2rem, 5vw, 3rem); }
+.section-head--center { margin-inline: auto; text-align: center; }
+.section-head p { margin-top: 0.75rem; color: var(--text-soft); font-size: var(--fs-md); }
+
+.section-head--split {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  max-width: none;
+}
+@media (max-width: 760px) {
+  .section-head--split { flex-direction: column; align-items: flex-start; }
+}
+
+/* ---- Entrance animation: "pop in", not fade ----------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px) scale(0.96);
+  transition:
+    opacity var(--t-slow) var(--ease-pop),
+    transform var(--t-slow) var(--ease-pop);
+  transition-delay: var(--delay, 0ms);
+}
+.reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; }
+}
+
+/* ---- Wiggle (icon nudge on hover) --------------------------------------- */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(4deg); }
+  75%      { transform: rotate(-4deg); }
+}
+.wiggle:hover { animation: wiggle 420ms var(--ease-out); }
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(1, 145, 237, 0.5); }
+  70%  { box-shadow: 0 0 0 14px rgba(1, 145, 237, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(1, 145, 237, 0); }
+}
+
+.float { animation: float-y 6s var(--ease-out) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .float, .wiggle { animation: none; }
+  [class*="animate-"] { animation: none !important; }
+}
+
+/* ---- Divider ------------------------------------------------------------ */
+.squiggle-divider {
+  height: 14px;
+  background-repeat: repeat-x;
+  background-size: 40px 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='14' viewBox='0 0 40 14'%3E%3Cpath d='M0 7 Q10 0 20 7 T40 7' fill='none' stroke='%230191ED' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+  opacity: 0.5;
+}
+
+/* ---- Print (certificates) ---------------------------------------------- */
+@media print {
+  .no-print, header, footer, .appbar, .sidebar { display: none !important; }
+  body { background: #fff; }
+  .card { box-shadow: none !important; }
+}

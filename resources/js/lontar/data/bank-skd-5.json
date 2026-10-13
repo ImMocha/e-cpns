@@ -1,0 +1,314 @@
+{
+  "id": "skd-5",
+  "title": "Tryout SKD #5 - Penuh",
+  "subtitle": "Simulasi 20 soal",
+  "durationSeconds": 1800,
+  "showTimer": true,
+  "pointsPerCorrect": 5,
+  "penaltyWrong": 0,
+  "passingScore": 60,
+  "reviewUrl": "/tryouts/skd-5/result",
+  "exitUrl": "/tryouts",
+  "questions": [
+    {
+      "id": 1,
+      "section": "TWK",
+      "topic": "Geografi Indonesia",
+      "stem": "Danau terbesar di Indonesia berdasarkan luas daerah adalah ...",
+      "options": [
+        "Danau Toba",
+        "Danau Sentani",
+        "Danau Poso",
+        "Danau Maninjau",
+        "Danau Lindu"
+      ],
+      "answer": 2,
+      "explain": "Danau Poso di Sulawesi Tengah memiliki luas sekitar 448 km2, lebih luas dari Danau Toba (sekitar 110 km2) maupun Danau Sentani (sekitar 104 km2)."
+    },
+    {
+      "id": 2,
+      "section": "TWK",
+      "topic": "Sejarah Indonesia",
+      "stem": "Candi Borobudur terutama dibangun pada masa pemerintahan ...",
+      "options": [
+        "Airlangga",
+        "Kertanegara",
+        "Dharmawangsa Teguh",
+        "Hayam Wuruk",
+        "Ken Arok"
+      ],
+      "answer": 2,
+      "explain": "Candi Borobudur dibangun oleh dinasti Sailendra. Pembangunannya dimulai sekitar 825 Masehi pada masa Raja Samaratungga, lalu rampung pada masa Dharmawangsa Teguh."
+    },
+    {
+      "id": 3,
+      "section": "TWK",
+      "topic": "Kebudayaan",
+      "stem": "Semboyan Bhinneka Tunggal Ika pertama kali ditemukan dalam karya ...",
+      "options": [
+        "Kakawin Bharatayuddha",
+        "Kakawin Sutasoma",
+        "Kitab Pararaton",
+        "Serat Kalatidha",
+        "Hikayat Bayanuddun"
+      ],
+      "answer": 1,
+      "explain": "Frasa Bhinneka tunggal ika ditulis Mpu Tantular dalam Kakawin Sutasoma yang memuji raja Airlangga sebagai titisan Wisnu."
+    },
+    {
+      "id": 4,
+      "section": "TWK",
+      "topic": "Kebudayaan",
+      "stem": "Alat musik Angklung berasal dari daerah ...",
+      "options": [
+        "Jawa Barat",
+        "Jawa Tengah",
+        "Jawa Timur",
+        "Bali",
+        "Sumatera Barat"
+      ],
+      "answer": 0,
+      "explain": "Angklung berasal dari budaya Sunda di Jawa Barat. Angklung ditetapkan UNESCO sebagai warisan takbenda dunia pada 2013."
+    },
+    {
+      "id": 5,
+      "section": "TWK",
+      "topic": "Astronomi",
+      "stem": "Planet terbesar dalam Tata Surya adalah ...",
+      "options": [
+        "Bumi",
+        "Mars",
+        "Jupiter",
+        "Saturnus",
+        "Neptunus"
+      ],
+      "answer": 2,
+      "explain": "Jupiter adalah planet terbesar dengan diameter sekitar 142.984 km dan massa sekitar 318 kali massa Bumi."
+    },
+    {
+      "id": 6,
+      "section": "TWK",
+      "topic": "Hubungan Internasional",
+      "stem": "ASEAN didirikan berdasarkan Deklarasi Bangkok pada tahun ...",
+      "options": [
+        "1945",
+        "1954",
+        "1967",
+        "1969",
+        "1976"
+      ],
+      "answer": 2,
+      "explain": "Deklarasi Bangkok ditandatangani lima negara, yaitu Indonesia, Malaysia, Singapura, Filipina, dan Thailand, pada 8 Agustus 1967."
+    },
+    {
+      "id": 7,
+      "section": "TWK",
+      "topic": "Sejarah Indonesia",
+      "stem": "Tokoh yang bersama Soekarno memproklamasikan kemerdekaan Indonesia adalah ...",
+      "options": [
+        "Mohammad Hatta",
+        "Sutan Sjahrir",
+        "Ki Hajar Dewantara",
+        "Douwes Dekker",
+        "Tan Malaka"
+      ],
+      "answer": 0,
+      "explain": "Proklamasi kemerdekaan 17 Agustus 1945 dibacakan oleh Soekarno dan ditandatangani Soekarno bersama Mohammad Hatta."
+    },
+    {
+      "id": 8,
+      "section": "TWK",
+      "topic": "Politik Luar Negeri",
+      "stem": "Indonesia secara resmi diterima menjadi anggota Perserikatan Bangsa-Bangsa pada tahun ...",
+      "options": [
+        "1945",
+        "1950",
+        "1954",
+        "1960",
+        "1970"
+      ],
+      "answer": 2,
+      "explain": "Indonesia diterima menjadi anggota PBB pada 28 September 1954 setelah melalui proses diplomasi panjang."
+    },
+    {
+      "id": 9,
+      "section": "TIU",
+      "topic": "Matematika",
+      "stem": "Jika x = 2 dan y = 5, maka nilai dari 3x^2 + 2y - 4 adalah ...",
+      "options": [
+        "18",
+        "20",
+        "22",
+        "24",
+        "26"
+      ],
+      "answer": 0,
+      "explain": "Substitusi: 3 x (2 pangkat 2) + 2 x 5 - 4 = 12 + 10 - 4 = 18."
+    },
+    {
+      "id": 10,
+      "section": "TIU",
+      "topic": "Persentase",
+      "stem": "Harga sebuah buku naik 20 persen. Jika harga semula Rp50.000, harga buku sekarang adalah ...",
+      "options": [
+        "Rp55.000",
+        "Rp60.000",
+        "Rp65.000",
+        "Rp70.000",
+        "Rp75.000"
+      ],
+      "answer": 1,
+      "explain": "Rp50.000 x 20 persen = Rp10.000, sehingga harga baru adalah Rp50.000 + Rp10.000 = Rp60.000."
+    },
+    {
+      "id": 11,
+      "section": "TIU",
+      "topic": "Kombinasi",
+      "stem": "Dari 7 orang peserta, banyak cara memilih 3 orang untuk mengikuti pelatihan adalah ...",
+      "options": [
+        "21",
+        "28",
+        "35",
+        "42",
+        "56"
+      ],
+      "answer": 2,
+      "explain": "C(7,3) = (7 x 6 x 5) / (3 x 2 x 1) = 210 / 6 = 35 cara."
+    },
+    {
+      "id": 12,
+      "section": "TIU",
+      "topic": "Bilangan Prima",
+      "stem": "Bilangan prima terkecil yang lebih besar dari 20 adalah ...",
+      "options": [
+        "21",
+        "22",
+        "23",
+        "24",
+        "25"
+      ],
+      "answer": 2,
+      "explain": "21 dan 24 habis dibagi 3, sedangkan 22 dan 25 bukan bilangan prima. Angka 23 tidak memiliki pembagi selain 1 dan 23, sehingga 23 adalah prima terkecil di atas 20."
+    },
+    {
+      "id": 13,
+      "section": "TIU",
+      "topic": "Aljabar",
+      "stem": "Jika 3x - 7 = 14, maka nilai x adalah ...",
+      "options": [
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "answer": 2,
+      "explain": "3x = 14 + 7 = 21, sehingga x = 21 / 3 = 7."
+    },
+    {
+      "id": 14,
+      "section": "TIU",
+      "topic": "Statistik",
+      "stem": "Nilai rata-rata dari angka 7, 8, 9, 10, dan 11 adalah ...",
+      "options": [
+        "8",
+        "8,5",
+        "9",
+        "9,5",
+        "10"
+      ],
+      "answer": 2,
+      "explain": "Jumlah seluruh angka adalah 45. Rata-rata = 45 / 5 = 9."
+    },
+    {
+      "id": 15,
+      "section": "TIU",
+      "topic": "Penalaran",
+      "stem": "Anton lebih tinggi daripada Budi, dan Budi lebih tinggi daripada Citra. Siapa yang paling rendah di antara mereka?",
+      "options": [
+        "Anton",
+        "Budi",
+        "Citra",
+        "Tidak dapat dipastikan",
+        "Ketiganya sama tinggi"
+      ],
+      "answer": 2,
+      "explain": "Rantai hubungan: Anton lebih tinggi dari Budi, dan Budi lebih tinggi dari Citra. Maka Citra adalah yang paling rendah."
+    },
+    {
+      "id": 16,
+      "section": "TIU",
+      "topic": "Silogisme",
+      "stem": "Semua guru adalah sarjana. Semua sarjana yang aktif mengikuti pelatihan adalah peserta pelatihan. Kesimpulan yang benar adalah ...",
+      "options": [
+        "Semua guru yang aktif mengikuti pelatihan",
+        "Semua sarjana aktif mengikuti pelatihan",
+        "Sebagian guru bukan sarjana",
+        "Semua peserta pelatihan adalah sarjana",
+        "Tidak dapat ditarik kesimpulan"
+      ],
+      "answer": 0,
+      "explain": "Guru termasuk kelompok sarjana. Karena sarjana yang aktif mengikuti pelatihan adalah peserta pelatihan, maka setiap guru juga peserta pelatihan."
+    },
+    {
+      "id": 17,
+      "section": "TIU",
+      "topic": "Data",
+      "stem": "Dari 100 peserta seleksi, 60 orang lolos tahap pertama. Dari yang lolos tahap pertama, 75 persen akhirnya lolos tahap kedua. Banyak peserta yang lolos tahap kedua adalah ...",
+      "options": [
+        "40 orang",
+        "45 orang",
+        "50 orang",
+        "55 orang",
+        "60 orang"
+      ],
+      "answer": 1,
+      "explain": "75 persen dari 60 = 0,75 x 60 = 45 orang yang lolos tahap kedua."
+    },
+    {
+      "id": 18,
+      "section": "TKP",
+      "topic": "Integritas",
+      "stem": "Anda bekerja dengan rekan setim yang sering terlambat mengumpulkan tugas. Sikap yang paling tepat adalah ...",
+      "options": [
+        "Memperingatkan di depan rapat",
+        "Menegur secara pribadi dengan tegas",
+        "Langsung melapor kepada atasan",
+        "Mengingatkan secara pribadi dan menawarkan bantuan",
+        "Mengabaikan karena bukan tugas Anda"
+      ],
+      "answer": 3,
+      "explain": "Komunikasi pribadi yang membangun sekaligus menawarkan bantuan menyelesaikan masalah tanpa merusak hubungan kerja sama."
+    },
+    {
+      "id": 19,
+      "section": "TKP",
+      "topic": "Tanggung Jawab",
+      "stem": "Anda baru saja mengirim laporan ke atasan, lalu menemukan kesalahan pada satu angka di dalamnya. Sikap yang paling tepat adalah ...",
+      "options": [
+        "Mengirim koreksi singkat tanpa penjelasan",
+        "Menghubungi atasan, menjelaskan, lalu mengirim revisi",
+        "Menunggu sampai rapat berikutnya",
+        "Menghapus laporan lama dan membuat laporan baru",
+        "Membiarkan karena laporan sudah terkirim"
+      ],
+      "answer": 1,
+      "explain": "Kejujuran dan koreksi terbuka menunjukkan integritas tinggi, dan dampak kesalahan dapat diperbaiki lebih awal."
+    },
+    {
+      "id": 20,
+      "section": "TKP",
+      "topic": "Kolaborasi",
+      "stem": "Anda menerima tugas yang di luar keahlian Anda dan harus selesai besok. Sikap yang paling tepat adalah ...",
+      "options": [
+        "Menolak dengan halus karena tidak ahli",
+        "Menerima tugas lalu meminta bantuan rekan yang ahli",
+        "Menerima dan menyelesaikannya sendiri tanpa bantuan",
+        "Meminta atasan untuk memindahkan tugas",
+        "Menerima tetapi menunda hingga ada waktu luang"
+      ],
+      "answer": 1,
+      "explain": "Inisiatif untuk meminta bantuan menunjukkan kerja sama yang baik, sambil tetap bertanggung jawab atas hasil akhir."
+    }
+  ]
+}

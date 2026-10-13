@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statistik Nilai — LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="statistik">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Statistik</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Analisis Belajar</span>
+        <h1 style="margin-top:.5rem">Statistik Nilai</h1>
+        <p>Pergerakan nilai dari setiap tryout dan latihan yang pernah kamu kerjakan.</p>
+      </div>
+      <div class="btn-row">
+        <div class="pills">
+          <button class="pill is-active" type="button">30 hari</button>
+          <button class="pill" type="button">3 bulan</button>
+          <button class="pill" type="button">Semua</button>
+        </div>
+        <button class="btn btn--ghost" type="button" onclick="L.toast('Laporan statistik diunduh sebagai PDF.','success')">
+          <svg data-icon="download"></svg> Unduh
+        </button>
+      </div>
+    </header>
+
+    <!-- ============ STAT CARDS ============ -->
+    <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
+      <article class="stat reveal">
+        <span class="stat__icon"><svg data-icon="trending-up"></svg></span>
+        <div>
+          <div class="stat__label">Nilai Terbaru</div>
+          <div class="stat__value">452</div>
+          <div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +34 poin</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="70">
+        <span class="stat__icon ico--amber"><svg data-icon="crown"></svg></span>
+        <div>
+          <div class="stat__label">Nilai Tertinggi</div>
+          <div class="stat__value">452</div>
+          <div class="stat__delta text-soft">Tryout SKD #4</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="140">
+        <span class="stat__icon ico--pink"><svg data-icon="gauge"></svg></span>
+        <div>
+          <div class="stat__label">Rata-rata</div>
+          <div class="stat__value">390</div>
+          <div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +18 dari awal</div>
+        </div>
+      </article>
+      <article class="stat reveal" data-delay="210">
+        <span class="stat__icon ico--mint"><svg data-icon="target"></svg></span>
+        <div>
+          <div class="stat__label">Akurasi Jawaban</div>
+          <div class="stat__value">78%</div>
+          <div class="stat__delta is-up"><svg data-icon="trending-up"></svg> +6 persen</div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ GRAFIK UTAMA ============ -->
+    <section class="card" style="margin-bottom:1.5rem">
+      <div class="card__head">
+        <div>
+          <div class="card__title">Grafik Perkembangan Nilai</div>
+          <div class="card__sub">Nilai tryout dari sesi pertama sampai terbaru</div>
+        </div>
+        <span class="badge badge--mint badge--flat"><svg data-icon="trending-up"></svg> Tren naik</span>
+      </div>
+      <div style="height:300px" data-chart='{"type":"line","labels":["T1","T2","T3","T4","T5","T6","T7","T8"],"values":[312,338,378,395,418,401,437,452],"avg":380,"height":300,"aria":"Grafik perkembangan nilai peserta"}'></div>
+      <p class="text-xs text-soft" style="margin-top:.85rem">Garis merah muda menandai rata-rata nilai kamu. Artinya: 6 dari 8 sesi berada di atas rata-rata.</p>
+    </section>
+
+    <div class="panes" style="--gap:1.5rem;margin-bottom:1.5rem">
+
+      <!-- Bar per kategori -->
+      <section class="card">
+        <div class="card__head">
+          <div>
+            <div class="card__title">Nilai per Kategori</div>
+            <div class="card__sub">Rata-rata dari semua sesi per bagian</div>
+          </div>
+        </div>
+        <div style="height:250px" data-chart='{"type":"bar","labels":["TWK","TIU","TKP"],"values":[86,71,79],"max":100,"height":250,"colors":["#0191ED","#FF6B9D","#FFC53D"],"aria":"Rata-rata nilai per kategori"}'></div>
+      </section>
+
+      <!-- Komposisi -->
+      <section class="card">
+        <div class="card__head">
+          <div>
+            <div class="card__title">Komposisi Aktivitas</div>
+            <div class="card__sub">Jumlah sesi yang pernah kamu kerjakan</div>
+          </div>
+        </div>
+        <div style="width:200px;height:200px;margin:0 auto 1.25rem" data-chart='{"type":"donut","size":210,"segments":[{"value":4,"color":"#0191ED"},{"value":15,"color":"#FFC53D"},{"value":6,"color":"#2DD4A7"}],"aria":"Komposisi aktivitas belajar"}'></div>
+        <div class="legend">
+          <div class="legend__item"><span class="legend__swatch" style="background:var(--primary)"></span> Tryout CAT &mdash; 4 sesi</div>
+          <div class="legend__item"><span class="legend__swatch" style="background:var(--pop-amber)"></span> Latihan soal &mdash; 15 sesi</div>
+          <div class="legend__item"><span class="legend__swatch" style="background:var(--pop-mint)"></span> Materi &amp; video &mdash; 6 sesi</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ RINCIAN PER BAGIAN ============ -->
+    <section class="card card--pad-0" style="margin-bottom:1.5rem">
+      <div class="flex items-center justify-between" style="padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
+        <div>
+          <div class="card__title">Rincian per Bagian</div>
+          <div class="card__sub">Perbandingan akurasi dan jumlah soal tiap sesi tryout</div>
+        </div>
+      </div>
+      <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+        <table class="table">
+          <thead>
+            <tr><th>Bagian</th><th class="is-sortable num" aria-sort="ascending">Soal<span class="sort-ind">↕</span></th><th class="num">Benar</th><th class="num">Salah</th><th class="num">Akurasi</th><th class="num">Skor</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--ink)">TWK &mdash; Pengetahuan Umum</strong></td>
+              <td class="num">35</td><td class="num">34</td><td class="num">1</td>
+              <td class="num" data-sort="97">97%</td><td class="num">170</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="trending-up"></svg> Naik 6%</span></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">TIU &mdash; Intelektual Umum</strong></td>
+              <td class="num">35</td><td class="num">31</td><td class="num">4</td>
+              <td class="num" data-sort="89">89%</td><td class="num">155</td>
+              <td><span class="badge badge--mint badge--flat"><svg data-icon="trending-up"></svg> Naik 3%</span></td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--ink)">TKP &mdash; Karakteristik &amp; Potensi</strong></td>
+              <td class="num">35</td><td class="num">27</td><td class="num">8</td>
+              <td class="num" data-sort="77">77%</td><td class="num">135</td>
+              <td><span class="badge badge--amber badge--flat"><svg data-icon="trending-down"></svg> Turun 2%</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ INSIGHT ============ -->
+    <section class="grid grid-3">
+      <article class="card card--icon card--pop">
+        <span class="card__icon ico--mint"><svg data-icon="sparkles"></svg></span>
+        <h2 class="card__title">Yang Berjalan Baik</h2>
+        <p class="text-sm text-soft" style="margin-top:.5rem">TWK konsisten naik dua sesi terakhir. Akurasi 97% pada sesi terakhir menunjukkan penguasaan materi yang baik.</p>
+      </article>
+      <article class="card card--icon card--pop">
+        <span class="card__icon ico--amber"><svg data-icon="target"></svg></span>
+        <h2 class="card__title">Yang Perlu Diperbaiki</h2>
+        <p class="text-sm text-soft" style="margin-top:.5rem">TKP turun 2 persen. Coba latihan skenario integritas selama dua minggu ke depan.</p>
+        <a class="btn btn--ghost btn--sm" href="quiz.html" style="margin-top:1rem">Latihan TKP<svg data-icon="arrow-right"></svg></a>
+      </article>
+      <article class="card card--icon card--pop">
+        <span class="card__icon ico--pink"><svg data-icon="target"></svg></span>
+        <h2 class="card__title">Target Berikutnya</h2>
+        <p class="text-sm text-soft" style="margin-top:.5rem">Butuh +38 poin lagi untuk masuk 10 besar. Tiga sesi tryout lagi dengan rata-rata 460 sudah cukup.</p>
+        <a class="btn btn--ghost btn--sm" href="tryout.html" style="margin-top:1rem">Mulai Tryout<svg data-icon="arrow-right"></svg></a>
+      </article>
+    </section>
+  </main>
+</div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

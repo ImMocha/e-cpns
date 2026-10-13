@@ -1,0 +1,153 @@
+@extends('layouts.user.main')
+
+@section('title', 'Paket Belajar — LONTAR CPNS Online')
+
+@section('content')
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{{ route('dashboard') }}">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Paket Belajar</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Upgrade</span>
+        <h1 style="margin-top:.5rem">Paket Belajar</h1>
+        <p>Pilih paket yang sesuai targetmu. Akses premium diberikan setelah pembayaran berhasil.</p>
+      </div>
+      <a class="btn btn--ghost" href="{{ route('checkout') }}"><svg data-icon="credit-card"></svg> Riwayat Pembelian</a>
+    </header>
+
+    {{-- ============ PAKET AKTIF ============ --}}
+    <section class="card card--pop card--blue" style="margin-bottom:2rem">
+      <div class="panes panes--center" style="--gap:1.5rem;">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap" style="margin-bottom:.75rem">
+            <span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Paket Aktif</span>
+            <span class="badge badge--premium badge--flat">Premium</span>
+          </div>
+          <h2 style="font-size:var(--fs-xl)">Paket Premium &mdash; 90 hari</h2>
+          <p class="text-soft" style="margin-top:.4rem">Berlaku sampai 28 November 2026. Sisa 56 hari.</p>
+          <div class="progress-wrap" style="margin-top:1.25rem;max-width:420px">
+            <div class="progress__row"><span>Sisa masa aktif</span><span>56 dari 90 hari</span></div>
+            <div class="progress progress--lg progress--mint"><div class="progress__bar" data-progress="38"></div></div>
+          </div>
+        </div>
+        <div class="grid" style="--gap:.5rem">
+          <div class="kv__row"><span class="kv__key">Materi premium</span><span class="kv__val">18 / 24</span></div>
+          <div class="kv__row"><span class="kv__key">Video ditonton</span><span class="kv__val">9 / 18</span></div>
+          <div class="kv__row"><span class="kv__key">Tryout terpakai</span><span class="kv__val">4 / 12</span></div>
+          <div class="kv__row"><span class="kv__key">Latihan soal</span><span class="kv__val">11 / Unlimited</span></div>
+        </div>
+      </div>
+    </section>
+
+    {{-- ============ PILihan paket ============ --}}
+    <section class="section" style="padding-top:0">
+      <div class="section-head section-head--center">
+        <span class="eyebrow" style="justify-content:center">Pilihan Paket</span>
+        <h2 style="margin:.75rem 0 0">Upgrade atau Perpanjang</h2>
+      </div>
+
+      <div class="grid grid-3" style="--gap:1.75rem;align-items:start">
+
+        <article class="card card--pop price">
+          <div>
+            <span class="badge badge--flat">Mulai belajar</span>
+            <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Basic</h3>
+          </div>
+          <div>
+            <div class="price__amount"><small>Rp</small>49.000</div>
+            <div class="price__period">Akses 30 hari</div>
+          </div>
+          <ul class="price__list">
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Materi PDF gratis dan ringkasan</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> 20 soal latihan per kategori</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> 2x Try Out CAT</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Riwayat dan statistik nilai</li>
+          </ul>
+          <div class="price__foot"><a class="btn btn--ghost btn--block" href="{{ route('checkout') }}">Pilih Basic</a></div>
+        </article>
+
+        <article class="card card--pop price price--featured">
+          <span class="star-badge">Paling Populer</span>
+          <div>
+            <span class="badge badge--premium"><svg data-icon="crown"></svg> Paling Disukai</span>
+            <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Premium</h3>
+          </div>
+          <div>
+            <div class="price__amount"><small>Rp</small>99.000</div>
+            <div class="price__period">Akses 90 hari</div>
+          </div>
+          <ul class="price__list">
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Semua materi PDF lengkap</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Seluruh video pembelajaran</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Bank soal tanpa batas</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> 12x Try Out CAT beserta pembahasan</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Leaderboard dan grafik lengkap</li>
+          </ul>
+          <div class="price__foot"><a class="btn btn--primary btn--block" href="{{ route('checkout') }}">Perpanjang<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a></div>
+        </article>
+
+        <article class="card card--pop price">
+          <div>
+            <span class="badge badge--flat">Untuk yang serius</span>
+            <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Ultimate</h3>
+          </div>
+          <div>
+            <div class="price__amount"><small>Rp</small>249.000</div>
+            <div class="price__period">Akses 12 bulan</div>
+          </div>
+          <ul class="price__list">
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Semua konten Premium</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Try Out CAT tanpa batas</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Sertifikat digital kelulusan</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Review jawaban bersama admin</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> Update materi otomatis</li>
+          </ul>
+          <div class="price__foot"><a class="btn btn--ghost btn--block" href="{{ route('checkout') }}">Pilih Ultimate</a></div>
+        </article>
+      </div>
+
+      <p class="text-center text-xs text-soft" style="margin-top:1.5rem">
+        Harga, masa berlaku, jumlah tryout, dan mekanisme subscription masih <strong>TBD</strong>.
+      </p>
+    </section>
+
+    {{-- ============ VOUCHER ============ --}}
+    <section class="grid grid-2" style="--gap:1.5rem;align-items:start;margin-top:2rem">
+      <div class="card">
+        <div class="card__head">
+          <div><div class="card__title">Punya Kode Voucher?</div><div class="card__sub">Masukkan saat checkout untuk potongan harga</div></div>
+          <span class="stat__icon ico--amber" style="width:42px;height:42px;flex-basis:42px;border-radius:12px"><svg data-icon="tag"></svg></span>
+        </div>
+        <form data-demo-submit="Kode voucher diterapkan. Harga dikurangi Rp20.000." data-demo-redirect="{{ route('checkout') }}">
+          <div class="flex gap-2" style="--gap:.6rem;flex-wrap:wrap">
+            <input class="input" type="text" placeholder="Contoh: GAIN20" aria-label="Kode voucher" style="flex:1;min-width:180px;text-transform:uppercase">
+            <button class="btn btn--dark" type="submit">Pakai Voucher</button>
+          </div>
+        </form>
+        <p class="text-xs text-soft" style="margin-top:.85rem">Voucher yang pernah kamu pakai: <strong>GAIN20</strong> (potongan Rp20.000).</p>
+      </div>
+
+      <div class="card">
+        <div class="card__head">
+          <div><div class="card__title">Pertanyaan Umum Paket</div><div class="card__sub">Sebelum membeli</div></div>
+        </div>
+        <div class="acc" data-accordion="single">
+          <div class="acc-item">
+            <button class="acc-trigger" aria-expanded="true" aria-controls="p1">Bagaimana akses premium diberikan?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+            <div class="acc-panel is-open" id="p1">Akses paket aktif otomatis setelah status pembayaran dinyatakan berhasil oleh payment gateway.</div>
+          </div>
+          <div class="acc-item">
+            <button class="acc-trigger" aria-expanded="false" aria-controls="p2">Apakah bisa upgrade di tengah jalan?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+            <div class="acc-panel" id="p2">Bisa. Sisa masa aktif paket lama bisa diakomodasi sebagai pengurangan harga paket baru. <span class="badge badge--amber badge--flat">TBD</span></div>
+          </div>
+          <div class="acc-item">
+            <button class="acc-trigger" aria-expanded="false" aria-controls="p3">Bagaimana kalau pembayaran gagal?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
+            <div class="acc-panel" id="p3">Status transaksi menjadi Gagal dan akses premium tidak diberikan. Kamu bisa mencoba pembayaran ulang.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+@endsection

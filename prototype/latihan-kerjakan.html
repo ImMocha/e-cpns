@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latihan Soal &mdash; LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-bank="latihan-1">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+
+<header class="tryout-bar">
+  <div class="container container--wide tryout-bar__inner">
+    <a class="logo" href="quiz.html" aria-label="Kembali ke daftar latihan">
+      <span class="logo__mark"><svg data-icon="book"></svg></span>
+    </a>
+    <div class="tryout-bar__meta">
+      <strong>Latihan Silogisme &amp; Penalaran</strong>
+      <span style="font-size:var(--fs-xs);color:#A9C1D6">Tanpa timer - jawab seabebas mungkin</span>
+    </div>
+    <div class="tryout-bar__right">
+      <span class="badge badge--flat" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25)">
+        <svg data-icon="clipboard"></svg> <span id="statAnswered">0/8</span>
+      </span>
+      <button class="btn btn--ghost btn--sm" type="button" id="exitBtn">
+        <svg data-icon="logout"></svg> Keluar
+      </button>
+      <button class="btn btn--primary btn--sm" type="button" id="submitBtn">
+        Kumpulkan<span class="btn__icon"><svg data-icon="check"></svg></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="container container--wide tryout-layout" id="main">
+
+  <div id="questionStage"></div>
+
+  <aside class="qnav" aria-label="Navigasi nomor soal">
+    <div class="card card--tight">
+      <div class="card__head" style="margin-bottom:.85rem">
+        <div>
+          <div class="card__title" style="font-size:var(--fs-base)">Nomor Soal</div>
+          <div class="card__sub">Klik nomor untuk berpindah</div>
+        </div>
+      </div>
+
+      <div class="palette" id="palette"></div>
+
+      <div class="legend" style="margin-top:1rem;padding-top:1rem;border-top:2px dashed var(--border)">
+        <div class="legend__item"><span class="legend__swatch legend__swatch--answered"></span> Sudah dijawab</div>
+        <div class="legend__item"><span class="legend__swatch"></span> Belum dijawab</div>
+        <div class="legend__item"><span class="legend__swatch legend__swatch--flagged"></span> Ditandai</div>
+        <div class="legend__item"><span class="legend__swatch legend__swatch--current"></span> Soal aktif</div>
+      </div>
+    </div>
+
+    <div class="card card--tight card--dashed" style="margin-top:1.25rem">
+      <strong style="font-family:var(--font-display);font-size:var(--fs-sm);color:var(--ink);display:block;margin-bottom:.75rem">Cara Kerja Latihan</strong>
+      <div class="stack" style="--stack:.55rem">
+        <div class="flex items-start gap-2"><svg data-icon="check-circle" style="width:18px;height:18px;color:var(--success);flex:0 0 18px;margin-top:2px"></svg><span class="text-sm text-soft">Tidak ada batas waktu.</span></div>
+        <div class="flex items-start gap-2"><svg data-icon="check-circle" style="width:18px;height:18px;color:var(--success);flex:0 0 18px;margin-top:2px"></svg><span class="text-sm text-soft">Boleh keluar dan melanjutkan nanti.</span></div>
+        <div class="flex items-start gap-2"><svg data-icon="check-circle" style="width:18px;height:18px;color:var(--success);flex:0 0 18px;margin-top:2px"></svg><span class="text-sm text-soft">Pembahasan muncul setelah dikumpulkan.</span></div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="assets/data/bank-latihan-1.js"></script>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/quiz.js"></script>
+</body>
+</html>

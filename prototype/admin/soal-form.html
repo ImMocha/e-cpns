@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tambah Soal — LONTAR Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/tokens.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="admin" data-base="../" data-active="soal">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="index.html">Admin Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <a href="soal.html">Soal &amp; Pembahasan</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Tambah Soal</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow">Bank Soal</span>
+        <h1 style="margin-top:.5rem">Tambah Soal Baru</h1>
+        <p>Struktur: kategori, soal, pilihan jawaban, jawaban benar, dan pembahasan.</p>
+      </div>
+      <a class="btn btn--ghost" href="soal.html"><svg data-icon="arrow-left"></svg> Kembali ke daftar</a>
+    </header>
+
+    <div class="panes" style="--gap:1.5rem;">
+
+      <!-- ============ FORM ============ -->
+      <form class="card card--pop" data-demo-submit="Soal berhasil disimpan ke bank soal." data-demo-redirect="soal.html">
+        <div class="stack" style="--stack:1.5rem">
+
+          <section>
+            <div class="card__title" style="margin-bottom:1rem">1. Kategori dan Kesulitan</div>
+            <div class="form-grid">
+              <div class="field">
+                <label class="label" for="kategori">Kategori</label>
+                <select class="select" id="kategori">
+                  <option>TWK - Pengetahuan Umum</option>
+                  <option selected>TIU - Intelektual Umum</option>
+                  <option>TKP - Karakteristik dan Potensi</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="subkategori">Subkategori</label>
+                <select class="select" id="subkategori">
+                  <option>Penalaran Silogisme</option>
+                  <option>Penalaran Verbal</option>
+                  <option>Penalaran Analitis</option>
+                  <option>Matematika Dasar</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="level">Tingkat Kesulitan</label>
+                <select class="select" id="level">
+                  <option>Mudah</option>
+                  <option selected>Sedang</option>
+                  <option>Sulit</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="tipe">Tipe Soal</label>
+                <select class="select" id="tipe">
+                  <option selected>Pilihan Ganda Tunggal</option>
+                  <option>Pilihan Ganda Benar/Salah</option>
+                  <option>Pilihan Ganda Kompleks</option>
+                </select>
+                <span class="field__hint">Tipe kompleks memakai kombinasi A sampai E.</span>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div class="card__title" style="margin-bottom:1rem">2. Pertanyaan</div>
+            <div class="field">
+              <label class="label" for="pertanyaan">Teks Soal</label>
+              <textarea class="textarea" id="pertanyaan" style="min-height:150px" placeholder="Tulis pertanyaan soal di sini. Contoh: Semua guru adalah sarjana. Semua sarjana aktif mengikuti pelatihan. Kesimpulan yang benar adalah..." required></textarea>
+            </div>
+            <div class="field" style="margin-top:1rem">
+              <label class="label">Gambar atau Ilustrasi <span class="label__opt">(opsional)</span></label>
+              <div class="dropzone" onclick="L.toast('Pemilih file adalah simulasi pada prototipe.','info')">
+                <span class="dropzone__icon"><svg data-icon="image"></svg></span>
+                <strong style="display:block;color:var(--ink);font-family:var(--font-display)">Unggah gambar</strong>
+                <span class="text-sm text-soft">PNG atau JPG, maksimal 2 MB. Rasio 4:3 disarankan.</span>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div class="card__title" style="margin-bottom:1rem">3. Pilihan Jawaban</div>
+            <p class="text-sm text-soft" style="margin-bottom:1rem">Pilih jawaban benar dengan klik pada huruf di sebelah kiri.</p>
+            <div class="grid" style="--gap:.7rem" id="opsiList">
+              <button class="opt" type="button" data-kunci="A"><span class="opt__key">A</span><span class="opt__text">Semua guru yang aktif mengikuti pelatihan</span></button>
+              <button class="opt" type="button" data-kunci="B"><span class="opt__key">B</span><span class="opt__text">Semua sarjana aktif mengikuti pelatihan</span></button>
+              <button class="opt" type="button" data-kunci="C"><span class="opt__key">C</span><span class="opt__text">Sebagian guru bukan sarjana</span></button>
+              <button class="opt" type="button" data-kunci="D"><span class="opt__key">D</span><span class="opt__text">Semua peserta pelatihan adalah sarjana</span></button>
+              <button class="opt" type="button" data-kunci="E"><span class="opt__key">E</span><span class="opt__text">Tidak dapat ditarik kesimpulan</span></button>
+            </div>
+            <div class="flex items-center justify-between flex-wrap" style="gap:.75rem;margin-top:1rem">
+              <button class="btn btn--ghost btn--sm" type="button" onclick="L.toast('Pilihan jawaban tambahan ditambahkan.','info')"><svg data-icon="plus"></svg> Tambah Pilihan</button>
+              <span class="text-xs text-soft">Jawaban benar saat ini: <strong class="text-ink" id="kunciLabel">belum dipilih</strong></span>
+            </div>
+          </section>
+
+          <section>
+            <div class="card__title" style="margin-bottom:1rem">4. Pembahasan</div>
+            <div class="field">
+              <label class="label" for="pembahasan">Teks Pembahasan</label>
+              <textarea class="textarea" id="pembahasan" style="min-height:150px" placeholder="Jelaskan mengapa jawaban tersebut benar. Pembahasan tampil setelah peserta menyelesaikan latihan atau tryout."></textarea>
+              <span class="field__hint">Disarankan minimal 2 kalimat agar peserta memahami alurnya.</span>
+            </div>
+          </section>
+
+          <section>
+            <div class="card__title" style="margin-bottom:1rem">5. Publikasi</div>
+            <div class="stack" style="--stack:.85rem">
+              <label class="switch"><input type="checkbox" checked><span>Aktifkan soal ini di bank soal</span></label>
+              <label class="switch"><input type="checkbox" checked><span>Tampilkan pembahasan setelah dijawab</span></label>
+              <label class="switch"><input type="checkbox" checked><span>Sertakan dalam tryout kategori terkait</span></label>
+              <div class="field">
+                <label class="label" for="tag">Tag</label>
+                <input class="input" type="text" id="tag" placeholder="Pisahkan dengan koma, contoh: silogisme, logika">
+              </div>
+            </div>
+          </section>
+
+          <div class="btn-row">
+            <button class="btn btn--primary btn--lg" type="submit">Simpan Soal<span class="btn__icon"><svg data-icon="check"></svg></span></button>
+            <button class="btn btn--ghost" type="reset">Reset Formulir</button>
+            <button class="btn btn--ghost" type="button" onclick="L.toast('Disimpan sebagai draft.','info')">Simpan Draft</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- ============ PRATINJAU ============ -->
+      <aside class="stack" style="--stack:1.5rem;position:sticky;top:86px">
+
+        <section class="card">
+          <div class="card__head">
+            <div><div class="card__title">Pratinjau Soal</div><div class="card__sub">Tampilan di sisi peserta</div></div>
+            <span class="badge badge--primary badge--flat">Live</span>
+          </div>
+          <div class="qhead">
+            <span class="qnum">1</span>
+            <span class="badge badge--pink badge--flat">TIU</span>
+            <span class="text-xs text-soft fw-700">Silogisme</span>
+          </div>
+          <p class="qstem" style="font-size:var(--fs-base)" id="previewStem">Teks soal akan tampil di sini setelah diisi.</p>
+          <div class="grid" style="--gap:.5rem;margin-top:1rem" id="previewOpts"></div>
+          <div class="explain explain--info" style="margin-top:1rem">
+            <div class="explain__title"><svg data-icon="book"></svg> Pembahasan</div>
+            <span id="previewExplain">Teks pembahasan akan tampil di sini setelah diisi.</span>
+          </div>
+        </section>
+
+        <section class="card card--tight card--dashed">
+          <div class="card__title" style="margin-bottom:.75rem">Checklist Kualitas</div>
+          <div class="stack" style="--stack:.55rem">
+            <div class="flex items-center gap-2"><span class="price__check" style="background:var(--success)"><svg data-icon="check"></svg></span><span class="text-sm">Kategori dan level terisi</span></div>
+            <div class="flex items-center gap-2"><span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="close"></svg></span><span class="text-sm">Teks soal terisi</span></div>
+            <div class="flex items-center gap-2"><span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="close"></svg></span><span class="text-sm">Jawaban benar dipilih</span></div>
+            <div class="flex items-center gap-2"><span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="close"></svg></span><span class="text-sm">Pembahasan terisi</span></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/icons.js"></script>
+<script src="../assets/js/shell.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+  /* Pemilih jawaban benar + pratinjau langsung */
+  (function () {
+    var list = document.getElementById('opsiList');
+    var label = document.getElementById('kunciLabel');
+    var stem = document.getElementById('pertanyaan');
+    var explain = document.getElementById('pembahasan');
+    var previewStem = document.getElementById('previewStem');
+    var previewExplain = document.getElementById('previewExplain');
+    var previewOpts = document.getElementById('previewOpts');
+    if (!list) return;
+
+    function paintPreview() {
+      previewStem.textContent = (stem.value.trim() || 'Teks soal akan tampil di sini setelah diisi.');
+      previewExplain.textContent = (explain.value.trim() || 'Teks pembahasan akan tampil di sini setelah diisi.');
+      previewOpts.innerHTML = Array.prototype.map.call(list.children, function (opt, i) {
+        var kunci = opt.classList.contains('is-selected');
+        var teks = opt.querySelector('.opt__text').textContent;
+        return '<div class="opt' + (kunci ? ' is-selected' : '') + '">' +
+          '<span class="opt__key">' + String.fromCharCode(65 + i) + '</span>' +
+          '<span class="opt__text">' + teks + '</span>' +
+          (kunci ? '<span class="opt__tag" style="color:var(--primary-700)">Jawaban benar</span>' : '') +
+        '</div>';
+      }).join('');
+    }
+
+    list.addEventListener('click', function (e) {
+      var opt = e.target.closest('.opt');
+      if (!opt) return;
+      Array.prototype.forEach.call(list.children, function (o) { o.classList.remove('is-selected'); });
+      opt.classList.add('is-selected');
+      label.textContent = opt.dataset.kunci;
+      paintPreview();
+    });
+
+    [stem, explain].forEach(function (el) { el.addEventListener('input', paintPreview); });
+    paintPreview();
+  })();
+</script>
+</body>
+</html>

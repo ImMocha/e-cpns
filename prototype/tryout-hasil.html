@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hasil Try Out &mdash; LONTAR CPNS Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+</head>
+<body data-shell="member" data-active="tryout">
+
+<a class="skip-link" href="#main">Lompat ke konten utama</a>
+
+<div data-shell-appbar></div>
+
+<div class="app-shell">
+  <div data-shell-side></div>
+
+  <main class="app-main" id="main">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="dashboard.html">Dashboard</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <a href="tryout.html">Try Out CAT</a>
+      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
+      <span class="crumbs__current">Hasil &amp; Pembahasan</span>
+    </nav>
+
+    <header class="page-head page-head__row">
+      <div>
+        <span class="eyebrow" id="eyebrow">Selesai Dikerjakan</span>
+        <h1 style="margin-top:.5rem" id="pageTitle">Hasil Try Out</h1>
+        <p id="pageSub">Rincian nilai dan pembahasan setiap soal.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn--ghost" type="button" data-print><svg data-icon="printer"></svg> Cetak</button>
+        <button class="btn btn--ghost" type="button" onclick="L.toast('File PDF dibuat dari data contoh.','success')"><svg data-icon="download"></svg> Unduh PDF</button>
+        <a class="btn btn--primary" href="tryout-kerjakan.html">Ulangi Tryout<span class="btn__icon"><svg data-icon="refresh"></svg></span></a>
+      </div>
+    </header>
+
+    <div id="demoBanner" class="alert alert--warn" style="margin-bottom:1.5rem;display:none">
+      <span class="alert__icon"><svg data-icon="info"></svg></span>
+      <div>
+        <strong>Ini contoh tampilan hasil</strong>
+        Kamu belum menyelesaikan sesi tryout pada browser ini. Selesaikan tryout untuk melihat hasil yang tersimpan.
+      </div>
+    </div>
+
+    <!-- ============ RINGKASAN ============ -->
+    <section class="card card--pop" style="margin-bottom:1.5rem">
+      <div class="result-hero">
+        <div class="ring" id="scoreRing" data-pct="0">
+          <div class="ring__label">
+            <div class="ring__value" id="scoreValue">0</div>
+            <div class="ring__unit">Nilai</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-2 flex-wrap" style="margin-bottom:.75rem">
+            <span class="badge badge--flat" id="verdictBadge">Belum ada hasil</span>
+            <span class="badge badge--primary badge--flat" id="durationBadge">Durasi 00:00</span>
+            <span class="badge badge--amber badge--flat" id="autoBadge" style="display:none">Auto-submit</span>
+          </div>
+
+          <h2 id="verdictTitle">Selesai dikerjakan</h2>
+          <p class="text-soft" style="margin-top:.4rem;max-width:56ch" id="verdictText">
+            Nilai dihitung dari jawaban yang tersimpan pada sesi ini. Rumus penilaian final menunggu konfirmasi client.
+          </p>
+
+          <div class="grid grid-4" style="--gap:.75rem;margin-top:1.5rem">
+            <div class="card card--tight card--dashed" style="text-align:center">
+              <div class="text-xs text-soft fw-700">Benar</div>
+              <div class="fw-800" id="kCorrect" style="font-family:var(--font-display);font-size:1.5rem;color:var(--success);line-height:1.2">0</div>
+            </div>
+            <div class="card card--tight card--dashed" style="text-align:center">
+              <div class="text-xs text-soft fw-700">Salah</div>
+              <div class="fw-800" id="kWrong" style="font-family:var(--font-display);font-size:1.5rem;color:var(--danger);line-height:1.2">0</div>
+            </div>
+            <div class="card card--tight card--dashed" style="text-align:center">
+              <div class="text-xs text-soft fw-700">Kosong</div>
+              <div class="fw-800" id="kBlank" style="font-family:var(--font-display);font-size:1.5rem;color:var(--text-soft);line-height:1.2">0</div>
+            </div>
+            <div class="card card--tight card--dashed" style="text-align:center">
+              <div class="text-xs text-soft fw-700">Akurasi</div>
+              <div class="fw-800" id="kAcc" style="font-family:var(--font-display);font-size:1.5rem;color:var(--primary-700);line-height:1.2">0%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PERBANDINGAN ============ -->
+    <section class="card" style="margin-bottom:1.5rem">
+      <div class="card__head">
+        <div>
+          <div class="card__title">Nilai per Bagian</div>
+          <div class="card__sub">Dihitung dari jawaban benar pada sesi ini</div>
+        </div>
+        <span class="badge badge--flat">Maksimal 100</span>
+      </div>
+      <div class="grid" style="--gap:1rem" id="sectionBars"></div>
+    </section>
+
+    <div data-tabs>
+      <div class="tabs" role="tablist" aria-label="Tampilan hasil">
+        <button class="tab is-active" data-tab="tabReview" role="tab" aria-selected="true">Pembahasan Soal</button>
+        <button class="tab" data-tab="tabCompare" role="tab" aria-selected="false">Perbandingan</button>
+        <button class="tab" data-tab="tabNext" role="tab" aria-selected="false">Langkah Berikutnya</button>
+      </div>
+
+      <!-- ---------- PEMBAHASAN ---------- -->
+      <div class="tab-panel is-active" id="tabReview" data-tab-panel>
+        <div class="flex items-center justify-between flex-wrap" style="gap:1rem;margin-bottom:1.25rem">
+          <div class="pills">
+            <button class="pill is-active" type="button" onclick="L.toast('Menampilkan seluruh soal.','info')">Semua</button>
+            <button class="pill" type="button" onclick="L.toast('Menampilkan soal yang salah.','info')">Salah saja</button>
+            <button class="pill" type="button" onclick="L.toast('Menampilkan soal kosong.','info')">Kosong</button>
+          </div>
+          <p class="text-xs text-soft">Klik baris soal untuk membuka pembahasan.</p>
+        </div>
+        <div class="acc" data-accordion="single" id="reviewList"></div>
+      </div>
+
+      <!-- ---------- PERBANDINGAN ---------- -->
+      <div class="tab-panel" id="tabCompare" data-tab-panel>
+        <div class="grid grid-2" style="--gap:1.5rem;align-items:start">
+          <div class="card">
+            <div class="card__head">
+              <div><div class="card__title">Progres 4 Tryout Terakhir</div><div class="card__sub">Nilai dari sesi sebelumnya</div></div>
+            </div>
+            <div style="height:230px" data-chart='{"type":"line","labels":["Tryout 1","Tryout 2","Tryout 3","Tryout 4","Sekarang"],"values":[312,378,418,452,470],"avg":405,"height":230,"aria":"Grafik perbandingan nilai tryout"}'></div>
+          </div>
+          <div class="card">
+            <div class="card__head">
+              <div><div class="card__title">Komposisi Jawaban</div><div class="card__sub">Benar, salah, dan tidak dijawab</div></div>
+            </div>
+            <div class="grid grid-2" style="--gap:1.5rem;align-items:center">
+              <div style="width:170px;height:170px;margin-inline:auto" data-chart='{"type":"donut","size":200,"segments":[{"value":16,"color":"#2DD4A7"},{"value":3,"color":"#FF7A5C"},{"value":1,"color":"#B9CFE0"}],"aria":"Komposisi jawaban"}'></div>
+              <div class="legend">
+                <div class="legend__item"><span class="legend__swatch" style="background:var(--pop-mint)"></span> Benar</div>
+                <div class="legend__item"><span class="legend__swatch" style="background:var(--pop-coral)"></span> Salah</div>
+                <div class="legend__item"><span class="legend__swatch" style="background:var(--border-strong)"></span> Tidak dijawab</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---------- LANGKAH BERIKUTNYA ---------- -->
+      <div class="tab-panel" id="tabNext" data-tab-panel>
+        <div class="grid grid-3">
+          <article class="card card--icon card--pop">
+            <span class="card__icon ico--pink"><svg data-icon="book"></svg></span>
+            <h3 class="card__title">Perbaiki TKP</h3>
+            <p class="text-sm text-soft" style="margin-top:.5rem">Bagian ini adalah yang terlemah. Baca materi integritas, lalu ulangi tryout TKP.</p>
+            <a class="btn btn--ghost btn--sm" href="materi.html" style="margin-top:1rem">Buka Materi<svg data-icon="arrow-right"></svg></a>
+          </article>
+          <article class="card card--icon card--pop">
+            <span class="card__icon ico--amber"><svg data-icon="target"></svg></span>
+            <h3 class="card__title">Latihan Silogisme</h3>
+            <p class="text-sm text-soft" style="margin-top:.5rem">KBigr dari kesalahan TIU ada di soal silogisme. Coba latihan tematik.</p>
+            <a class="btn btn--ghost btn--sm" href="bank-soal.html" style="margin-top:1rem">Mulai Latihan<svg data-icon="arrow-right"></svg></a>
+          </article>
+          <article class="card card--icon card--pop">
+            <span class="card__icon ico--mint"><svg data-icon="trophy"></svg></span>
+            <h3 class="card__title">Naik Peringkat</h3>
+            <p class="text-sm text-soft" style="margin-top:.5rem">Nilai kamu sudah naik 34 poin. Satu tryout lagi bisa masuk 10 besar.</p>
+            <a class="btn btn--ghost btn--sm" href="leaderboard.html" style="margin-top:1rem">Lihat Papan<svg data-icon="arrow-right"></svg></a>
+          </article>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/data/bank-skd-5.js"></script>
+<script src="assets/data/bank-latihan-1.js"></script>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/shell.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+var ID = new URLSearchParams(location.search).get('id') || 'skd-5';
+  var LETTERS = 'ABCDE';
+
+  function get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+
+  /* ---- Susun data hasil: dari storage, atau contoh bila belum ada sesi ----
+     Bank soal dimuat dari assets/data/*.js sehingga halaman ini tetap
+     terbaca penuh juga saat dibuka langsung tanpa sesi tryout. */
+  var banks = window.LONTAR_BANKS || {};
+  var bankCfg = banks[ID] || null;
+  var bank = get('lontar:bank:' + ID) || (bankCfg ? bankCfg.questions : []);
+  var res = get('lontar:result:' + ID);
+
+  if (!res) {
+    // Contoh tampilan: sebagian besar soal dijawab dengan benar
+    var per = (bankCfg && bankCfg.pointsPerCorrect) || 5;
+    var demoAnswers = {};
+    bank.forEach(function (q, i) {
+      if (i >= Math.round(bank.length * 0.8)) return;   // sisanya dibiarkan kosong
+      demoAnswers[q.id] = (i % 5 !== 4) ? q.answer : (q.answer + 1) % q.options.length;
+    });
+    res = {
+      id: ID,
+      title: (bankCfg ? bankCfg.title : ID) + ' - Contoh Tampilan',
+      demo: true,
+      max: bank.length * per,
+      durationSeconds: 1520,
+      passingScore: (bankCfg && bankCfg.passingScore) || null,
+      answers: demoAnswers,
+      flags: {},
+      questions: bank
+    };
+  }
+  if (!res.questions) res.questions = bank;
+
+  /* ---- Hitung ulang dari jawaban agar konsisten dengan mesin penilaian ---- */
+  var qs = res.questions || [];
+  var t = { correct: 0, wrong: 0, blank: 0 };
+  var sections = {};
+  qs.forEach(function (q) {
+    var key = q.section || 'Umum';
+    sections[key] = sections[key] || { section: key, correct: 0, wrong: 0, blank: 0, count: 0, per: 5 };
+    sections[key].count++;
+    var a = res.answers ? res.answers[q.id] : null;
+    if (a == null) { t.blank++; sections[key].blank++; }
+    else if (a === q.answer) { t.correct++; sections[key].correct++; }
+    else { t.wrong++; sections[key].wrong++; }
+  });
+  var maxScore = res.max || qs.length * 5;
+  var score = res.score != null ? res.score : Math.max(0, t.correct * 5);
+  var pass = res.passingScore != null ? score >= res.passingScore : true;
+
+  /* ---- Header ---- */
+  document.getElementById('pageTitle').textContent = res.title || 'Hasil Try Out';
+  document.getElementById('pageSub').textContent =
+    'Dikerjakan ' + (res.finishedAt ? new Date(res.finishedAt).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '3 Oktober 2026, 19:24') +
+    ' - ' + qs.length + ' soal.';
+  if (res.demo) document.getElementById('demoBanner').style.display = '';
+
+  var m = Math.floor((res.durationSeconds || 0) / 60), s = (res.durationSeconds || 0) % 60;
+  document.getElementById('durationBadge').textContent = 'Durasi ' + m + ':' + String(s).padStart(2, '0');
+  if (res.autoSubmitted) document.getElementById('autoBadge').style.display = '';
+
+  /* ---- Skor utama ---- */
+  var pct = Math.round((score / maxScore) * 100);
+  var ring = document.getElementById('scoreRing');
+  ring.dataset.pct = pct;
+  ring.classList.add(pass ? 'ring--mint' : 'ring--amber');
+  document.getElementById('scoreValue').textContent = score;
+
+  var badge = document.getElementById('verdictBadge');
+  badge.textContent = pass ? 'Di atas nilai ambang' : 'Belum mencapai nilai ambang';
+  badge.className = 'badge badge--flat ' + (pass ? 'badge--mint' : 'badge--amber');
+
+  document.getElementById('verdictTitle').textContent = pass
+    ? 'Bagus, nilaimu naik lagi!'
+    : 'Tetap semangat, masih ada ruang untuk naik.';
+  document.getElementById('verdictText').textContent = pass
+    ? 'Kamu menjawab ' + t.correct + ' dari ' + qs.length + ' soal dengan benar. Fokuskan perhatian pada bagian dengan nilai terendah.'
+    : 'Kamu menjawab ' + t.correct + ' dari ' + qs.length + ' soal dengan benar. Baca pembahasan di bawah, lalu ulangi tryout.';
+
+  document.getElementById('kCorrect').textContent = t.correct;
+  document.getElementById('kWrong').textContent = t.wrong;
+  document.getElementById('kBlank').textContent = t.blank;
+  document.getElementById('kAcc').textContent = Math.round((t.correct / qs.length) * 100) + '%';
+
+  /* ---- Bilah nilai per bagian ---- */
+  var wrap = document.getElementById('sectionBars');
+  var COLORS = { TWK: 'var(--primary)', TIU: 'var(--pop-pink)', TKP: 'var(--pop-amber)' };
+  wrap.innerHTML = Object.keys(sections).map(function (k) {
+    var sec = sections[k];
+    var secPct = Math.round((sec.correct / sec.per) / sec.count * 100);
+    return '<div>' +
+      '<div class="scorebar" style="margin-bottom:.4rem">' +
+        '<span class="fw-700" style="color:var(--ink)">' + k + '</span>' +
+        '<span class="text-soft">' + sec.correct + ' benar dari ' + sec.count + ' soal</span>' +
+        '<span class="scorebar__val">' + (sec.correct * sec.per) + '</span>' +
+      '</div>' +
+      '<div class="scorebar__track"><div class="scorebar__fill" data-pct="' + Math.min(100, secPct) + '" style="background:' + (COLORS[k] || 'var(--primary)') + '"></div></div>' +
+    '</div>';
+  }).join('');
+
+  /* ---- Daftar pembahasan ---- */
+  var list = document.getElementById('reviewList');
+  list.innerHTML = qs.map(function (q, i) {
+    var chosen = res.answers ? res.answers[q.id] : null;
+    var ok = chosen === q.answer;
+    var state = chosen == null ? 'Kosong' : (ok ? 'Benar' : 'Salah');
+    var tone = chosen == null ? 'badge--flat' : (ok ? 'badge--mint' : 'badge--danger');
+
+    var opts = q.options.map(function (text, k) {
+      var cls = 'opt is-locked';
+      var tag = '';
+      if (k === q.answer) { cls += ' is-correct'; tag = '<span class="opt__tag" style="color:#0B7C5C">Jawaban benar</span>'; }
+      else if (k === chosen) { cls += ' is-wrong'; tag = '<span class="opt__tag" style="color:#B3282C">Jawaban kamu</span>'; }
+      return '<div class="' + cls + '"><span class="opt__key">' + LETTERS[k] + '</span><span class="opt__text">' +
+        String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</span>' + tag + '</div>';
+    }).join('');
+
+    return '<div class="acc-item">' +
+      '<button class="acc-trigger" aria-expanded="false" aria-controls="rv' + q.id + '">' +
+        '<span class="flex items-center gap-2" style="flex-wrap:wrap">' +
+          '<span class="qnum" style="min-width:40px;height:32px;font-size:var(--fs-xs)">' + (i + 1) + '</span>' +
+          '<span class="badge badge--primary badge--flat">' + (q.section || 'Umum') + '</span>' +
+          '<span class="badge ' + tone + ' badge--flat">' + state + '</span>' +
+        '</span>' +
+        '<svg data-icon="chevron-down" class="acc-icon"></svg>' +
+      '</button>' +
+      '<div class="acc-panel" id="rv' + q.id + '">' +
+        '<p class="qstem" style="font-size:var(--fs-base);margin-bottom:1rem">' + (i + 1) + '. ' + q.stem + '</p>' +
+        '<div class="grid" style="--gap:.55rem">' + opts + '</div>' +
+        '<div class="explain explain--info" style="margin-top:1rem">' +
+          '<div class="explain__title"><svg data-icon="book"></svg> Pembahasan</div>' + q.explain +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  window.LIcons && window.LIcons.hydrate(document);
+  window.LCharts && window.LCharts.init();
+  /* trigger meter animation for the freshly injected score bars */
+  requestAnimationFrame(function () {
+    document.querySelectorAll('#sectionBars [data-pct]').forEach(function (el) {
+      el.style.setProperty('--pct', el.dataset.pct);
+    });
+  });
+})();
+</script>
+</body>
+</html>
