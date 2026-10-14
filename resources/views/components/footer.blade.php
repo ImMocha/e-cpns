@@ -42,7 +42,7 @@
       </div>
     </div>
     <div class="footer__bottom">
-      <span>© <span data-year>2026</span> LONTAR · Prototipe demonstrasi, bukan situs produksi.</span>
+      <span>© <span data-year>2026</span> Ganesha Nusa · Prototipe demonstrasi, bukan situs produksi.</span>
       <span class="badge badge--flat" style="background:rgba(255,255,255,.08);color:#A9C1D6;border-color:rgba(255,255,255,.2);box-shadow:none">v0.1 Prototype</span>
     </div>
   </div>

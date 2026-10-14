@@ -66,7 +66,7 @@ class ExamAttemptTest extends TestCase
         $this->actingAs($user)->get($attempt->resultUrl())
             ->assertOk()
             ->assertSee('12')
-            ->assertSee('Pembahasan Soal');
+            ->assertSee('Kunci Jawaban');
     }
 
     public function test_invalid_question_and_option_cannot_be_saved(): void

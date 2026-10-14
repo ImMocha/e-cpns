@@ -6,7 +6,7 @@
 <footer class="no-print" style="border-top:2px solid var(--border);margin-top:2.5rem;padding:1.25rem 0 2rem">
   <div class="flex items-center justify-between flex-wrap" style="gap:.75rem">
     <span class="text-xs text-soft">
-      &copy; <span data-year>2026</span> LONTAR &middot; Admin Panel
+      &copy; <span data-year>2026</span> Ganesha Nusa &middot; Admin Panel
       @if (auth()->user()) &middot; masuk sebagai <strong style="color:var(--ink)">{{ auth()->user()->name }}</strong> @endif
     </span>
 

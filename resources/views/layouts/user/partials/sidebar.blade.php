@@ -84,10 +84,10 @@
        @if (request()->routeIs('packages.*')) aria-current="page" @endif>
       <svg data-icon="package"></svg><span>Paket Belajar</span>
     </a>
-    <a class="side__link{{ request()->routeIs('checkout.*') ? ' is-active' : '' }}"
-       href="{{ route('checkout') }}"
-       @if (request()->routeIs('checkout.*')) aria-current="page" @endif>
-      <svg data-icon="credit-card"></svg><span>Checkout</span>
+    <a class="side__link{{ request()->routeIs('transactions.*') ? ' is-active' : '' }}"
+       href="{{ route('transactions.index') }}"
+       @if (request()->routeIs('transactions.*')) aria-current="page" @endif>
+      <svg data-icon="credit-card"></svg><span>Transaksi Saya</span>
     </a>
     <a class="side__link{{ request()->routeIs('certificates.*') ? ' is-active' : '' }}"
        href="{{ route('certificates.index') }}"

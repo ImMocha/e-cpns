@@ -1,5 +1,5 @@
 @extends('layouts.exam')
-@section('title', $attempt->title.' — LONTAR CPNS Online')
+@section('title', $attempt->title.' — Ganesha Nusa CPNS Online')
 @section('exam-bar')
 <header class="tryout-bar">
   <div class="container container--wide tryout-bar__inner">
@@ -40,7 +40,7 @@
     </div>
     <div class="card card--tight card--dashed" style="margin-top:1.25rem">
       <strong>Pintasan keyboard</strong>
-      <p class="text-xs text-soft" style="margin-top:.6rem">A–J: pilihan jawaban · ← →: pindah soal · Shift+F: tandai. Pembahasan tersedia setelah dikumpulkan.</p>
+      <p class="text-xs text-soft" style="margin-top:.6rem">A–J: pilihan jawaban · ← →: pindah soal · Shift+F: tandai. Kunci jawaban tersedia setelah dikumpulkan. Pembahasan untuk akun dengan paket berbayar aktif.</p>
     </div>
   </aside>
 </main>

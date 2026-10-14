@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\LeaderboardAccess;
+use App\Enums\Province;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
@@ -25,6 +27,7 @@ use Illuminate\Support\Str;
     'status',
     'phone',
     'address',
+    'province',
     'institution',
     'bio',
     'notification_preferences',
@@ -47,6 +50,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(MaterialProgress::class);
     }
 
+    public function userPackages(): HasMany
+    {
+        return $this->hasMany(UserPackage::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -60,6 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_login_at' => 'datetime',
             'notification_preferences' => 'array',
             'role' => UserRole::class,
+            'province' => Province::class,
             'status' => UserStatus::class,
         ];
     }
@@ -74,6 +88,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isActive(): bool
     {
         return $this->status === UserStatus::Active;
+    }
+
+    public function canViewExplanations(): bool
+    {
+        return $this->isAdmin() || $this->userPackages()->active()->where('price', '>', 0)->exists();
+    }
+
+    public function leaderboardAccess(): LeaderboardAccess
+    {
+        if ($this->isAdmin()) {
+            return LeaderboardAccess::National;
+        }
+
+        $access = $this->userPackages()->active()->pluck('leaderboard_access');
+
+        if ($access->contains(LeaderboardAccess::National)) {
+            return LeaderboardAccess::National;
+        }
+
+        return $access->contains(LeaderboardAccess::Local) ? LeaderboardAccess::Local : LeaderboardAccess::None;
     }
 
     // ---- Scopes ---------------------------------------------------------------

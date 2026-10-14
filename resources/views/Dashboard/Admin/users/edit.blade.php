@@ -1,6 +1,6 @@
 @extends('layouts.admin.main')
 
-@section('title', 'Ubah ' . $user->name . ' — LONTAR')
+@section('title', 'Ubah ' . $user->name . ' — Ganesha Nusa')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">

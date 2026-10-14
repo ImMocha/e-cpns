@@ -42,17 +42,17 @@ class DatabaseExamTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
         $data = $this->payload();
-        $this->actingAs($admin)->post(route('admin.exams.store'), $data)->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post(route('admin.materials.quizzes.store'), $data)->assertSessionHasNoErrors();
         $exam = Exam::sole();
         $this->assertSame($data['question_ids'], $exam->questions()->pluck('questions.id')->all());
         $this->assertSame($admin->id, $exam->created_by);
-        $this->get(route('admin.exams.index'))->assertOk()->assertSee('Latihan Numerik');
-        $this->get(route('admin.exams.edit', $exam))->assertOk()->assertSee('Jumlah soal');
-        $this->put(route('admin.exams.update', $exam), array_replace($data, ['title' => 'Revisi Latihan']))->assertSessionHasNoErrors();
+        $this->get(route('admin.materials.quizzes.index'))->assertOk()->assertSee('Latihan Numerik');
+        $this->get(route('admin.materials.quizzes.edit', $exam))->assertOk()->assertSee('Jumlah soal');
+        $this->put(route('admin.materials.quizzes.update', $exam), array_replace($data, ['title' => 'Revisi Latihan']))->assertSessionHasNoErrors();
         $this->assertSame('Revisi Latihan', $exam->fresh()->title);
-        $this->actingAs(User::factory()->create())->post(route('admin.exams.store'), $data)->assertForbidden();
-        $this->delete(route('admin.exams.destroy', $exam))->assertForbidden();
-        $this->actingAs($admin)->delete(route('admin.exams.destroy', $exam))->assertRedirect();
+        $this->actingAs(User::factory()->create())->post(route('admin.materials.quizzes.store'), $data)->assertForbidden();
+        $this->delete(route('admin.materials.quizzes.destroy', $exam))->assertForbidden();
+        $this->actingAs($admin)->delete(route('admin.materials.quizzes.destroy', $exam))->assertRedirect();
         $this->assertSoftDeleted($exam);
     }
 
@@ -61,13 +61,13 @@ class DatabaseExamTest extends TestCase
         $this->actingAs(User::factory()->admin()->create());
         $draft = Question::factory()->create();
         $data = $this->payload(['question_ids' => [$draft->id]]);
-        $this->post(route('admin.exams.store'), $data)->assertSessionHasErrors('question_ids');
-        $this->post(route('admin.exams.store'), array_replace($data, ['status' => 'draft']))->assertSessionHasNoErrors();
+        $this->post(route('admin.materials.quizzes.store'), $data)->assertSessionHasErrors('question_ids');
+        $this->post(route('admin.materials.quizzes.store'), array_replace($data, ['status' => 'draft']))->assertSessionHasNoErrors();
         $this->postJson(route('admin.exams.store'), $this->payload(['slug' => 'invalid-tryout', 'kind' => 'tryout',
             'duration_minutes' => 0, 'passing_score' => 6]))->assertUnprocessable()->assertJsonValidationErrors(['duration_minutes', 'passing_score']);
-        $this->postJson(route('admin.exams.store'), $this->payload(['slug' => 'invalid-pool', 'question_count' => 2]))
+        $this->postJson(route('admin.materials.quizzes.store'), $this->payload(['slug' => 'invalid-pool', 'question_count' => 2]))
             ->assertUnprocessable()->assertJsonValidationErrors('question_ids');
-        $this->postJson(route('admin.exams.store'), $this->payload(['slug' => 'invalid-options', 'question_ids' => [['bad' => 1]]]))
+        $this->postJson(route('admin.materials.quizzes.store'), $this->payload(['slug' => 'invalid-options', 'question_ids' => [['bad' => 1]]]))
             ->assertUnprocessable()->assertJsonValidationErrors('question_ids.0');
     }
 
@@ -80,12 +80,12 @@ class DatabaseExamTest extends TestCase
             Question::factory()->published()->for(Section::factory()->inactive())->create(),
         ]);
         foreach ($questions as $question) {
-            $this->post(route('admin.exams.store'), $this->payload(['question_ids' => [$question->id]]))
+            $this->post(route('admin.materials.quizzes.store'), $this->payload(['question_ids' => [$question->id]]))
                 ->assertSessionHasErrors('question_ids');
         }
         $deleted = Question::factory()->published()->create();
         $deleted->delete();
-        $this->postJson(route('admin.exams.store'), $this->payload(['question_ids' => [$deleted->id]]))
+        $this->postJson(route('admin.materials.quizzes.store'), $this->payload(['question_ids' => [$deleted->id]]))
             ->assertUnprocessable()->assertJsonValidationErrors('question_ids.0');
     }
 
@@ -93,7 +93,7 @@ class DatabaseExamTest extends TestCase
     {
         $exam = $this->exam(1);
         $this->actingAs(User::factory()->admin()->create())
-            ->put(route('admin.exams.update', $exam), $this->payload(['slug' => 'changed-address']))
+            ->put(route('admin.materials.quizzes.update', $exam), $this->payload(['slug' => 'changed-address']))
             ->assertSessionHasErrors('slug');
         $this->assertNotSame('changed-address', $exam->fresh()->slug);
     }
@@ -142,7 +142,7 @@ class DatabaseExamTest extends TestCase
             $this->assertSame($expected, $attempt->score);
             $this->assertSame($kind === 'quiz' ? 100 : 15, $attempt->max_score);
             $this->assertSame([1, 1, 1], [$attempt->correct_count, $attempt->wrong_count, $attempt->blank_count]);
-            $this->get($attempt->resultUrl())->assertOk()->assertSee('Pembahasan Soal')->assertSee('Jawaban benar');
+            $this->get($attempt->resultUrl())->assertOk()->assertSee('Kunci Jawaban')->assertSee('Jawaban benar');
         }
     }
 

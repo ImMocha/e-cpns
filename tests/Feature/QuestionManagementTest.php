@@ -179,14 +179,15 @@ class QuestionManagementTest extends TestCase
     }
 
     #[DataProvider('answerChoices')]
-    public function test_valid_answer_reveals_feedback_and_explanation(int $option, string $feedback): void
+    public function test_valid_answer_reveals_feedback_and_key_without_explanation_for_free_members(int $option, string $feedback): void
     {
         $question = Question::factory()->published()->create(['explanation' => '<p>Pembahasan Setelah Jawab</p>']);
         $this->actingAs(User::factory()->create());
 
         $this->post(route('question-bank.answer', $question), ['option' => $option, 'revision' => $question->revision()])
             ->assertRedirect(route('question-bank.show', $question))->assertSessionHasNoErrors();
-        $this->get(route('question-bank.show', $question))->assertSee($feedback)->assertSee('Pembahasan Setelah Jawab')->assertSee('Jawaban B');
+        $this->get(route('question-bank.show', $question))->assertSee($feedback)->assertDontSee('Pembahasan Setelah Jawab')
+            ->assertSee('Jawaban B')->assertSee('Lihat paket belajar')->assertViewHas('explanationHtml', null);
     }
 
     public static function answerChoices(): array

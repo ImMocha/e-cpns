@@ -1,10 +1,10 @@
 @extends('layouts.user.main')
 
-@section('title', 'Riwayat — LONTAR CPNS Online')
+@section('title', 'Riwayat — Ganesha Nusa CPNS Online')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('dashboard') }}">Dashboard</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">Riwayat</span></nav>
-    <header class="page-head page-head__row"><div><span class="eyebrow">Semua Aktivitas</span><h1 style="margin-top:.5rem">Riwayat Pengerjaan</h1><p>Lanjutkan sesi aktif atau buka hasil dan pembahasan sesi yang selesai.</p></div></header>
+    <header class="page-head page-head__row"><div><span class="eyebrow">Semua Aktivitas</span><h1 style="margin-top:.5rem">Riwayat Pengerjaan</h1><p>Lanjutkan sesi aktif atau buka hasil dan kunci jawaban. Pembahasan tersedia dengan paket berbayar aktif.</p></div></header>
 
     <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
       <article class="stat"><span class="stat__icon"><svg data-icon="timer"></svg></span><div><div class="stat__label">Total Tryout</div><div class="stat__value">{{ $summary['tryoutCount'] }}</div></div></article>
@@ -35,7 +35,7 @@
               <td><strong style="color:var(--ink)">{{ $attempt->title }}</strong><span class="text-xs text-soft" style="display:block">{{ implode(' · ', array_unique(array_column($attempt->question_snapshot['questions'], 'section'))) }}</span></td>
               <td>{{ $attempt->kind === 'quiz' ? 'Latihan' : 'Tryout' }}</td>
               <td class="num">{{ count($attempt->question_snapshot['questions']) }}</td>
-              <td class="num">{{ $attempt->status === 'completed' ? $attempt->correct_count.' / '.$attempt->wrong_count : '—' }}</td>
+              <td class="num">{{ $attempt->status === 'completed' ? $attempt->correct_count.' / '.$attempt->wrong_count : '—' }}@if ($attempt->status === 'completed' && $attempt->weighted_answered_count)<span class="text-xs text-soft" style="display:block">{{ $attempt->weighted_answered_count }} berbobot dijawab</span>@endif</td>
               <td>{{ ($attempt->submitted_at ?? $attempt->started_at)->translatedFormat('d M Y H:i') }}</td>
               <td class="num">{{ $attempt->status === 'completed' ? floor($attempt->duration_seconds / 60).' menit' : 'Berjalan' }}</td>
               <td class="num">{{ $attempt->status === 'completed' ? $attempt->score.' / '.$attempt->max_score : count($attempt->answers ?? []).' dijawab' }}</td>

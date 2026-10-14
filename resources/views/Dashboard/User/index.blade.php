@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Dashboard — LONTAR CPNS Online')
+@section('title', 'Dashboard — Ganesha Nusa CPNS Online')
 
 @section('content')
     <header class="page-head page-head__row">
@@ -51,7 +51,7 @@
         <section class="card">
           <div class="card__head"><div><div class="card__title">Progres Materi</div><div class="card__sub">Materi gratis yang sudah kamu tandai selesai</div></div><span class="badge badge--mint badge--flat">{{ $materialProgressPercent }}% selesai</span></div>
           @if ($materialCount > 0)
-            <div class="result-hero" style="grid-template-columns:auto 1fr;gap:1.5rem;justify-items:start;margin-bottom:1.5rem">
+            <div class="result-hero" style="grid-template-columns:{{ $summary['accuracy'] !== null ? 'auto 1fr' : '1fr' }};gap:1.5rem;justify-items:start;margin-bottom:1.5rem">
               <div class="ring" data-pct="{{ $materialProgressPercent }}"><div class="ring__label"><div class="ring__value">{{ $materialProgressPercent }}%</div><div class="ring__unit">Materi</div></div></div>
               <div class="kv" style="width:100%">
                 <div class="kv__row"><span class="kv__key">Materi selesai</span><span class="kv__val">{{ $completedMaterialCount }} / {{ $materialCount }}</span></div>
@@ -71,24 +71,25 @@
 
         <section class="card">
           <div class="card__head">
-            <div><div class="card__title">Akurasi Latihan</div><div class="card__sub">Dari soal quiz dan tryout yang sudah dijawab</div></div>
+            <div><div class="card__title">Performa Belajar</div><div class="card__sub">Akurasi soal biasa dan perolehan skor soal berbobot</div></div>
             @if ($summary['accuracy'] !== null)<span class="badge badge--primary badge--flat">{{ $summary['correct'] + $summary['wrong'] > 0 ? $summary['accuracy'].'% akurasi' : 'Belum ada jawaban' }}</span>@endif
           </div>
           @if ($summary['count'] > 0)
             <div class="result-hero" style="grid-template-columns:auto 1fr;gap:1.5rem;justify-items:start;margin-bottom:1.5rem">
-              <div class="ring" data-pct="{{ $summary['accuracy'] }}"><div class="ring__label"><div class="ring__value">{{ $summary['accuracy'] }}%</div><div class="ring__unit">Akurasi</div></div></div>
+              @if ($summary['accuracy'] !== null)<div class="ring" data-pct="{{ $summary['accuracy'] }}"><div class="ring__label"><div class="ring__value">{{ $summary['accuracy'] }}%</div><div class="ring__unit">Akurasi soal biasa</div></div></div>@endif
               <div class="kv" style="width:100%">
                 <div class="kv__row"><span class="kv__key">Soal benar</span><span class="kv__val">{{ $summary['correct'] }}</span></div>
                 <div class="kv__row"><span class="kv__key">Soal salah</span><span class="kv__val">{{ $summary['wrong'] }}</span></div>
+                <div class="kv__row"><span class="kv__key">Soal berbobot dijawab</span><span class="kv__val">{{ $summary['weighted'] }}</span></div>
                 <div class="kv__row"><span class="kv__key">Belum dijawab</span><span class="kv__val">{{ $summary['blank'] }}</span></div>
                 <div class="kv__row"><span class="kv__key">Total sesi</span><span class="kv__val">{{ $summary['count'] }}</span></div>
               </div>
             </div>
             <div class="grid" style="--gap:1rem">
               @foreach ($summary['sections'] as $section)
-                @php($accuracy = $section['correct'] + $section['wrong'] > 0 ? round($section['correct'] / ($section['correct'] + $section['wrong']) * 100) : 0)
+                @php($accuracy = $section['weighted_total'] > 0 ? round($section['score'] / max(1, $section['max']) * 100) : ($section['correct'] + $section['wrong'] > 0 ? round($section['correct'] / ($section['correct'] + $section['wrong']) * 100) : 0))
                 <div class="progress-wrap">
-                  <div class="progress__row"><span>{{ $section['section'] }} · {{ $section['correct'] + $section['wrong'] }}/{{ $section['total'] }} dijawab</span><span>{{ $section['correct'] + $section['wrong'] > 0 ? $accuracy.'% akurasi' : 'Belum dijawab' }}</span></div>
+                  <div class="progress__row"><span>{{ $section['section'] }} · {{ $section['correct'] + $section['wrong'] + $section['weighted'] }}/{{ $section['total'] }} dijawab</span><span>{{ $section['weighted_total'] > 0 ? $accuracy.'% perolehan skor' : ($section['correct'] + $section['wrong'] > 0 ? $accuracy.'% akurasi' : 'Belum dijawab') }}</span></div>
                   <div class="progress"><div class="progress__bar" data-progress="{{ $accuracy }}"></div></div>
                 </div>
               @endforeach
@@ -126,6 +127,13 @@
       </div>
 
       <aside class="stack" style="--stack:1.5rem">
+        <section class="card question-form-stack">
+          <div class="card__title">Paket Aktif</div>
+          @forelse ($activePackages as $activePackage)
+          <div class="card card--tight card--dashed"><strong>{{ $activePackage->name }}</strong><p class="text-xs text-soft" style="margin-top:.4rem">{{ $activePackage->expires_at ? 'Berlaku sampai '.$activePackage->expires_at->translatedFormat('d M Y, H:i') : 'Tanpa batas waktu' }} · Kuota tryout: {{ $activePackage->remainingTryouts() ?? 'Tanpa batas' }}</p></div>
+          @empty<p class="text-sm text-soft">Belum ada paket aktif. Materi dan sesi gratis tetap bisa diakses.</p>@endforelse
+          <a class="btn btn--ghost btn--sm" href="{{ route('packages.index') }}">Lihat paket belajar</a>
+        </section>
         <section class="card card--pop card--amber">
           <span class="card__icon ico--coral"><svg data-icon="timer"></svg></span>
           <div class="badge badge--premium"><svg data-icon="zap"></svg> Simulasi CAT</div>

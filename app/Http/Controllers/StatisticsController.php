@@ -38,17 +38,19 @@ class StatisticsController extends SliceController
             'sectionChart' => count($sections) > 0 ? [
                 'type' => 'bar',
                 'labels' => array_column($sections, 'section'),
-                'values' => array_map(fn (array $section): int => $section['correct'] + $section['wrong'] > 0
-                    ? (int) round($section['correct'] / ($section['correct'] + $section['wrong']) * 100) : 0, $sections),
+                'values' => array_map(fn (array $section): int => $section['weighted_total'] > 0
+                    ? (int) round($section['score'] / max(1, $section['max']) * 100)
+                    : ($section['correct'] + $section['wrong'] > 0 ? (int) round($section['correct'] / ($section['correct'] + $section['wrong']) * 100) : 0), $sections),
                 'max' => 100,
                 'height' => 250,
-                'aria' => 'Akurasi jawaban per bagian',
+                'aria' => 'Akurasi soal biasa dan persentase perolehan skor soal berbobot per bagian',
             ] : null,
             'compositionChart' => $summary['count'] > 0 ? [
                 'type' => 'donut', 'size' => 210,
                 'segments' => [
                     ['value' => $summary['correct'], 'color' => '#2DD4A7'],
                     ['value' => $summary['wrong'], 'color' => '#FF7A5C'],
+                    ['value' => $summary['weighted'], 'color' => '#0191ED'],
                     ['value' => $summary['blank'], 'color' => '#B9CFE0'],
                 ],
                 'aria' => 'Komposisi jawaban',

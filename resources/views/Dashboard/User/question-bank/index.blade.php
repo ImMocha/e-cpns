@@ -1,5 +1,5 @@
 @extends('layouts.user.main')
-@section('title', 'Bank Soal — LONTAR')
+@section('title', 'Bank Soal — Ganesha Nusa')
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('dashboard') }}">Dashboard</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">Bank Soal</span></nav>
     <header class="page-head page-head__row"><div><span class="eyebrow">Latihan Mandiri</span><h1 style="margin-top:.5rem">Bank Soal</h1><p>Pilih soal, lalu lanjutkan dengan tombol Berikutnya tanpa kembali ke daftar.</p></div><span class="badge badge--primary badge--flat">{{ number_format($questionCount, 0, ',', '.') }} soal tersedia</span></header>

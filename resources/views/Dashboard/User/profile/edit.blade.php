@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Profil Saya — LONTAR CPNS Online')
+@section('title', 'Profil Saya — Ganesha Nusa CPNS Online')
 
 @section('content')
     @include('components.flash')
@@ -46,7 +46,7 @@
 
     <div class="panes" style="--gap:1.5rem" id="pengaturan">
       <div class="stack" style="--stack:1.5rem">
-        <form class="card card--pop" method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+        <form class="card card--static" method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
           @csrf
           @method('PATCH')
           <div class="card__head">
@@ -71,6 +71,7 @@
               <input class="input" type="email" id="email" value="{{ $user->email }}" readonly aria-describedby="email-hint">
               <span class="field__hint" id="email-hint">Email tidak bisa diubah sendiri. Hubungi admin bila perlu.</span>
             </div>
+            <x-province-select :value="$user->province?->value" />
             <div class="field{{ $errors->has('phone') ? ' is-invalid' : '' }}">
               <label class="label" for="phone">Nomor Telepon</label>
               <input class="input" type="tel" id="phone" name="phone" value="{{ old('phone', $user->phone) }}" maxlength="30" autocomplete="tel">

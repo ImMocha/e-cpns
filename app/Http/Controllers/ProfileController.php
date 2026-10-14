@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\Province;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends SliceController
 {
@@ -45,6 +47,7 @@ class ProfileController extends SliceController
             'name' => ['required', 'string', 'min:3', 'max:120'],
             'phone' => ['nullable', 'string', 'max:30', 'regex:/^[0-9+\-\s()]+$/'],
             'address' => ['nullable', 'string', 'max:180'],
+            'province' => ['sometimes', 'required', Rule::enum(Province::class)],
             'institution' => ['nullable', 'string', 'max:120'],
             'bio' => ['nullable', 'string', 'max:500'],
             'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -61,7 +64,7 @@ class ProfileController extends SliceController
                 ->withInput();
         }
 
-        $user->fill(Arr::only($validated, ['name', 'phone', 'address', 'institution', 'bio']));
+        $user->fill(Arr::only($validated, ['name', 'phone', 'address', 'province', 'institution', 'bio']));
 
         if (is_string($newAvatarPath)) {
             $user->avatar_path = $newAvatarPath;

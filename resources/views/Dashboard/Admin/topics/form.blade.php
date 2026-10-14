@@ -1,5 +1,5 @@
 @extends('layouts.admin.main')
-@section('title', ($topic->exists ? 'Edit Topik' : 'Tambah Topik') . ' — LONTAR')
+@section('title', ($topic->exists ? 'Edit Topik' : 'Tambah Topik') . ' — Ganesha Nusa')
 @section('content')
     <nav class="crumbs"><a href="{{ route('admin.topics.index') }}">Topik Materi</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span>{{ $topic->exists ? 'Edit' : 'Tambah' }}</span></nav>
     <header class="page-head"><h1>{{ $topic->exists ? 'Edit Topik' : 'Tambah Topik' }}</h1><p>Satu topik berada dalam satu bidang dan dapat berisi materi PDF maupun video.</p></header>

@@ -1,6 +1,6 @@
 @extends('layouts.admin.main')
 
-@section('title', 'Kelola Voucher — LONTAR')
+@section('title', 'Kelola Voucher — Ganesha Nusa')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">

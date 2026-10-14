@@ -1,5 +1,5 @@
 @extends('layouts.admin.main')
-@section('title', 'Tambah Soal — LONTAR')
+@section('title', 'Tambah Soal — Ganesha Nusa')
 @section('content')
     @include('Dashboard.Admin.questions._form')
 @endsection

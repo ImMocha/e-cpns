@@ -1,6 +1,6 @@
 @extends('layouts.admin.main')
 
-@section('title', ($article->exists ? 'Edit Artikel' : 'Tulis Artikel').' — LONTAR')
+@section('title', ($article->exists ? 'Edit Artikel' : 'Tulis Artikel').' — Ganesha Nusa')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">

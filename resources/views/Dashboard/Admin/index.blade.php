@@ -1,6 +1,6 @@
 @extends('layouts.admin.main')
 
-@section('title', 'Admin Dashboard — LONTAR')
+@section('title', 'Admin Dashboard — Ganesha Nusa')
 
 @section('content')
     <header class="page-head page-head__row">
@@ -82,7 +82,8 @@
               <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="file"></svg></span>
               <div style="flex:1"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $draftMaterialCount }} materi draft</strong><span class="text-xs text-soft">Tinjau sebelum diterbitkan</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;color:var(--text-soft)"></svg>
             </a>
-            <a class="card card--tight card--dashed" href="{{ route('admin.exams.index') }}"><strong class="text-sm">{{ $bankCount }} sesi quiz &amp; tryout</strong><p class="text-xs text-soft" style="margin-top:.35rem">Atur kumpulan soal, durasi, randomisasi, dan penilaian peserta.</p></a>
+            <a class="card card--tight card--dashed" href="{{ route('admin.materials.quizzes.index') }}"><strong class="text-sm">{{ $quizCount }} latihan materi</strong><p class="text-xs text-soft" style="margin-top:.35rem">Kelola soal latihan dan hubungkan dengan topik pembelajaran.</p></a>
+            <a class="card card--tight card--dashed" href="{{ route('admin.exams.index') }}"><strong class="text-sm">{{ $tryoutCount }} tryout</strong><p class="text-xs text-soft" style="margin-top:.35rem">Atur simulasi CAT, durasi, dan penilaian peserta.</p></a>
           </div>
         </section>
 

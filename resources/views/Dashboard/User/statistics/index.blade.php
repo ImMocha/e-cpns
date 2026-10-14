@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Statistik — LONTAR CPNS Online')
+@section('title', 'Statistik — Ganesha Nusa CPNS Online')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('dashboard') }}">Dashboard</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">Statistik</span></nav>
@@ -42,19 +42,19 @@
       </section>
 
       <div class="panes" style="--gap:1.5rem;margin-bottom:1.5rem">
-        <section class="card"><div class="card__head"><div><div class="card__title">Akurasi per Bagian</div><div class="card__sub">Persentase benar dari soal yang dijawab</div></div></div><div style="height:250px" data-chart='@json($sectionChart)'></div></section>
+        <section class="card"><div class="card__head"><div><div class="card__title">Performa per Bagian</div><div class="card__sub">Akurasi soal biasa; persentase perolehan skor untuk bagian yang memuat soal berbobot.</div></div></div><div style="height:250px" data-chart='@json($sectionChart)'></div></section>
         <section class="card">
           <div class="card__head"><div><div class="card__title">Komposisi Jawaban</div><div class="card__sub">{{ $summary['count'] }} sesi pada periode ini</div></div></div>
           <div style="width:200px;height:200px;margin:0 auto 1.25rem" data-chart='@json($compositionChart)'></div>
-          <div class="legend"><div class="legend__item"><span class="legend__swatch" style="background:var(--pop-mint)"></span> Benar — {{ $summary['correct'] }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--pop-coral)"></span> Salah — {{ $summary['wrong'] }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--border-strong)"></span> Kosong — {{ $summary['blank'] }}</div></div>
+          <div class="legend"><div class="legend__item"><span class="legend__swatch" style="background:var(--pop-mint)"></span> Benar — {{ $summary['correct'] }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--pop-coral)"></span> Salah — {{ $summary['wrong'] }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--primary)"></span> Berbobot dijawab — {{ $summary['weighted'] }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--border-strong)"></span> Kosong — {{ $summary['blank'] }}</div></div>
         </section>
       </div>
 
       <section class="card card--pad-0" style="margin-bottom:1.5rem">
         <div style="padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)"><div class="card__title">Rincian per Bagian</div><div class="card__sub">Akumulasi jawaban dalam rentang yang dipilih</div></div>
-        <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none"><table class="table"><thead><tr><th>Bagian</th><th class="num">Soal</th><th class="num">Benar</th><th class="num">Salah</th><th class="num">Kosong</th><th class="num">Akurasi</th><th class="num">Skor</th></tr></thead><tbody>
+        <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none"><table class="table"><thead><tr><th>Bagian</th><th class="num">Soal</th><th class="num">Benar</th><th class="num">Salah</th><th class="num">Berbobot dijawab</th><th class="num">Kosong</th><th class="num">Akurasi soal biasa</th><th class="num">Skor</th></tr></thead><tbody>
           @foreach ($summary['sections'] as $section)
-            <tr><td><strong style="color:var(--ink)">{{ $section['section'] }}</strong></td><td class="num">{{ $section['total'] }}</td><td class="num">{{ $section['correct'] }}</td><td class="num">{{ $section['wrong'] }}</td><td class="num">{{ $section['blank'] }}</td><td class="num">{{ $section['correct'] + $section['wrong'] > 0 ? round($section['correct'] / ($section['correct'] + $section['wrong']) * 100) : 0 }}%</td><td class="num">{{ $section['score'] }} / {{ $section['max'] }}</td></tr>
+            <tr><td><strong style="color:var(--ink)">{{ $section['section'] }}</strong></td><td class="num">{{ $section['total'] }}</td><td class="num">{{ $section['correct'] }}</td><td class="num">{{ $section['wrong'] }}</td><td class="num">{{ $section['weighted'] }}</td><td class="num">{{ $section['blank'] }}</td><td class="num">{{ $section['correct'] + $section['wrong'] > 0 ? round($section['correct'] / ($section['correct'] + $section['wrong']) * 100).'%' : '—' }}</td><td class="num">{{ $section['score'] }} / {{ $section['max'] }}</td></tr>
           @endforeach
         </tbody></table></div>
       </section>

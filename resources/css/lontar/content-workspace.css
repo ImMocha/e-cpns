@@ -93,6 +93,21 @@
 .content-topic-state::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--success); }
 .content-topic-state.is-inactive::before { background:var(--text-soft); }
 .content-tabs a:focus-visible, .content-topic-link:focus-visible, .content-icon-button:focus-visible { outline:3px solid var(--primary); outline-offset:2px; }
+.content-topic-quizzes { border-top:2px solid var(--primary-100); }
+.content-topic-quizzes > .content-panel-heading { background:var(--primary-050); }
+.content-topic-quizzes h3 { font:700 var(--fs-lg)/1.4 var(--font-display); color:var(--ink); }
+.content-exam-row { display:grid; grid-template-columns:42px minmax(0,1fr) auto auto; align-items:center; gap:1rem; padding:1.2rem 1.5rem; border-bottom:1px solid var(--border); }
+.content-exam-row:last-child { border-bottom:0; }
+.content-exam-row:hover { background:var(--primary-050); }
+.content-exam-icon { display:grid; place-items:center; width:42px; height:42px; border-radius:12px; background:var(--primary-100); color:var(--primary-700); }
+.content-exam-icon.is-tryout { background:var(--pop-amber-050); color:var(--ink); }
+.content-exam-icon svg { width:20px; height:20px; }
+.content-exam-info { min-width:0; }
+.content-exam-warning { display:inline-flex; align-items:center; gap:.4rem; margin-top:.6rem; font-size:var(--fs-xs); color:var(--ink); }
+.content-exam-warning svg { width:15px; height:15px; color:var(--warning); flex-shrink:0; }
+.content-exam-filters .content-exam-topic-filter { flex:1 1 220px; max-width:340px; min-width:0; }
+.exam-form-head { flex-wrap:wrap; }
+.exam-form-head > .btn-row { flex-wrap:wrap; }
 @media(max-width:1250px) {
  .content-workspace { grid-template-columns:230px minmax(0,1fr); gap:1rem; }
  .content-material-row { gap:.7rem; padding-inline:1rem; }
@@ -121,4 +136,9 @@
  .content-row-actions > .btn { display:none; }
  .content-topic-grid { grid-template-columns:1fr; padding:1rem; }
  .content-list-footer { padding:1rem; }
+ .content-tabs a { min-width:0; padding-inline:.6rem; }
+ .content-exam-row { grid-template-columns:34px minmax(0,1fr) auto; gap:.65rem; padding:1rem; }
+ .content-exam-icon { width:34px; height:38px; align-self:start; }
+ .content-exam-row > .badge { grid-column:2; justify-self:start; }
+ .content-exam-filters .content-exam-topic-filter { flex-basis:100%; max-width:none; }
 }

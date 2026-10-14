@@ -25,4 +25,9 @@ class QuestionFactory extends Factory
     {
         return $this->state(fn (): array => ['status' => QuestionStatus::Published, 'published_at' => now()]);
     }
+
+    public function weighted(): static
+    {
+        return $this->state(fn (): array => ['scoring_type' => 'weighted', 'option_scores' => [1, 2, 3, 4, 5], 'correct_option' => null]);
+    }
 }

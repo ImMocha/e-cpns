@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
             ArticleSeeder::class,
             QuestionSeeder::class,
             ExamSeeder::class,
+            TopicQuizSeeder::class,
+            PremiumRf05Seeder::class,
+            LearningPackageSeeder::class,
         ]);
     }
 }

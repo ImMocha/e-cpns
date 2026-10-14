@@ -1,5 +1,5 @@
 @extends(auth()->check() ? 'layouts.user.main' : 'layouts.public')
-@section('title', 'Artikel — LONTAR')
+@section('title', 'Artikel — Ganesha Nusa')
 @section('content')
 <div class="article-page">
     <header class="page-head"><span class="eyebrow">Wawasan & pembelajaran</span><h1 style="margin-top:.5rem">Artikel</h1><p>Baca rangkuman, panduan, dan tips untuk menemani persiapan CPNS.</p></header>

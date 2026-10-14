@@ -26,7 +26,7 @@ class EmailVerificationController extends Controller
         $request->fulfill();
 
         return redirect()->intended(route('dashboard'))
-            ->with('success', 'Email kamu berhasil diverifikasi. Selamat belajar di LONTAR!');
+            ->with('success', 'Email kamu berhasil diverifikasi. Selamat belajar di Ganesha Nusa!');
     }
 
     public function send(Request $request): RedirectResponse

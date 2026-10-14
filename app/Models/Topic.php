@@ -34,6 +34,27 @@ class Topic extends Model
         return $this->hasMany(Material::class);
     }
 
+    public function quizzes(): HasMany
+    {
+        return $this->hasMany(Exam::class)->where('kind', 'quiz');
+    }
+
+    /** @param Builder<Topic> $query */
+    public function scopeWithLearningProgress(Builder $query, User $user): void
+    {
+        $query->withCount([
+            'materials as learning_materials_count' => fn (Builder $materials): Builder => $materials->visibleToMembers(),
+            'materials as completed_learning_materials_count' => fn (Builder $materials): Builder => $materials->visibleToMembers()
+                ->whereHas('progressRecords', fn (Builder $progress): Builder => $progress->whereBelongsTo($user)->whereNotNull('completed_at')),
+        ]);
+    }
+
+    public function hasCompletedMaterials(): bool
+    {
+        return $this->learning_materials_count > 0
+            && (int) $this->completed_learning_materials_count === (int) $this->learning_materials_count;
+    }
+
     public function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);

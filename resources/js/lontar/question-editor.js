@@ -1,14 +1,22 @@
 import { sanitizeArticle } from './article-editor.js';
 
-document.querySelectorAll('[data-exam-form]').forEach((form) => {
-  const choices = [...form.querySelectorAll('[data-exam-pool-item]')];
-  const update = () => { form.querySelector('[data-exam-selected]').textContent = choices.filter(row => row.querySelector('input').checked).length + ' soal dipilih sebagai bank sumber'; };
-  form.addEventListener('change', update);
-  form.querySelector('[data-exam-question-search]').addEventListener('input', (event) => {
-    const term = event.target.value.trim().toLocaleLowerCase('id');
+document.querySelectorAll('[data-question-exams]').forEach((panel) => {
+  const search = panel.querySelector('[data-question-exam-search]');
+  if (!search) return;
+  const choices = [...panel.querySelectorAll('[data-question-exam-item]')];
+  const updateCount = () => {
+    panel.querySelector('[data-question-exam-count]').textContent = choices.filter(row => row.querySelector('input').checked).length + ' sesi dipilih';
+  };
+  search.addEventListener('input', () => {
+    const term = search.value.trim().toLocaleLowerCase('id');
     choices.forEach(row => { row.hidden = !row.textContent.toLocaleLowerCase('id').includes(term); });
+    panel.querySelectorAll('[data-question-exam-group]').forEach(group => {
+      group.hidden = [...group.querySelectorAll('[data-question-exam-item]')].every(row => row.hidden);
+    });
+    panel.querySelector('[data-question-exam-empty]').hidden = choices.some(row => !row.hidden);
   });
-  update();
+  panel.addEventListener('change', updateCount);
+  updateCount();
 });
 
 document.querySelectorAll('[data-question-editor]').forEach((form) => {
@@ -25,6 +33,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   const removeVideo = form.querySelector('[data-remove-video]');
   const videoError = form.querySelector('[data-video-error]');
   const addOption = form.querySelector('[data-add-option]');
+  const scoring = form.querySelector('[data-question-scoring]');
   let imageUrl = null;
   let videoUrl = null;
   let dirty = false;
@@ -33,10 +42,16 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   const rows = () => [...list.querySelectorAll('[data-option-row]')];
   const markDirty = () => {
     dirty = true;
+    form.dataset.dirty = 'true';
     form.querySelector('[data-question-save-note]').textContent = 'Ada perubahan yang belum disimpan';
   };
 
   const syncPreview = () => {
+    const weighted = scoring.value === 'weighted';
+    scoring.querySelector('[value="weighted"]').disabled = section.selectedOptions[0]?.dataset.code !== 'TKP';
+    form.querySelector('[data-scoring-hint]').textContent = weighted ? 'Setiap pilihan memiliki skor 1–5. Tidak ada jawaban benar atau salah.' : 'Isi 2–10 pilihan, lalu tandai satu jawaban yang benar.';
+    form.querySelector('[data-preview-scoring-hint]').textContent = weighted ? 'Periksa pertanyaan dan skor tiap pilihan' : 'Periksa pertanyaan dan kunci jawaban';
+    form.querySelector('[data-scoring-checklist]').textContent = weighted ? 'Skor 1–5 untuk setiap pilihan telah diperiksa.' : 'Kunci jawaban telah diperiksa.';
     form.querySelector('[data-preview-title]').textContent = title.value.trim() || 'Judul soal';
     form.querySelector('[data-preview-field]').textContent = section.selectedOptions[0]?.value ? section.selectedOptions[0].textContent : 'Bidang';
     form.querySelector('[data-preview-level]').textContent = level.selectedOptions[0]?.textContent || '';
@@ -57,6 +72,14 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     currentRows.forEach((row, index) => {
       const letter = String.fromCharCode(65 + index);
       const radio = row.querySelector('input[type="radio"]');
+      const score = row.querySelector('[name="option_scores[]"]');
+      radio.disabled = weighted;
+      radio.hidden = weighted;
+      score.disabled = !weighted;
+      score.required = weighted;
+      score.setAttribute('aria-label', 'Skor pilihan ' + letter);
+      row.querySelector('[data-option-score]').hidden = !weighted;
+      row.classList.toggle('is-weighted', weighted);
       const textarea = row.querySelector('textarea');
       radio.value = index;
       radio.setAttribute('aria-label', 'Jadikan ' + letter + ' jawaban benar');
@@ -67,17 +90,23 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       remove.disabled = currentRows.length <= 2;
       remove.setAttribute('aria-label', 'Hapus pilihan ' + letter);
       const option = document.createElement('div');
-      option.className = 'question-preview-option' + (radio.checked ? ' question-preview-option--correct' : '');
+      option.className = 'question-preview-option' + ((weighted ? Number(score.value) === 5 : radio.checked) ? ' question-preview-option--correct' : '');
       const key = document.createElement('span');
       key.className = 'question-preview-letter';
       key.textContent = letter;
       const text = document.createElement('span');
       text.textContent = textarea.value.trim() || 'Pilihan ' + letter + ' belum diisi';
       option.append(key, text);
+      if (weighted) {
+        const badge = document.createElement('span');
+        badge.className = 'badge badge--primary badge--flat';
+        badge.textContent = 'Skor ' + (score.value || '—');
+        option.append(badge);
+      }
       previewOptions.append(option);
       if (radio.checked) selected = letter;
     });
-    form.querySelector('[data-key-label]').textContent = selected ? 'Kunci ' + selected : 'Kunci belum dipilih';
+    form.querySelector('[data-key-label]').textContent = weighted ? 'Skor per pilihan' : selected ? 'Kunci ' + selected : 'Kunci belum dipilih';
     addOption.disabled = currentRows.length >= 10;
     const url = imageUrl || (removeImage?.checked ? '' : previewImage.dataset.existingImage);
     previewImage.hidden = !url;
@@ -154,8 +183,19 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     markDirty();
     syncPreview();
   });
-  form.addEventListener('input', () => { markDirty(); syncPreview(); });
-  form.addEventListener('change', () => { markDirty(); syncPreview(); });
+  const updateEditor = (event) => {
+    if (event.target.matches('[data-question-exam-search]')) return;
+    markDirty();
+    syncPreview();
+  };
+  form.addEventListener('input', updateEditor);
+  form.addEventListener('change', updateEditor);
+  section.addEventListener('change', () => {
+    if (section.selectedOptions[0]?.dataset.code !== 'TKP' && scoring.value === 'weighted') {
+      scoring.value = 'binary';
+      syncPreview();
+    }
+  });
   image.addEventListener('change', () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     imageUrl = null;
@@ -187,6 +227,53 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   for (const selector of ['[data-preview-stem]', '[data-preview-explanation]']) {
     form.querySelector(selector).addEventListener('click', (event) => { if (event.target.closest('a')) event.preventDefault(); });
   }
+  form.addEventListener('question-editor:load', (event) => {
+    const question = event.detail || {};
+    form.reset();
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+    if (videoUrl) URL.revokeObjectURL(videoUrl);
+    imageUrl = null;
+    videoUrl = null;
+    title.value = question.title || '';
+    section.value = question.section_id ? String(question.section_id) : '';
+    level.value = question.difficulty || 'medium';
+    scoring.value = question.scoring_type || 'binary';
+    form.querySelector('[data-shuffle-options]').checked = question.shuffle_options !== false;
+    form.querySelector('input[name="status"]').value = question.status || 'draft';
+    const statusBadge = form.querySelector('[data-editor-status]');
+    statusBadge.textContent = question.status === 'published' ? 'Terbit' : 'Draft';
+    statusBadge.className = 'badge ' + (question.status === 'published' ? 'badge--mint' : 'badge--amber');
+    for (const [name, editor] of editors) {
+      editor.content.innerHTML = sanitizeArticle(question[name] || '');
+      editor.source.value = sanitizeArticle(question[name] || '');
+    }
+    list.replaceChildren();
+    (question.options || ['', '', '', '', '']).forEach((option, index) => {
+      const fragment = form.querySelector('[data-option-template]').content.cloneNode(true);
+      fragment.querySelector('textarea').value = option;
+      fragment.querySelector('input').checked = question.correct_option === index;
+      fragment.querySelector('[name="option_scores[]"]').value = question.option_scores?.[index] ?? '';
+      list.append(fragment);
+    });
+    previewImage.dataset.existingImage = question.image_url || '';
+    previewVideo.dataset.existingVideo = question.video_url || '';
+    form.querySelector('[data-existing-image-control]')?.toggleAttribute('hidden', !question.image_url);
+    form.querySelector('[data-existing-video-control]')?.toggleAttribute('hidden', !question.video_url);
+    videoError.hidden = true;
+    videoError.textContent = '';
+    dirty = false;
+    submitting = false;
+    form.dataset.dirty = 'false';
+    form.querySelector('[data-question-save-note]').textContent = 'Perubahan disimpan saat Anda menekan Simpan draft atau Terbitkan soal.';
+    window.LIcons?.hydrate(list);
+    syncPreview();
+  });
+  form.addEventListener('question-editor:saved', () => {
+    dirty = false;
+    submitting = false;
+    form.dataset.dirty = 'false';
+  });
+  form.addEventListener('question-editor:submit-failed', () => { submitting = false; });
   form.addEventListener('submit', () => { syncPreview(); submitting = true; });
   window.addEventListener('beforeunload', (event) => {
     if (dirty && !submitting) { event.preventDefault(); event.returnValue = ''; }

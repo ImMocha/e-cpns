@@ -61,9 +61,7 @@ class MaterialSeeder extends Seeder
                 ]),
             );
 
-            if ($material->wasRecentlyCreated) {
-                $this->ensurePlaceholderPdf($material);
-            }
+            $this->ensurePlaceholderPdf($material);
         }
     }
 
@@ -122,6 +120,8 @@ class MaterialSeeder extends Seeder
             if (! str_contains($existing, self::PLACEHOLDER_MARKER)) {
                 return;
             }
+        } elseif (! $material->wasRecentlyCreated) {
+            return;
         }
 
         $contents = $this->placeholderPdf($material->title, $this->placeholderPageCount($material));
@@ -211,7 +211,7 @@ class MaterialSeeder extends Seeder
     {
         $lines = $page === 1
             ? [
-                'Materi Contoh - Learning LONTAR',
+                'Materi Contoh - Ganesha Nusa',
                 '',
                 $title,
                 '',
@@ -223,7 +223,7 @@ class MaterialSeeder extends Seeder
                 self::PLACEHOLDER_MARKER,
             ]
             : [
-                'Placeholder - Learning LONTAR',
+                'Placeholder - Ganesha Nusa',
                 '',
                 $title,
                 '',

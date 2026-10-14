@@ -2,7 +2,7 @@
 
 @use('App\Enums\MaterialType')
 
-@section('title', $material->title . ' — LONTAR CPNS Online')
+@section('title', $material->title . ' — Ganesha Nusa CPNS Online')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">
@@ -70,7 +70,7 @@
 
       @if ($hasFile)
         {{--
-            Viewer milik LONTAR, bukan `<object>` / `<embed>` / `<iframe>`.
+            Viewer milik Ganesha Nusa, bukan `<object>` / `<embed>` / `<iframe>`.
 
             Viewer bawaan browser selalu punya tombol Unduh dan Cetak. Selama
             PDF-nya diserahkan sebagai dokumen, mengunduhnya cuma satu klik.
@@ -149,7 +149,7 @@
           <span class="alert__icon"><svg data-icon="alert"></svg></span>
           <div>
             <strong>Berkas PDF belum tersedia</strong>
-            Materi ini sudah terbit tapi berkasnya belum ada di server. Hubungi admin Learning LONTAR.
+            Materi ini sudah terbit tapi berkasnya belum ada di server. Hubungi admin Ganesha Nusa.
           </div>
         </div>
       @endif
@@ -176,7 +176,7 @@
           <span class="alert__icon"><svg data-icon="alert"></svg></span>
           <div>
             <strong>URL video belum diisi</strong>
-            Materi ini sudah terbit tapi belum punya sumber video. Hubungi admin Learning LONTAR.
+            Materi ini sudah terbit tapi belum punya sumber video. Hubungi admin Ganesha Nusa.
           </div>
         </div>
       @endif
@@ -197,10 +197,11 @@
 
     <div class="btn-row" style="margin-top:1.5rem">
       <a class="btn btn--ghost" href="{{ route('materials.index') }}"><svg data-icon="arrow-left"></svg> Kembali ke daftar materi</a>
-      <a class="btn btn--primary" href="{{ route('question-bank.index') }}">
-        <svg data-icon="list-checks"></svg> Latihan Soal Materi Ini
-      </a>
     </div>
+
+    @if ($material->topic && $topicQuizzes->isNotEmpty())
+      <div style="margin-top:1.5rem"><x-topic-quizzes :topic="$material->topic" :banks="$topicQuizzes" /></div>
+    @endif
 
     {{-- ============ MATERI LAIN ============ --}}
     @if ($related->isNotEmpty())

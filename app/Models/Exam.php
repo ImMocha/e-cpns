@@ -5,17 +5,20 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\ArticleContent;
+use App\Enums\MaterialAccess;
+use App\Enums\QuestionScoring;
 use App\Enums\QuestionStatus;
 use Database\Factories\ExamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\ValidationException;
 
-#[Fillable(['kind', 'slug', 'title', 'description', 'question_count', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'created_by', 'updated_by'])]
+#[Fillable(['kind', 'slug', 'title', 'description', 'question_count', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'access_level', 'topic_id', 'requires_topic_completion', 'created_by', 'updated_by'])]
 class Exam extends Model
 {
     /** @use HasFactory<ExamFactory> */
@@ -25,12 +28,28 @@ class Exam extends Model
     {
         return ['question_count' => 'integer', 'duration_minutes' => 'integer', 'points_per_correct' => 'integer',
             'penalty_wrong' => 'integer', 'passing_score' => 'integer', 'random_questions' => 'boolean',
-            'random_options' => 'boolean', 'status' => QuestionStatus::class];
+            'random_options' => 'boolean', 'status' => QuestionStatus::class, 'access_level' => MaterialAccess::class,
+            'requires_topic_completion' => 'boolean'];
+    }
+
+    public function topic(): BelongsTo
+    {
+        return $this->belongsTo(Topic::class);
+    }
+
+    public function topicIsReadyFor(User $user): bool
+    {
+        return $user->isAdmin() || ! $this->requires_topic_completion || $this->topic?->hasCompletedMaterials() === true;
     }
 
     public function questions(): BelongsToMany
     {
         return $this->belongsToMany(Question::class);
+    }
+
+    public function userPackages(): BelongsToMany
+    {
+        return $this->belongsToMany(UserPackage::class);
     }
 
     /** @param Builder<Exam> $query */
@@ -39,9 +58,27 @@ class Exam extends Model
         $query->where('status', QuestionStatus::Published);
     }
 
+    /** @param Builder<Exam> $query */
+    public function scopeVisibleToMembers(Builder $query): void
+    {
+        $query->published()->where(function (Builder $query): void {
+            $query->whereNull('topic_id')->orWhereHas('topic', fn (Builder $topic): Builder => $topic->active()
+                ->whereHas('section', fn (Builder $section): Builder => $section->active()));
+        });
+    }
+
     public function maximumScore(): int
     {
-        return $this->kind === 'quiz' ? 100 : $this->question_count * $this->points_per_correct;
+        if ($this->kind === 'quiz') {
+            return 100;
+        }
+        $weighted = $this->weighted_available_count ?? $this->questions()->visibleToMembers()->where('scoring_type', QuestionScoring::Weighted)->count();
+        $available = $this->available_count ?? $this->questions()->visibleToMembers()->count();
+        $weightedSlots = $this->points_per_correct <= 5
+            ? min($weighted, $this->question_count)
+            : max(0, $this->question_count - ($available - $weighted));
+
+        return $weightedSlots * 5 + ($this->question_count - $weightedSlots) * $this->points_per_correct;
     }
 
     /** @return array<string, mixed> */
@@ -67,7 +104,7 @@ class Exam extends Model
             'mediaPaths' => $selected->flatMap(fn (Question $question): array => [$question->image_path, $question->video_path])->filter()->values()->all(),
             'questions' => $selected->map(function (Question $question): array {
                 $indices = collect(array_keys($question->options));
-                if ($this->random_options) {
+                if ($this->random_options && $question->shuffle_options) {
                     $indices = $indices->shuffle();
                 }
                 $indices = $indices->values();
@@ -75,7 +112,10 @@ class Exam extends Model
                 return ['id' => $question->id, 'section' => $question->section->code, 'topic' => $question->title,
                     'stem' => ArticleContent::text($question->safeBody()), 'stemHtml' => $question->safeBody(),
                     'options' => $indices->map(fn (int $index): string => $question->options[$index])->all(),
-                    'answer' => $indices->search($question->correct_option, true),
+                    'scoringType' => $question->scoring_type->value,
+                    'fixedOptionOrder' => ! $question->shuffle_options,
+                    'optionScores' => $question->isWeighted() ? $indices->map(fn (int $index): int => (int) $question->option_scores[$index])->all() : null,
+                    'answer' => $question->isWeighted() ? null : $indices->search($question->correct_option, true),
                     'explain' => ArticleContent::text($question->safeExplanation()), 'explainHtml' => $question->safeExplanation(),
                     'image_path' => $question->image_path, 'video_path' => $question->video_path];
             })->all(),

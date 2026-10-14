@@ -32,6 +32,7 @@ class TopicController extends Controller
         return view('Dashboard.Admin.topics.index', [
             'topics' => (clone $query)->with('section')->withCount([
                 'materials',
+                'quizzes',
                 'materials as published_materials_count' => fn (Builder $query) => $query->published(),
             ])
                 ->when($filters['q'] !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($filters): void {
@@ -78,9 +79,10 @@ class TopicController extends Controller
 
     public function update(TopicRequest $request, Topic $topic): RedirectResponse
     {
-        if ((int) $request->input('section_id') !== $topic->section_id && $topic->materials()->withTrashed()->exists()) {
+        if ((int) $request->input('section_id') !== $topic->section_id
+            && ($topic->materials()->withTrashed()->exists() || $topic->quizzes()->withTrashed()->exists())) {
             throw ValidationException::withMessages([
-                'section_id' => 'Topik yang memiliki materi tidak bisa dipindahkan bidang. Pindahkan materinya dahulu.',
+                'section_id' => 'Topik yang memiliki materi atau latihan tidak bisa dipindahkan bidang. Pindahkan kontennya dahulu.',
             ]);
         }
 
@@ -91,8 +93,8 @@ class TopicController extends Controller
 
     public function destroy(Request $request, Topic $topic): RedirectResponse
     {
-        if ($topic->materials()->withTrashed()->exists()) {
-            return back()->with('error', 'Topik masih memiliki materi, termasuk materi arsip. Pindahkan materi atau nonaktifkan topik.');
+        if ($topic->materials()->withTrashed()->exists() || $topic->quizzes()->withTrashed()->exists()) {
+            return back()->with('error', 'Topik masih memiliki materi atau latihan, termasuk konten arsip. Pindahkan konten atau nonaktifkan topik.');
         }
 
         $topic->delete();

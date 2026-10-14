@@ -31,7 +31,7 @@
     <a class="side__link{{ request()->routeIs('admin.materials.*', 'admin.topics.*') ? ' is-active' : '' }}"
        href="{{ route('admin.materials.index') }}"
        @if (request()->routeIs('admin.materials.*', 'admin.topics.*')) aria-current="page" @endif>
-      <svg data-icon="folder"></svg><span>Materi &amp; Topik</span>
+      <svg data-icon="folder"></svg><span>Materi</span>
     </a>
     <a class="side__link{{ request()->routeIs('admin.sections.*') ? ' is-active' : '' }}"
        href="{{ route('admin.sections.index') }}"
@@ -43,7 +43,7 @@
        @if (request()->routeIs('admin.questions.*')) aria-current="page" @endif>
       <svg data-icon="layers"></svg><span>Soal &amp; Pembahasan</span>
     </a>
-    <a class="side__link{{ request()->routeIs('admin.exams.*') ? ' is-active' : '' }}" href="{{ route('admin.exams.index') }}" @if (request()->routeIs('admin.exams.*')) aria-current="page" @endif><svg data-icon="timer"></svg><span>Quiz &amp; Tryout</span></a>
+    <a class="side__link{{ request()->routeIs('admin.exams.*') ? ' is-active' : '' }}" href="{{ route('admin.exams.index') }}" @if (request()->routeIs('admin.exams.*')) aria-current="page" @endif><svg data-icon="timer"></svg><span>Tryout</span></a>
     <a class="side__link{{ request()->routeIs('admin.articles.*') ? ' is-active' : '' }}"
        href="{{ route('admin.articles.index') }}"
        @if (request()->routeIs('admin.articles.*')) aria-current="page" @endif>

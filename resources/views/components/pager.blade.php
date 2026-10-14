@@ -1,7 +1,7 @@
 @props(['paginator'])
 
 {{--
-    Paginator Laravel yang dirender memakai kelas pager dari design system LONTAR
+    Paginator Laravel yang dirender memakai kelas pager dari design system Ganesha Nusa
     (.pager / .pager__btn), bukan markup default Tailwind.
 
     `LengthAwarePaginator::elements()` protected di Laravel 13, jadi jendela

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Province;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\User;
@@ -36,6 +37,7 @@ class UserFactory extends Factory
             'status' => UserStatus::Active,
             'phone' => fake()->numerify('08## #### ####'),
             'address' => fake()->city().', '.fake()->state(),
+            'province' => fake()->randomElement(Province::cases()),
             'institution' => fake()->randomElement([
                 'Kementerian Dalam Negeri',
                 'Kementerian Digital',

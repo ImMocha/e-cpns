@@ -1,9 +1,9 @@
 @extends('layouts.admin.main')
-@section('title', 'Kelola Materi — LONTAR')
+@section('title', 'Kelola Materi — Ganesha Nusa')
 @section('content')
   @include('components.flash')
   <header class="page-head content-page-head">
-    <div><span class="eyebrow">Ruang Kerja Konten</span><h1>Materi &amp; Topik</h1><p>Pilih bidang dan topik untuk mengelola isi pembelajaran dengan lebih fokus.</p></div>
+    <div><span class="eyebrow">Ruang Kerja Konten</span><h1>Materi &amp; Topik</h1><p>Kelola materi dan latihan dalam topik agar alur belajar peserta tersusun rapi.</p></div>
     <a class="btn btn--primary" href="{{ route('admin.materials.create', array_filter(['section_id' => $selectedSection?->id, 'topic_id' => $selectedTopic?->id, 'workspace' => 1])) }}"><svg data-icon="plus"></svg> Tambah Materi</a>
   </header>
   @if($sections->isEmpty())
@@ -37,7 +37,7 @@
         @endif
         @foreach($topics as $topic)
           <a class="content-topic-link {{ $selectedTopic?->id === $topic->id ? 'is-active' : '' }}" href="{{ route('admin.materials.index', array_filter(['section_id' => $topic->section_id, 'topic_id' => $topic->id, 'topic_page' => $topics->currentPage() > 1 ? $topics->currentPage() : null, 'topic_q' => $filters['topic_q']])) }}" @if($selectedTopic?->id === $topic->id) aria-current="page" @endif>
-            <svg data-icon="{{ $topic->is_active ? 'layers' : 'pause' }}"></svg><span><strong>{{ $topic->name }}</strong><small>{{ $selectedSection ? ($topic->is_active ? 'Aktif' : 'Nonaktif') : $topic->section->name }} · {{ $topic->materials_count }} materi</small></span>
+            <svg data-icon="{{ $topic->is_active ? 'layers' : 'pause' }}"></svg><span><strong>{{ $topic->name }}</strong><small>{{ $selectedSection ? ($topic->is_active ? 'Aktif' : 'Nonaktif') : $topic->section->name }} · {{ $topic->materials_count }} materi · {{ $topic->quizzes_count }} latihan</small></span>
           </a>
         @endforeach
       </nav>
@@ -91,6 +91,19 @@
         @endforelse
       </div>
       @if($materials->total() > 0)<footer class="content-list-footer"><span>Menampilkan {{ $materials->firstItem() }}–{{ $materials->lastItem() }} dari {{ $materials->total() }} materi</span><x-pager :paginator="$materials" /></footer>@endif
+      @if($selectedTopic)
+        <section class="content-topic-quizzes" aria-label="Latihan pada {{ $selectedTopic->name }}">
+          <div class="content-panel-heading content-panel-heading--main"><div><div class="content-location"><svg data-icon="list-checks"></svg> Evaluasi pembelajaran</div><h3>Latihan Topik</h3><p>{{ $selectedTopic->quizzes_count }} latihan · Atur soal dan syarat penyelesaian materi.</p></div><a class="btn btn--primary btn--sm" href="{{ route('admin.materials.quizzes.create', ['topic_id' => $selectedTopic->id]) }}"><svg data-icon="plus"></svg> Tambah Latihan</a></div>
+          <div class="content-exam-list">
+            @forelse($topicQuizzes as $exam)
+              @include('Dashboard.Admin.exams._item', ['exam' => $exam])
+            @empty
+              <p class="content-panel-note">Belum ada latihan pada topik ini. Tambahkan latihan untuk menguji pemahaman peserta.</p>
+            @endforelse
+          </div>
+          @if($selectedTopic->quizzes_count > 0)<a class="content-directory-link" href="{{ route('admin.materials.quizzes.index', ['topic_id' => $selectedTopic->id]) }}">Kelola semua latihan topik <svg data-icon="arrow-right"></svg></a>@endif
+        </section>
+      @endif
     </section>
   </div>
 @endsection

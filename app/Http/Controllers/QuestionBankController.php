@@ -44,10 +44,14 @@ class QuestionBankController extends Controller
             && ($feedback['revision'] ?? null) === $question->revision()
             && is_int($feedback['option'] ?? null) && array_key_exists($feedback['option'], $question->options)
             ? $feedback['option'] : null;
+        $canViewExplanations = $request->user()->canViewExplanations();
 
         return view('Dashboard.User.question-bank.show', [
             'question' => $question->load('section'), 'selectedOption' => $selectedOption,
             'isPreview' => $request->user()->isAdmin(),
+            'canViewExplanations' => $canViewExplanations,
+            'explanationHtml' => $canViewExplanations && ($selectedOption !== null || $request->user()->isAdmin())
+                ? $question->safeExplanation() : null,
             'filters' => $filters,
             'navigation' => $this->navigation($question, $filters),
         ]);

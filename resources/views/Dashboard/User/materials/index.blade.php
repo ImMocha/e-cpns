@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 @use('App\Enums\MaterialType')
-@section('title', 'Materi — LONTAR CPNS Online')
+@section('title', 'Materi — Ganesha Nusa CPNS Online')
 @section('content')
     @include('components.flash')
     <nav class="crumbs" aria-label="Breadcrumb">
@@ -32,6 +32,7 @@
       </div>
     @endif
     <form method="GET" action="{{ route('materials.index') }}" class="card card--tight">
+      @if ($filters['topic_id'])<input type="hidden" name="topic_id" value="{{ $filters['topic_id'] }}">@endif
       @if ($filters['section_id'])
         <input type="hidden" name="section_id" value="{{ $filters['section_id'] }}">
       @endif
@@ -55,7 +56,7 @@
             @endforeach
           </select>
           <button class="btn btn--ghost" type="submit">Terapkan</button>
-          @if ($filters['q'] || $filters['section_id'] || $filters['type'])
+          @if ($filters['q'] || $filters['section_id'] || $filters['type'] || $filters['topic_id'])
             <a class="btn btn--ghost" href="{{ route('materials.index') }}">Reset</a>
           @endif
         </div>
@@ -103,6 +104,9 @@
                   </span>
                 </a>
               @endforeach
+              @if ($topicQuizzes->has($topic->id))
+                <x-topic-quizzes :topic="$topic" :banks="$topicQuizzes->get($topic->id)" />
+              @endif
             </div>
           </details>
         @endforeach

@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\MaterialAccess;
 use App\Enums\MaterialType;
+use App\ExamCatalog;
 use App\Models\Material;
 use App\Models\MaterialProgress;
 use App\Models\Section;
@@ -38,18 +39,21 @@ class MaterialController extends Controller
 {
     private const PER_PAGE = 12;
 
-    public function index(Request $request): View
+    public function index(Request $request, ExamCatalog $catalog): View
     {
+        $request->validate(['topic_id' => ['nullable', 'integer', 'min:1']]);
         $filters = [
             'q' => trim((string) $request->query('q', '')),
             'section_id' => $request->query('section_id'),
             'type' => $request->query('type'),
+            'topic_id' => $request->query('topic_id'),
         ];
 
         $user = $request->user();
 
-        $lessonQuery = function (Builder|Relation $query) use ($filters): void {
+        $lessonQuery = function (Builder|Relation $query) use ($filters, $user): void {
             $query->visibleToMembers()
+                ->with(['userPackages' => fn (Builder|Relation $grants) => $grants->active()->whereBelongsTo($user)])
                 ->when($filters['type'], fn (Builder $query, $type) => $query->where('type', $type))
                 ->when($filters['q'] !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($filters): void {
                     $query->search($filters['q'])->orWhereHas('topic', fn (Builder $topic) => $topic->where('name', 'like', '%'.$filters['q'].'%'));
@@ -60,6 +64,7 @@ class MaterialController extends Controller
         $topics = Topic::query()->active()->with('section')
             ->withWhereHas('materials', $lessonQuery)
             ->when($filters['section_id'], fn (Builder $query, $id) => $query->where('section_id', $id))
+            ->when($filters['topic_id'], fn (Builder $query, $id) => $query->whereKey($id))
             ->ordered()
             ->paginate(self::PER_PAGE)
             ->withQueryString();
@@ -73,14 +78,17 @@ class MaterialController extends Controller
             ->pluck('material_id')
             ->flip()
             ->all();
+        $topicQuizzes = $catalog->listing($user, 'quiz', $topics->getCollection()->modelKeys())['banks']
+            ->groupBy(fn (array $item): int => (int) $item['exam']->topic_id);
 
         return view('Dashboard.User.materials.index', [
             'topics' => $topics,
             'filters' => $filters,
             'sections' => $this->sectionsWithCounts(),
             'types' => MaterialType::cases(),
-            'counts' => $this->counts(),
+            'counts' => $this->counts($user),
             'completedMaterialIds' => $completedMaterialIds,
+            'topicQuizzes' => $topicQuizzes,
             // Callable, bukan array: akses dicek per materi tanpa query ulang,
             // karena tiap materi bisa beda level.
             'canOpen' => fn (Material $material): bool => $material->isAccessibleBy($user),
@@ -88,7 +96,7 @@ class MaterialController extends Controller
     }
 
     /** Halaman baca: PDF di-embed, video diputar. */
-    public function show(Request $request, Material $material): View|RedirectResponse
+    public function show(Request $request, Material $material, ExamCatalog $catalog): View|RedirectResponse
     {
         $user = $request->user();
 
@@ -119,6 +127,7 @@ class MaterialController extends Controller
             'material' => $material,
             'related' => $this->related($material),
             'progress' => $progress,
+            'topicQuizzes' => $material->topic ? $catalog->listing($user, 'quiz', [$material->topic->id])['banks'] : collect(),
         ]);
     }
 
@@ -197,13 +206,14 @@ class MaterialController extends Controller
     }
 
     /** @return array{total:int, pdf:int, video:int, locked:int} */
-    private function counts(): array
+    private function counts(User $user): array
     {
         return [
             'total' => $this->visibleQuery()->count(),
             'pdf' => $this->visibleQuery()->where('type', MaterialType::Pdf->value)->count(),
             'video' => $this->visibleQuery()->where('type', MaterialType::Video->value)->count(),
-            'locked' => $this->visibleQuery()->where('access_level', MaterialAccess::Premium->value)->count(),
+            'locked' => $user->isAdmin() ? 0 : $this->visibleQuery()->where('access_level', MaterialAccess::Premium->value)
+                ->whereDoesntHave('userPackages', fn (Builder $grants) => $grants->active()->whereBelongsTo($user))->count(),
         ];
     }
 

@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'LONTAR — Belajar & Tryout CPNS Online')
+@section('title', 'Ganesha Nusa — Belajar & Tryout CPNS Online')
 
 @section('content')
 {{-- ===================== HERO ===================== --}}
@@ -198,7 +198,7 @@
               <span>2 · Latihan dengan bank soal</span><svg data-icon="chevron-down" class="acc-icon"></svg>
             </button>
             <div class="acc-panel" id="s2">
-              Kerjakan soal latihan per kategori. Jawaban langsung dinilai dan pembahasan muncul setelah submit.
+              Kerjakan soal latihan per kategori. Jawaban langsung dinilai dan kunci muncul setelah submit. Pembahasan tersedia dengan paket berbayar aktif.
             </div>
           </div>
           <div class="acc-item">
@@ -506,78 +506,40 @@
     <div class="section-head section-head--center reveal">
       <span class="eyebrow" style="justify-content:center">Paket Belajar</span>
       <h2 style="margin:.75rem 0 0">Pilih Paket <span class="underline-squiggle">Sesuai Targetmu</span></h2>
-      <p>Setiap paket memberi akses ke materi, video, quiz, dan tryout tertentu. Bisa naik kelas kapan saja.</p>
+      <p>Pilih jumlah percobaan tryout, akses leaderboard, materi, dan latihan sesuai kebutuhanmu.</p>
     </div>
 
     <div class="grid grid-3" style="--gap:1.75rem;align-items:start">
 
-      <article class="card card--pop price reveal">
+      @forelse ($packages as $package)
+      <article class="card card--pop price {{ $package->leaderboard_access === \App\Enums\LeaderboardAccess::Local ? 'price--featured' : '' }} reveal" data-delay="{{ $loop->index * 90 }}">
         <div>
-          <span class="badge badge--flat">Mulai belajar</span>
-          <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Basic</h3>
+          <span class="badge {{ $package->leaderboard_access === \App\Enums\LeaderboardAccess::None ? 'badge--flat' : 'badge--premium' }}"><svg data-icon="{{ $package->leaderboard_access === \App\Enums\LeaderboardAccess::None ? 'check' : 'crown' }}"></svg> {{ $package->leaderboard_access->label() }}</span>
+          <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">{{ $package->name }}</h3>
+          <p class="text-sm text-soft" style="margin-top:.6rem">{{ $package->description }}</p>
         </div>
         <div>
-          <div class="price__amount"><small>Rp</small>49.000</div>
-          <div class="price__period">Akses 30 hari</div>
+          <div class="price__amount">{{ $package->formattedPrice() }}</div>
+          <div class="price__period">{{ $package->duration_days === null ? 'Tanpa batas waktu' : 'Akses '.$package->durationLabel() }}</div>
         </div>
         <ul class="price__list">
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Materi PDF gratis + ringkasan</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> 20 soal latihan per kategori</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> 2x Try Out CAT</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Riwayat & statistik nilai</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'tryout')->count() }} paket soal tryout</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Percobaan tryout tanpa batas' : $package->tryout_quota.' percobaan tryout' }}</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> Kunci jawaban dan pembahasan</li>
+          @if ($package->materials->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->materials->count() }} materi &amp; video premium</li>@endif
+          @if ($package->exams->where('kind', 'quiz')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'quiz')->count() }} latihan soal</li>@endif
+          @if ($package->leaderboard_access === \App\Enums\LeaderboardAccess::National)<li><span class="price__check"><svg data-icon="check"></svg></span> Progres belajar &amp; statistik nilai</li>@endif
         </ul>
         <div class="price__foot">
-          <a class="btn btn--ghost btn--block" href="{{ route('checkout') }}">Pilih Basic</a>
+          <a class="btn btn--primary btn--block" href="{{ route('checkout', ['package' => $package->id]) }}">Pilih {{ $package->name }}<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
         </div>
       </article>
-
-      <article class="card card--pop price price--featured reveal" data-delay="90">
-        <span class="star-badge">Paling Populer</span>
-        <div>
-          <span class="badge badge--premium"><svg data-icon="crown"></svg> Paling Disukai</span>
-          <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Premium</h3>
-        </div>
-        <div>
-          <div class="price__amount"><small>Rp</small>99.000</div>
-          <div class="price__period">Akses 90 hari</div>
-        </div>
-        <ul class="price__list">
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Semua materi PDF lengkap</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Seluruh video pembelajaran</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Bank soal tanpa batas</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> 12x Try Out CAT + pembahasan</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Leaderboard & grafik lengkap</li>
-        </ul>
-        <div class="price__foot">
-          <a class="btn btn--primary btn--block" href="{{ route('checkout') }}">Pilih Premium<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
-        </div>
-      </article>
-
-      <article class="card card--pop price reveal" data-delay="180">
-        <div>
-          <span class="badge badge--flat">Untuk yang serius</span>
-          <h3 class="card__title" style="margin-top:.6rem;font-size:var(--fs-lg)">Paket Ultimate</h3>
-        </div>
-        <div>
-          <div class="price__amount"><small>Rp</small>249.000</div>
-          <div class="price__period">Akses 12 bulan</div>
-        </div>
-        <ul class="price__list">
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Semua konten Premium</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Try Out CAT tanpa batas</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Sertifikat digital kelulusan</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Review jawaban bersama admin</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Update materi otomatis</li>
-        </ul>
-        <div class="price__foot">
-          <a class="btn btn--ghost btn--block" href="{{ route('checkout') }}">Pilih Ultimate</a>
-        </div>
-      </article>
+      @empty
+      <div class="card price"><h3 class="card__title">Paket belajar segera hadir</h3><p class="text-sm text-soft" style="margin-top:.6rem">Sambil menunggu, kamu bisa belajar lewat materi dan latihan gratis.</p></div>
+      @endforelse
     </div>
 
-    <p class="text-center text-xs text-soft" style="margin-top:1.75rem">
-      Harga, masa berlaku, dan isi paket bersifat <strong>TBD</strong> — menunggu konfirmasi final client.
-    </p>
+    <p class="text-center text-xs text-soft" style="margin-top:1.75rem">Harga dan isi paket mengikuti katalog aktif yang dikelola admin.</p>
   </div>
 </section>
 
@@ -589,8 +551,7 @@
         <span class="eyebrow">Leaderboard</span>
         <h2 style="margin:.75rem 0 1rem">Tahu Posisimu <span class="underline-squiggle">di Antara Peserta Lain</span></h2>
         <p class="lead">
-          Papan peringkat diperbarui setelah setiap tryout. Mekanisme ranking final akan ditentukan bersama client —
-          saat ini prototipe memakai skor tryout terakhir.
+          Papan peringkat memakai nilai terbaik dari seluruh tryout yang selesai, dihitung sebagai persentase agar skornya sebanding. Lihat posisi di provinsimu atau secara nasional sesuai paketmu.
         </p>
         <div class="btn-row" style="margin-top:1.75rem">
           <a class="btn btn--primary" href="{{ route('leaderboard.index') }}">Lihat Leaderboard<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
@@ -666,7 +627,7 @@
       </div>
       <div class="acc-item reveal" data-delay="120">
         <button class="acc-trigger" aria-expanded="false" aria-controls="f3">Kalau waktu habis saat mengerjakan?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
-        <div class="acc-panel" id="f3">Sistem melakukan submit otomatis, lalu nilai dan pembahasan tetap bisa kamu lihat seperti biasa.</div>
+        <div class="acc-panel" id="f3">Sistem melakukan submit otomatis. Nilai dan kunci jawaban tetap bisa kamu lihat; pembahasan tersedia dengan paket berbayar aktif.</div>
       </div>
       <div class="acc-item reveal" data-delay="180">
         <button class="acc-trigger" aria-expanded="false" aria-controls="f4">Apakah saya bisa melakukan refund?<svg data-icon="chevron-down" class="acc-icon"></svg></button>

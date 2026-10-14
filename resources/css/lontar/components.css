@@ -263,6 +263,7 @@
 }
 .card--pop { box-shadow: var(--sh-lg); transition: transform var(--t) var(--ease-pop), box-shadow var(--t) var(--ease-pop); }
 .card--pop:hover { transform: translate(-3px, -3px) rotate(-1deg); box-shadow: 12px 12px 0 var(--ink); }
+.card--static { box-shadow: var(--sh-lg); }
 .card--flat { box-shadow: none; }
 .card--dashed { border-style: dashed; box-shadow: none; background: var(--surface-2); }
 .card--blue  { box-shadow: var(--sh-soft-blue); }
@@ -661,6 +662,8 @@
   border-bottom: 2px solid var(--ink);
 }
 .appbar__inner { display: flex; align-items: center; gap: 0.85rem; height: 100%; }
+.appbar .logo, .appbar__icon { flex-shrink: 0; }
+.appbar .logo { white-space: nowrap; }
 .appbar__search { position: relative; flex: 1; max-width: 380px; }
 .appbar__search .input { min-height: 44px; padding-left: 2.75rem; }
 .appbar__search svg {
@@ -700,6 +703,16 @@
   color: #fff;
 }
 @media (max-width: 700px) { .appbar__search { display: none; } }
+@media (max-width: 560px) {
+  .appbar__inner { gap: .5rem; }
+  .appbar .logo { font-size: 16px; gap: .4rem; }
+  .appbar .logo__mark { width: 32px; height: 32px; flex-basis: 32px; }
+  .appbar .logo__sub { font-size: 8px; letter-spacing: .12em; }
+  .appbar__right { gap: .35rem; }
+  .appbar__icon, .appbar-site-link { width: 36px; height: 36px; min-height: 36px; padding: .4rem; }
+  .appbar-site-link > span { display: none; }
+}
+@media (max-width: 360px) { .appbar-site-link { display: none; } }
 
 .app-shell { display: flex; align-items: flex-start; }
 .app-main {

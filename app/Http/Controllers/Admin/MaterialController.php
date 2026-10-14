@@ -41,7 +41,7 @@ class MaterialController extends Controller
             'status' => ['nullable', Rule::in(MaterialStatus::options())],
         ]);
         $selectedTopic = $request->filled('topic_id')
-            ? Topic::with('section')->findOrFail($request->integer('topic_id')) : null;
+            ? Topic::with('section')->withCount('quizzes')->findOrFail($request->integer('topic_id')) : null;
         $sectionId = $request->filled('section_id') ? $request->integer('section_id') : $selectedTopic?->section_id;
         $selectedSection = $sectionId ? Section::findOrFail($sectionId) : null;
         abort_if($selectedTopic && $selectedTopic->section_id !== $sectionId, 404);
@@ -66,7 +66,7 @@ class MaterialController extends Controller
             ->paginate(self::PER_PAGE)
             ->withQueryString();
 
-        $topics = Topic::query()->with('section')->withCount('materials')
+        $topics = Topic::query()->with('section')->withCount(['materials', 'quizzes'])
             ->whereHas('section')
             ->when($sectionId, fn (Builder $query) => $query->where('section_id', $sectionId))
             ->when($filters['topic_q'] !== '', fn (Builder $query) => $query->where('name', 'like', '%'.$filters['topic_q'].'%'))
@@ -80,6 +80,9 @@ class MaterialController extends Controller
             'topics' => $topics,
             'selectedSection' => $selectedSection,
             'selectedTopic' => $selectedTopic,
+            'topicQuizzes' => $selectedTopic ? $selectedTopic->quizzes()->with('topic.section')
+                ->withCount(['questions as available_count' => fn (Builder $query): Builder => $query->visibleToMembers()])
+                ->latest('id')->limit(5)->get() : collect(),
             'types' => MaterialType::cases(),
             'statuses' => MaterialStatus::cases(),
         ]);

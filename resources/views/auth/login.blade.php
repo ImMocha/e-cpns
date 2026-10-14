@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Masuk — LONTAR CPNS Online')
+@section('title', 'Masuk — Ganesha Nusa CPNS Online')
 
 @section('body-attributes')
     style="min-height:100dvh;display:flex;flex-direction:column"
@@ -11,8 +11,7 @@
 <header class="nav auth-nav">
   <div class="container container--wide nav__inner">
     <a class="logo" href="{{ route('home') }}">
-      <span class="logo__mark"><svg data-icon="book"></svg></span>
-      <span>LONTAR<span class="logo__sub">CPNS Online</span></span>
+      <x-logo />
     </a>
     <a class="btn btn--ghost btn--sm auth-back" href="{{ route('home') }}" aria-label="Kembali ke beranda">
       <svg data-icon="arrow-left"></svg><span class="auth-back__full">Kembali ke beranda</span><span class="auth-back__short" aria-hidden="true">Beranda</span>
@@ -80,7 +79,7 @@
       <span class="alert__icon"><svg data-icon="info"></svg></span>
       <div>
         <strong>Akun demo</strong>
-        <code class="text-mono text-xs">admin@lontar.asia</code> atau peserta mana pun &mdash; password <code class="text-mono text-xs">password</code>.
+        Gunakan email akun admin atau peserta yang sudah tersedia &mdash; password <code class="text-mono text-xs">password</code>.
       </div>
     </div>
   </div>
@@ -115,7 +114,7 @@
 
 <footer class="footer auth-footer" style="padding-block:1.5rem">
   <div class="container container--wide flex items-center justify-between flex-wrap" style="gap:1rem">
-    <span class="text-sm">© <span data-year>2026</span> LONTAR · Prototipe demonstrasi.</span>
+    <span class="text-sm">© <span data-year>2026</span> Ganesha Nusa · Prototipe demonstrasi.</span>
     <div class="footer__links">
       <a href="#">Syarat &amp; Ketentuan</a>
       <a href="#">Kebijakan Privasi</a>

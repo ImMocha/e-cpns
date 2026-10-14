@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\MaterialController as AdminMaterialController;
 use App\Http\Controllers\Admin\SectionController as AdminSectionController;
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\UserPackageController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
@@ -24,11 +25,13 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialProgressController;
+use App\Http\Controllers\MidtransNotificationController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionBankController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\StatisticsController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TryoutController;
 use App\Http\Controllers\TryoutResultController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +44,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::resource('articles', ArticleController::class)->only(['index', 'show']);
+Route::post('/payments/midtrans/notification', MidtransNotificationController::class)->name('payments.midtrans.notification');
 
 /*
 |--------------------------------------------------------------------------
@@ -112,6 +116,11 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
 
     Route::get('/packages', [PackageController::class, 'index'])->name('packages.index');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('checkout.store');
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+    Route::post('/transactions/{transaction}/refresh', [TransactionController::class, 'refresh'])->middleware('throttle:10,1')->name('transactions.refresh');
+    Route::post('/transactions/{transaction}/pay', [TransactionController::class, 'pay'])->middleware('throttle:10,1')->name('transactions.pay');
     Route::get('/certificates', CertificateController::class)->name('certificates.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -148,6 +157,9 @@ Route::prefix('admin')
 
         // Pengelolaan materi. `toggleStatus` mendahului resource supaya
         // `materials/{material}` tidak menabrak jalur `materials/{material}/...`.
+        Route::prefix('materials')->name('materials.')->group(function (): void {
+            Route::resource('quizzes', AdminExamController::class)->except('show')->parameters(['quizzes' => 'exam']);
+        });
         Route::patch('materials/{material}/status', [AdminMaterialController::class, 'toggleStatus'])
             ->name('materials.status');
         Route::resource('materials', AdminMaterialController::class)->parameters(['materials' => 'material']);
@@ -155,7 +167,9 @@ Route::prefix('admin')
         Route::resource('questions', AdminQuestionController::class);
         Route::resource('exams', AdminExamController::class)->except('show');
         Route::resource('articles', AdminArticleController::class);
-        Route::get('/packages', AdminPackageController::class)->name('packages.index');
+        Route::resource('packages', AdminPackageController::class)->except('show')->withTrashed(['edit']);
+        Route::post('packages/{package}/members', [UserPackageController::class, 'store'])->name('packages.members.store');
+        Route::delete('packages/{package}/members/{userPackage}', [UserPackageController::class, 'destroy'])->withTrashed()->name('packages.members.destroy');
         Route::get('/transactions', AdminTransactionController::class)->name('transactions.index');
         Route::get('/vouchers', AdminVoucherController::class)->name('vouchers.index');
     });

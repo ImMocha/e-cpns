@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\MaterialAccess;
 use App\Enums\MaterialType;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
@@ -26,20 +25,20 @@ class DashboardController extends SliceController
         $trend = $tryoutSummary['trend'];
 
         $materialQuery = Material::query()->visibleToMembers()
-            ->where('access_level', MaterialAccess::Free->value);
+            ->accessibleTo($user);
         $materialSections = Section::query()->active()->ordered()
             ->withCount([
                 'materials as available_materials_count' => fn (Builder $query) => $query->visibleToMembers()
-                    ->where('access_level', MaterialAccess::Free->value),
+                    ->accessibleTo($user),
                 'materials as completed_materials_count' => fn (Builder $query) => $query->visibleToMembers()
-                    ->where('access_level', MaterialAccess::Free->value)
+                    ->accessibleTo($user)
                     ->whereHas('progressRecords', fn (Builder $progress) => $progress->whereBelongsTo($user)->whereNotNull('completed_at')),
             ])->get()->filter(fn (Section $section): bool => $section->available_materials_count > 0)->values();
         $materialCount = $materialSections->sum('available_materials_count');
         $completedMaterialCount = $materialSections->sum('completed_materials_count');
         $resumeMaterials = MaterialProgress::query()->whereBelongsTo($user)->whereNull('completed_at')
             ->whereHas('material', fn (Builder $query) => $query->visibleToMembers()
-                ->where('access_level', MaterialAccess::Free->value))
+                ->accessibleTo($user))
             ->with(['material.section', 'material.topic'])
             ->latest('last_viewed_at')->limit(3)->get()
             ->pluck('material');
@@ -63,12 +62,13 @@ class DashboardController extends SliceController
                 'height' => 240,
                 'aria' => 'Grafik perkembangan nilai tryout',
             ] : null,
+            'activePackages' => $user->userPackages()->active()->latest('id')->get(),
             'materialCount' => $materialCount,
             'completedMaterialCount' => $completedMaterialCount,
             'materialProgressPercent' => $materialCount > 0 ? (int) round($completedMaterialCount / $materialCount * 100) : 0,
             'completedVideoCount' => MaterialProgress::query()->whereBelongsTo($user)->whereNotNull('completed_at')
                 ->whereHas('material', fn (Builder $query) => $query->visibleToMembers()
-                    ->where('access_level', MaterialAccess::Free->value)
+                    ->accessibleTo($user)
                     ->where('type', MaterialType::Video->value))->count(),
             'materialSections' => $materialSections,
             'recentMaterials' => $recentMaterials,

@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Daftar — LONTAR CPNS Online')
+@section('title', 'Daftar — Ganesha Nusa CPNS Online')
 
 @section('body-attributes')
     style="min-height:100dvh;display:flex;flex-direction:column"
@@ -22,8 +22,7 @@
 <header class="nav auth-nav">
   <div class="container container--wide nav__inner">
     <a class="logo" href="{{ route('home') }}">
-      <span class="logo__mark"><svg data-icon="book"></svg></span>
-      <span>LONTAR<span class="logo__sub">CPNS Online</span></span>
+      <x-logo />
     </a>
     <a class="btn btn--ghost btn--sm auth-back" href="{{ route('home') }}" aria-label="Kembali ke beranda">
       <svg data-icon="arrow-left"></svg><span class="auth-back__full">Kembali ke beranda</span><span class="auth-back__short" aria-hidden="true">Beranda</span>
@@ -51,6 +50,8 @@
           </div>
           <span class="field__error"><svg data-icon="alert"></svg><span>{{ $errors->first('name') ?? 'Wajib diisi.' }}</span></span>
         </div>
+
+        <x-province-select />
 
         <div class="field{{ $errors->has('email') ? ' is-invalid' : '' }}">
           <label class="label" for="email">Email</label>
@@ -92,7 +93,7 @@
 
         <label class="check{{ $errors->has('terms') ? ' is-invalid' : '' }}">
           <input type="checkbox" id="terms" name="terms" value="1" required @checked(old('terms'))>
-          <span>Saya setuju dengan <a class="fw-700 text-primary" href="#">Syarat &amp; Ketentuan</a> serta <a class="fw-700 text-primary" href="#">Kebijakan Privasi</a> LONTAR.</span>
+          <span>Saya setuju dengan <a class="fw-700 text-primary" href="#">Syarat &amp; Ketentuan</a> serta <a class="fw-700 text-primary" href="#">Kebijakan Privasi</a> Ganesha Nusa.</span>
         </label>
         @error('terms')<span class="field__error" style="display:flex"><svg data-icon="alert"></svg><span>{{ $message }}</span></span>@enderror
 
@@ -130,7 +131,7 @@
         </div>
         <div class="flex items-start gap-3">
           <span class="price__check"><svg data-icon="check"></svg></span>
-          <div><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Latihan soal terbatas</strong><span class="text-sm text-soft">Coba bank soal per kategori beserta pembahasan.</span></div>
+          <div><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Latihan soal terbatas</strong><span class="text-sm text-soft">Coba bank soal per kategori beserta kunci jawaban. Pembahasan tersedia dengan paket berbayar aktif.</span></div>
         </div>
         <div class="flex items-start gap-3">
           <span class="price__check"><svg data-icon="check"></svg></span>
@@ -149,7 +150,7 @@
           <span class="avatar avatar--sm avatar--violet" style="margin-left:-14px">N</span>
           <span class="avatar avatar--sm avatar--ink" style="margin-left:-14px">+12k</span>
         </div>
-        <p class="text-xs text-soft">Peserta sudah belajar bersama LONTAR.</p>
+        <p class="text-xs text-soft">Peserta sudah belajar bersama Ganesha Nusa.</p>
       </div>
     </div>
   </aside>
@@ -157,7 +158,7 @@
 
 <footer class="footer auth-footer" style="padding-block:1.5rem">
   <div class="container container--wide flex items-center justify-between flex-wrap" style="gap:1rem">
-    <span class="text-sm">© <span data-year>2026</span> LONTAR · Prototipe demonstrasi.</span>
+    <span class="text-sm">© <span data-year>2026</span> Ganesha Nusa · Prototipe demonstrasi.</span>
     <div class="footer__links">
       <a href="#">Syarat &amp; Ketentuan</a>
       <a href="#">Kebijakan Privasi</a>

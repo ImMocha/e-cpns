@@ -1,9 +1,9 @@
 @extends('layouts.admin.main')
-@section('title', 'Kelola Topik — LONTAR')
+@section('title', 'Kelola Topik — Ganesha Nusa')
 @section('content')
   @include('components.flash')
   <header class="page-head content-page-head">
-    <div><span class="eyebrow">Ruang Kerja Konten</span><h1>Materi &amp; Topik</h1><p>Susun topik dalam setiap bidang, lalu kelola PDF dan video di dalamnya.</p></div>
+    <div><span class="eyebrow">Ruang Kerja Konten</span><h1>Materi &amp; Topik</h1><p>Susun topik dalam setiap bidang, lalu kelola materi dan latihan di dalamnya.</p></div>
     <a class="btn btn--primary" href="{{ route('admin.topics.create', array_filter(['section_id' => $selectedSection?->id, 'workspace' => 1])) }}"><svg data-icon="plus"></svg> Tambah Topik</a>
   </header>
   @include('Dashboard.Admin.materials._navigation')
@@ -23,12 +23,14 @@
             <details class="content-menu"><summary class="content-icon-button" aria-label="Tindakan untuk topik {{ $topic->name }}"><svg data-icon="more"></svg></summary><div class="content-menu__items">
               <a href="{{ route('admin.topics.edit', [$topic, 'workspace' => 1]) }}"><svg data-icon="pencil"></svg> Edit Topik</a>
               <a href="{{ route('admin.materials.create', ['section_id' => $topic->section_id, 'topic_id' => $topic->id, 'workspace' => 1]) }}"><svg data-icon="plus"></svg> Tambah Materi</a>
-              @if($topic->materials_count === 0)<form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" data-content-confirm data-confirm-title="Hapus topik?" data-confirm-body="Topik &quot;{{ $topic->name }}&quot; akan dihapus jika tidak memiliki materi, termasuk materi arsip." data-confirm-ok="Ya, hapus">@csrf @method('DELETE')<input type="hidden" name="workspace" value="1"><button type="submit" class="is-danger"><svg data-icon="trash"></svg> Hapus Topik</button></form>@endif
+              <a href="{{ route('admin.materials.quizzes.index', ['topic_id' => $topic->id]) }}"><svg data-icon="list-checks"></svg> Kelola Latihan</a>
+              <a href="{{ route('admin.materials.quizzes.create', ['topic_id' => $topic->id]) }}"><svg data-icon="plus"></svg> Tambah Latihan</a>
+              @if($topic->materials_count === 0 && $topic->quizzes_count === 0)<form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" data-content-confirm data-confirm-title="Hapus topik?" data-confirm-body="Topik &quot;{{ $topic->name }}&quot; akan dihapus jika tidak memiliki materi atau latihan, termasuk konten arsip." data-confirm-ok="Ya, hapus">@csrf @method('DELETE')<input type="hidden" name="workspace" value="1"><button type="submit" class="is-danger"><svg data-icon="trash"></svg> Hapus Topik</button></form>@endif
             </div></details>
           </div>
           <a class="content-topic-card__title" href="{{ route('admin.materials.index', ['section_id' => $topic->section_id, 'topic_id' => $topic->id]) }}">{{ $topic->name }}</a>
           <p class="content-topic-card__description">{{ $topic->description ?: 'Belum ada deskripsi topik.' }}</p>
-          <div class="content-topic-card__counts"><span><strong>{{ $topic->materials_count }}</strong> materi</span><span>{{ $topic->published_materials_count }} terbit · {{ $topic->materials_count - $topic->published_materials_count }} draft</span></div>
+          <div class="content-topic-card__counts"><span><strong>{{ $topic->materials_count }}</strong> materi · {{ $topic->quizzes_count }} latihan</span><span>{{ $topic->published_materials_count }} terbit · {{ $topic->materials_count - $topic->published_materials_count }} draft</span></div>
           <div class="content-topic-card__footer"><span class="content-topic-state {{ $topic->is_active ? '' : 'is-inactive' }}">{{ $topic->is_active ? 'Aktif' : 'Nonaktif' }}</span><a href="{{ route('admin.materials.index', ['section_id' => $topic->section_id, 'topic_id' => $topic->id]) }}">Kelola Materi <svg data-icon="arrow-right"></svg></a></div>
         </article>
       @empty

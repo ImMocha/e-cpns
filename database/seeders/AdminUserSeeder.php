@@ -27,7 +27,7 @@ class AdminUserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'phone' => '0812 3456 7890',
                 'address' => 'Jakarta Selatan, DKI Jakarta',
-                'institution' => 'LONTAR',
+                'institution' => 'Ganesha Nusa',
                 'last_login_at' => now(),
             ],
         );
@@ -42,7 +42,7 @@ class AdminUserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'phone' => '0813 2211 9087',
                 'address' => 'Bandung, Jawa Barat',
-                'institution' => 'LONTAR',
+                'institution' => 'Ganesha Nusa',
                 'last_login_at' => null,
             ],
         );

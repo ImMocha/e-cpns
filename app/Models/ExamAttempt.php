@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ExamBank;
-use App\Enums\QuestionStatus;
+use App\Enums\MaterialAccess;
+use App\ExamScoring;
 use Database\Factories\ExamAttemptFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -13,13 +14,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 #[Fillable([
     'user_id', 'kind', 'bank_slug', 'title', 'status', 'question_snapshot',
     'answers', 'flags', 'current_index', 'started_at', 'expires_at',
     'submitted_at', 'score', 'max_score', 'passing_score', 'correct_count',
-    'wrong_count', 'blank_count', 'duration_seconds', 'auto_submitted',
+    'wrong_count', 'blank_count', 'weighted_answered_count', 'duration_seconds', 'auto_submitted', 'user_package_id',
 ])]
 class ExamAttempt extends Model
 {
@@ -48,6 +51,7 @@ class ExamAttempt extends Model
             'correct_count' => 'integer',
             'wrong_count' => 'integer',
             'blank_count' => 'integer',
+            'weighted_answered_count' => 'integer',
             'duration_seconds' => 'integer',
             'auto_submitted' => 'boolean',
         ];
@@ -56,6 +60,11 @@ class ExamAttempt extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function userPackage(): BelongsTo
+    {
+        return $this->belongsTo(UserPackage::class);
     }
 
     /** @param Builder<ExamAttempt> $query */
@@ -87,14 +96,31 @@ class ExamAttempt extends Model
             }
 
             if ($bank instanceof Exam) {
-                abort_unless($bank->status === QuestionStatus::Published, 404);
+                $bank = Exam::query()->whereKey($bank->id)->sharedLock()->firstOrFail();
+                abort_unless(Exam::query()->visibleToMembers()->whereKey($bank->id)->exists(), 404);
+                $bank->load(['topic' => fn (Builder|Relation $topic): Builder|Relation => $topic->withLearningProgress($user)]);
+                if (! $bank->topicIsReadyFor($user)) {
+                    throw ValidationException::withMessages(['exam' => 'Selesaikan semua materi pada topik ini sebelum memulai latihan.']);
+                }
+            }
+            $entitlement = null;
+            if ($bank instanceof Exam && $bank->access_level === MaterialAccess::Premium && ! $user->isAdmin()) {
+                $entitlements = $user->userPackages()->active()
+                    ->whereHas('exams', fn (Builder $query) => $query->whereKey($bank->id))
+                    ->orderBy('id')->lockForUpdate()->get();
+                abort_if($entitlements->isEmpty(), 403, 'Sesi ini membutuhkan paket aktif yang memuatnya.');
+                $entitlement = $entitlements->first(fn (UserPackage $item): bool => $bank->kind === 'quiz' || $item->hasTryoutQuota());
+                if ($entitlement === null) {
+                    throw ValidationException::withMessages(['exam' => 'Kuota tryout paket sudah habis. Pilih paket lain untuk memulai sesi baru.']);
+                }
             }
             $definition = $bank->definition();
             $startedAt = now();
             $duration = (int) $definition['durationSeconds'];
 
-            return self::create([
+            $attempt = self::create([
                 'user_id' => $user->id,
+                'user_package_id' => $entitlement?->id,
                 'kind' => $bank instanceof Exam ? $bank->kind : $bank->kind(),
                 'bank_slug' => $bank instanceof Exam ? $bank->slug : $bank->value,
                 'title' => $definition['title'],
@@ -105,6 +131,11 @@ class ExamAttempt extends Model
                 'started_at' => $startedAt,
                 'expires_at' => $duration > 0 ? $startedAt->copy()->addSeconds($duration) : null,
             ]);
+            if ($entitlement !== null && $bank->kind === 'tryout') {
+                $entitlement->increment('tryouts_used');
+            }
+
+            return $attempt;
         });
     }
 
@@ -126,7 +157,7 @@ class ExamAttempt extends Model
                     }
                 }
 
-                return array_diff_key($question, array_flip(['answer', 'explain', 'explainHtml', 'image_path', 'video_path']));
+                return array_diff_key($question, array_flip(['answer', 'optionScores', 'explain', 'explainHtml', 'image_path', 'video_path']));
             },
             $definition['questions'],
         );
@@ -163,28 +194,10 @@ class ExamAttempt extends Model
         }
 
         $definition = $this->question_snapshot;
-        $answers = $this->answers ?? [];
-        $correct = 0;
-        $wrong = 0;
-        $blank = 0;
-
-        foreach ($definition['questions'] as $question) {
-            $answer = $answers[(string) $question['id']] ?? null;
-
-            if ($answer === null) {
-                $blank++;
-            } elseif ((int) $answer === (int) $question['answer']) {
-                $correct++;
-            } else {
-                $wrong++;
-            }
-        }
-
-        $points = (int) $definition['pointsPerCorrect'];
-        $penalty = (int) $definition['penaltyWrong'];
+        $result = ExamScoring::evaluate($definition, $this->answers ?? []);
         $submittedAt = $this->isExpired() ? $this->expires_at->copy() : now();
-        $rawMaximum = count($definition['questions']) * $points;
-        $rawScore = max(0, $correct * $points - $wrong * $penalty);
+        $rawMaximum = $result['max'];
+        $rawScore = $result['score'];
         $percent = ($definition['scoreMode'] ?? 'points') === 'percent';
 
         $this->forceFill([
@@ -193,40 +206,20 @@ class ExamAttempt extends Model
             'score' => $percent ? (int) round($rawScore / max(1, $rawMaximum) * 100) : $rawScore,
             'max_score' => $percent ? 100 : $rawMaximum,
             'passing_score' => $definition['passingScore'] ?? null,
-            'correct_count' => $correct,
-            'wrong_count' => $wrong,
-            'blank_count' => $blank,
+            'correct_count' => $result['correct'],
+            'wrong_count' => $result['wrong'],
+            'blank_count' => $result['blank'],
+            'weighted_answered_count' => $result['weighted'],
             'duration_seconds' => (int) max(0, $this->started_at->diffInSeconds($submittedAt)),
             'auto_submitted' => $automatic,
         ])->save();
     }
 
-    /** @return array<string, array{section: string, total: int, correct: int, wrong: int, blank: int, score: int, max: int}> */
+    /** @return array<string, array<string, int|string>> */
     public function sectionBreakdown(): array
     {
         $definition = $this->question_snapshot;
-        $answers = $this->answers ?? [];
-        $points = (int) $definition['pointsPerCorrect'];
-        $penalty = (int) $definition['penaltyWrong'];
-        $sections = [];
-
-        foreach ($definition['questions'] as $question) {
-            $code = $question['section'] ?? 'Umum';
-            $sections[$code] ??= ['section' => $code, 'total' => 0, 'correct' => 0, 'wrong' => 0, 'blank' => 0, 'score' => 0, 'max' => 0];
-            $sections[$code]['total']++;
-            $sections[$code]['max'] += $points;
-            $answer = $answers[(string) $question['id']] ?? null;
-
-            if ($answer === null) {
-                $sections[$code]['blank']++;
-            } elseif ((int) $answer === (int) $question['answer']) {
-                $sections[$code]['correct']++;
-                $sections[$code]['score'] += $points;
-            } else {
-                $sections[$code]['wrong']++;
-                $sections[$code]['score'] -= $penalty;
-            }
-        }
+        $sections = ExamScoring::evaluate($definition, $this->answers ?? [])['sections'];
 
         foreach ($sections as &$section) {
             $section['score'] = max(0, $section['score']);
@@ -254,7 +247,7 @@ class ExamAttempt extends Model
         $summary = [
             'count' => 0, 'tryoutCount' => 0, 'quizCount' => 0,
             'latest' => null, 'highest' => null, 'averageScore' => null,
-            'accuracy' => null, 'correct' => 0, 'wrong' => 0, 'blank' => 0,
+            'accuracy' => null, 'correct' => 0, 'wrong' => 0, 'blank' => 0, 'weighted' => 0,
             'totalSeconds' => 0, 'sections' => [], 'recent' => [], 'trend' => [],
         ];
         $scoreTotal = 0;
@@ -272,11 +265,12 @@ class ExamAttempt extends Model
             $summary['correct'] += $attempt->correct_count;
             $summary['wrong'] += $attempt->wrong_count;
             $summary['blank'] += $attempt->blank_count;
+            $summary['weighted'] += $attempt->weighted_answered_count;
             $summary['totalSeconds'] += $attempt->duration_seconds;
 
             foreach ($attempt->sectionBreakdown() as $code => $section) {
-                $summary['sections'][$code] ??= ['section' => $code, 'total' => 0, 'correct' => 0, 'wrong' => 0, 'blank' => 0, 'score' => 0, 'max' => 0];
-                foreach (['total', 'correct', 'wrong', 'blank', 'score', 'max'] as $field) {
+                $summary['sections'][$code] ??= ['section' => $code, 'total' => 0, 'correct' => 0, 'wrong' => 0, 'blank' => 0, 'weighted' => 0, 'weighted_total' => 0, 'score' => 0, 'max' => 0];
+                foreach (['total', 'correct', 'wrong', 'blank', 'weighted', 'weighted_total', 'score', 'max'] as $field) {
                     $summary['sections'][$code][$field] += $section[$field];
                 }
             }
@@ -289,7 +283,7 @@ class ExamAttempt extends Model
         if ($summary['count'] > 0) {
             $summary['averageScore'] = (int) round($scoreTotal / $summary['count']);
             $answered = $summary['correct'] + $summary['wrong'];
-            $summary['accuracy'] = $answered > 0 ? (int) round($summary['correct'] / $answered * 100) : 0;
+            $summary['accuracy'] = $answered > 0 ? (int) round($summary['correct'] / $answered * 100) : ($summary['weighted'] > 0 ? null : 0);
             $summary['trend'] = array_reverse($summary['recent']);
         }
 

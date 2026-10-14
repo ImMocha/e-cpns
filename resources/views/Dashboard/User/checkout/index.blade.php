@@ -1,202 +1,156 @@
 @extends('layouts.user.main')
-
-@section('title', 'Checkout — LONTAR CPNS Online')
-
+@section('title', 'Checkout — Ganesha Nusa')
 @section('content')
+<div class="mx-auto! max-w-[1180px]">
     <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="{{ route('dashboard') }}">Dashboard</a>
-      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
-      <a href="{{ route('packages.index') }}">Paket Belajar</a>
-      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
-      <span class="crumbs__current">Checkout</span>
+        <a href="{{ route('packages.index') }}">Paket Belajar</a>
+        <span class="crumbs__sep">›</span>
+        <span class="crumbs__current">Checkout</span>
     </nav>
 
-    <header class="page-head">
-      <h1>Checkout</h1>
-      <p>Pilih metode pembayaran dan selesaikan transaksi untuk mengaktifkan akses paket.</p>
+    <header class="page-head mb-7!">
+        <span class="eyebrow">Selangkah lagi</span>
+        <h1 class="mt-2!">Konfirmasi paketmu</h1>
+        <p class="max-w-2xl">Cek manfaat paket dan totalnya sebelum melanjutkan pembayaran.</p>
     </header>
 
-    <div class="steps" style="margin-bottom:1.75rem" aria-label="Tahapan checkout">
-      <span class="step is-done"><span class="step__num"><svg data-icon="check"></svg></span><span class="step__label">Pilih Paket</span></span>
-      <span class="step__line"></span>
-      <span class="step is-current"><span class="step__num">2</span><span class="step__label">Pembayaran</span></span>
-      <span class="step__line"></span>
-      <span class="step"><span class="step__num">3</span><span class="step__label">Akses Aktif</span></span>
-    </div>
-
-    <div class="panes" style="--gap:1.5rem;">
-
-      {{-- ============ FORM ============ --}}
-      <form class="card card--pop" id="formCheckout" data-demo-submit="Pembayaran berhasil. Paket Premium sudah aktif." data-demo-redirect="{{ route('dashboard') }}">
-        <div class="stack" style="--stack:1.5rem">
-
-          <section>
-            <div class="card__title" style="margin-bottom:1rem">1. Detail Paket</div>
-            <div class="card card--tight card--dashed" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
-              <span class="card__icon ico--primary" style="position:static;width:44px;height:44px;flex:0 0 44px"><svg data-icon="package"></svg></span>
-              <div style="flex:1;min-width:160px">
-                <strong style="display:block;font-family:var(--font-display);color:var(--ink)">Paket Premium</strong>
-                <span class="text-xs text-soft">Akses 90 hari</span>
-              </div>
-              <span class="badge badge--premium">Rp99.000</span>
-            </div>
-          </section>
-
-          <section>
-            <div class="card__title" style="margin-bottom:1rem">2. Metode Pembayaran</div>
-            <div class="grid" style="--gap:.6rem">
-
-              <label class="card card--tight flex items-center gap-3" style="cursor:pointer;border-color:var(--primary);box-shadow:var(--sh-primary)">
-                <input type="radio" name="metode" value="transfer" checked style="width:20px;height:20px;accent-color:var(--primary)">
-                <span class="tile__glyph" style="width:42px;height:42px;border-radius:12px;flex:0 0 42px"><svg data-icon="credit-card"></svg></span>
-                <div style="flex:1"><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Transfer Bank</strong><span class="text-xs text-soft">BCA, BNI, Mandiri, BRI</span></div>
-                <span class="badge badge--mint badge--flat">Tanpa biaya</span>
-              </label>
-
-              <label class="card card--tight flex items-center gap-3" style="cursor:pointer">
-                <input type="radio" name="metode" value="ewallet" style="width:20px;height:20px;accent-color:var(--primary)">
-                <span class="tile__glyph" style="width:42px;height:42px;border-radius:12px;flex:0 0 42px;background:var(--pop-mint-050);color:var(--success)"><svg data-icon="smartphone"></svg></span>
-                <div style="flex:1"><strong style="display:block;color:var(--ink);font-family:var(--font-display)">E-Wallet</strong><span class="text-xs text-soft">GoPay, OVO, DANA, ShopeePay</span></div>
-              </label>
-
-              <label class="card card--tight flex items-center gap-3" style="cursor:pointer">
-                <input type="radio" name="metode" value="qris" style="width:20px;height:20px;accent-color:var(--primary)">
-                <span class="tile__glyph" style="width:42px;height:42px;border-radius:12px;flex:0 0 42px;background:var(--pop-violet-050);color:var(--pop-violet)"><svg data-icon="grid"></svg></span>
-                <div style="flex:1"><strong style="display:block;color:var(--ink);font-family:var(--font-display)">QRIS</strong><span class="text-xs text-soft">Scan dari aplikasi apa pun</span></div>
-              </label>
-
-              <div class="alert alert--warn" style="margin-top:.5rem">
-                <span class="alert__icon"><svg data-icon="alert"></svg></span>
-                <div>Payment gateway yang dipakai belum ditentukan. Pada prototipe, pilihan metode hanya simulasi tampilan.</div>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <div class="card__title" style="margin-bottom:1rem">3. Kode Voucher</div>
-            <div class="flex gap-2" style="--gap:.6rem;flex-wrap:wrap">
-              <input class="input" type="text" id="voucher" placeholder="Contoh: GAIN20" aria-label="Kode voucher" style="flex:1;min-width:160px;text-transform:uppercase">
-              <button class="btn btn--ghost" type="button" id="btnVoucher">Gunakan</button>
-            </div>
-            <p class="field__hint" id="voucherHint">Voucher akan mengurangi total pembayaran di bawah.</p>
-          </section>
-
-          <section>
-            <div class="card__title" style="margin-bottom:1rem">4. Detail Pembeli</div>
-            <div class="form-grid">
-              <div class="field">
-                <label class="label" for="nama">Nama Lengkap</label>
-                <input class="input" type="text" id="nama" value="Rani Kusuma" required>
-              </div>
-              <div class="field">
-                <label class="label" for="email">Email</label>
-                <input class="input" type="email" id="email" value="rani.kusuma@mail.com" required>
-              </div>
-              <div class="field span-2">
-                <label class="label" for="telp">Nomor Telepon</label>
-                <input class="input" type="tel" id="telp" placeholder="08xxxxxxxxxx" required>
-                <span class="field__hint">Dipakai untuk menerima notifikasi pembayaran.</span>
-              </div>
-            </div>
-          </section>
-
-          <label class="check">
-            <input type="checkbox" checked>
-            <span>Saya setuju dengan ketentuan pembelian paket belajar LONTAR.</span>
-          </label>
-
-          <button class="btn btn--primary btn--lg btn--block" type="submit">
-            Bayar Sekarang Rp<span id="btnTotal">99.000</span>
-            <span class="btn__icon"><svg data-icon="arrow-right"></svg></span>
-          </button>
+    @if ($errors->any())
+        <div class="article-errors question-section" role="alert">
+            <ul>
+                @foreach ($errors->all() as $message)
+                    <li>{{ $message }}</li>
+                @endforeach
+            </ul>
         </div>
-      </form>
+    @endif
 
-      {{-- ============ RINGKASAN ============ --}}
-      <aside class="stack" style="--stack:1.5rem;position:sticky;top:86px">
-
-        <section class="card card--pop">
-          <div class="card__head">
-            <div><div class="card__title">Ringkasan Pesanan</div><div class="card__sub">INV-2026-10-00841</div></div>
-            <span class="badge badge--amber badge--flat">Pending</span>
-          </div>
-
-          <div class="kv" style="padding-bottom:1.25rem;border-bottom:2px dashed var(--border)">
-            <div class="kv__row"><span class="kv__key">Paket Premium</span><span class="kv__val">Rp99.000</span></div>
-            <div class="kv__row"><span class="kv__key">Diskon voucher</span><span class="kv__val" id="sumVoucher">-Rp0</span></div>
-            <div class="kv__row"><span class="kv__key">Biaya layanan</span><span class="kv__val">Rp0</span></div>
-          </div>
-
-          <div class="flex items-center justify-between" style="padding-top:1.25rem">
-            <div>
-              <div class="stat__label">Total Pembayaran</div>
-              <div class="fw-800" id="sumTotal" style="font-family:var(--font-display);font-size:2rem;color:var(--ink);line-height:1.1;letter-spacing:-.03em">Rp99.000</div>
+    <div class="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(350px,420px)]">
+        <section class="card card--blue card--pad-0" aria-labelledby="checkout-package-title">
+            <div class="bg-[var(--primary-050)] p-6 sm:p-8">
+                <div class="flex flex-col items-start gap-4 sm:flex-row">
+                    <span class="grid size-12 shrink-0 place-items-center rounded-2xl border-2 border-[var(--ink)] bg-[var(--pop-amber)] text-xl text-[var(--ink)] shadow-[3px_3px_0_var(--ink)]" aria-hidden="true">
+                        <svg data-icon="package"></svg>
+                    </span>
+                    <div class="min-w-0">
+                        <span class="text-xs font-extrabold uppercase tracking-[.12em] text-[var(--primary-700)]">Paket pilihanmu</span>
+                        <h2 id="checkout-package-title" class="mt-1! font-[var(--font-display)] text-xl! leading-tight font-extrabold text-[var(--ink)] sm:text-[1.75rem]!">{{ $package->name }}</h2>
+                        @if ($package->description)
+                            <p class="mt-3! max-w-2xl leading-relaxed text-[var(--text)]">{{ $package->description }}</p>
+                        @endif
+                    </div>
+                </div>
             </div>
-            <span class="tile__glyph" style="background:var(--pop-amber)"><svg data-icon="credit-card"></svg></span>
-          </div>
 
-          <div class="alert alert--success" style="margin-top:1.25rem">
-            <span class="alert__icon"><svg data-icon="shield"></svg></span>
-            <div>Akses paket diberikan otomatis setelah status pembayaran berhasil.</div>
-          </div>
+            <div class="p-6 sm:p-8">
+                <div class="grid sm:grid-cols-3" style="--gap:.75rem">
+                    <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                        <span class="mb-2! flex items-center gap-2 text-sm font-semibold text-[var(--text-soft)]"><svg data-icon="clock" class="size-4"></svg> Masa akses</span>
+                        <strong class="block font-[var(--font-display)] text-lg leading-snug font-extrabold text-[var(--ink)]">{{ $package->durationLabel() }}</strong>
+                        <span class="mt-1! block text-xs leading-snug text-[var(--text-soft)]">Sejak akses aktif</span>
+                    </div>
+                    <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                        <span class="mb-2! flex items-center gap-2 text-sm font-semibold text-[var(--text-soft)]"><svg data-icon="timer" class="size-4"></svg> Jatah tryout</span>
+                        <strong class="block font-[var(--font-display)] text-lg leading-snug font-extrabold text-[var(--ink)]">{{ $package->tryout_quota === null ? 'Tanpa batas' : $package->tryout_quota.' sesi' }}</strong>
+                        <span class="mt-1! block text-xs leading-snug text-[var(--text-soft)]">Untuk sesi premium baru</span>
+                    </div>
+                    <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                        <span class="mb-2! flex items-center gap-2 text-sm font-semibold text-[var(--text-soft)]"><svg data-icon="layers" class="size-4"></svg> Isi paket</span>
+                        <strong class="block font-[var(--font-display)] text-lg leading-snug font-extrabold text-[var(--ink)]">{{ $package->materials->count() + $package->exams->count() }} konten</strong>
+                        <span class="mt-1! block text-xs leading-snug text-[var(--text-soft)]">Materi &amp; sesi belajar</span>
+                    </div>
+                </div>
+
+                <div class="mt-8! border-t border-[var(--border)] pt-7!">
+                    <div class="mb-5! flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="font-[var(--font-display)] text-xl! font-extrabold text-[var(--ink)]">Yang kamu dapatkan</h3>
+                        <span class="rounded-full bg-[var(--pop-amber-050)] px-3 py-1 text-xs font-bold text-[var(--ink)]">Sudah termasuk dalam paket</span>
+                    </div>
+
+                    <p class="text-sm text-soft mb-4!">{{ $package->leaderboard_access->label() }} · Berlaku selama paket aktif.</p>
+
+                    @if ($package->materials->isNotEmpty())
+                        <div>
+                            <h4 class="mb-3! text-xs font-extrabold uppercase tracking-[.12em] text-[var(--text-soft)]">Materi &amp; video · {{ $package->materials->count() }}</h4>
+                            <ul class="grid" style="--gap:.5rem">
+                                @foreach ($package->materials as $material)
+                                    <li class="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white px-4 py-3">
+                                        <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--primary-100)] text-lg text-[var(--primary-700)]" aria-hidden="true"><svg data-icon="{{ $material->type->icon() }}"></svg></span>
+                                        <span class="min-w-0 flex-1 font-semibold leading-snug text-[var(--ink)]">{{ $material->title }}</span>
+                                        <span class="hidden text-xs font-bold text-[var(--text-soft)] sm:block">{{ $material->type->shortLabel() }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if ($package->exams->isNotEmpty())
+                        <div class="{{ $package->materials->isNotEmpty() ? 'mt-6!' : '' }}">
+                            <h4 class="mb-3! text-xs font-extrabold uppercase tracking-[.12em] text-[var(--text-soft)]">Latihan &amp; tryout · {{ $package->exams->count() }}</h4>
+                            <ul class="grid" style="--gap:.5rem">
+                                @foreach ($package->exams as $exam)
+                                    <li class="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white px-4 py-3">
+                                        <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--pop-amber-050)] text-lg text-[var(--ink)]" aria-hidden="true"><svg data-icon="{{ $exam->kind === 'quiz' ? 'pencil' : 'timer' }}"></svg></span>
+                                        <span class="min-w-0 flex-1 font-semibold leading-snug text-[var(--ink)]">{{ $exam->title }}</span>
+                                        <span class="hidden text-xs font-bold text-[var(--text-soft)] sm:block">{{ $exam->kind === 'quiz' ? 'Latihan' : 'Tryout' }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if ($package->materials->isEmpty() && $package->exams->isEmpty())
+                        <p class="text-[var(--text-soft)]">Daftar konten belum tersedia.</p>
+                    @endif
+                </div>
+
+                <p class="mt-7! flex gap-3 rounded-2xl bg-[var(--primary-050)] p-4 text-sm leading-relaxed text-[var(--text)]">
+                    <svg data-icon="info" class="mt-0.5! size-5 shrink-0 text-[var(--primary-700)]"></svg>
+                    <span>Jatah tryout terpakai saat kamu memulai sesi premium baru. Melanjutkan sesi yang sama atau mengerjakan latihan tidak mengurangi jatah.</span>
+                </p>
+            </div>
         </section>
 
-        <section class="card card--tight card--dashed">
-          <div class="card__title" style="margin-bottom:.75rem">Status Transaksi</div>
-          <div class="grid" style="--gap:.5rem">
-            <div class="flex items-center gap-2 text-sm"><span class="badge badge--mint badge--flat">Pending</span><span class="text-soft">Pesanan dibuat</span></div>
-            <div class="flex items-center gap-2 text-sm"><span class="badge badge--flat">Paid</span><span class="text-soft">Menunggu pembayaran</span></div>
-            <div class="flex items-center gap-2 text-sm"><span class="badge badge--flat">Failed</span><span class="text-soft">Pembayaran gagal</span></div>
-            <div class="flex items-center gap-2 text-sm"><span class="badge badge--flat">Expired</span><span class="text-soft">Kedaluwarsa</span></div>
-          </div>
+        <section class="card card--amber" aria-labelledby="checkout-summary-title">
+            <div class="flex items-center gap-3">
+                <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--pop-amber-050)] text-xl text-[var(--ink)]" aria-hidden="true"><svg data-icon="clipboard"></svg></span>
+                <div>
+                    <p class="text-xs font-extrabold uppercase tracking-[.12em] text-[var(--primary-700)]">Langkah terakhir</p>
+                    <h2 id="checkout-summary-title" class="font-[var(--font-display)] text-xl! font-extrabold text-[var(--ink)]">Ringkasan pembelian</h2>
+                </div>
+            </div>
+
+            <div class="mt-6! border-t border-[var(--border)] pt-5!">
+                <p class="text-xs font-bold uppercase tracking-[.1em] text-[var(--text-soft)]">Akan aktif untuk</p>
+                <p class="mt-2! font-bold text-[var(--ink)]">{{ auth()->user()->name }}</p>
+                <p class="break-all text-sm text-[var(--text-soft)]">{{ auth()->user()->email }}</p>
+            </div>
+
+            <div class="mt-6! rounded-2xl bg-[var(--ink)] p-5 text-white">
+                <div class="flex items-center justify-between gap-3 text-sm text-white/80">
+                    <span>Total pembayaran</span>
+                    <svg data-icon="credit-card" class="size-5" aria-hidden="true"></svg>
+                </div>
+                <strong class="mt-3! block font-[var(--font-display)] text-3xl leading-none font-extrabold tracking-tight sm:text-4xl">{{ $package->formattedPrice() }}</strong>
+                <span class="mt-2! block text-xs text-white/70">Sekali bayar untuk paket ini</span>
+            </div>
+
+            @if ($alreadyOwned)
+                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]">Paket ini sudah aktif di akunmu.</p>
+                <a class="btn btn--primary btn--block mt-5!" href="{{ route('packages.index') }}">Lihat akses paket <svg data-icon="arrow-right"></svg></a>
+            @elseif (! $paymentAvailable)
+                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]" role="status">Pembayaran belum tersedia. Silakan hubungi admin untuk mendapatkan paket ini.</p>
+            @else
+                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]">{{ $package->price === 0 ? 'Paket gratis akan langsung diaktifkan untuk akunmu.' : 'Kamu akan memilih metode pembayaran di Midtrans. Paket aktif otomatis setelah pembayaran terverifikasi.' }}</p>
+                <form action="{{ route('checkout.store') }}" method="POST" class="mt-6!">
+                    @csrf
+                    <input type="hidden" name="package_id" value="{{ $package->id }}">
+                    <button class="btn btn--primary btn--block" type="submit">{{ $package->price === 0 ? 'Aktifkan paket gratis' : 'Lanjut ke pembayaran' }} <svg data-icon="arrow-right"></svg></button>
+                </form>
+            @endif
+
+            <a class="btn btn--ghost btn--block mt-3!" href="{{ route('packages.index') }}"><svg data-icon="arrow-left"></svg> Kembali ke paket</a>
+            <p class="mt-5! border-t border-[var(--border)] pt-4! text-xs leading-relaxed text-[var(--text-soft)]">Harga, masa aktif, jatah tryout, dan konten paket dikunci saat pesanan dibuat. Masa aktif dihitung sejak akses diaktifkan.</p>
         </section>
-      </aside>
     </div>
-
-<script>
-  /* Perhitungan total dengan voucher */
-  (function () {
-    var BASE = 99000;
-    var voucherInput = document.getElementById('voucher');
-    var btn = document.getElementById('btnVoucher');
-    var hint = document.getElementById('voucherHint');
-    var sumVoucher = document.getElementById('sumVoucher');
-    var sumTotal = document.getElementById('sumTotal');
-    var btnTotal = document.getElementById('btnTotal');
-
-    var CODES = { GAIN20: 20000, CERDAS15: 15000, NAVIGASI10: 10000 };
-
-    function rupiah(n) {
-      return 'Rp' + new Intl.NumberFormat('id-ID').format(n);
-    }
-
-    function apply() {
-      var code = (voucherInput.value || '').trim().toUpperCase();
-      var disc = CODES[code] || 0;
-      var total = Math.max(0, BASE - disc);
-
-      sumVoucher.textContent = '-'.concat(rupiah(disc));
-      sumTotal.textContent = rupiah(total);
-      btnTotal.textContent = new Intl.NumberFormat('id-ID').format(total);
-
-      if (!code) {
-        hint.textContent = 'Voucher akan mengurangi total pembayaran di bawah.';
-        hint.style.color = '';
-      } else if (disc) {
-        hint.textContent = 'Voucher ' + code + ' aktif. Potongan ' + rupiah(disc) + '.';
-        hint.style.color = 'var(--success)';
-      } else {
-        hint.textContent = 'Kode ' + code + ' tidak dikenali.';
-        hint.style.color = 'var(--danger)';
-      }
-    }
-
-    btn.addEventListener('click', function () {
-      apply();
-      var code = (voucherInput.value || '').trim().toUpperCase();
-      L.toast(CODES[code] ? 'Voucher berhasil dipakai.' : 'Kode voucher tidak valid.', CODES[code] ? 'success' : 'error');
-    });
-    voucherInput.addEventListener('input', apply);
-  })();
-</script>
+</div>
 @endsection

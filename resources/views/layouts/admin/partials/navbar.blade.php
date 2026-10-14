@@ -25,7 +25,7 @@
     </div>
 
     <div class="appbar__right">
-      <a class="btn btn--ghost btn--sm" href="{{ route('home') }}"><svg data-icon="external"></svg><span class="text-sm">Situs</span></a>
+      <a class="btn btn--ghost btn--sm appbar-site-link" href="{{ route('home') }}" aria-label="Situs publik"><svg data-icon="external"></svg><span class="text-sm">Situs</span></a>
       <a class="appbar__icon" href="{{ route('dashboard') }}" aria-label="Notifikasi"><svg data-icon="bell"></svg><span class="appbar__dot">3</span></a>
 
       <div class="dropdown" data-dropdown>

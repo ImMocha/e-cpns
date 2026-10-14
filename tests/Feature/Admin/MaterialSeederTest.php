@@ -45,6 +45,7 @@ class MaterialSeederTest extends TestCase
         $pdf = Material::where('type', 'pdf')->firstOrFail();
         Storage::disk(Material::PDF_DISK)->assertExists($pdf->file_path);
         $this->assertStringStartsWith('%PDF-', Storage::disk(Material::PDF_DISK)->get($pdf->file_path));
+        $this->assertStringContainsString('Ganesha Nusa', Storage::disk(Material::PDF_DISK)->get($pdf->file_path));
     }
 
     public function test_reseeding_preserves_admin_changes_files_and_archived_materials(): void

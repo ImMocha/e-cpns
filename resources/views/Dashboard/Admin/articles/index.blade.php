@@ -1,5 +1,5 @@
 @extends('layouts.admin.main')
-@section('title', 'Kelola Artikel — LONTAR')
+@section('title', 'Kelola Artikel — Ganesha Nusa')
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">Artikel</span></nav>
     <header class="page-head page-head__row">
@@ -28,7 +28,7 @@
                 <tbody>
                     @forelse ($articles as $article)
                         <tr>
-                            <td><a class="font-bold text-primary" href="{{ route('admin.articles.edit', $article) }}">{{ $article->title }}</a><div class="text-xs text-soft">{{ $article->author?->name ?? 'Tim LONTAR' }} · {{ $article->readingMinutes() }} menit baca</div></td>
+                            <td><a class="font-bold text-primary" href="{{ route('admin.articles.edit', $article) }}">{{ $article->title }}</a><div class="text-xs text-soft">{{ $article->author?->name ?? 'Tim Ganesha Nusa' }} · {{ $article->readingMinutes() }} menit baca</div></td>
                             <td>{{ $article->section?->name ?? 'Bidang dihapus' }}</td>
                             <td><span class="badge {{ $article->status->badgeClass() }}">{{ $article->status->label() }}</span></td>
                             <td class="num">{{ number_format((int) ($articleViews[$article->id]->readers_count ?? 0), 0, ',', '.') }}</td>

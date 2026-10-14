@@ -566,7 +566,7 @@ state.container = $('#pdfview-pages', root);
         console.error('[pdf-reader]', error);
 
         showFailure(
-            'Berkas PDF mungkin rusak atau formatnya tidak didukung browser ini. Coba muat ulang halaman, atau hubungi admin Learning LONTAR.',
+            'Berkas PDF mungkin rusak atau formatnya tidak didukung browser ini. Coba muat ulang halaman, atau hubungi admin Ganesha Nusa.',
         );
     }
 }

@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Sertifikat — LONTAR CPNS Online')
+@section('title', 'Sertifikat — Ganesha Nusa CPNS Online')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">
@@ -78,7 +78,7 @@
         <div class="flex items-center justify-between" style="margin-bottom:1.5rem">
           <div class="logo">
             <span class="logo__mark"><svg data-icon="book"></svg></span>
-            <span style="text-align:left">LONTAR<span class="logo__sub" style="text-align:left">Lembaga Belajar CPNS</span></span>
+            <span style="text-align:left">Ganesha Nusa<span class="logo__sub" style="text-align:left">Lembaga Belajar CPNS</span></span>
           </div>
           <span class="badge badge--flat">Nomor: CERT-2026-000184</span>
         </div>
@@ -118,7 +118,7 @@
             <div class="text-xs text-soft fw-700">Mengetahui</div>
             <div style="font-family:var(--cursive,'Segoe Script','Brush Script MT',cursive);font-size:1.4rem;color:var(--ink);margin-top:.25rem">Bagas Pratama</div>
             <div style="width:170px;height:2px;background:var(--border-strong);margin-top:.25rem"></div>
-            <div class="text-xs text-soft">Kepala LONTAR</div>
+            <div class="text-xs text-soft">Kepala Ganesha Nusa</div>
           </div>
           <div class="text-center">
             <div class="stat__icon ico--primary" style="margin-inline:auto;width:56px;height:56px;border-radius:50%"><svg data-icon="shield"></svg></div>

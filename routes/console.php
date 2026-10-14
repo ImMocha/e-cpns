@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('exams:finalize-expired')->everyMinute()->withoutOverlapping();
+Schedule::command('payments:sync-midtrans')->everyTenMinutes()->withoutOverlapping(30);

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
@@ -271,13 +272,7 @@ class Material extends Model
      * 1. Admin boleh membuka semuanya — termasuk draft — untuk keperluan
      *    pemeriksaan sebelum diterbitkan.
      * 2. `free` boleh dibuka siapa pun yang sudah login.
-     * 3. `premium` butuh paket aktif.
-     *
-     * **Poin 3 belum bisa terpenuhi.** Pemeriksaan entitlement memakai tabel
-     * `packages` / `user_packages` yang belum ada (§24), jadi premium selalu
-     * ditolak untuk peserta. Sengaja begitu: lebih baik materi premium terkunci
-     * daripada terbuka tanpa checked. Begitu tabel paket ada, satu baris di
-     * `hasActivePackage()` sudah cukup untuk mengaktifkannya.
+     * 3. `premium` butuh paket aktif yang memuat materi ini.
      */
     public function isAccessibleBy(?User $user): bool
     {
@@ -307,21 +302,34 @@ class Material extends Model
         }
 
         if (! $this->hasContentSource()) {
-            return 'Materi ini belum punya berkas atau tautan yang bisa dibuka. Hubungi admin Learning LONTAR.';
+            return 'Materi ini belum punya berkas atau tautan yang bisa dibuka. Hubungi admin Ganesha Nusa.';
         }
 
         return 'Materi ini bagian dari paket Premium. Pilih paket belajar untuk membukanya.';
     }
 
-    /**
-     * Placeholder sampai tabel paket ada.
-     *
-     * Sengaja selalu `false`: implementasi sungguhan membaca
-     * `user_packages` yang berstatus aktif dan belum kedaluwarsa (§24 TBD-08).
-     */
+    /** Akses mengikuti isi paket saat aktivasi, bukan katalog paket saat ini. */
     public function hasActivePackage(User $user): bool
     {
-        return false;
+        if ($this->relationLoaded('userPackages')) {
+            return $this->userPackages->contains(fn (UserPackage $grant): bool => $grant->user_id === $user->id && $grant->isActive());
+        }
+
+        return $this->userPackages()->active()->whereBelongsTo($user)->exists();
+    }
+
+    public function userPackages(): BelongsToMany
+    {
+        return $this->belongsToMany(UserPackage::class);
+    }
+
+    /** @param Builder<Material> $query */
+    public function scopeAccessibleTo(Builder $query, User $user): void
+    {
+        if (! $user->isAdmin()) {
+            $query->where(fn (Builder $access) => $access->where('access_level', MaterialAccess::Free)
+                ->orWhereHas('userPackages', fn (Builder $grants) => $grants->active()->whereBelongsTo($user)));
+        }
     }
 
     /**

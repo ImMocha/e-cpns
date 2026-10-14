@@ -1,7 +1,7 @@
 @php($metaDescription = $article->summary())
 @php($articleUrl = route('articles.show', $article))
 @extends(auth()->check() ? 'layouts.user.main' : 'layouts.public')
-@section('title', $article->title.' — LONTAR')
+@section('title', $article->title.' — Ganesha Nusa')
 @section('content')
 <div class="article-page">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('articles.index') }}">Artikel</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">{{ $article->title }}</span></nav>
@@ -25,7 +25,7 @@
                 <span class="badge badge--sky">{{ $article->section?->name ?? 'Bidang dihapus' }}</span>
                 <h1 class="article-paper-title">{{ $article->title }}</h1>
                 @if ($article->excerpt)<p class="article-paper-excerpt">{{ $article->excerpt }}</p>@endif
-                <div class="article-paper-meta"><span>{{ $article->author?->name ?? 'Tim LONTAR' }}</span><span>·</span><span>{{ $article->published_at?->format('d M Y') ?? 'Belum terbit' }}</span><span>·</span><span>{{ $article->readingMinutes() }} menit baca</span></div>
+                <div class="article-paper-meta"><span>{{ $article->author?->name ?? 'Tim Ganesha Nusa' }}</span><span>·</span><span>{{ $article->published_at?->format('d M Y') ?? 'Belum terbit' }}</span><span>·</span><span>{{ $article->readingMinutes() }} menit baca</span></div>
                 @if ($article->coverUrl())<img class="article-paper-cover" src="{{ $article->coverUrl() }}" alt="Cover {{ $article->title }}">@endif
                 <div class="article-prose">{!! $article->safeBody() !!}</div>
             </article>

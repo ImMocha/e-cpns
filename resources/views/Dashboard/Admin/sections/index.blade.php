@@ -1,6 +1,6 @@
 @extends('layouts.admin.main')
 
-@section('title', 'Kelola Bidang — LONTAR')
+@section('title', 'Kelola Bidang — Ganesha Nusa')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">

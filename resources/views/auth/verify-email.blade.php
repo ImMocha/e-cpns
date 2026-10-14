@@ -1,13 +1,12 @@
 @extends('layouts.guest')
 
-@section('title', 'Verifikasi Email — LONTAR CPNS Online')
+@section('title', 'Verifikasi Email — Ganesha Nusa CPNS Online')
 
 @section('content')
 <header class="nav">
   <div class="container container--wide nav__inner">
     <a class="logo" href="{{ route('home') }}">
-      <span class="logo__mark"><svg data-icon="book"></svg></span>
-      <span>LONTAR<span class="logo__sub">CPNS Online</span></span>
+      <x-logo />
     </a>
     <form method="POST" action="{{ route('logout') }}" style="margin-left:auto">
       @csrf
