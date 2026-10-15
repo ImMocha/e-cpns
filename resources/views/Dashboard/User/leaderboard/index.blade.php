@@ -36,37 +36,39 @@
             <article class="card card--pop">
                 <div class="stat__label">Peringkatmu · {{ $scope === 'local' ? $province->value : 'Nasional' }}</div>
                 <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? '#'.$ownRank->position : '—' }}</div>
-                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Dari '.$participants->total().' peserta yang sudah menyelesaikan tryout.' : 'Selesaikan satu tryout untuk mendapatkan peringkat.' }}</p>
+                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Dari '.$participants->total().' entri peringkat'.($simulatedCount ? ', termasuk '.$simulatedCount.' virtual.' : ' peserta.') : 'Selesaikan satu tryout untuk mendapatkan peringkat.' }}</p>
             </article>
             <article class="card">
                 <div class="stat__label">Nilai terbaikmu</div>
                 <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? number_format((float) $ownRank->score_percent, 2, ',', '.').'%' : '—' }}</div>
-                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Skor '.$ownRank->score.' dari '.$ownRank->max_score.' poin.' : 'Nilai tryoutmu akan tampil di sini.' }}</p>
+                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Skor asli '.$ownRank->score.' dari '.$ownRank->max_score.' poin.' : 'Nilai tryoutmu akan tampil di sini.' }}</p>
             </article>
             <article class="card">
-                <div class="stat__label">Peserta dalam peringkat</div>
+                <div class="stat__label">Entri dalam peringkat</div>
                 <div class="stat__value" style="margin-top:.5rem">{{ number_format($participants->total(), 0, ',', '.') }}</div>
-                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $scope === 'local' ? 'Peserta dari '.$province->value : 'Peserta dari seluruh Indonesia' }}</p>
+                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $simulatedCount ? $simulatedCount.' peserta virtual · ' : '' }}{{ $scope === 'local' ? 'Provinsi '.$province->value : 'Seluruh Indonesia' }}</p>
             </article>
         </section>
 
         <section class="card">
-            <div class="card__head"><div><h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2><p class="card__sub">Gabungan seluruh tryout · satu nilai terbaik per peserta</p></div><span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span></div>
-            <p class="text-sm text-soft" style="margin-bottom:1rem">Peringkat memakai persentase skor terhadap skor maksimal agar tryout dengan jumlah soal berbeda bisa dibandingkan. Nilai sama mendapat peringkat sama, misalnya 1, 1, 3. Nilai latihan tidak masuk leaderboard.</p>
+            <div class="card__head"><div><h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2><p class="card__sub">{{ $simulatedCount ? 'Nilai tryout terbaik peserta · nilai contoh virtual' : 'Gabungan seluruh tryout · satu nilai terbaik per peserta' }}</p></div><span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span></div>
+            <p class="text-sm text-soft" style="margin-bottom:1rem">Nilai pada tabel disetarakan ke skala 0–100 dari persentase skor terhadap skor maksimal, agar tryout dengan jumlah soal berbeda bisa dibandingkan. Nilai sama mendapat peringkat sama, misalnya 1, 1, 3. Nilai latihan tidak masuk leaderboard.</p>
+            @if ($simulatedCount > 0)
+                <p class="text-xs text-soft" style="margin-bottom:1rem">Peserta virtual memakai nilai contoh dan ikut dihitung dalam peringkat selama fitur aktif.</p>
+            @endif
             <div class="table-wrap" style="border:none;box-shadow:none">
                 <table class="table">
-                    <thead><tr><th class="num">Peringkat</th><th>Peserta</th><th>Provinsi</th><th class="num">Skor terbaik</th><th class="num">Nilai</th></tr></thead>
+                    <thead><tr><th class="num">Peringkat</th><th>Peserta</th><th>Provinsi</th><th class="num">Nilai (0–100)</th></tr></thead>
                     <tbody>
                     @forelse ($participants as $entry)
-                        <tr @if ((int) $entry->id === auth()->id()) class="bg-[var(--primary-050)]" @endif>
-                            <td class="num"><strong>#{{ $entry->position }}</strong></td>
-                            <td><strong>{{ $entry->name }}</strong>@if ((int) $entry->id === auth()->id()) <span class="badge badge--mint badge--flat">Kamu</span>@endif</td>
+                        <tr @if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) class="bg-[var(--primary-050)]" @endif>
+                            <td class="num"><span class="lb-rank leaderboard-rank{{ (int) $entry->position <= 3 ? ' lb-rank--'.$entry->position : '' }}" aria-label="Peringkat {{ $entry->position }}">{{ $entry->position }}</span></td>
+                            <td><strong>{{ $entry->name }}</strong>@if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) <span class="badge badge--mint badge--flat">Kamu</span>@endif</td>
                             <td>{{ $entry->province ?? 'Belum diisi' }}</td>
-                            <td class="num">{{ $entry->score }} / {{ $entry->max_score }}</td>
-                            <td class="num"><strong>{{ number_format((float) $entry->score_percent, 2, ',', '.') }}%</strong></td>
+                            <td class="num"><strong>{{ number_format((float) $entry->score_percent, 2, ',', '.') }} / 100</strong></td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-soft">Belum ada peserta yang menyelesaikan tryout{{ $scope === 'local' ? ' di provinsi ini' : '' }}. Jadilah yang pertama!</td></tr>
+                        <tr><td colspan="4" class="text-soft">Belum ada peserta yang menyelesaikan tryout{{ $scope === 'local' ? ' di provinsi ini' : '' }}. Jadilah yang pertama!</td></tr>
                     @endforelse
                     </tbody>
                 </table>

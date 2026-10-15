@@ -59,6 +59,11 @@
        @if (request()->routeIs('admin.users.*')) aria-current="page" @endif>
       <svg data-icon="users"></svg><span>Peserta</span>
     </a>
+    <a class="side__link{{ request()->routeIs('admin.leaderboard-simulation.*') ? ' is-active' : '' }}"
+       href="{{ route('admin.leaderboard-simulation.index') }}"
+       @if (request()->routeIs('admin.leaderboard-simulation.*')) aria-current="page" @endif>
+      <svg data-icon="trophy"></svg><span>Leaderboard</span>
+    </a>
   </div>
 
   {{-- ===================== BISNIS ===================== --}}

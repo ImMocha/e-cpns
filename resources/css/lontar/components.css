@@ -1815,6 +1815,7 @@
 .lb-rank--1 { background: var(--pop-amber); box-shadow: 3px 3px 0 var(--ink); }
 .lb-rank--2 { background: #DCE7EF; box-shadow: 3px 3px 0 var(--ink); }
 .lb-rank--3 { background: var(--pop-coral); color: #fff; box-shadow: 3px 3px 0 var(--ink); }
+.leaderboard-rank { width: 36px; height: 36px; display: inline-grid; font-size: var(--fs-sm); vertical-align: middle; }
 .lb-name { font-family: var(--font-display); font-weight: 700; color: var(--ink); line-height: 1.3; }
 .lb-meta { font-size: var(--fs-xs); color: var(--text-soft); font-weight: 600; }
 .lb-score { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); color: var(--primary-700); letter-spacing: -0.02em; }

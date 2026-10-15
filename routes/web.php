@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminPackageController;
 use App\Http\Controllers\Admin\AdminQuestionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\AdminVoucherController;
+use App\Http\Controllers\Admin\LeaderboardSimulationController;
 use App\Http\Controllers\Admin\MaterialController as AdminMaterialController;
 use App\Http\Controllers\Admin\SectionController as AdminSectionController;
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
@@ -121,7 +122,9 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
     Route::post('/transactions/{transaction}/refresh', [TransactionController::class, 'refresh'])->middleware('throttle:10,1')->name('transactions.refresh');
     Route::post('/transactions/{transaction}/pay', [TransactionController::class, 'pay'])->middleware('throttle:10,1')->name('transactions.pay');
-    Route::get('/certificates', CertificateController::class)->name('certificates.index');
+    Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+    Route::get('/certificates/{examAttempt}', [CertificateController::class, 'show'])
+        ->whereNumber('examAttempt')->name('certificates.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
@@ -150,6 +153,8 @@ Route::prefix('admin')
         // parameter supaya generated URL dan route-model binding konsisten.
         Route::patch('users/{user}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
         Route::resource('users', AdminUserController::class)->parameters(['users' => 'user']);
+        Route::get('leaderboard-simulation', [LeaderboardSimulationController::class, 'index'])->name('leaderboard-simulation.index');
+        Route::patch('leaderboard-simulation', [LeaderboardSimulationController::class, 'update'])->name('leaderboard-simulation.update');
 
         // Pengelolaan bidang (TWK / TIU / TKP / dan bidang lain).
         Route::resource('sections', AdminSectionController::class)->parameters(['sections' => 'section']);

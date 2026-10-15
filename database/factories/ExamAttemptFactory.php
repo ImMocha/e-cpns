@@ -49,4 +49,16 @@ class ExamAttemptFactory extends Factory
             ];
         });
     }
+
+    public function passingTryout(): static
+    {
+        return $this->tryout()->state(function (array $attributes): array {
+            $answers = [];
+            foreach ($attributes['question_snapshot']['questions'] as $question) {
+                $answers[(string) $question['id']] = $question['answer'];
+            }
+
+            return ['answers' => $answers];
+        });
+    }
 }

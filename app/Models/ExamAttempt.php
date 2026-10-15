@@ -73,6 +73,26 @@ class ExamAttempt extends Model
         $query->where('status', self::COMPLETED);
     }
 
+    /** @param Builder<ExamAttempt> $query */
+    public function scopeCertifiable(Builder $query): void
+    {
+        $query->completed()->where('kind', 'tryout')
+            ->whereNotNull('submitted_at')->whereNotNull('score')->where('max_score', '>', 0)
+            ->whereNotNull('passing_score')->whereColumn('score', '>=', 'passing_score');
+    }
+
+    public function canPrintCertificate(): bool
+    {
+        return $this->kind === 'tryout' && $this->status === self::COMPLETED
+            && $this->submitted_at !== null && $this->score !== null && $this->max_score > 0
+            && $this->passing_score !== null && $this->score >= $this->passing_score;
+    }
+
+    public function certificateNumber(): string
+    {
+        return 'GN-'.$this->submitted_at->format('Y').'-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
     public static function resumeOrStart(User $user, Exam|ExamBank $bank): self
     {
         return DB::transaction(function () use ($user, $bank): self {

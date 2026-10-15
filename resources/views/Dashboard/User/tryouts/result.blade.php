@@ -35,6 +35,11 @@
         <p class="text-sm text-soft" style="margin-top:.5rem">Nilai baru akan muncul setelah jawabanmu berhasil dikumpulkan.</p>
       </section>
     @else
+      @if ($attempt->canPrintCertificate())
+        <div class="btn-row" style="margin-bottom:1.5rem">
+          <a class="btn btn--ghost" href="{{ route('certificates.show', $attempt) }}"><svg data-icon="award"></svg> Cetak Sertifikat</a>
+        </div>
+      @endif
       <section class="card card--pop" style="margin-bottom:1.5rem">
         <div class="result-hero">
           <div class="ring" data-pct="{{ $attempt->max_score > 0 ? round($attempt->score / $attempt->max_score * 100) : 0 }}">

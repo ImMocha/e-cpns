@@ -1,0 +1,41 @@
+.certificate-workspace { max-width: 1120px; margin: 0 auto; padding: 2rem 1rem; }
+.certificate-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+.certificate-toolbar p { flex-basis: 100%; }
+.certificate-document { padding: 2.5rem; border-radius: 0; }
+.certificate-brand { display: flex; align-items: center; justify-content: space-between; gap: 1rem; text-align: left; margin-bottom: 1.5rem; }
+.certificate-number { font-family: var(--font-mono); font-size: .75rem; }
+.certificate-kicker { font-size: .75rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--primary-700); }
+.certificate-caption { margin-top: .75rem; color: var(--text-soft); font-size: .875rem; }
+.certificate-name { font-size: clamp(1.75rem, 4vw, 3rem); overflow-wrap: anywhere; }
+.certificate-description { color: var(--text-soft); font-size: .875rem; }
+.certificate-exam { margin: .5rem auto; max-width: 60ch; font-size: 1.25rem; overflow-wrap: anywhere; }
+.certificate-scores { display: flex; justify-content: center; flex-wrap: wrap; gap: .75rem; margin: 1.5rem auto; }
+.certificate-score { min-width: 110px; padding: .75rem 1rem; border: 1px solid var(--border); border-radius: var(--r-sm); }
+.certificate-score--total { background: var(--primary-050); border-color: var(--primary-300); }
+.certificate-score span { display: block; font-size: .75rem; color: var(--text-soft); }
+.certificate-score strong { display: block; font-size: 1.4rem; color: var(--ink); }
+.certificate-score small { font-size: .75rem; font-weight: 500; }
+.certificate-footer { display: flex; justify-content: space-between; align-items: end; gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.25rem; text-align: left; }
+.certificate-footer p { font-size: .8rem; margin-top: .25rem; }
+.certificate-issuer { text-align: right; }
+.certificate-note { margin: 1.25rem auto 0; font-size: .65rem; color: var(--text-soft); }
+@media screen and (max-width: 640px) {
+  .certificate-document { padding: 2rem 1.25rem; }
+  .certificate-brand { flex-direction: column; }
+  .certificate-footer { flex-direction: column; align-items: center; text-align: center; }
+  .certificate-issuer { text-align: center; }
+}
+@media print {
+  @page certificate { size: A4 landscape; margin: 10mm; }
+  .certificate-page { margin: 0; padding: 0; background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .certificate-workspace { max-width: none; margin: 0; padding: 0; }
+  .certificate-document { page: certificate; width: 100%; min-height: 185mm; padding: 8mm 10mm; box-shadow: none; break-inside: avoid; }
+  .certificate-brand { margin-bottom: 5mm; }
+  .certificate-document .cert__seal { width: 17mm; height: 17mm; margin-bottom: 3mm; box-shadow: none; }
+  .certificate-document .cert__seal svg { width: 9mm; height: 9mm; }
+  .certificate-name { font-size: 26pt; }
+  .certificate-scores { margin-block: 5mm; gap: 3mm; }
+  .certificate-score { padding: 2mm 4mm; }
+  .certificate-footer { padding-top: 4mm; }
+  .certificate-note { margin-top: 4mm; }
+}
