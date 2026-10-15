@@ -46,7 +46,14 @@
             @foreach ($package->materials as $material)<li>{{ $material->title }}</li>@endforeach
             @foreach ($package->exams as $exam)<li>{{ $exam->title }}</li>@endforeach
         </ul></details>
-        <div class="price__foot"><a class="btn btn--primary btn--block" href="{{ route('checkout', ['package' => $package->id]) }}">{{ $package->price === 0 ? 'Aktifkan paket' : 'Pilih paket' }} <svg data-icon="arrow-right"></svg></a></div>
+        <div class="price__foot">
+            @if ($package->hasAvailableContent())
+                <a class="btn btn--primary btn--block" href="{{ route('checkout', ['package' => $package->id]) }}">{{ $package->price === 0 ? 'Aktifkan paket' : 'Pilih paket' }} <svg data-icon="arrow-right"></svg></a>
+            @else
+                <span class="badge badge--amber badge--flat">Konten belum tersedia</span>
+                <p class="text-sm text-soft" style="margin-top:.75rem">Paket belum bisa dibeli. Silakan pilih paket lain atau hubungi admin.</p>
+            @endif
+        </div>
     </article>
     @empty
     <div class="card exam-empty"><h3 class="card__title">Paket belum tersedia</h3><p class="text-soft" style="margin-top:.5rem">Kamu tetap bisa belajar lewat materi dan sesi gratis.</p><a class="btn btn--primary" style="margin-top:1rem" href="{{ route('materials.index') }}">Buka materi</a></div>

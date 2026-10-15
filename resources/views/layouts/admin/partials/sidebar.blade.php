@@ -89,6 +89,9 @@
   {{-- ===================== KELUAR DARI ADMIN PANEL ===================== --}}
   <div class="side__group">
     <div class="side__title">Lainnya</div>
+    <a class="side__link{{ request()->routeIs('admin.settings.*') ? ' is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if (request()->routeIs('admin.settings.*')) aria-current="page" @endif>
+      <svg data-icon="settings"></svg><span>Pengaturan Integrasi</span>
+    </a>
     <a class="side__link" href="{{ route('dashboard') }}">
       <svg data-icon="book"></svg><span>Mode Peserta</span>
     </a>

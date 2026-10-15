@@ -3,6 +3,18 @@ const guide = (id, audience, category, routes, title, summary, sections, fields 
 });
 
 export const helpGuides = [
+  guide('admin-integrations', 'admin', 'Administrasi', ['admin.settings.'], 'Pengaturan pembayaran dan email',
+    'Kelola key Midtrans dan SMTP, uji kredensial yang tersimpan, serta periksa riwayat perubahan admin.', [
+      ['Mengubah kredensial', ['Isi hanya key atau app password yang ingin diganti. Kolom rahasia yang kosong mempertahankan nilai sebelumnya. Masukkan password akun admin lalu simpan. Jika pengaturan berubah di halaman lain, muat ulang sebelum melanjutkan.', 'Pilihan Hapus menghapus kredensial dari aplikasi. Untuk mencabut kredensial yang bocor, lakukan pencabutan atau penggantian melalui penyedia layanan juga.']],
+      ['Mode dan status pembayaran', ['Sandbox dipakai untuk simulasi; Production memproses pembayaran uang sungguhan. Key kedua mode dikelola terpisah. Mengganti mode hanya memengaruhi pembelian baru.', 'Menjeda pembelian tetap mengizinkan notifikasi dan sinkronisasi transaksi lama. Penggantian atau penghapusan key ditolak jika masih ada transaksi pending pada mode tersebut. Selesaikan dan sinkronkan transaksi terlebih dahulu.']],
+      ['Email dan pengujian', ['Email yang dinonaktifkan tidak dapat mengirim verifikasi akun, reset password, dan notifikasi. Gunakan kredensial SMTP khusus aplikasi dari penyedia email, serta port TLS 465 atau STARTTLS 587.', 'Simpan perubahan sebelum menguji. Uji Midtrans hanya memeriksa autentikasi tanpa membuat tagihan. Email uji dikirim ke alamat email akun admin yang sedang masuk; periksa kotak masuk dan spam.']],
+    ], [
+      ['#is_production', 'Mode pembayaran', 'Pastikan mode yang dipilih memiliki server key yang benar. Production menggunakan uang sungguhan.'],
+      ['#smtp_host', 'Penyedia email', 'Pilih server SMTP yang diizinkan dan cocokkan port serta username dengan penyedia email kamu.'],
+      ['#smtp_password', 'App password', 'Kosongkan untuk mempertahankan kredensial. Password akun admin di bawahnya digunakan untuk mengonfirmasi perubahan.'],
+      ['.table-wrap', 'Riwayat perubahan', 'Periksa siapa yang menyimpan pengaturan atau menguji integrasi. Nilai rahasia tidak dicatat dalam riwayat.'],
+    ]),
+
   guide('admin-start', 'admin', 'Mulai di sini', ['admin.dashboard'], 'Panduan awal administrator',
     'Kenali hubungan antarfitur dan urutan menyiapkan kelas, dari bidang sampai peserta bisa belajar serta mencetak sertifikat.', [
       ['Urutan menyiapkan pembelajaran', [
@@ -147,7 +159,7 @@ export const helpGuides = [
       ['Harga, masa aktif, dan kuota', ['Harga diisi dalam rupiah tanpa titik pemisah: 99000 berarti Rp99.000. Masa aktif dihitung sejak aktivasi paket peserta; kosong berarti tanpa batas waktu.', 'Kuota tryout kosong berarti tanpa batas, 0 berarti tidak menyediakan jatah tryout, dan angka positif membatasi total penggunaan. Latihan tidak memotong kuota tryout. Memulai sesi tryout premium baru dapat menggunakan kuota; melanjutkan sesi yang sama bukan pembelian paket baru.']],
       ['Leaderboard dan status katalog', ['Akses lokal mengikuti provinsi peserta. Akses nasional mencakup lokal juga. Hak tersebut berlaku selama paket peserta aktif sesuai ketentuan saat aktivasi.', 'Menonaktifkan paket menghentikan aktivasi baru melalui katalog; hak peserta yang sudah aktif tetap mengikuti ketentuan saat aktivasi. Mengarsipkan paket tidak sama dengan mencabut akses setiap peserta.']],
       ['Paket peserta dan pemberian manual', ['Pada paket yang sudah dibuat dan aktif, masukkan email akun peserta serta alasan pemberian, kemudian Berikan paket. Masa aktif dimulai saat aktivasi. Aktivasi ganda untuk paket yang sama dan masih aktif ditolak.', 'Gunakan tabel Paket Peserta untuk memeriksa masa aktif, sisa kuota, status, dan catatan. Pencabutan akses adalah tindakan terpisah; cocokkan peserta dan baca konfirmasi sebelum melanjutkan.']],
-      ['Perubahan paket dan masalah akses', ['Paket peserta menyimpan salinan ketentuan/isinya. Untuk pembelian, rincian dicatat saat checkout; pemberian manual memakai ketentuan saat aktivasi admin. Perubahan katalog setelahnya tidak otomatis menambah isi, masa aktif, atau kuota pada paket peserta lama.', 'Jika peserta masih terkunci, periksa paket peserta yang benar, status aktif, tanggal berakhir, isi yang menjadi haknya, dan sisa kuota. Memasukkan konten ke paket hari ini belum tentu menambahkannya ke paket yang dibeli atau diaktifkan sebelumnya.']],
+      ['Perubahan paket dan masalah akses', ['Ketentuan/isi paket disalin ketika peserta mengaktifkannya. Perubahan paket setelahnya berlaku untuk aktivasi berikutnya; paket peserta yang sudah aktif tidak otomatis memperoleh isi/masa aktif/kuota baru.', 'Jika peserta masih terkunci, periksa paket peserta yang benar, status aktif, tanggal berakhir, isi saat aktivasi, dan sisa kuota. Memasukkan konten ke paket hari ini belum tentu menambahkannya ke paket yang diaktifkan sebelumnya.']],
     ], [
       ['#package-name', 'Nama paket', 'Nama ditampilkan di katalog dan ketentuan paket peserta. Buat nama yang membedakan paket.'],
       ['#package-description', 'Deskripsi manfaat', 'Jelaskan cakupan materi/sesi, masa aktif, dan manfaat tanpa menjanjikan konten yang tidak dipilih.'],
@@ -156,8 +168,8 @@ export const helpGuides = [
       ['#package-quota', 'Total kuota tryout', 'Kosong = tanpa batas; 0 = tanpa jatah tryout; angka positif = batas total penggunaan. Latihan tidak memotong kuota ini.'],
       ['#package-leaderboard', 'Hak leaderboard', 'Lokal mengikuti provinsi peserta; nasional mencakup lokal. Hak disalin saat aktivasi dan berlaku selama paket aktif.'],
       ['[name="is_active"]:not([type="hidden"])', 'Tampilkan di katalog', 'Paket aktif dapat diaktifkan peserta sesuai aturan katalog. Menonaktifkan tidak mencabut hak paket yang sudah aktif.'],
-      ['[name="material_ids[]"]', 'Materi yang termasuk', 'Pilih materi premium yang benar-benar termasuk paket. Isi baru berlaku untuk aktivasi paket berikutnya.'],
-      ['[name="exam_ids[]"]', 'Sesi yang termasuk', 'Pilih latihan dan tryout yang menjadi hak paket. Kuota tetap diperiksa untuk memulai tryout premium.'],
+      ['[name="material_ids[]"]', 'Materi yang termasuk', 'Gunakan Semua materi atau Semua premium untuk pilihan massal. Untuk satu topik, pilih topiknya lalu tekan Pilih hasil filter. Pilihan dapat ditambahkan dari beberapa topik. Simpan paket setelah selesai.'],
+      ['[name="exam_ids[]"]', 'Sesi yang termasuk', 'Gunakan Semua latihan, Semua tryout, atau Semua premium. Pilihan massal melewati konten yang belum siap. Kosongkan membatalkan pilihan pada daftar ini; perubahan berlaku setelah paket disimpan.'],
       ['#grant-email', 'Aktivasi manual', 'Gunakan email akun peserta terdaftar. Paket harus aktif dan aktivasi ganda paket yang sama tidak diperbolehkan selama masih aktif.'],
       ['#grant-note', 'Alasan pemberian', 'Catat alasan yang dapat dipahami pengelola lain. Pemberian paket manual terpisah dari transaksi pembayaran.'],
     ]),
@@ -273,7 +285,7 @@ export const helpGuides = [
   guide('member-packages', 'member', 'Paket dan pembayaran', ['packages.'], 'Memilih paket belajar',
     'Periksa isi, harga, masa aktif, kuota tryout, dan akses leaderboard sebelum memilih paket.', [
       ['Apa yang perlu dibandingkan?', ['Paket dapat memuat materi/video, latihan, tryout, dan hak leaderboard yang berbeda. Premium tidak otomatis berarti semua konten berbayar dalam aplikasi terbuka.', 'Masa aktif dihitung sejak aktivasi. Kuota tryout membatasi penggunaan sesi premium sesuai ketentuan paket; latihan tidak memotong kuota tersebut. Baca isi paket yang dipilih sebelum menuju checkout.']],
-      ['Paket aktif dan perubahan katalog', ['Paketmu mengikuti rincian pembelian yang dicatat saat checkout, atau ketentuan saat pemberian manual oleh admin. Perubahan harga, isi, kuota, atau masa aktif pada katalog setelah itu tidak otomatis mengubah hak paketmu.', 'Jika konten masih terkunci, periksa bahwa paketmu aktif, belum kedaluwarsa/dicabut, memuat konten tersebut, dan masih memiliki kuota untuk tryout premium baru.']],
+      ['Paket aktif dan perubahan katalog', ['Hak paket disimpan saat aktivasi. Perubahan harga, isi, kuota, atau masa aktif pada katalog setelah itu tidak otomatis mengubah paket yang sudah kamu aktifkan.', 'Jika konten masih terkunci, periksa bahwa paketmu aktif, belum kedaluwarsa/dicabut, memuat konten tersebut, dan masih memiliki kuota untuk tryout premium baru.']],
     ]),
 
   guide('member-checkout', 'member', 'Paket dan pembayaran', ['checkout'], 'Checkout dan membuat pesanan',
@@ -334,100 +346,8 @@ const examFields = [
   ['button[name="status"][value="published"]', 'Simpan dan terbitkan', 'Menerbitkan memeriksa kesiapan dan jumlah soal. Perubahan pengaturan berlaku untuk sesi baru; hasil lama tidak dihitung ulang. Tur tidak menyimpan data.'],
 ];
 
-const additionalFields = {
-  'admin-sections': [
-    ['#slug', 'Alamat bidang', 'Slug membentuk alamat kategori. Kosong dapat diisi otomatis dari nama; periksa keunikannya.'],
-    ['#description', 'Deskripsi bidang', 'Jelaskan lingkup bidang agar pengelola dan peserta memahami jenis materi yang termasuk.'],
-    ['#icon', 'Ikon bidang', 'Ikon membedakan bidang secara visual dan tidak mengubah nilai atau hak akses.'],
-  ],
-  'admin-questions': [
-    ['#question-image', 'Gambar pendukung', 'JPEG, PNG, atau WebP maksimal 2 MB. Periksa teks dan label opsi di dalam gambar sebelum mengizinkan pengacakan pilihan.'],
-    ['#question-video', 'Video pendukung', 'MP4/WebM maksimal 50 MB. MP4 H.264 membantu kompatibilitas browser. Pratinjau media sebelum terbit.'],
-  ],
-  'admin-packages': [
-    ['#package-position', 'Urutan katalog', 'Angka kecil ditampilkan lebih dahulu pada katalog. Urutan tidak menambah hak akses atau kuota.'],
-  ],
-  'admin-users': [
-    ['#phone', 'Kontak peserta', 'Nomor telepon membantu identifikasi akun; menyimpannya tidak otomatis mengirim pesan/pengingat.'],
-    ['#institution', 'Instansi atau asal', 'Isi identitas instansi/asal peserta dengan jelas agar tidak tertukar dengan akun lain.'],
-    ['#address', 'Alamat', 'Data kontak tambahan. Untuk peringkat lokal, gunakan pilihan provinsi, bukan hanya teks alamat.'],
-  ],
-  'member-dashboard': [
-    ['main .stat', 'Ringkasan belajar', 'Baca label angka dan jenis aktivitasnya. Sesi selesai berbeda dari materi yang ditandai selesai.'],
-    ['main [data-chart]', 'Perkembangan', 'Gunakan grafik sebagai ringkasan lalu buka hasil sesi untuk rincian nilai dan jawaban.'],
-  ],
-  'member-materials': [
-    ['.material-field-pills', 'Pilih bidang', 'Bidang mengelompokkan topik. Pencarian dan filter format membantu mempersempit bahan belajar.'],
-    ['.lesson-topic', 'Buka topik', 'Buka kelompok topik untuk melihat materi PDF/video serta latihan yang terkait. Materi terkunci memerlukan paket yang sesuai.'],
-    ['form[action$="/progress"]', 'Tandai materi selesai', 'Gunakan setelah mempelajari materi. Tanda selesai dapat menjadi syarat memulai latihan topik; hanya membuka materi belum cukup.'],
-    ['[data-pdf-reader]', 'Pembaca PDF', 'Gunakan kontrol halaman dan perbesaran. Pembaca materi ini membatasi fitur unduh/cetak; cetak sertifikat tersedia melalui menu Sertifikat.'],
-    ['video', 'Materi video', 'Putar sumber video yang disediakan pengelola. Setelah belajar, periksa tanda selesai materi.'],
-  ],
-  'member-question-bank': [
-    ['.question-bank-navigation', 'Pindah soal', 'Sebelumnya/Berikutnya mengikuti daftar/filter soal yang dipilih. Tidak sama dengan sesi tryout bertimer.'],
-    ['.question-answer-options', 'Pilih jawaban', 'Baca pertanyaan lalu pilih opsi sebelum Periksa jawaban. Pada soal berbobot setiap pilihan dapat bernilai berbeda.'],
-    ['.question-answer-footer', 'Periksa jawaban', 'Tombol mengirim pilihan untuk diperiksa. Tur ini tidak memilih atau mengirim jawaban.'],
-    ['.question-feedback', 'Umpan balik dan pembahasan', 'Bandingkan pilihan dengan kunci/skor. Pembahasan lengkap mengikuti hak akses yang berlaku.'],
-  ],
-  'member-quizzes': [
-    ['.exam-metrics', 'Jumlah soal dan durasi latihan', 'Durasi 0 berarti tanpa timer. Periksa jumlah soal dan maksimum hasil sebelum mulai.'],
-    ['.exam-catalog', 'Akses dan prasyarat', 'Latihan premium perlu paket yang memuatnya. Latihan topik dapat meminta seluruh materi ditandai selesai. Latihan tidak memotong kuota tryout.'],
-  ],
-  'member-tryouts': [
-    ['.exam-metrics', 'Persiapan tryout', 'Periksa jumlah soal, durasi, dan skor maksimal. Timer tetap berjalan setelah sesi dimulai, termasuk ketika keluar.'],
-    ['.exam-catalog', 'Mulai atau lanjutkan', 'Tryout premium baru memerlukan paket yang memuatnya dan kuota tersisa. Lanjutkan memakai sesi berjalan, bukan membuat hasil baru.'],
-  ],
-  'member-result': [
-    ['.result-hero', 'Nilai dan passing grade', 'Bandingkan nilai dengan maksimum dan ambang sesi. Nilai tepat di ambang sudah memenuhi syarat sertifikat tryout.'],
-    ['.scorebar', 'Nilai per bagian', 'Gunakan bagian dengan nilai rendah sebagai prioritas belajar berikutnya. Skor soal berbobot berbeda dengan jumlah benar.'],
-    ['main details', 'Rincian jawaban', 'Buka rincian setelah tur untuk melihat pilihan, kunci, dan pembahasan sesuai hak akses.'],
-  ],
-  'member-history': [
-    ['main .pills', 'Filter riwayat', 'Pilih semua, tryout, atau latihan. Filter status membedakan sesi berjalan dengan sesi selesai.'],
-    ['main .table-wrap', 'Lanjutkan atau lihat hasil', 'Lanjutkan Sesi membuka jawaban yang tersimpan; Lihat Hasil membuka penilaian. Timer sesi berjalan tidak berhenti saat di halaman ini.'],
-  ],
-  'member-statistics': [
-    ['[aria-label="Jenis aktivitas"]', 'Pilih jenis aktivitas', 'Ringkasan latihan dan tryout dapat berbeda skala. Pilih jenis aktivitas yang ingin dievaluasi.'],
-    ['[aria-label="Rentang waktu"]', 'Pilih periode', '30 hari, 3 bulan, atau semua membatasi data yang dihitung. Sesi berjalan belum menjadi hasil akhir.'],
-    ['main .stat', 'Nilai dan akurasi', 'Perhatikan maksimum nilai serta jenis soal. Akurasi benar/salah tidak menyamakan semua jawaban berbobot sebagai benar penuh.'],
-    ['main [data-chart]', 'Grafik hasil', 'Gunakan grafik untuk melihat pola lalu periksa hasil sesi individual sebelum membandingkan sesi yang berbeda.'],
-  ],
-  'member-leaderboard': [
-    ['[aria-label="Cakupan leaderboard"]', 'Lokal atau nasional', 'Lokal mengikuti provinsi profil. Nasional membutuhkan hak yang sesuai pada paket aktif dan mencakup lokal juga.'],
-    ['main .table-wrap', 'Peringkat dan profil virtual', 'Peringkat memakai persentase tryout terbaik. Label Virtual berarti profil contoh dengan skor simulasi, bukan peserta nyata.'],
-  ],
-  'member-packages': [
-    ['.price', 'Isi dan harga paket', 'Bandingkan materi/sesi, harga, masa aktif, kuota, serta leaderboard. Paket tidak otomatis membuka seluruh konten premium.'],
-    ['.price__foot', 'Pilih atau aktifkan paket', 'Tombol membawa ke pemeriksaan rincian paket. Tur tidak membuat pesanan atau mengaktifkan akses.'],
-  ],
-  'member-checkout': [
-    ['[aria-labelledby="checkout-package-title"]', 'Periksa isi paket', 'Pastikan materi, latihan, tryout, masa aktif, dan kuotanya sesuai kebutuhanmu sebelum membuat pesanan.'],
-    ['#checkout-summary-title', 'Ringkasan pembelian', 'Periksa harga/total yang benar-benar ditampilkan. Voucher contoh pada admin tidak menjamin potongan berlaku.'],
-    ['main form', 'Lanjutkan sesuai pilihanmu', 'Tindakan pada formulir dapat membuat pesanan atau mengaktifkan paket gratis. Tur hanya menjelaskan dan tidak menekan tombol.'],
-  ],
-  'member-transactions': [
-    ['main .table-wrap', 'Temukan pesanan', 'Cocokkan nomor pesanan, paket, tanggal, dan status agar tidak tertukar dengan pembelian lain.'],
-    ['form[action$="/refresh"]', 'Periksa status', 'Meminta pemeriksaan status pembayaran. Belum lunas tidak sama dengan akses paket aktif.'],
-    ['form[action$="/pay"]', 'Lanjutkan pembayaran', 'Tombol bisa menyiapkan atau membuka pembayaran. Tur tidak membuat komitmen pembayaran untukmu.'],
-  ],
-  'member-profile': [
-    ['#avatar', 'Foto profil', 'Gunakan JPEG, PNG, atau WebP sesuai batas formulir, lalu simpan perubahan profil.'],
-    ['#name', 'Nama pada sertifikat', 'Isi nama lengkap dengan benar sebelum membuka dan mencetak sertifikat.'],
-    ['#email', 'Email akun', 'Email ditampilkan hanya-baca. Hubungi admin jika perlu memperbaikinya.'],
-    ['#province', 'Peringkat lokal', 'Provinsi menentukan kelompok leaderboard lokal dan ditampilkan bersama namamu di papan peringkat.'],
-    ['#current_password', 'Password saat ini', 'Bagian ini digunakan saat mengganti sandi. Isi sesuai petunjuk lalu konfirmasikan password baru.'],
-    ['#password', 'Password baru', 'Minimal 8 karakter sesuai formulir. Mengganti password adalah tindakan tersendiri dari menyimpan profil.'],
-    ['#password_confirmation', 'Konfirmasi sandi baru', 'Harus sama persis dengan password baru sebelum menyimpan perubahan sandi.'],
-    ['#delete_current_password', 'Penghapusan akun', 'Ini bagian tindakan hapus akun, bukan penggantian password. Baca dampak dan konfirmasi sebelum menggunakannya. Tur tidak menghapus akun.'],
-  ],
-  'member-articles': [
-    ['main .article-prose', 'Isi bacaan', 'Membaca artikel tidak otomatis menandai materi topik selesai. Gunakan Materi untuk progres belajar dan Tryout untuk hasil simulasi.'],
-  ],
-};
-
 for (const item of helpGuides) {
   if (['admin-exams', 'admin-quizzes'].includes(item.id)) item.fields = examFields;
-  item.fields = [...item.fields, ...(additionalFields[item.id] || [])];
 }
 
 export function findHelpGuide(routeName, audience) {

@@ -53,7 +53,7 @@
 .help-tour .driver-popover-close-btn { color: var(--text-soft); }
 .help-center :focus-visible, .help-tour :focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
 @media (max-width: 900px) { .help-banner { flex-direction: column; align-items: start; } }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
   .help-launcher { right: .75rem; bottom: .75rem; padding: .65rem 1rem; font-size: .75rem; }
   .help-center { width: calc(100% - 1rem); height: 94dvh; max-height: 94dvh; }
   .help-center__header, .help-center__search { padding: .85rem 1rem; }

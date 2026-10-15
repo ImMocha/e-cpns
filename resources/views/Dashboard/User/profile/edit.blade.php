@@ -133,7 +133,7 @@
           @csrf
           @method('PATCH')
           <div class="card__head">
-            <div><div class="card__title">Notifikasi</div><div class="card__sub">Simpan preferensi informasi akunmu</div></div>
+            <div><div class="card__title">Notifikasi Email</div><div class="card__sub">Pilih informasi yang dikirim ke emailmu. Email keamanan akun tetap dikirim.</div></div>
           </div>
           <div class="stack" style="--stack:1rem">
             <label class="switch"><input type="checkbox" name="notifications[new_tryout]" value="1" @checked(old('notifications.new_tryout', $notificationPreferences['new_tryout']))><span>Pengingat tryout baru</span></label>

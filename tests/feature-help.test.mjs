@@ -5,6 +5,7 @@ import { findHelpGuide, searchHelpGuides } from '../resources/js/lontar/help-con
 test('admin module routes resolve to the correct contextual instructions', () => {
   for (const [route, expected] of [
     ['admin.dashboard', 'admin-start'],
+    ['admin.settings.index', 'admin-integrations'],
     ['admin.materials.index', 'admin-materials'],
     ['admin.materials.edit', 'admin-materials'],
     ['admin.materials.quizzes.create', 'admin-quizzes'],

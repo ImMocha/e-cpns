@@ -29,6 +29,9 @@
 
     <form class="card card--pop" method="POST" action="{{ route('login.store') }}" novalidate>
       @csrf
+      @if (session('status'))
+        <div class="alert alert--success" role="status" style="margin-bottom:1.25rem">{{ session('status') }}</div>
+      @endif
       <div class="stack" style="--stack:1.15rem">
 
         <div class="field{{ $errors->has('email') ? ' is-invalid' : '' }}">
@@ -61,7 +64,7 @@
             <input type="checkbox" name="remember" value="1" @checked(old('remember'))>
             <span>Ingat saya</span>
           </label>
-          <span class="text-sm fw-700 text-primary" style="text-underline-offset:3px;opacity:.6;cursor:not-allowed" title="Segera hadir">Lupa password?</span>
+          <a class="text-sm fw-700 text-primary" href="{{ route('password.request') }}">Lupa password?</a>
         </div>
 
         <button class="btn btn--primary btn--lg btn--block" type="submit">

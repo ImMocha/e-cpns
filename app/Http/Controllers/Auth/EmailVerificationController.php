@@ -9,11 +9,16 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class EmailVerificationController extends Controller
 {
-    public function notice(): View
+    public function notice(Request $request): View|RedirectResponse
     {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route($request->user()->isAdmin() ? 'admin.dashboard' : 'dashboard');
+        }
+
         return view('auth.verify-email');
     }
 
@@ -35,7 +40,15 @@ class EmailVerificationController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        try {
+            $request->user()->sendEmailVerificationNotification();
+        } catch (TransportExceptionInterface $exception) {
+            report($exception);
+
+            return back()->withErrors([
+                'email' => 'Email verifikasi belum dapat dikirim. Silakan coba lagi beberapa saat atau hubungi admin.',
+            ]);
+        }
 
         return back()->with('status', 'verification-link-sent');
     }

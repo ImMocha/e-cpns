@@ -56,6 +56,39 @@ class PackageManagementTest extends TestCase
         $this->assertDatabaseCount('packages', 0);
     }
 
+    public function test_content_picker_supplies_topics_and_marks_only_available_content_for_bulk_selection(): void
+    {
+        $ready = Material::factory()->premium()->video()->create();
+        $draft = Material::factory()->draft()->video()->create();
+        $exam = Exam::factory()->create();
+        $draftExam = Exam::factory()->create(['status' => 'draft']);
+        $package = Package::factory()->create();
+        $package->materials()->attach($ready);
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->get(route('admin.packages.edit', $package))
+            ->assertSee('data-package-picker', false)->assertSee('Semua materi')->assertSee('Semua premium')
+            ->assertSee('Pilih hasil filter')->assertSee('Semua latihan')->assertSee('Semua tryout')
+            ->assertSee($ready->topic->name)->assertSee('Berikan akses manual')
+            ->assertViewHas('availableMaterialIds', fn (array $ids): bool => isset($ids[$ready->id]) && ! isset($ids[$draft->id]))
+            ->assertViewHas('availableExamIds', fn (array $ids): bool => isset($ids[$exam->id]) && ! isset($ids[$draftExam->id]))
+            ->assertViewHas('selectedMaterials', [$ready->id]);
+    }
+
+    public function test_admin_can_save_multiple_selected_materials_and_sessions_in_one_package(): void
+    {
+        $materials = Material::factory()->count(3)->premium()->video()->create();
+        $exams = Exam::factory()->count(2)->create();
+        $payload = $this->payload(['material_ids' => $materials->modelKeys(), 'exam_ids' => $exams->modelKeys()]);
+
+        $this->actingAs(User::factory()->admin()->create())->post(route('admin.packages.store'), $payload)
+            ->assertSessionHasNoErrors();
+
+        $package = Package::sole();
+        $this->assertSame($materials->modelKeys(), $package->materials()->orderBy('materials.id')->pluck('materials.id')->all());
+        $this->assertSame($exams->modelKeys(), $package->exams()->orderBy('exams.id')->pluck('exams.id')->all());
+    }
+
     /** @return array<string, array{string, string}> */
     public static function restrictedActions(): array
     {

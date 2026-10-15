@@ -16,14 +16,6 @@ use Illuminate\Validation\Rule;
 
 class ProfileController extends SliceController
 {
-    private const DEFAULT_NOTIFICATION_PREFERENCES = [
-        'new_tryout' => true,
-        'updated_materials' => true,
-        'payment_updates' => true,
-        'package_recommendations' => false,
-        'platform_announcements' => false,
-    ];
-
     public function edit(Request $request): View
     {
         /** @var User $user */
@@ -35,7 +27,7 @@ class ProfileController extends SliceController
                 ? Storage::disk('public')->url($user->avatar_path)
                 : null,
             'notificationPreferences' => array_merge(
-                self::DEFAULT_NOTIFICATION_PREFERENCES,
+                User::DEFAULT_NOTIFICATION_PREFERENCES,
                 $user->notification_preferences ?? [],
             ),
         ]);
@@ -108,7 +100,7 @@ class ProfileController extends SliceController
         $submittedPreferences = $validated['notifications'] ?? [];
         $preferences = [];
 
-        foreach (array_keys(self::DEFAULT_NOTIFICATION_PREFERENCES) as $key) {
+        foreach (array_keys(User::DEFAULT_NOTIFICATION_PREFERENCES) as $key) {
             $preferences[$key] = (bool) ($submittedPreferences[$key] ?? false);
         }
 

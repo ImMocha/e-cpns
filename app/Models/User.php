@@ -37,6 +37,14 @@ use Illuminate\Support\Str;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
+    public const DEFAULT_NOTIFICATION_PREFERENCES = [
+        'new_tryout' => true,
+        'updated_materials' => true,
+        'payment_updates' => true,
+        'package_recommendations' => false,
+        'platform_announcements' => false,
+    ];
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
 
@@ -88,6 +96,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isActive(): bool
     {
         return $this->status === UserStatus::Active;
+    }
+
+    public function wantsEmailNotification(string $preference): bool
+    {
+        return ! $this->trashed()
+            && $this->isActive()
+            && $this->hasVerifiedEmail()
+            && (bool) ($this->notification_preferences[$preference] ?? self::DEFAULT_NOTIFICATION_PREFERENCES[$preference] ?? false);
     }
 
     public function canViewExplanations(): bool

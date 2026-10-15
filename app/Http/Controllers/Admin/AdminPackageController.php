@@ -23,6 +23,7 @@ class AdminPackageController extends Controller
 
         return view('Dashboard.Admin.packages.index', [
             'packages' => Package::query()
+                ->withContentAvailability()
                 ->when(($filters['status'] ?? null) === 'archived', fn ($query) => $query->onlyTrashed())
                 ->when($filters['q'] ?? null, fn ($query, $search) => $query->where('name', 'like', '%'.$search.'%'))
                 ->when(in_array($filters['status'] ?? null, ['active', 'inactive'], true),
@@ -71,9 +72,15 @@ class AdminPackageController extends Controller
 
     private function form(Package $package): View
     {
+        $materials = Material::query()->with(['section', 'topic.section'])->ordered()->get();
+
         return view('Dashboard.Admin.packages.form', [
             'package' => $package,
-            'materials' => Material::query()->with(['section', 'topic'])->ordered()->get(),
+            'contentAvailable' => $package->exists && $package->hasAvailableContent(),
+            'materials' => $materials,
+            'materialTopics' => $materials->pluck('topic')->filter()->unique('id')->sortBy('name'),
+            'availableMaterialIds' => array_fill_keys(Material::query()->visibleToMembers()->pluck('materials.id')->all(), true),
+            'availableExamIds' => array_fill_keys(Exam::query()->published()->pluck('exams.id')->all(), true),
             'exams' => Exam::query()->orderBy('kind')->orderBy('title')->get(),
             'selectedMaterials' => $package->exists ? $package->materials()->pluck('materials.id')->all() : [],
             'selectedExams' => $package->exists ? $package->exams()->pluck('exams.id')->all() : [],

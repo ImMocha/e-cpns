@@ -137,6 +137,8 @@
             @if ($alreadyOwned)
                 <p class="mt-5! text-sm leading-relaxed text-[var(--text)]">Paket ini sudah aktif di akunmu.</p>
                 <a class="btn btn--primary btn--block mt-5!" href="{{ route('packages.index') }}">Lihat akses paket <svg data-icon="arrow-right"></svg></a>
+            @elseif (! $contentAvailable)
+                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]" role="status">Paket ini belum bisa dibeli karena kontennya sedang tidak tersedia. Silakan pilih paket lain atau hubungi admin.</p>
             @elseif (! $paymentAvailable)
                 <p class="mt-5! text-sm leading-relaxed text-[var(--text)]" role="status">Pembayaran belum tersedia. Silakan hubungi admin untuk mendapatkan paket ini.</p>
             @else

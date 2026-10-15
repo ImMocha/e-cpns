@@ -57,7 +57,7 @@ function initializeHelp(container) {
     article.append(node('span', 'help-eyebrow', item.category), node('h3', 'help-article-title', item.title), node('p', 'help-article-summary', item.summary));
     const actions = node('div', 'help-article-actions');
     if (item.id === current.id) actions.append(button('Mulai tur halaman ini', () => startTour(), 'btn btn--primary btn--sm'));
-    if (destinations.has(item.id) && item.id !== current.id) {
+    if (destinations.has(item.id)) {
       const link = node('a', 'btn btn--ghost btn--sm', 'Buka halaman fitur');
       link.href = destinations.get(item.id);
       actions.append(link);

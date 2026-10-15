@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminPackageController;
 use App\Http\Controllers\Admin\AdminQuestionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\AdminVoucherController;
+use App\Http\Controllers\Admin\IntegrationSettingController;
 use App\Http\Controllers\Admin\LeaderboardSimulationController;
 use App\Http\Controllers\Admin\MaterialController as AdminMaterialController;
 use App\Http\Controllers\Admin\SectionController as AdminSectionController;
@@ -16,6 +17,8 @@ use App\Http\Controllers\Admin\UserPackageController;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\CheckoutController;
@@ -35,6 +38,7 @@ use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TryoutController;
 use App\Http\Controllers\TryoutResultController;
+use App\Http\Middleware\SecureIntegrationSettings;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -59,11 +63,18 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:6,1')->name('password.email');
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        ->middleware('throttle:6,1')->name('password.update');
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])
         ->name('verification.notice');
     Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
@@ -148,6 +159,14 @@ Route::prefix('admin')
     ->middleware(['auth', 'active', 'role:admin', 'verified'])
     ->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+
+        Route::middleware(SecureIntegrationSettings::class)->group(function (): void {
+            Route::get('settings/integrations', [IntegrationSettingController::class, 'index'])->name('settings.index');
+            Route::patch('settings/integrations/{integration}', [IntegrationSettingController::class, 'update'])
+                ->whereIn('integration', ['midtrans', 'mail'])->middleware('throttle:integration-settings')->name('settings.update');
+            Route::post('settings/integrations/{integration}/test', [IntegrationSettingController::class, 'test'])
+                ->whereIn('integration', ['midtrans', 'mail'])->middleware(['throttle:integration-settings', 'throttle:integration-connection-tests'])->name('settings.test');
+        });
 
         // Pengelolaan user. `users` sebagai segment URL, `user` sebagai nama
         // parameter supaya generated URL dan route-model binding konsisten.

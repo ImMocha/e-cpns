@@ -5,6 +5,9 @@
 <header class="page-head page-head__row"><div><span class="eyebrow">Pengaturan Paket</span><h1 style="margin-top:.5rem">{{ $package->exists ? 'Kelola Paket' : 'Buat Paket' }}</h1><p>Perubahan ketentuan berlaku untuk aktivasi berikutnya. Paket peserta yang sudah aktif tetap mengikuti isi saat aktivasi.</p></div><a class="btn btn--ghost" href="{{ route('admin.packages.index') }}">Kembali</a></header>
 @if ($errors->any())<div class="article-errors question-section" role="alert"><strong>Periksa data berikut:</strong><ul>@foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul></div>@endif
 @if ($package->trashed())<div class="card question-section"><span class="badge badge--coral badge--flat">Paket diarsipkan</span><p class="text-soft">Ketentuan tidak dapat diubah. Akses peserta tetap bisa dicabut melalui daftar di bawah.</p></div>@endif
+@if ($package->exists && ! $package->trashed() && $package->is_active && ! $contentAvailable)
+<div class="card question-section" role="status"><strong>Konten paket belum tersedia</strong><p class="text-sm text-soft" style="margin-top:.5rem">Paket ini belum bisa dibeli karena kosong atau masih memuat konten yang sudah dihapus, belum terbit, atau tidak aktif. Pilih kembali materi dan sesi yang tersedia, sesuaikan deskripsinya, lalu simpan paket.</p></div>
+@endif
 <form method="POST" action="{{ $package->exists ? route('admin.packages.update', $package) : route('admin.packages.store') }}">
 @csrf @if ($package->exists) @method('PUT') @endif
 <fieldset @disabled($package->trashed()) style="border:0;padding:0;margin:0">
@@ -33,39 +36,29 @@
         @unless ($package->trashed())<button class="btn btn--primary">Simpan paket</button>@endunless
     </section>
     <div class="question-form-stack">
-        <section class="card question-form-stack">
-            <div><div class="card__title">Materi &amp; video</div><p class="card__sub">Paket membuka materi premium yang dipilih di sini.</p></div>
-            <div class="exam-question-pool">
-            @forelse ($materials as $material)
-            <label class="exam-pool-item"><input type="checkbox" name="material_ids[]" value="{{ $material->id }}" @checked(in_array($material->id, is_array(old('material_ids', $selectedMaterials)) ? old('material_ids', $selectedMaterials) : []))><span><strong>{{ $material->title }}</strong><span class="text-xs text-soft">{{ $material->section?->name ?? 'Bidang dihapus' }} · {{ $material->type->label() }} · {{ $material->access_level->label() }} · {{ $material->status->label() }}</span></span></label>
-            @empty<p class="text-soft">Belum ada materi. <a href="{{ route('admin.materials.create') }}">Tambahkan materi</a>.</p>@endforelse
-            </div>
-        </section>
-        <section class="card question-form-stack">
-            <div><div class="card__title">Latihan &amp; tryout</div><p class="card__sub">Sesi premium hanya dapat dimulai lewat paket yang memuatnya.</p></div>
-            <div class="exam-question-pool">
-            @forelse ($exams as $exam)
-            <label class="exam-pool-item"><input type="checkbox" name="exam_ids[]" value="{{ $exam->id }}" @checked(in_array($exam->id, is_array(old('exam_ids', $selectedExams)) ? old('exam_ids', $selectedExams) : []))><span><strong>{{ $exam->title }}</strong><span class="text-xs text-soft">{{ $exam->kind === 'quiz' ? 'Latihan' : 'Tryout' }} · {{ $exam->access_level->label() }} · {{ $exam->status->label() }}</span></span></label>
-            @empty<p class="text-soft">Belum ada sesi. <a href="{{ route('admin.exams.create') }}">Buat sesi</a>.</p>@endforelse
-            </div>
-            <p class="field__hint">Sesi gratis tetap bebas diakses dan tidak memotong kuota paket. Ubah level akses melalui pengaturan sesi bila ingin menjadikannya premium.</p>
-        </section>
+        @include('Dashboard.Admin.packages._content-picker', ['pickerType' => 'materials', 'items' => $materials, 'selectedIds' => $selectedMaterials, 'availableIds' => $availableMaterialIds])
+        @include('Dashboard.Admin.packages._content-picker', ['pickerType' => 'exams', 'items' => $exams, 'selectedIds' => $selectedExams, 'availableIds' => $availableExamIds])
     </div>
 </div>
 </fieldset>
 </form>
 @if ($package->exists)
 <section class="card question-section" style="margin-top:1.5rem">
-    <div class="card__head"><div><div class="card__title">Paket Peserta</div><div class="card__sub">Aktivasi dan pencabutan akses oleh admin</div></div></div>
+    <div class="card__head"><div><h2 class="card__title">Paket Peserta</h2><p class="card__sub">Daftar akses dari pembelian atau pemberian manual oleh admin.</p></div><span class="badge badge--primary badge--flat">{{ $grants->total() }} akses</span></div>
     @if ($package->is_active && ! $package->trashed())
-    <form class="question-fields question-section" method="POST" action="{{ route('admin.packages.members.store', $package) }}">
+    <details class="question-section" @if ($errors->hasAny(['email', 'note'])) open @endif>
+    <summary class="cursor-pointer text-sm font-bold">Berikan akses manual</summary>
+    <p class="text-sm text-soft" style="margin-top:.75rem">Gunakan untuk bonus atau kelas khusus. Masukkan email peserta terdaftar dan alasan pemberian akses.</p>
+    <form class="question-fields question-section" style="margin-top:1rem" method="POST" action="{{ route('admin.packages.members.store', $package) }}">
         @csrf
         <div class="field"><label class="label" for="grant-email">Email peserta</label><input class="input" type="email" id="grant-email" name="email" maxlength="255" value="{{ old('email') }}" required></div>
         <div class="field"><label class="label" for="grant-note">Alasan pemberian paket</label><input class="input" id="grant-note" name="note" maxlength="500" value="{{ old('note') }}" placeholder="Contoh: akses kelas yang dikonfirmasi admin" required></div>
         <div><button class="btn btn--primary">Berikan paket</button></div>
     </form>
-    <p class="text-xs text-soft question-section">Masa aktif dimulai sekarang. Peserta dengan paket yang sama masih aktif tidak bisa menerima aktivasi ganda.</p>
+    <p class="text-xs text-soft">Masa aktif dimulai saat akses diberikan. Paket yang sama tidak dapat diberikan dua kali selama masih aktif.</p>
+    </details>
     @elseif (! $package->trashed())<p class="text-soft question-section">Aktifkan paket terlebih dahulu untuk memberikannya kepada peserta.</p>@endif
+    @if ($grants->isNotEmpty())
     <div class="table-wrap"><table class="table"><thead><tr><th>Peserta</th><th>Ketentuan saat aktivasi</th><th>Masa aktif</th><th>Kuota tersisa</th><th>Status</th><th>Catatan</th><th>Aksi</th></tr></thead><tbody>
     @forelse ($grants as $grant)
     <tr><td><strong>{{ $grant->user?->name ?? 'Akun dihapus' }}</strong><p class="text-xs text-soft">{{ $grant->user?->email }}</p></td><td>{{ $grant->name }}<p class="text-xs text-soft">{{ $grant->leaderboard_access->label() }}</p></td><td>{{ $grant->starts_at->format('d/m/Y H:i') }}<br>{{ $grant->expires_at ? 's/d '.$grant->expires_at->format('d/m/Y H:i') : 'Tanpa batas waktu' }}</td><td>{{ $grant->remainingTryouts() ?? 'Tanpa batas' }}</td><td>{{ $grant->statusLabel() }}</td><td>{{ $grant->note }}</td><td>
@@ -75,6 +68,9 @@
     @empty<tr><td colspan="7" class="text-soft">Belum ada peserta yang menerima paket ini.</td></tr>@endforelse
     </tbody></table></div>
     @if ($grants->hasPages())<div class="exam-pager"><x-pager :paginator="$grants" /></div>@endif
+    @else
+    <p class="text-sm text-soft">Belum ada peserta yang menerima paket ini. Pembelian yang berhasil akan menambahkan akses peserta secara otomatis.</p>
+    @endif
 </section>
 @endif
 @endsection

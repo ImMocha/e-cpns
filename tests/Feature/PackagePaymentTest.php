@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Enums\LeaderboardAccess;
 use App\Enums\TransactionStatus;
+use App\Models\Exam;
 use App\Models\Material;
 use App\Models\Package;
 use App\Models\Transaction;
@@ -473,11 +474,67 @@ class PackagePaymentTest extends TestCase
         $package->materials()->attach($archived);
         $archived->delete();
 
-        $this->actingAs(User::factory()->create())->get(route('checkout', ['package' => $package->id]))->assertDontSee('Konten yang diarsipkan');
+        $this->actingAs(User::factory()->create())->get(route('checkout', ['package' => $package->id]))
+            ->assertDontSee('Konten yang diarsipkan')->assertSee('Paket ini belum bisa dibeli')->assertDontSee('Lanjut ke pembayaran');
+        $this->get(route('packages.index'))->assertSee('Konten belum tersedia')
+            ->assertDontSee(route('checkout', ['package' => $package->id]), false);
         $this->post(route('checkout.store'), ['package_id' => $package->id])->assertInvalid(['package_id']);
 
         $this->assertDatabaseCount('transactions', 0);
         Http::assertNothingSent();
+    }
+
+    /** @return array<string, array{string, bool}> */
+    public static function unavailableExamStates(): array
+    {
+        return ['archived exam' => ['published', true], 'draft exam' => ['draft', false]];
+    }
+
+    #[DataProvider('unavailableExamStates')]
+    public function test_checkout_and_catalogue_disable_purchase_when_a_selected_exam_is_unavailable(string $status, bool $archived): void
+    {
+        $this->configureGateway();
+        $package = Package::factory()->create();
+        $exam = Exam::factory()->create(['status' => $status, 'deleted_at' => $archived ? now() : null]);
+        $package->exams()->attach($exam);
+        $this->actingAs(User::factory()->create());
+
+        $this->get(route('checkout', ['package' => $package->id]))
+            ->assertSee('Paket ini belum bisa dibeli')->assertDontSee('Lanjut ke pembayaran');
+        $this->get(route('packages.index'))->assertSee('Konten belum tersedia')
+            ->assertDontSee(route('checkout', ['package' => $package->id]), false);
+        $this->post(route('checkout.store'), ['package_id' => $package->id])->assertInvalid('package_id');
+
+        $this->assertDatabaseCount('transactions', 0);
+        Http::assertNothingSent();
+    }
+
+    public function test_admin_can_replace_archived_package_content_to_restore_checkout(): void
+    {
+        $this->configureGateway();
+        Http::fake([self::SNAP => Http::response(['redirect_url' => self::PAYMENT_URL], 201)]);
+        $package = Package::factory()->create();
+        $archived = Exam::factory()->create(['deleted_at' => now()]);
+        $replacement = Exam::factory()->create();
+        $package->exams()->attach($archived);
+        $this->actingAs(User::factory()->admin()->create());
+        $this->get(route('admin.packages.index'))->assertSee('Konten belum tersedia. Perbarui isi paket agar dapat dibeli.');
+        $this->get(route('admin.packages.edit', $package))->assertSee('Konten paket belum tersedia');
+
+        $this->put(route('admin.packages.update', $package), [
+            'name' => $package->name, 'description' => 'Paket tryout pengganti', 'price' => $package->price,
+            'duration_days' => $package->duration_days, 'tryout_quota' => 2, 'position' => 0,
+            'is_active' => true, 'material_ids' => [], 'exam_ids' => [$replacement->id],
+        ])->assertSessionHasNoErrors();
+        $this->get(route('admin.packages.edit', $package))->assertDontSee('Konten paket belum tersedia');
+        $this->actingAs(User::factory()->create())->get(route('checkout', ['package' => $package->id]))
+            ->assertSee('Lanjut ke pembayaran')->assertSee($replacement->title);
+        $this->post(route('checkout.store'), ['package_id' => $package->id])->assertSessionHasNoErrors();
+
+        $this->assertSame([$replacement->id], array_column(Transaction::sole()->package_snapshot['exams'], 'id'));
+        $this->assertDatabaseHas('exam_package', ['package_id' => $package->id, 'exam_id' => $replacement->id]);
+        $this->assertDatabaseMissing('exam_package', ['package_id' => $package->id, 'exam_id' => $archived->id]);
+        Http::assertSentCount(1);
     }
 
     public function test_notification_for_unknown_order_is_rejected(): void

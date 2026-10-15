@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class RegisterController extends Controller
 {
@@ -39,10 +40,18 @@ class RegisterController extends Controller
             'province' => $validated['province'],
         ]);
 
-        event(new Registered($user));
-
         Auth::login($user);
         $request->session()->regenerate();
+
+        try {
+            event(new Registered($user));
+        } catch (TransportExceptionInterface $exception) {
+            report($exception);
+
+            return redirect()->route('verification.notice')->withErrors([
+                'email' => 'Akun berhasil dibuat, tetapi email verifikasi belum dapat dikirim. Silakan kirim ulang beberapa saat lagi.',
+            ]);
+        }
 
         return redirect()->route('verification.notice');
     }

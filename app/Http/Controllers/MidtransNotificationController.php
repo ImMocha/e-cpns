@@ -16,9 +16,12 @@ class MidtransNotificationController extends Controller
 {
     public function __invoke(Request $request, MidtransGateway $gateway, PackagePayment $payments): JsonResponse
     {
-        abort_unless($gateway->configured(), 503, 'Pembayaran belum dikonfigurasi.');
-        abort_unless($gateway->validSignature($request->all()), 403, 'Signature tidak valid.');
-        $transaction = Transaction::query()->where('provider', 'midtrans')->where('order_id', $request->input('order_id'))->firstOrFail();
+        abort_unless($gateway->configuredFor(false) || $gateway->configuredFor(true), 503, 'Pembayaran belum dikonfigurasi.');
+        $orderId = $request->input('order_id');
+        abort_unless(is_string($orderId) && strlen($orderId) <= 50, 403, 'Signature tidak valid.');
+        $transaction = Transaction::query()->where('provider', 'midtrans')->where('order_id', $orderId)->first();
+        abort_unless($gateway->validSignature($request->all(), $transaction?->is_production), 403, 'Signature tidak valid.');
+        abort_if($transaction === null, 404);
         try {
             $transaction = $payments->refresh($transaction);
             if ($transaction->provider_status === null) {

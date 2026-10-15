@@ -48,6 +48,40 @@ class Package extends Model
         $query->where('is_active', true);
     }
 
+    /** @param Builder<Package> $query */
+    public function scopeWithContentAvailability(Builder $query): void
+    {
+        $query->withCount(self::contentAvailabilityCounts());
+    }
+
+    public function hasAvailableContent(): bool
+    {
+        if (! $this->exists) {
+            return false;
+        }
+        if (! array_key_exists('selected_materials_count', $this->getAttributes())) {
+            $this->loadCount(self::contentAvailabilityCounts());
+        }
+
+        $selectedMaterials = (int) $this->selected_materials_count;
+        $selectedExams = (int) $this->selected_exams_count;
+
+        return $selectedMaterials + $selectedExams > 0
+            && (int) $this->available_materials_count === $selectedMaterials
+            && (int) $this->available_exams_count === $selectedExams;
+    }
+
+    /** @return array<string, \Closure> */
+    private static function contentAvailabilityCounts(): array
+    {
+        return [
+            'materials as selected_materials_count' => fn (Builder $query): Builder => $query->withTrashed(),
+            'materials as available_materials_count' => fn (Builder $query): Builder => $query->visibleToMembers(),
+            'exams as selected_exams_count' => fn (Builder $query): Builder => $query->withTrashed(),
+            'exams as available_exams_count' => fn (Builder $query): Builder => $query->published(),
+        ];
+    }
+
     public function formattedPrice(): string
     {
         return 'Rp'.number_format($this->price, 0, ',', '.');

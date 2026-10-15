@@ -14,19 +14,33 @@ use RuntimeException;
 
 class MidtransGateway implements PaymentGatewayContract
 {
+    public function __construct(private IntegrationSettings $settings) {}
+
     public function configured(): bool
     {
-        return is_string(config('services.midtrans.server_key')) && config('services.midtrans.server_key') !== '';
+        $settings = $this->settings->midtrans();
+
+        return $settings['enabled'] && $this->configuredFor($settings['is_production']);
+    }
+
+    public function configuredFor(bool $isProduction): bool
+    {
+        return $this->serverKey($isProduction) !== '';
+    }
+
+    private function serverKey(bool $isProduction): string
+    {
+        return $this->settings->midtrans()[$isProduction ? 'production_server_key' : 'sandbox_server_key'];
     }
 
     private function client(Transaction $transaction): PendingRequest
     {
-        if (! $this->configured() || $transaction->is_production !== (bool) config('services.midtrans.is_production')) {
+        if (! $this->configuredFor($transaction->is_production)) {
             throw new RuntimeException('Konfigurasi Midtrans tidak tersedia untuk transaksi ini.');
         }
 
-        return Http::acceptJson()->asJson()->withBasicAuth(config('services.midtrans.server_key'), '')
-            ->connectTimeout(5)->timeout(15);
+        return Http::acceptJson()->asJson()->withBasicAuth($this->serverKey($transaction->is_production), '')
+            ->withoutRedirecting()->connectTimeout(5)->timeout(15);
     }
 
     public function create(Transaction $transaction): string
@@ -75,18 +89,33 @@ class MidtransGateway implements PaymentGatewayContract
     }
 
     /** @param array<string, mixed> $payload */
-    public function validSignature(array $payload): bool
+    public function validSignature(array $payload, ?bool $isProduction = null): bool
     {
-        if (! $this->configured()) {
-            return false;
-        }
         foreach (['order_id', 'status_code', 'gross_amount', 'signature_key'] as $key) {
             if (! isset($payload[$key]) || ! is_string($payload[$key])) {
                 return false;
             }
         }
-        $expected = hash('sha512', $payload['order_id'].$payload['status_code'].$payload['gross_amount'].config('services.midtrans.server_key'));
+        foreach ($isProduction === null ? [false, true] : [$isProduction] as $mode) {
+            $serverKey = $this->serverKey($mode);
+            if ($serverKey !== '' && hash_equals(hash('sha512', $payload['order_id'].$payload['status_code'].$payload['gross_amount'].$serverKey), $payload['signature_key'])) {
+                return true;
+            }
+        }
 
-        return hash_equals($expected, $payload['signature_key']);
+        return false;
+    }
+
+    public function testConnection(bool $isProduction): bool
+    {
+        $serverKey = $this->serverKey($isProduction);
+        if ($serverKey === '') {
+            return false;
+        }
+        $host = $isProduction ? 'https://api.midtrans.com' : 'https://api.sandbox.midtrans.com';
+        $response = Http::acceptJson()->withBasicAuth($serverKey, '')->withoutRedirecting()->connectTimeout(5)->timeout(15)
+            ->get($host.'/v2/integration-check-'.Str::uuid().'/status');
+
+        return in_array($response->status(), [200, 404], true) && (string) $response->json('status_code') === '404';
     }
 }

@@ -13,7 +13,7 @@ class PackageController extends Controller
     public function index(Request $request): View
     {
         return view('Dashboard.User.packages.index', [
-            'packages' => Package::query()->active()->with([
+            'packages' => Package::query()->active()->withContentAvailability()->with([
                 'materials' => fn ($query) => $query->visibleToMembers(),
                 'exams' => fn ($query) => $query->published(),
             ])->orderBy('position')->orderBy('id')->get(),

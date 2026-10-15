@@ -11,3 +11,7 @@ import './lontar/pdf-reader.js';
 if (document.querySelector('[data-feature-help]')) {
     import('./lontar/feature-help.js');
 }
+
+if (document.querySelector('[data-package-picker]')) {
+    import('./lontar/package-content-picker.js');
+}

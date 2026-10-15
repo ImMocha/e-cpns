@@ -261,8 +261,7 @@
   padding: 1.5rem;
   box-shadow: var(--sh-soft);
 }
-.card--pop { box-shadow: var(--sh-lg); transition: transform var(--t) var(--ease-pop), box-shadow var(--t) var(--ease-pop); }
-.card--pop:hover { transform: translate(-3px, -3px) rotate(-1deg); box-shadow: 12px 12px 0 var(--ink); }
+.card--pop { box-shadow: var(--sh-lg); }
 .card--static { box-shadow: var(--sh-lg); }
 .card--flat { box-shadow: none; }
 .card--dashed { border-style: dashed; box-shadow: none; background: var(--surface-2); }
@@ -300,7 +299,6 @@
   transition: transform var(--t) var(--ease-pop);
 }
 .card__icon svg { width: 24px; height: 24px; stroke-width: 2.5; }
-.card--pop:hover .card__icon { transform: rotate(-10deg) scale(1.06); }
 
 .ico--primary { background: var(--primary); }
 .ico--pink    { background: var(--pop-pink); }
@@ -1585,8 +1583,6 @@
   transition: transform var(--t) var(--ease-pop);
 }
 .tile__glyph svg { width: 30px; height: 30px; stroke-width: 2.5; }
-.card--pop:hover .tile__glyph,
-.tile:hover .tile__glyph { transform: rotate(-8deg) scale(1.06); }
 .tile__badge { position: absolute; top: 0.75rem; left: 0.75rem; z-index: 2; }
 .tile__badge--right { left: auto; right: 0.75rem; }
 .tile__body { display: flex; flex-direction: column; gap: 0.5rem; padding: 1.15rem; flex: 1; }

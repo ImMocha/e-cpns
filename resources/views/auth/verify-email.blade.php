@@ -15,14 +15,18 @@
   </div>
 </header>
 
-<main class="container" style="min-height:70vh;display:grid;place-items:center;padding-block:3rem">
+<main id="main" class="container" style="min-height:70vh;display:grid;place-items:center;padding-block:3rem">
   <section class="card card--pop" style="width:min(100%,600px)">
     <span class="eyebrow">Satu langkah lagi</span>
     <h1 style="font-size:var(--fs-2xl);margin:.75rem 0">Verifikasi email kamu</h1>
     <p class="text-soft" style="margin-bottom:1.5rem">
-      Kami mengirim tautan verifikasi ke <strong>{{ auth()->user()->email }}</strong>.
+      Gunakan tautan verifikasi yang dikirim ke <strong>{{ auth()->user()->email }}</strong>.
       Buka tautan tersebut untuk mengaktifkan akses belajar dan tryout.
     </p>
+
+    @error('email')
+      <div class="alert alert--danger" role="alert" style="margin-bottom:1.25rem">{{ $message }}</div>
+    @enderror
 
     @if (session('status') === 'verification-link-sent')
       <div class="alert alert--success" role="status" style="margin-bottom:1.25rem">

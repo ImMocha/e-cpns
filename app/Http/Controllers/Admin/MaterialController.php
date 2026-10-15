@@ -187,6 +187,7 @@ class MaterialController extends Controller
             $material->update([
                 'status' => MaterialStatus::Draft,
                 'published_at' => null,
+                'updated_by' => $request->user()->id,
             ]);
 
             return redirect()
@@ -203,6 +204,7 @@ class MaterialController extends Controller
         $material->update([
             'status' => MaterialStatus::Published,
             'published_at' => $material->published_at ?? now(),
+            'updated_by' => $request->user()->id,
         ]);
 
         return redirect()

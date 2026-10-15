@@ -18,7 +18,9 @@
 <tr>
     <td><strong>{{ $package->name }}</strong><p class="text-xs text-soft">{{ $package->leaderboard_access->label() }}</p></td><td>{{ $package->formattedPrice() }}</td><td>{{ $package->durationLabel() }}</td>
     <td>{{ $package->materials_count }} materi · {{ $package->exams_count }} sesi</td><td>{{ $package->tryout_quota ?? 'Tanpa batas' }}</td><td>{{ $package->active_members_count }}</td>
-    <td><span class="badge badge--{{ $package->trashed() ? 'coral' : ($package->is_active ? 'mint' : 'amber') }} badge--flat">{{ $package->trashed() ? 'Diarsipkan' : ($package->is_active ? 'Aktif' : 'Draft / nonaktif') }}</span></td>
+    <td><span class="badge badge--{{ $package->trashed() ? 'coral' : ($package->is_active ? 'mint' : 'amber') }} badge--flat">{{ $package->trashed() ? 'Diarsipkan' : ($package->is_active ? 'Aktif' : 'Draft / nonaktif') }}</span>
+        @if (! $package->trashed() && $package->is_active && ! $package->hasAvailableContent())<p class="text-xs text-soft" style="margin-top:.5rem">Konten belum tersedia. Perbarui isi paket agar dapat dibeli.</p>@endif
+    </td>
     <td><div class="btn-row"><a class="btn btn--ghost btn--sm" href="{{ route('admin.packages.edit', $package) }}">{{ $package->trashed() ? 'Lihat peserta' : 'Kelola' }}</a>
     @unless ($package->trashed())<form method="POST" action="{{ route('admin.packages.destroy', $package) }}" data-content-confirm data-confirm-title="Arsipkan paket?" data-confirm-body="Paket hilang dari katalog. Akses peserta yang sudah aktif tetap berlaku.">@csrf @method('DELETE')<button class="btn btn--ghost btn--sm">Arsipkan</button></form>@endunless
     </div></td>

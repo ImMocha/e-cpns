@@ -77,13 +77,19 @@
         <section class="card card--pop card--amber">
           <span class="card__icon ico--coral" style="position:static"><svg data-icon="alert"></svg></span>
           <h2 class="card__title" style="margin-top:.75rem">Perlu Perhatian</h2>
-          <div class="stack" style="--stack:.75rem;margin-top:1rem">
+          <div class="grid" style="--gap:.75rem;margin-top:1rem">
             <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.index', ['status' => 'draft']) }}">
               <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="file"></svg></span>
-              <div style="flex:1"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $draftMaterialCount }} materi draft</strong><span class="text-xs text-soft">Tinjau sebelum diterbitkan</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;color:var(--text-soft)"></svg>
+              <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $draftMaterialCount }} materi draft</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Tinjau sebelum diterbitkan</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
             </a>
-            <a class="card card--tight card--dashed" href="{{ route('admin.materials.quizzes.index') }}"><strong class="text-sm">{{ $quizCount }} latihan materi</strong><p class="text-xs text-soft" style="margin-top:.35rem">Kelola soal latihan dan hubungkan dengan topik pembelajaran.</p></a>
-            <a class="card card--tight card--dashed" href="{{ route('admin.exams.index') }}"><strong class="text-sm">{{ $tryoutCount }} tryout</strong><p class="text-xs text-soft" style="margin-top:.35rem">Atur simulasi CAT, durasi, dan penilaian peserta.</p></a>
+            <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.quizzes.index') }}">
+              <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="pencil"></svg></span>
+              <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $quizCount }} latihan materi</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Kelola soal latihan dan hubungkan dengan topik pembelajaran.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
+            </a>
+            <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.exams.index') }}">
+              <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="timer"></svg></span>
+              <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $tryoutCount }} tryout</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Atur simulasi CAT, durasi, dan penilaian peserta.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
+            </a>
           </div>
         </section>
 

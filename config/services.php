@@ -2,6 +2,10 @@
 
 return [
 
+    'integrations' => [
+        'smtp_hosts' => array_values(array_filter(array_map('trim', explode(',', env('INTEGRATION_SMTP_HOSTS', 'smtp.gmail.com,smtp.office365.com,smtp.zoho.com,smtp.sendgrid.net,smtp-relay.brevo.com'))))),
+    ],
+
     'midtrans' => [
         'server_key' => env('MIDTRANS_SERVER_KEY', ''),
         'is_production' => env('MIDTRANS_IS_PRODUCTION', false),

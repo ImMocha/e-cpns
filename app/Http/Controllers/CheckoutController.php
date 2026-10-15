@@ -23,13 +23,14 @@ class CheckoutController extends Controller
         }
         $id = $request->query('package');
         abort_unless(is_string($id) && ctype_digit($id), 404);
-        $package = Package::query()->active()->with([
+        $package = Package::query()->active()->withContentAvailability()->with([
             'materials' => fn ($query) => $query->visibleToMembers(),
             'exams' => fn ($query) => $query->published(),
         ])->findOrFail($id);
 
         return view('Dashboard.User.checkout.index', [
             'package' => $package, 'paymentAvailable' => $package->price === 0 || $gateway->configured(),
+            'contentAvailable' => $package->hasAvailableContent(),
             'alreadyOwned' => $request->user()->userPackages()->active()->whereBelongsTo($package)->exists(),
         ]);
     }

@@ -6,6 +6,7 @@ namespace App;
 
 use App\Enums\TransactionStatus;
 use App\Models\Exam;
+use App\Models\IntegrationSetting;
 use App\Models\Material;
 use App\Models\Package;
 use App\Models\Transaction;
@@ -18,11 +19,12 @@ use RuntimeException;
 
 class PackagePayment
 {
-    public function __construct(private PaymentGatewayContract $gateway) {}
+    public function __construct(private PaymentGatewayContract $gateway, private IntegrationSettings $settings) {}
 
     public function checkout(User $user, Package $package): Transaction
     {
         return DB::transaction(function () use ($user, $package): Transaction {
+            IntegrationSetting::query()->lockForUpdate()->findOrFail('midtrans');
             $user = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $package = Package::query()->whereKey($package->id)->lockForUpdate()->firstOrFail();
             if (! $user->isActive() || $user->isAdmin() || ! $package->is_active) {
@@ -35,20 +37,18 @@ class PackagePayment
             if ($pending !== null) {
                 return $pending;
             }
-            $materials = $package->materials()->withTrashed()->get();
-            $exams = $package->exams()->withTrashed()->get();
-            if (($materials->isEmpty() && $exams->isEmpty())
-                || Material::query()->visibleToMembers()->whereKey($materials->modelKeys())->count() !== $materials->count()
-                || Exam::query()->published()->whereKey($exams->modelKeys())->count() !== $exams->count()) {
+            if (! $package->hasAvailableContent()) {
                 throw ValidationException::withMessages(['package_id' => 'Konten paket sedang tidak tersedia. Pilih paket lain atau hubungi admin.']);
             }
+            $materials = $package->materials()->get();
+            $exams = $package->exams()->get();
             if ($package->price > 0 && ! $this->gateway->configured()) {
                 throw ValidationException::withMessages(['package_id' => 'Pembayaran belum tersedia. Silakan hubungi admin.']);
             }
             $transaction = Transaction::create([
                 'order_id' => 'GANESHA-NUSA-'.Str::uuid(), 'user_id' => $user->id, 'package_id' => $package->id,
                 'provider' => $package->price === 0 ? 'free' : 'midtrans',
-                'is_production' => (bool) config('services.midtrans.is_production'), 'amount' => $package->price,
+                'is_production' => $this->settings->midtrans()['is_production'], 'amount' => $package->price,
                 'package_snapshot' => [
                     'leaderboard_access' => $package->leaderboard_access->value,
                     'name' => $package->name, 'duration_days' => $package->duration_days, 'tryout_quota' => $package->tryout_quota,

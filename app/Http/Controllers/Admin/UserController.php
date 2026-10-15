@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class UserController extends Controller
 {
@@ -107,9 +108,11 @@ class UserController extends Controller
 
         $user = User::create($data);
 
+        $emailError = $this->sendVerification($user);
+
         return redirect()
             ->route('admin.users.edit', $user)
-            ->with('success', "Akun {$user->name} berhasil dibuat.");
+            ->with($emailError === null ? 'success' : 'error', $emailError ?? "Akun {$user->name} berhasil dibuat.");
     }
 
     public function show(User $user): RedirectResponse
@@ -139,9 +142,28 @@ class UserController extends Controller
 
         $user->update($data);
 
+        $emailError = $user->wasChanged('email') ? $this->sendVerification($user) : null;
+
         return redirect()
             ->route('admin.users.index')
-            ->with('success', "Perubahan pada akun {$user->name} disimpan.");
+            ->with($emailError === null ? 'success' : 'error', $emailError ?? "Perubahan pada akun {$user->name} disimpan.");
+    }
+
+    private function sendVerification(User $user): ?string
+    {
+        if (! $user->isActive() || $user->hasVerifiedEmail()) {
+            return null;
+        }
+
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (TransportExceptionInterface $exception) {
+            report($exception);
+
+            return 'Akun berhasil disimpan, tetapi email verifikasi belum dapat dikirim. Peserta dapat mengirim ulang setelah masuk.';
+        }
+
+        return null;
     }
 
     public function destroy(Request $request, User $user): RedirectResponse

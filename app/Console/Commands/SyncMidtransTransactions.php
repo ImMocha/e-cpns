@@ -20,7 +20,8 @@ class SyncMidtransTransactions extends Command
 
     public function handle(PackagePayment $payments, MidtransGateway $gateway): int
     {
-        if (! $gateway->configured()) {
+        $modes = array_values(array_filter([false, true], fn (bool $mode): bool => $gateway->configuredFor($mode)));
+        if ($modes === []) {
             $this->warn('Midtrans belum dikonfigurasi.');
 
             return self::SUCCESS;
@@ -32,7 +33,7 @@ class SyncMidtransTransactions extends Command
             return self::FAILURE;
         }
         $transactions = Transaction::query()->where('provider', 'midtrans')->where('status', TransactionStatus::Pending)
-            ->where('is_production', (bool) config('services.midtrans.is_production'))
+            ->whereIn('is_production', $modes)
             ->where(fn ($query) => $query->whereNull('checked_at')->orWhere('checked_at', '<=', now()->subMinutes(10)))
             ->orderBy('checked_at')->orderBy('id')->limit($limit)->get();
         $failed = 0;
