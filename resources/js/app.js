@@ -7,3 +7,7 @@ import './lontar/question-editor.js';
 import './lontar/exam-question-manager.js';
 import './lontar/quiz.js';
 import './lontar/pdf-reader.js';
+
+if (document.querySelector('[data-feature-help]')) {
+    import('./lontar/feature-help.js');
+}

@@ -232,7 +232,7 @@ import { sanitizeArticle } from './article-editor.js';
       }
     }));
     document.addEventListener('keydown', event => {
-      if (finished || submitting || event.target.closest('input,textarea,select,[contenteditable="true"]') || event.metaKey || event.ctrlKey || event.altKey ||
+      if (finished || submitting || document.body.classList.contains('driver-active') || event.target.closest('input,textarea,select,[contenteditable="true"]') || event.metaKey || event.ctrlKey || event.altKey ||
           $('.modal.is-open') || $$('[role="dialog"]').some(dialog => dialog.getClientRects().length && dialog.getAttribute('aria-hidden') !== 'true')) return;
       const key = event.key.toLowerCase(), q = currentQuestion();
       if (key === 'arrowright' || key === 'arrowleft') { event.preventDefault(); go(state.current + (key === 'arrowright' ? 1 : -1)); }

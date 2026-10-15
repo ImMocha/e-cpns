@@ -17,6 +17,10 @@
 
 @yield('body')
 
+@auth
+    <x-feature-help :audience="request()->routeIs('admin.*') ? 'admin' : 'member'" />
+@endauth
+
 @stack('scripts')
 <x-flash />
 

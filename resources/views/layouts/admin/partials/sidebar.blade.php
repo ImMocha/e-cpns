@@ -100,7 +100,8 @@
         <span class="tile__glyph" style="width:34px;height:34px;border-radius:10px"><svg data-icon="megaphone" width="17" height="17"></svg></span>
         <strong style="font-family:var(--font-display);font-size:var(--fs-sm);color:var(--ink)">Butuh bantuan?</strong>
       </div>
-      <p class="text-xs text-soft">Tim kami siap bantu soal materi atau paket.</p>
+      <p class="text-xs text-soft">Pelajari alur admin, arti pengaturan, cara menerbitkan konten, dan solusi kendala akses peserta.</p>
+      <button class="btn btn--ghost btn--sm" type="button" data-help-open style="margin-top:.75rem">Buka panduan admin</button>
     </div>
   </div>
 </aside>

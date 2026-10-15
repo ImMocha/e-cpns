@@ -12,6 +12,7 @@
     <input type="hidden" name="status" value="{{ $questionValue('status', $question->status->value) }}">
     @if($inline)
     <header class="exam-question-dialog__head"><div><span class="eyebrow">Editor Soal</span><h2 id="inline-question-title" data-inline-question-title>Tambah Soal</h2><p>Lengkapi soal dan periksa pratinjau sebelum menyimpan.</p></div><button class="content-icon-button" type="button" data-inline-close aria-label="Tutup editor soal"><svg data-icon="close"></svg></button></header>
+    <button class="btn btn--ghost btn--sm" type="button" data-help-open data-help-guide="admin-questions">Bantuan editor soal</button>
     <div class="exam-question-feedback" data-inline-errors role="alert" hidden></div>
     <div class="exam-question-feedback exam-question-feedback--info" data-inline-shared hidden></div>
     <div class="exam-question-feedback" data-inline-discard hidden><p>Perubahan soal belum disimpan. Tutup editor dan buang perubahan?</p><div class="btn-row"><button class="btn btn--ghost btn--sm" type="button" data-inline-keep>Lanjutkan mengedit</button><button class="btn btn--outline btn--sm" type="button" data-inline-discard-confirm>Buang perubahan</button></div></div>
