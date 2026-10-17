@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['source_key', 'name', 'province', 'score', 'is_visible'])]
+#[Fillable(['source_key', 'name', 'province', 'score', 'is_visible', 'generation_version'])]
 class LeaderboardBot extends Model
 {
     /** @use HasFactory<LeaderboardBotFactory> */
@@ -18,6 +18,6 @@ class LeaderboardBot extends Model
 
     protected function casts(): array
     {
-        return ['province' => Province::class, 'score' => 'integer', 'is_visible' => 'boolean'];
+        return ['province' => Province::class, 'score' => 'decimal:2', 'is_visible' => 'boolean', 'generation_version' => 'integer'];
     }
 }

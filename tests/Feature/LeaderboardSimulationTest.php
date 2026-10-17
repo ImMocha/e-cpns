@@ -175,15 +175,72 @@ class LeaderboardSimulationTest extends TestCase
         ExamAttempt::factory()->tryout()->for($peer)->create([
             'status' => ExamAttempt::COMPLETED, 'score' => 400, 'max_score' => 500, 'submitted_at' => now(),
         ]);
-        LeaderboardBot::factory()->create(['province' => Province::KalimantanSelatan, 'score' => 62]);
+        LeaderboardBot::factory()->create(['province' => Province::KalimantanSelatan, 'score' => 62.37]);
         $this->actingAs(User::factory()->admin()->create())->patch(route('admin.leaderboard-simulation.update'), [
             'enabled' => 1, 'minimum_per_province' => 1, 'maximum_per_province' => 1,
         ])->assertRedirect();
 
         $this->actingAs($member)->get(route('leaderboard.index'))
-            ->assertSee('Nilai (0–100)')->assertSee('66,67 / 100')->assertSee('80,00 / 100')->assertSee('62,00 / 100')
+            ->assertSee('Nilai (0–100)')->assertSee('66,67 / 100')->assertSee('80,00 / 100')->assertSee('62,37 / 100')
             ->assertSee('Skor asli 10 dari 15 poin.')->assertDontSee('10 / 15')->assertDontSee('400 / 500')
             ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 2);
+    }
+
+    public function test_seeded_national_scores_are_varied_and_stable_across_pages_and_reseeding(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $this->actingAs($admin)->patch(route('admin.leaderboard-simulation.update'), [
+            'enabled' => 1, 'minimum_per_province' => 25, 'maximum_per_province' => 25,
+        ])->assertRedirect();
+        $profiles = LeaderboardBot::query()->orderBy('id')->get();
+        $snapshot = $profiles->toArray();
+
+        $this->assertCount(950, $profiles);
+        $this->assertCount(950, $profiles->pluck('score')->unique());
+        $this->assertCount(950, $profiles->pluck('name')->unique());
+        $this->assertGreaterThanOrEqual(42, (float) $profiles->min('score'));
+        $this->assertLessThanOrEqual(97, (float) $profiles->max('score'));
+        $this->get(route('leaderboard.index', ['scope' => 'national']))
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === range(1, 25));
+        $this->get(route('leaderboard.index', ['scope' => 'national', 'page' => 2]))
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === range(26, 50));
+        $this->get(route('leaderboard.index', ['scope' => 'local']))
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === range(1, 25));
+
+        $this->seed(LeaderboardBotSeeder::class);
+
+        $this->assertSame($snapshot, LeaderboardBot::query()->orderBy('id')->get()->toArray());
+    }
+
+    public function test_legacy_seeded_profiles_are_refreshed_once_without_changing_manual_profiles_or_real_results(): void
+    {
+        $legacyProfiles = LeaderboardBot::factory()->count(3)->sequence(
+            ['source_key' => 'starter-Aceh-1', 'is_visible' => true],
+            ['source_key' => 'starter-Aceh-2', 'is_visible' => true],
+            ['source_key' => 'starter-Aceh-3', 'is_visible' => false],
+        )->create(['province' => Province::Aceh, 'name' => 'Nama Contoh Lama', 'score' => 93, 'generation_version' => 1]);
+        $manualProfile = LeaderboardBot::factory()->create(['name' => 'Profil Pilihan Admin', 'score' => 88.25]);
+        $member = User::factory()->create();
+        $this->completedTryout($member, 80);
+
+        $this->actingAs(User::factory()->admin()->create())->patch(route('admin.leaderboard-simulation.update'), [
+            'enabled' => 0, 'minimum_per_province' => 2, 'maximum_per_province' => 2,
+        ])->assertRedirect();
+
+        $updatedProfiles = LeaderboardBot::query()->whereKey($legacyProfiles->modelKeys())->orderBy('id')->get();
+        $this->assertSame([2, 2, 2], $updatedProfiles->pluck('generation_version')->all());
+        $this->assertSame([true, true, false], $updatedProfiles->pluck('is_visible')->all());
+        $this->assertCount(3, $updatedProfiles->pluck('score')->unique());
+        $this->assertNotContains('93.00', $updatedProfiles->pluck('score')->all());
+        $this->assertNotContains('Nama Contoh Lama', $updatedProfiles->pluck('name')->all());
+        $this->assertDatabaseHas('leaderboard_bots', ['id' => $manualProfile->id, 'name' => 'Profil Pilihan Admin', 'score' => 88.25]);
+        $this->assertDatabaseHas('leaderboard_settings', ['id' => 1, 'simulations_enabled' => false]);
+        $this->assertDatabaseHas('exam_attempts', ['user_id' => $member->id, 'score' => 80, 'max_score' => 100]);
+        $snapshot = $updatedProfiles->toArray();
+
+        $this->seed(LeaderboardBotSeeder::class);
+
+        $this->assertSame($snapshot, LeaderboardBot::query()->whereKey($legacyProfiles->modelKeys())->orderBy('id')->get()->toArray());
     }
 
     private function completedTryout(User $user, int $score): void

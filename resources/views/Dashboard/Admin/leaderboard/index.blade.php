@@ -19,7 +19,7 @@
             <div><h2 class="card__title">Tampilan leaderboard</h2><p class="card__sub">Satu tombol untuk menampilkan atau menyembunyikan seluruh peserta virtual.</p></div>
             <span class="badge {{ $simulationEnabled ? 'badge--mint' : 'badge--flat' }}">{{ $simulationEnabled ? 'Aktif' : 'Nonaktif' }}</span>
         </div>
-        <p class="text-sm text-soft" style="margin-bottom:1.25rem">Profil virtual punya skor contoh dan diberi label <strong>Virtual</strong> di halaman peserta. Saat dimatikan, semuanya hilang dari peringkat lokal dan nasional; nilai serta riwayat peserta nyata tetap tersimpan.</p>
+        <p class="text-sm text-soft" style="margin-bottom:1.25rem">Profil virtual punya nilai contoh dengan variasi dua angka desimal. Keterangan peserta virtual ditampilkan di atas tabel leaderboard. Saat dimatikan, semuanya hilang dari peringkat lokal dan nasional; nilai serta riwayat peserta nyata tetap tersimpan.</p>
         <form method="POST" action="{{ route('admin.leaderboard-simulation.update') }}">
             @csrf
             @method('PATCH')
