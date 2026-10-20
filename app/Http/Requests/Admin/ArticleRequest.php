@@ -29,6 +29,8 @@ class ArticleRequest extends FormRequest
             'body' => ['nullable', 'string', 'max:200000'],
             'status' => ['required', Rule::enum(ArticleStatus::class)],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'cover_source' => ['nullable', 'string', 'max:255'],
+            'cover_source_url' => ['nullable', 'url:http,https', 'max:2048'],
             'remove_cover' => ['sometimes', 'boolean'],
         ];
     }
@@ -46,18 +48,20 @@ class ArticleRequest extends FormRequest
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['title' => 'judul', 'slug' => 'slug', 'section_id' => 'bidang', 'excerpt' => 'ringkasan', 'body' => 'isi artikel', 'cover' => 'gambar cover', 'status' => 'status'];
+        return ['title' => 'judul', 'slug' => 'slug', 'section_id' => 'bidang', 'excerpt' => 'ringkasan', 'body' => 'isi artikel', 'cover' => 'gambar cover', 'cover_source' => 'sumber cover', 'cover_source_url' => 'tautan sumber cover', 'status' => 'status'];
     }
 
-    /** @return array{title: string, slug: string, section_id: int|string, excerpt: ?string, body: string, status: string} */
+    /** @return array{title: string, slug: string, section_id: int|string, excerpt: ?string, body: string, status: string, cover_source: ?string, cover_source_url: ?string} */
     public function articleAttributes(): array
     {
-        $data = $this->safe()->only(['title', 'slug', 'section_id', 'excerpt', 'body', 'status']);
+        $data = $this->safe()->only(['title', 'slug', 'section_id', 'excerpt', 'body', 'status', 'cover_source', 'cover_source_url']);
         $article = $this->route('article');
         $data['title'] = trim($data['title']);
         $data['slug'] = Article::resolveSlug($data['slug'] ?? null, $data['title'], $article instanceof Article ? $article->id : null);
         $data['body'] = ArticleContent::sanitize($data['body'] ?? '');
         $data['excerpt'] = trim($data['excerpt'] ?? '') ?: null;
+        $data['cover_source'] = trim($data['cover_source'] ?? '') ?: null;
+        $data['cover_source_url'] = trim($data['cover_source_url'] ?? '') ?: null;
 
         return $data;
     }

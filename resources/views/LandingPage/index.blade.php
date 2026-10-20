@@ -406,7 +406,7 @@
         @foreach ($latestArticles as $article)
           <article class="card article-card reveal">
             @if ($article->coverUrl())
-              <img class="article-card-cover" src="{{ $article->coverUrl() }}" alt="Cover {{ $article->title }}" loading="lazy">
+              <x-article-cover :article="$article" image-class="article-card-cover" :lazy="true" />
             @else
               <div class="article-card-cover article-card-cover--empty"><svg data-icon="quote"></svg></div>
             @endif
@@ -472,6 +472,7 @@
         <p class="lead" style="margin-bottom:1.75rem">
           Didesain untuk membiasakan kamu dengan tekanan waktu dan format CAT sebelum hari-H.
         </p>
+        <x-passing-grades style="margin-bottom:1.5rem" />
 
         <div class="grid" style="--gap:.85rem">
           <div class="card card--tight flex items-start gap-3">
@@ -551,7 +552,7 @@
         <span class="eyebrow">Leaderboard</span>
         <h2 style="margin:.75rem 0 1rem">Tahu Posisimu <span class="underline-squiggle">di Antara Peserta Lain</span></h2>
         <p class="lead">
-          Papan peringkat memakai nilai terbaik dari seluruh tryout yang selesai, dihitung sebagai persentase agar skornya sebanding. Lihat posisi di provinsimu atau secara nasional sesuai paketmu.
+          Papan peringkat memakai skor poin tertinggi dari seluruh tryout yang selesai. Lihat posisi di provinsimu atau secara nasional sesuai paketmu.
         </p>
         <div class="btn-row" style="margin-top:1.75rem">
           <a class="btn btn--primary" href="{{ route('leaderboard.index') }}">Lihat Leaderboard<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>

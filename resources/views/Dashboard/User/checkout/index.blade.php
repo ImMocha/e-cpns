@@ -73,7 +73,7 @@
                             <h4 class="mb-3! text-xs font-extrabold uppercase tracking-[.12em] text-[var(--text-soft)]">Materi &amp; video · {{ $package->materials->count() }}</h4>
                             <ul class="grid" style="--gap:.5rem">
                                 @foreach ($package->materials as $material)
-                                    <li class="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white px-4 py-3">
+                                    <li class="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
                                         <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--primary-100)] text-lg text-[var(--primary-700)]" aria-hidden="true"><svg data-icon="{{ $material->type->icon() }}"></svg></span>
                                         <span class="min-w-0 flex-1 font-semibold leading-snug text-[var(--ink)]">{{ $material->title }}</span>
                                         <span class="hidden text-xs font-bold text-[var(--text-soft)] sm:block">{{ $material->type->shortLabel() }}</span>
@@ -88,7 +88,7 @@
                             <h4 class="mb-3! text-xs font-extrabold uppercase tracking-[.12em] text-[var(--text-soft)]">Latihan &amp; tryout · {{ $package->exams->count() }}</h4>
                             <ul class="grid" style="--gap:.5rem">
                                 @foreach ($package->exams as $exam)
-                                    <li class="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white px-4 py-3">
+                                    <li class="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
                                         <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--pop-amber-050)] text-lg text-[var(--ink)]" aria-hidden="true"><svg data-icon="{{ $exam->kind === 'quiz' ? 'pencil' : 'timer' }}"></svg></span>
                                         <span class="min-w-0 flex-1 font-semibold leading-snug text-[var(--ink)]">{{ $exam->title }}</span>
                                         <span class="hidden text-xs font-bold text-[var(--text-soft)] sm:block">{{ $exam->kind === 'quiz' ? 'Latihan' : 'Tryout' }}</span>
@@ -125,7 +125,7 @@
                 <p class="break-all text-sm text-[var(--text-soft)]">{{ auth()->user()->email }}</p>
             </div>
 
-            <div class="mt-6! rounded-2xl bg-[var(--ink)] p-5 text-white">
+            <div class="mt-6! rounded-2xl bg-[var(--ink-surface)] p-5 text-white">
                 <div class="flex items-center justify-between gap-3 text-sm text-white/80">
                     <span>Total pembayaran</span>
                     <svg data-icon="credit-card" class="size-5" aria-hidden="true"></svg>

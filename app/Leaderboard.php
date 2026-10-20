@@ -22,16 +22,15 @@ class Leaderboard
         $attempts = ExamAttempt::query()->completed()->where('kind', 'tryout')
             ->where('max_score', '>', 0)
             ->select(['user_id', 'score', 'max_score'])
-            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY (1.0 * score / max_score) DESC, score DESC, submitted_at ASC, id ASC) AS attempt_order');
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY score DESC, submitted_at ASC, id ASC) AS attempt_order');
 
         $bestScores = DB::query()->fromSub($attempts, 'results')->where('attempt_order', 1)
-            ->select(['user_id', 'score', 'max_score'])
-            ->selectRaw('ROUND(100.0 * score / max_score, 2) AS score_percent');
+            ->select(['user_id', 'score', 'max_score']);
 
         $realParticipants = User::query()->active()->role(UserRole::User)->whereNotNull('email_verified_at')
             ->joinSub($bestScores, 'best_scores', 'users.id', '=', 'best_scores.user_id')
             ->when($province !== null, fn (EloquentBuilder $query): EloquentBuilder => $query->where('users.province', $province->value))
-            ->select(['users.id', 'users.name', 'users.province', 'best_scores.score', 'best_scores.max_score', 'best_scores.score_percent'])
+            ->select(['users.id', 'users.name', 'users.province', 'best_scores.score', 'best_scores.max_score'])
             ->selectRaw('? AS participant_type', ['real']);
 
         $participants = $realParticipants->toBase();
@@ -40,14 +39,14 @@ class Leaderboard
             $simulatedParticipants = LeaderboardBot::query()->where('is_visible', true)
                 ->when($province !== null, fn (EloquentBuilder $query): EloquentBuilder => $query->where('province', $province->value))
                 ->select(['id', 'name', 'province', 'score'])
-                ->selectRaw('100 AS max_score, 1.0 * score AS score_percent, ? AS participant_type', ['simulation']);
+                ->selectRaw('NULL AS max_score, ? AS participant_type', ['simulation']);
 
             $participants->unionAll($simulatedParticipants->toBase());
         }
 
         $rankings = DB::query()->fromSub($participants, 'participants')
             ->select('participants.*')
-            ->selectRaw('RANK() OVER (ORDER BY participants.score_percent DESC) AS position');
+            ->selectRaw('RANK() OVER (ORDER BY participants.score DESC) AS position');
 
         return DB::query()->fromSub($rankings, 'leaderboard')
             ->orderBy('position')->orderBy('participant_type')->orderBy('id');

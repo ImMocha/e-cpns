@@ -90,7 +90,7 @@
 .pdfview__btn:hover:not(:disabled) { background: var(--primary); border-color: var(--primary); color: #fff; }
 .pdfview__btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .pdfview__btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.pdfview__btn.is-active { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pdfview__btn.is-active { background: var(--ink-surface); border-color: var(--ink); color: #fff; }
 
 .pdfview__pages {
   --pdf-page-ratio: 1.414;

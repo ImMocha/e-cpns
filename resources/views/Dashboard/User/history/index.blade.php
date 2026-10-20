@@ -38,8 +38,12 @@
               <td class="num">{{ $attempt->status === 'completed' ? $attempt->correct_count.' / '.$attempt->wrong_count : '—' }}@if ($attempt->status === 'completed' && $attempt->weighted_answered_count)<span class="text-xs text-soft" style="display:block">{{ $attempt->weighted_answered_count }} berbobot dijawab</span>@endif</td>
               <td>{{ ($attempt->submitted_at ?? $attempt->started_at)->translatedFormat('d M Y H:i') }}</td>
               <td class="num">{{ $attempt->status === 'completed' ? floor($attempt->duration_seconds / 60).' menit' : 'Berjalan' }}</td>
-              <td class="num">{{ $attempt->status === 'completed' ? $attempt->score.' / '.$attempt->max_score : count($attempt->answers ?? []).' dijawab' }}</td>
-              <td><span class="badge badge--{{ $attempt->status === 'completed' ? 'mint' : 'amber' }} badge--flat">{{ $attempt->status === 'completed' ? 'Selesai' : 'Berjalan' }}</span></td>
+              <td class="num">{{ $attempt->status === 'completed' ? $attempt->score.' / '.$attempt->max_score : count($attempt->answers ?? []).' dijawab' }}
+                @if ($attempt->kind === 'tryout' && $attempt->status === 'completed')
+                  @foreach ($attempt->sectionGrades() as $grade)<span class="text-xs text-soft" style="display:block">{{ $grade['section'] }} {{ $grade['score'] }} · {{ $grade['passed'] ? 'PASS' : 'FAIL' }}</span>@endforeach
+                @endif
+              </td>
+              <td><span class="badge badge--{{ $attempt->status === 'completed' && ($attempt->kind === 'quiz' || $attempt->hasPassed()) ? 'mint' : 'amber' }} badge--flat">{{ $attempt->status !== 'completed' ? 'Berjalan' : ($attempt->kind === 'tryout' ? ($attempt->hasPassed() ? 'Lulus' : 'Belum Lulus') : 'Selesai') }}</span></td>
               <td><a class="badge badge--primary badge--flat" href="{{ $attempt->status === 'completed' ? $attempt->resultUrl() : $attempt->attemptUrl() }}">{{ $attempt->status === 'completed' ? 'Lihat Hasil' : 'Lanjutkan Sesi' }}</a></td>
             </tr>
           @empty

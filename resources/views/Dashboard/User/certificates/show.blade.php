@@ -14,24 +14,25 @@
       <article class="cert certificate-document" aria-label="Sertifikat kelulusan tryout {{ $participant->name }}">
         <div class="cert__frame" aria-hidden="true"></div>
         <div class="certificate-brand">
-          <div class="logo"><span class="logo__mark"><svg data-icon="book"></svg></span><span>Ganesha Nusa<span class="logo__sub">Lembaga Belajar CPNS</span></span></div>
+          <div class="logo"><x-logo sub="Lembaga Belajar CPNS" /></div>
           <span class="certificate-number">Nomor: {{ $attempt->certificateNumber() }}</span>
         </div>
         <div class="cert__seal"><svg data-icon="award"></svg></div>
         <p class="certificate-kicker">Sertifikat Kelulusan Tryout</p>
         <p class="certificate-caption">Diberikan kepada</p>
         <h1 class="cert__name certificate-name">{{ $participant->name }}</h1>
-        <p class="certificate-description">Telah menyelesaikan dan mencapai passing grade simulasi Tryout CAT</p>
+        <p class="certificate-description">Telah menyelesaikan simulasi Tryout CAT dan dinyatakan LULUS dengan semua bidang PASS</p>
         <h2 class="certificate-exam">{{ $attempt->title }}</h2>
         <p class="certificate-description">yang diselenggarakan oleh Ganesha Nusa pada {{ $attempt->submitted_at->locale('id')->translatedFormat('d F Y') }}.</p>
 
         <div class="certificate-scores">
           <div class="certificate-score certificate-score--total"><span>Nilai Total</span><strong>{{ $attempt->score }} <small>/ {{ $attempt->max_score }}</small></strong></div>
-          <div class="certificate-score"><span>Passing Grade</span><strong>{{ $attempt->passing_score }}</strong></div>
           @foreach ($sections as $section)
-            <div class="certificate-score"><span>{{ $section['section'] }}</span><strong>{{ $section['score'] }} <small>/ {{ $section['max'] }}</small></strong></div>
+            <div class="certificate-score"><span>{{ $section['section'] }}</span><strong>{{ $section['score'] }} <small>/ {{ $section['max'] }}</small></strong><span>Passing Grade: {{ $section['passing_score'] }} · <b>PASS</b></span></div>
           @endforeach
         </div>
+
+        <p class="certificate-description" style="margin-bottom:1rem">Syarat kelulusan: @foreach (\App\ExamScoring::PASSING_GRADES as $section => $minimum){{ $section }} ≥ {{ $minimum }}{{ $loop->last ? ' poin.' : ', ' }}@endforeach Ketiga bidang wajib PASS.</p>
 
         <div class="certificate-footer">
           <div><span class="certificate-kicker">Tanggal Penyelesaian</span><p>{{ $attempt->submitted_at->locale('id')->translatedFormat('d F Y') }}</p></div>

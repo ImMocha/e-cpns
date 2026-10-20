@@ -42,7 +42,7 @@
       </section>
 
       <div class="panes" style="--gap:1.5rem;margin-bottom:1.5rem">
-        <section class="card"><div class="card__head"><div><div class="card__title">Performa per Bagian</div><div class="card__sub">Akurasi soal biasa; persentase perolehan skor untuk bagian yang memuat soal berbobot.</div></div></div><div style="height:250px" data-chart='@json($sectionChart)'></div></section>
+        <section class="card"><div class="card__head"><div><div class="card__title">Skor per Bagian</div><div class="card__sub">Akumulasi poin yang diperoleh pada setiap bagian.</div></div></div><div style="height:250px" data-chart='@json($sectionChart)'></div></section>
         <section class="card">
           <div class="card__head"><div><div class="card__title">Komposisi Jawaban</div><div class="card__sub">{{ $summary['count'] }} sesi pada periode ini</div></div></div>
           <div style="width:200px;height:200px;margin:0 auto 1.25rem" data-chart='@json($compositionChart)'></div>

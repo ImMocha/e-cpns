@@ -89,7 +89,7 @@
               @foreach ($summary['sections'] as $section)
                 @php($accuracy = $section['weighted_total'] > 0 ? round($section['score'] / max(1, $section['max']) * 100) : ($section['correct'] + $section['wrong'] > 0 ? round($section['correct'] / ($section['correct'] + $section['wrong']) * 100) : 0))
                 <div class="progress-wrap">
-                  <div class="progress__row"><span>{{ $section['section'] }} · {{ $section['correct'] + $section['wrong'] + $section['weighted'] }}/{{ $section['total'] }} dijawab</span><span>{{ $section['weighted_total'] > 0 ? $accuracy.'% perolehan skor' : ($section['correct'] + $section['wrong'] > 0 ? $accuracy.'% akurasi' : 'Belum dijawab') }}</span></div>
+                  <div class="progress__row"><span>{{ $section['section'] }} · {{ $section['correct'] + $section['wrong'] + $section['weighted'] }}/{{ $section['total'] }} dijawab</span><span>{{ $section['weighted_total'] > 0 ? $section['score'].' / '.$section['max'].' poin' : ($section['correct'] + $section['wrong'] > 0 ? $accuracy.'% akurasi' : 'Belum dijawab') }}</span></div>
                   <div class="progress"><div class="progress__bar" data-progress="{{ $accuracy }}"></div></div>
                 </div>
               @endforeach

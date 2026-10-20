@@ -79,15 +79,15 @@
           <h2 class="card__title" style="margin-top:.75rem">Perlu Perhatian</h2>
           <div class="grid" style="--gap:.75rem;margin-top:1rem">
             <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.index', ['status' => 'draft']) }}">
-              <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="file"></svg></span>
+              <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="file"></svg></span>
               <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $draftMaterialCount }} materi draft</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Tinjau sebelum diterbitkan</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
             </a>
             <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.quizzes.index') }}">
-              <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="pencil"></svg></span>
+              <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="pencil"></svg></span>
               <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $quizCount }} latihan materi</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Kelola soal latihan dan hubungkan dengan topik pembelajaran.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
             </a>
             <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.exams.index') }}">
-              <span class="price__check" style="background:var(--warning);color:var(--ink)"><svg data-icon="timer"></svg></span>
+              <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="timer"></svg></span>
               <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $tryoutCount }} tryout</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Atur simulasi CAT, durasi, dan penilaian peserta.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
             </a>
           </div>

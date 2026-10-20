@@ -35,6 +35,7 @@
         <p class="text-sm text-soft" style="margin-top:.5rem">Nilai baru akan muncul setelah jawabanmu berhasil dikumpulkan.</p>
       </section>
     @else
+      @if ($kind === 'tryout')<x-passing-grades style="margin-bottom:1.5rem" />@endif
       @if ($attempt->canPrintCertificate())
         <div class="btn-row" style="margin-bottom:1.5rem">
           <a class="btn btn--ghost" href="{{ route('certificates.show', $attempt) }}"><svg data-icon="award"></svg> Cetak Sertifikat</a>
@@ -50,8 +51,8 @@
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap" style="margin-bottom:.75rem">
-              <span class="badge badge--{{ $attempt->passing_score !== null && $attempt->score >= $attempt->passing_score ? 'mint' : 'amber' }} badge--flat">
-                {{ $attempt->passing_score === null ? 'Selesai' : ($attempt->score >= $attempt->passing_score ? 'Di atas ambang' : 'Di bawah ambang') }}
+              <span class="badge badge--{{ $attempt->hasPassed() ? 'mint' : 'amber' }} badge--flat">
+                {{ $kind === 'tryout' ? ($attempt->hasPassed() ? 'Lulus' : 'Belum Lulus') : ($attempt->passing_score === null ? 'Selesai' : ($attempt->hasPassed() ? 'Di atas ambang' : 'Di bawah ambang')) }}
               </span>
               <span class="badge badge--primary badge--flat">{{ $attempt->submitted_at->translatedFormat('d M Y H:i') }}</span>
               @if ($attempt->auto_submitted)
@@ -60,8 +61,7 @@
             </div>
             <h2>Hasil {{ $kind === 'quiz' ? 'Latihan' : 'Tryout' }} Kamu</h2>
             <p class="text-soft" style="margin-top:.4rem;max-width:56ch">Nilai dihitung dari jawaban yang tersimpan. Soal biasa: benar +{{ $attempt->question_snapshot['pointsPerCorrect'] }}, salah −{{ $attempt->question_snapshot['penaltyWrong'] }}. @if ($weightedQuestionCount)TKP berbobot: skor pilihan 1–5, tanpa penalti salah.@endif Jawaban kosong bernilai 0.
-              @if (($attempt->question_snapshot['scoreMode'] ?? 'points') === 'percent') Hasil dikonversi ke skala 0–100.@endif
-              @if ($attempt->passing_score !== null) Nilai ambang sesi: {{ $attempt->passing_score }}.@endif
+              @if ($kind === 'quiz' && $attempt->passing_score !== null) Nilai ambang sesi: {{ $attempt->passing_score }}.@endif
             </p>
             <div class="grid grid-4" style="--gap:.75rem;margin-top:1.5rem">
               <div class="card card--tight card--dashed" style="text-align:center"><div class="text-xs text-soft fw-700">{{ $weightedQuestionCount ? 'Benar (soal biasa)' : 'Benar' }}</div><div class="fw-800" style="font-family:var(--font-display);font-size:1.5rem;color:var(--success)">{{ $attempt->correct_count }}</div></div>
@@ -75,7 +75,20 @@
 
       <div class="panes" style="--gap:1.5rem;margin-bottom:1.5rem">
         <section class="card">
-          <div class="card__head"><div><div class="card__title">Nilai per Bagian</div><div class="card__sub">Berdasarkan jawaban pada sesi ini</div></div></div>
+          <div class="card__head"><div><div class="card__title">Nilai per Bidang</div><div class="card__sub">Berdasarkan jawaban pada sesi ini</div></div></div>
+          @if ($kind === 'tryout')
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" style="margin-bottom:1.25rem">
+              @foreach ($sectionGrades as $grade)
+                <div class="card card--tight card--dashed">
+                  <strong>{{ $grade['section'] }}</strong>
+                  <div class="fw-800" style="font-size:1.5rem;margin-block:.4rem">{{ $grade['score'] }} <span class="text-sm text-soft">/ {{ $grade['max'] }}</span></div>
+                  <p class="text-xs text-soft">Passing grade: {{ $grade['passing_score'] }}</p>
+                  <span class="badge badge--{{ $grade['passed'] ? 'mint' : 'coral' }} badge--flat" style="margin-top:.5rem">{{ $grade['passed'] ? 'PASS' : 'FAIL' }}</span>
+                  @unless ($grade['present'])<p class="text-xs text-soft" style="margin-top:.4rem">Bidang tidak tersedia pada sesi ini.</p>@endunless
+                </div>
+              @endforeach
+            </div>
+          @endif
           <div class="grid" style="--gap:1rem">
             @foreach ($sections as $section)
               <div><div class="scorebar"><strong>{{ $section['section'] }}</strong><div class="scorebar__track"><div class="scorebar__fill" data-pct="{{ $section['max'] > 0 ? round($section['score'] / $section['max'] * 100) : 0 }}"></div></div><span class="scorebar__val">{{ $section['score'] }} / {{ $section['max'] }}</span></div><p class="text-xs text-soft" style="margin-top:.35rem">@if ($section['weighted_total'] < $section['total']){{ $section['correct'] }} benar, {{ $section['wrong'] }} salah, @endif @if ($section['weighted_total']){{ $section['weighted'] }} soal berbobot dijawab, @endif{{ $section['blank'] }} kosong</p></div>

@@ -107,7 +107,7 @@ class LeaderboardTest extends TestCase
         $outsider = User::factory()->create(['name' => 'Peserta provinsi lain', 'province' => Province::JawaTimur]);
         $this->grant($user, LeaderboardAccess::Local);
         $this->createCompletedTryout($user, 400);
-        $this->createCompletedTryout($user, 90, 100);
+        $this->createCompletedTryout($user, 100, 100);
         $this->createCompletedTryout($user, 450);
         $this->createCompletedTryout($user, 500, 500, ['status' => ExamAttempt::IN_PROGRESS]);
         $this->createCompletedTryout($user, 100, 100, ['kind' => 'quiz']);
@@ -138,12 +138,12 @@ class LeaderboardTest extends TestCase
             ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->total() === 3);
     }
 
-    public function test_equal_percentages_share_rank_and_skip_following_positions(): void
+    public function test_equal_points_share_rank_despite_different_maximums_and_skip_following_positions(): void
     {
         $user = User::factory()->create();
         $this->grant($user, LeaderboardAccess::National);
         $this->createCompletedTryout($user, 400);
-        $this->createCompletedTryout(User::factory()->create(), 80, 100);
+        $this->createCompletedTryout(User::factory()->create(), 400, 400);
         $this->createCompletedTryout(User::factory()->create(), 300);
 
         $response = $this->actingAs($user)->get(route('leaderboard.index', ['scope' => 'national']));

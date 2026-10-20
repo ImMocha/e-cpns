@@ -38,12 +38,10 @@ class StatisticsController extends SliceController
             'sectionChart' => count($sections) > 0 ? [
                 'type' => 'bar',
                 'labels' => array_column($sections, 'section'),
-                'values' => array_map(fn (array $section): int => $section['weighted_total'] > 0
-                    ? (int) round($section['score'] / max(1, $section['max']) * 100)
-                    : ($section['correct'] + $section['wrong'] > 0 ? (int) round($section['correct'] / ($section['correct'] + $section['wrong']) * 100) : 0), $sections),
-                'max' => 100,
+                'values' => array_column($sections, 'score'),
+                'max' => max(1, max(array_column($sections, 'max'))),
                 'height' => 250,
-                'aria' => 'Akurasi soal biasa dan persentase perolehan skor soal berbobot per bagian',
+                'aria' => 'Skor poin per bagian',
             ] : null,
             'compositionChart' => $summary['count'] > 0 ? [
                 'type' => 'donut', 'size' => 210,

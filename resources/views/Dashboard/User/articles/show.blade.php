@@ -26,7 +26,7 @@
                 <h1 class="article-paper-title">{{ $article->title }}</h1>
                 @if ($article->excerpt)<p class="article-paper-excerpt">{{ $article->excerpt }}</p>@endif
                 <div class="article-paper-meta"><span>{{ $article->author?->name ?? 'Tim Ganesha Nusa' }}</span><span>·</span><span>{{ $article->published_at?->format('d M Y') ?? 'Belum terbit' }}</span><span>·</span><span>{{ $article->readingMinutes() }} menit baca</span></div>
-                @if ($article->coverUrl())<img class="article-paper-cover" src="{{ $article->coverUrl() }}" alt="Cover {{ $article->title }}">@endif
+                @if ($article->coverUrl())<x-article-cover :article="$article" />@endif
                 <div class="article-prose">{!! $article->safeBody() !!}</div>
             </article>
             <div class="article-reader-back"><a class="btn btn--ghost" href="{{ route('articles.index') }}"><svg data-icon="arrow-left"></svg> Kembali ke semua artikel</a></div>

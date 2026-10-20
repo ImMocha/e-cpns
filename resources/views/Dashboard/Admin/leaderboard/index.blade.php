@@ -61,7 +61,7 @@
             <table class="table"><thead><tr><th>Nama</th><th>Provinsi</th><th class="num">Nilai</th></tr></thead>
                 <tbody>
                 @forelse ($sampleBots as $bot)
-                    <tr><td><strong>{{ $bot->name }}</strong> <span class="badge badge--amber badge--flat">Virtual</span></td><td>{{ $bot->province->value }}</td><td class="num">{{ $bot->score }}%</td></tr>
+                    <tr><td><strong>{{ $bot->name }}</strong> <span class="badge badge--amber badge--flat">Virtual</span></td><td>{{ $bot->province->value }}</td><td class="num">{{ $bot->score }} poin</td></tr>
                 @empty
                     <tr><td colspan="3" class="text-soft">Profil contoh akan disiapkan saat fitur diaktifkan.</td></tr>
                 @endforelse

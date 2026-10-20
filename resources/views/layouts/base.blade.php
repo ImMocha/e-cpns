@@ -8,7 +8,18 @@
 <meta name="description" content="{{ $metaDescription }}">
 @endisset
 <title>@yield('title', 'Ganesha Nusa — Belajar & Tryout CPNS Online')</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230191ED'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' fill='white' text-anchor='middle'%3EG%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="{{ asset('images/ganesha-nusa-logo.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('images/ganesha-nusa-logo.png') }}">
+<script>
+    (function () {
+        try {
+            var theme = localStorage.getItem('theme');
+            if (theme === 'light' || theme === 'dark') {
+                document.documentElement.dataset.theme = theme;
+            }
+        } catch (e) {}
+    })();
+</script>
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fonts
 @stack('head')
@@ -16,6 +27,8 @@
 <body @yield('body-attributes')>
 
 @yield('body')
+
+<x-whatsapp-button />
 
 @auth
     <x-feature-help :audience="request()->routeIs('admin.*') ? 'admin' : 'member'" />

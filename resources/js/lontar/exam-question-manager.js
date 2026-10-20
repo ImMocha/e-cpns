@@ -1,3 +1,5 @@
+import { createQuestionOrder } from './exam-question-order.js';
+
 document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
   const dialog = document.querySelector('[data-exam-question-dialog]');
   if (!dialog) return;
@@ -22,6 +24,7 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
   const initialFingerprint = sessionFingerprint();
   const trackSessionChanges = () => { sessionDirty = sessionFingerprint() !== initialFingerprint; };
   const rows = () => [...pool.querySelectorAll('[data-exam-pool-item]')];
+  const questionOrder = createQuestionOrder(sessionForm, pool, trackSessionChanges);
   const notify = (text, isError = false) => {
     message.textContent = text;
     message.classList.toggle('is-error', isError);
@@ -40,6 +43,7 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
     return payload;
   };
   const updatePool = () => {
+    questionOrder.sync();
     const term = search.value.trim().toLocaleLowerCase('id');
     const selected = rows().filter(row => row.querySelector('input').checked);
     const ready = selected.filter(row => row.querySelector('.exam-pool-status.is-ready')).length;
@@ -117,8 +121,8 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
       try {
         await request(archiveButton.dataset.archiveQuestion, { method: 'POST', body: data });
         row.remove();
-        trackSessionChanges();
         updatePool();
+        trackSessionChanges();
         notify('Soal diarsipkan dari bank soal. Pastikan jumlah soal terbit sesi tetap mencukupi.');
       } catch (error) { archiveButton.disabled = false; notify(error.message || 'Soal tidak dapat diarsipkan.', true); }
     };
@@ -132,10 +136,11 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
     field.addEventListener('change', updatePool);
   }
   sessionForm.addEventListener('change', (event) => {
-    if (![search, sectionFilter, selectedOnly].includes(event.target)) trackSessionChanges();
     updatePool();
+    if (![search, sectionFilter, selectedOnly].includes(event.target)) trackSessionChanges();
   });
   sessionForm.addEventListener('input', (event) => {
+    if (event.target.matches('#exam-count')) questionOrder.sync();
     if (![search, sectionFilter, selectedOnly].includes(event.target)) trackSessionChanges();
   });
   sessionForm.addEventListener('submit', () => { sessionSubmitting = true; });
@@ -173,9 +178,10 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
       const row = template.content.firstElementChild;
       row.querySelector('input').checked = isSelected;
       if (oldRow) oldRow.replaceWith(row);
-      else { pool.prepend(row); trackSessionChanges(); search.value = ''; sectionFilter.value = ''; }
+      else { pool.prepend(row); search.value = ''; sectionFilter.value = ''; }
       window.LIcons?.hydrate(row);
       updatePool();
+      if (!oldRow) trackSessionChanges();
       editor.dispatchEvent(new CustomEvent('question-editor:saved'));
       notify(oldRow ? 'Perubahan soal berhasil disimpan.' : 'Soal baru berhasil disimpan dan dicentang. Simpan sesi untuk menerapkan pilihan soal.');
       editorBusy = false;

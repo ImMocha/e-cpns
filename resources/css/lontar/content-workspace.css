@@ -71,7 +71,7 @@
 .content-menu__items a, .content-menu__items button { display:flex; align-items:center; gap:.6rem; width:100%; text-align:left; padding:.7rem .6rem; font-size:var(--fs-sm); font-weight:600; color:var(--ink); border:0; background:none; border-radius:7px; cursor:pointer; }
 .content-menu__items svg { width:16px; height:16px; }
 .content-menu__items a:hover, .content-menu__items button:hover { background:var(--primary-050); }
-.content-menu__items .is-danger { color:#B3282C; }
+.content-menu__items .is-danger { color: color-mix(in srgb, var(--danger) 80%, var(--ink)); }
 .content-list-footer { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; padding:1.1rem 1.5rem; border-top:1px solid var(--border); }
 .content-list-footer > span { font-size:var(--fs-xs); color:var(--text-soft); }
 .content-empty { padding:2.5rem 1.5rem; }

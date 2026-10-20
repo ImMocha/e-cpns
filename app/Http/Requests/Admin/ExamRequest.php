@@ -61,10 +61,12 @@ class ExamRequest extends FormRequest
                 $validator->errors()->add('slug', 'Jenis dan alamat sesi tidak dapat diubah setelah dibuat.');
             }
             if (! $validator->errors()->hasAny(['question_count', 'points_per_correct', 'passing_score', 'question_ids', 'question_ids.*'])) {
-                $maximum = $this->input('kind') === 'quiz' ? 100 : $this->integer('question_count') * $this->integer('points_per_correct');
-                if ($this->input('kind') === 'tryout' && $this->input('question_ids') !== []) {
-                    $scores = Question::query()->visibleToMembers()->whereIn('id', $this->input('question_ids'))->orderBy('id')
-                        ->get(['id', 'scoring_type'])->map(fn (Question $question): int => $question->isWeighted() ? 5 : $this->integer('points_per_correct'));
+                $maximum = $this->integer('question_count') * $this->integer('points_per_correct');
+                if ($this->input('question_ids') !== []) {
+                    $availableQuestions = Question::query()->visibleToMembers()->whereIn('id', $this->input('question_ids'))
+                        ->get(['id', 'scoring_type'])->keyBy('id');
+                    $scores = collect($this->input('question_ids'))->map(fn (int|string $id): ?Question => $availableQuestions->get($id))
+                        ->filter()->map(fn (Question $question): int => $question->isWeighted() ? 5 : $this->integer('points_per_correct'));
                     if ($this->boolean('random_questions')) {
                         $scores = $scores->sortDesc();
                     }

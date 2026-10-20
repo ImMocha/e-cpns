@@ -11,7 +11,7 @@
     <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         @forelse ($articles as $article)
             <article class="card article-card">
-                @if ($article->coverUrl())<img class="article-card-cover" src="{{ $article->coverUrl() }}" alt="Cover {{ $article->title }}" loading="lazy">@else<div class="article-card-cover article-card-cover--empty"><svg data-icon="quote"></svg></div>@endif
+                @if ($article->coverUrl())<x-article-cover :article="$article" image-class="article-card-cover" :lazy="true" />@else<div class="article-card-cover article-card-cover--empty"><svg data-icon="quote"></svg></div>@endif
                 <span class="badge {{ $article->section->resolvedTone()->badgeClass() }}">{{ $article->section->name }}</span>
                 <h2><a href="{{ route('articles.show', $article) }}">{{ $article->title }}</a></h2>
                 <p class="text-soft">{{ $article->summary() }}</p>

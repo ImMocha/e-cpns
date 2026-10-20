@@ -22,7 +22,7 @@ use Illuminate\Validation\ValidationException;
     'user_id', 'kind', 'bank_slug', 'title', 'status', 'question_snapshot',
     'answers', 'flags', 'current_index', 'started_at', 'expires_at',
     'submitted_at', 'score', 'max_score', 'passing_score', 'correct_count',
-    'wrong_count', 'blank_count', 'weighted_answered_count', 'duration_seconds', 'auto_submitted', 'user_package_id',
+    'wrong_count', 'blank_count', 'weighted_answered_count', 'duration_seconds', 'auto_submitted', 'user_package_id', 'section_scores',
 ])]
 class ExamAttempt extends Model
 {
@@ -39,6 +39,7 @@ class ExamAttempt extends Model
     {
         return [
             'question_snapshot' => 'array',
+            'section_scores' => 'array',
             'answers' => 'array',
             'flags' => 'array',
             'current_index' => 'integer',
@@ -77,15 +78,39 @@ class ExamAttempt extends Model
     public function scopeCertifiable(Builder $query): void
     {
         $query->completed()->where('kind', 'tryout')
-            ->whereNotNull('submitted_at')->whereNotNull('score')->where('max_score', '>', 0)
-            ->whereNotNull('passing_score')->whereColumn('score', '>=', 'passing_score');
+            ->whereNotNull('submitted_at')->whereNotNull('score')->where('max_score', '>', 0);
+
+        foreach (ExamScoring::PASSING_GRADES as $section => $minimum) {
+            $query->where('section_scores->'.$section.'->score', '>=', $minimum);
+        }
     }
 
     public function canPrintCertificate(): bool
     {
-        return $this->kind === 'tryout' && $this->status === self::COMPLETED
-            && $this->submitted_at !== null && $this->score !== null && $this->max_score > 0
-            && $this->passing_score !== null && $this->score >= $this->passing_score;
+        return $this->kind === 'tryout' && $this->hasPassed();
+    }
+
+    public function hasPassed(): bool
+    {
+        if ($this->status !== self::COMPLETED || $this->submitted_at === null || $this->score === null || $this->max_score <= 0) {
+            return false;
+        }
+
+        if ($this->kind === 'quiz') {
+            return $this->passing_score !== null && $this->score >= $this->passing_score;
+        }
+
+        if ($this->section_scores === null) {
+            return false;
+        }
+
+        foreach ($this->sectionGrades() as $grade) {
+            if (! $grade['passed']) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function certificateNumber(): string
@@ -216,15 +241,13 @@ class ExamAttempt extends Model
         $definition = $this->question_snapshot;
         $result = ExamScoring::evaluate($definition, $this->answers ?? []);
         $submittedAt = $this->isExpired() ? $this->expires_at->copy() : now();
-        $rawMaximum = $result['max'];
-        $rawScore = $result['score'];
-        $percent = ($definition['scoreMode'] ?? 'points') === 'percent';
 
         $this->forceFill([
             'status' => self::COMPLETED,
             'submitted_at' => $submittedAt,
-            'score' => $percent ? (int) round($rawScore / max(1, $rawMaximum) * 100) : $rawScore,
-            'max_score' => $percent ? 100 : $rawMaximum,
+            'score' => $result['score'],
+            'max_score' => $result['max'],
+            'section_scores' => $result['sections'],
             'passing_score' => $definition['passingScore'] ?? null,
             'correct_count' => $result['correct'],
             'wrong_count' => $result['wrong'],
@@ -238,18 +261,22 @@ class ExamAttempt extends Model
     /** @return array<string, array<string, int|string>> */
     public function sectionBreakdown(): array
     {
-        $definition = $this->question_snapshot;
-        $sections = ExamScoring::evaluate($definition, $this->answers ?? [])['sections'];
+        return $this->section_scores ?? ExamScoring::evaluate($this->question_snapshot, $this->answers ?? [])['sections'];
+    }
 
-        foreach ($sections as &$section) {
-            $section['score'] = max(0, $section['score']);
-            if (($definition['scoreMode'] ?? 'points') === 'percent') {
-                $section['score'] = (int) round($section['score'] / max(1, $section['max']) * 100);
-                $section['max'] = 100;
-            }
+    /** @return array<string, array{section: string, score: int, max: int, passing_score: int, passed: bool, present: bool}> */
+    public function sectionGrades(): array
+    {
+        $sections = $this->sectionBreakdown();
+        $grades = [];
+
+        foreach (ExamScoring::PASSING_GRADES as $code => $minimum) {
+            $score = (int) ($sections[$code]['score'] ?? 0);
+            $grades[$code] = ['section' => $code, 'score' => $score, 'max' => (int) ($sections[$code]['max'] ?? 0),
+                'passing_score' => $minimum, 'passed' => $score >= $minimum, 'present' => isset($sections[$code])];
         }
 
-        return $sections;
+        return $grades;
     }
 
     /**

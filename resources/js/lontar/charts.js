@@ -12,6 +12,13 @@
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const PALETTE = ['#0191ED', '#FF6B9D', '#FFC53D', '#2DD4A7', '#8B5CF6', '#FF7A5C'];
 
+  /* SVG presentation attributes can't hold var(), so theme colours are
+     resolved on every render — charts re-render when the theme is toggled. */
+  function cssVar(name, fallback) {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value || fallback;
+  }
+
   function el(name, attrs, children) {
     const node = document.createElementNS(NS, name);
     Object.keys(attrs || {}).forEach((k) => node.setAttribute(k, attrs[k]));
@@ -61,13 +68,13 @@
       const y = pad.t + plotH - (plotH * i) / ticks;
       svg.appendChild(el('line', {
         x1: pad.l, x2: w - pad.r, y1: y, y2: y,
-        stroke: i === 0 ? '#B9CFE0' : '#E6EFF6',
+        stroke: i === 0 ? cssVar('--border-strong', '#B9CFE0') : cssVar('--border', '#E6EFF6'),
         'stroke-width': i === 0 ? 2 : 1,
         'stroke-dasharray': i === 0 ? 'none' : '4 5'
       }));
       svg.appendChild(txt(fmtTick ? fmtTick(v) : fmt(v), {
         x: pad.l - 10, y: y + 4, 'text-anchor': 'end',
-        'font-size': 11, 'font-weight': 700, fill: '#64809A',
+        'font-size': 11, 'font-weight': 700, fill: cssVar('--text-soft', '#64809A'),
         'font-family': 'Plus Jakarta Sans, sans-serif'
       }));
     }
@@ -86,7 +93,7 @@
         x: pad.l + step * i,
         y: svg.__h - pad.b + 20,
         'text-anchor': anchor,
-        'font-size': 11, 'font-weight': 700, fill: '#64809A',
+        'font-size': 11, 'font-weight': 700, fill: cssVar('--text-soft', '#64809A'),
         'font-family': 'Plus Jakarta Sans, sans-serif'
       }));
     });
@@ -124,11 +131,11 @@
     if (cfg.avg != null) {
       svg.appendChild(el('line', {
         x1: pad.l, x2: w - pad.r, y1: y(cfg.avg), y2: y(cfg.avg),
-        stroke: '#FF6B9D', 'stroke-width': 2, 'stroke-dasharray': '7 6'
+        stroke: cssVar('--pop-pink', '#FF6B9D'), 'stroke-width': 2, 'stroke-dasharray': '7 6'
       }));
       svg.appendChild(txt('rata-rata ' + cfg.avg, {
         x: w - pad.r, y: y(cfg.avg) - 8, 'text-anchor': 'end',
-        'font-size': 11, 'font-weight': 800, fill: '#C22E63',
+        'font-size': 11, 'font-weight': 800, fill: cssVar('--pop-pink', '#C22E63'),
         'font-family': 'Plus Jakarta Sans, sans-serif'
       }));
     }
@@ -156,7 +163,7 @@
 
     pts.forEach((p, i) => {
       const g = el('g', { class: 'chart-dot' });
-      g.appendChild(el('circle', { cx: p[0], cy: p[1], r: 6, fill: '#fff', stroke: color, 'stroke-width': 3 }));
+      g.appendChild(el('circle', { cx: p[0], cy: p[1], r: 6, fill: cssVar('--surface', '#fff'), stroke: color, 'stroke-width': 3 }));
       g.appendChild(el('title')).textContent = `${labels[i]}: ${values[i]}`;
       svg.appendChild(g);
     });
@@ -188,7 +195,7 @@
       const color = Array.isArray(cfg.colors) ? cfg.colors[i] : (cfg.color || PALETTE[0]);
       const rect = el('rect', {
         x: bx.toFixed(1), y: by.toFixed(1), width: bw.toFixed(1), height: bh.toFixed(1),
-        rx: 6, fill: color, stroke: '#16324F', 'stroke-width': 2
+        rx: 6, fill: color, stroke: cssVar('--ink', '#16324F'), 'stroke-width': 2
       });
       svg.appendChild(rect);
       const g = el('g');
@@ -207,13 +214,13 @@
           : fmt(v);
         svg.appendChild(txt(valueLabel, {
           x: bx + bw / 2, y: by - 9, 'text-anchor': 'middle',
-          'font-size': 11, 'font-weight': 800, fill: '#16324F',
+          'font-size': 11, 'font-weight': 800, fill: cssVar('--ink', '#16324F'),
           'font-family': 'Plus Jakarta Sans, sans-serif'
         }));
       }
       svg.appendChild(txt(labels[i], {
         x: bx + bw / 2, y: h - pad.b + 20, 'text-anchor': 'middle',
-        'font-size': 11, 'font-weight': 700, fill: '#64809A',
+        'font-size': 11, 'font-weight': 700, fill: cssVar('--text-soft', '#64809A'),
         'font-family': 'Plus Jakarta Sans, sans-serif'
       }));
     });
@@ -234,7 +241,7 @@
     });
 
     svg.appendChild(el('circle', {
-      cx, cy, r, fill: 'none', stroke: '#E6EFF6', 'stroke-width': thick
+      cx, cy, r, fill: 'none', stroke: cssVar('--border', '#E6EFF6'), 'stroke-width': thick
     }));
 
     let angle = -Math.PI / 2;
@@ -300,10 +307,10 @@
       const isResponsive = cfg.type === 'line' || cfg.type === 'bar';
       let lastWidth = 0;
 
-      const render = (width, animate = false) => {
+      const render = (width, animate = false, force = false) => {
         const measuredWidth = Math.round(width || host.clientWidth || cfg.width || 720);
 
-        if (isResponsive && measuredWidth === lastWidth && host.firstElementChild) return;
+        if (!force && isResponsive && measuredWidth === lastWidth && host.firstElementChild) return;
 
         lastWidth = measuredWidth;
         const chartConfig = isResponsive
@@ -341,19 +348,27 @@
 
   function buildLegend(cfg) {
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.85rem;font-size:.8125rem;font-weight:600;color:#64809A';
+    wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.85rem;font-size:.8125rem;font-weight:600;color:' + cssVar('--text-soft', '#64809A');
     (cfg.legendColors || PALETTE).forEach((c, i) => {
       const item = document.createElement('span');
       item.style.cssText = 'display:inline-flex;align-items:center;gap:.4rem';
-      item.innerHTML = `<span style="width:14px;height:14px;border-radius:4px;border:2px solid #16324F;background:${c};display:inline-block"></span>`;
+      item.innerHTML = `<span style="width:14px;height:14px;border-radius:4px;border:2px solid ${cssVar('--ink', '#16324F')};background:${c};display:inline-block"></span>`;
       item.appendChild(document.createTextNode((cfg.legendLabels || [])[i] || ''));
       wrap.appendChild(item);
     });
     return wrap;
   }
 
+  /* Re-render every chart so theme-dependent colours are re-resolved from
+     the CSS variables (called when the light/dark toggle flips). */
+  function refresh() {
+    document.querySelectorAll('[data-chart]').forEach((host) => {
+      instances.get(host)?.render(host.clientWidth, false, true);
+    });
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initCharts);
   else initCharts();
 
-  window.LCharts = { line, bar, donut, spark, init: initCharts };
+  window.LCharts = { line, bar, donut, spark, init: initCharts, refresh };
 })();

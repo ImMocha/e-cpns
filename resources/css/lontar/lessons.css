@@ -18,7 +18,7 @@
 .lesson-row { display: flex; align-items: center; gap: .9rem; padding: 1rem .5rem; border-bottom: 1px solid var(--border); border-radius: var(--r-sm); color: var(--ink); transition: background var(--t); }
 .lesson-row:last-child { border-bottom: 0; }
 .lesson-row:hover { background: var(--primary-050); }
-.lesson-row__icon { display: grid; place-items: center; flex: 0 0 30px; height: 30px; background: var(--ink); color: white; border-radius: 50%; }
+.lesson-row__icon { display: grid; place-items: center; flex: 0 0 30px; height: 30px; background: var(--ink-surface); color: white; border-radius: 50%; }
 .lesson-row__icon svg { width: 16px; height: 16px; }
 .lesson-row__title { flex: 1; min-width: 0; font-weight: 650; overflow-wrap: anywhere; }
 .lesson-row__meta { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; flex: 0 0 auto; }

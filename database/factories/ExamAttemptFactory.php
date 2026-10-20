@@ -53,12 +53,27 @@ class ExamAttemptFactory extends Factory
     public function passingTryout(): static
     {
         return $this->tryout()->state(function (array $attributes): array {
+            $definition = $attributes['question_snapshot'];
+            $templates = collect($definition['questions'])->keyBy('section');
+            $questions = [];
             $answers = [];
-            foreach ($attributes['question_snapshot']['questions'] as $question) {
-                $answers[(string) $question['id']] = $question['answer'];
+            foreach (['TWK' => 13, 'TIU' => 16, 'TKP' => 4] as $code => $count) {
+                for ($index = 0; $index < $count; $index++) {
+                    $question = $templates[$code];
+                    $question['id'] = count($questions) + 1;
+                    if ($code === 'TKP') {
+                        $question['scoringType'] = 'weighted';
+                        $question['optionScores'] = [1, 2, 3, 4, 5];
+                        $question['answer'] = null;
+                    }
+                    $questions[] = $question;
+                    $answers[(string) $question['id']] = $code === 'TKP' ? 3 : $question['answer'];
+                }
             }
+            $definition['questions'] = $questions;
+            $definition['passingScore'] = null;
 
-            return ['answers' => $answers];
+            return ['question_snapshot' => $definition, 'answers' => $answers];
         });
     }
 }

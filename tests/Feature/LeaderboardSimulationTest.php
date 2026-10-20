@@ -65,8 +65,8 @@ class LeaderboardSimulationTest extends TestCase
         $member = User::factory()->create(['province' => Province::KalimantanSelatan]);
         UserPackage::factory()->for($member)->create(['leaderboard_access' => LeaderboardAccess::National]);
         $this->completedTryout($member, 80);
-        LeaderboardBot::factory()->create(['name' => 'Contoh Lokal', 'province' => Province::KalimantanSelatan, 'score' => 90]);
-        LeaderboardBot::factory()->create(['name' => 'Contoh Nasional', 'province' => Province::JawaTimur, 'score' => 95]);
+        LeaderboardBot::factory()->create(['name' => 'Contoh Lokal', 'province' => Province::KalimantanSelatan, 'score' => 450]);
+        LeaderboardBot::factory()->create(['name' => 'Contoh Nasional', 'province' => Province::JawaTimur, 'score' => 500]);
         $this->actingAs(User::factory()->admin()->create())->patch(route('admin.leaderboard-simulation.update'), ['enabled' => '1']);
 
         $this->actingAs($member)->get(route('leaderboard.index'))
@@ -164,7 +164,7 @@ class LeaderboardSimulationTest extends TestCase
         ];
     }
 
-    public function test_real_and_virtual_scores_are_displayed_on_the_same_hundred_point_scale(): void
+    public function test_real_and_virtual_scores_are_displayed_and_ranked_as_raw_points(): void
     {
         $member = User::factory()->create(['province' => Province::KalimantanSelatan]);
         $peer = User::factory()->create(['province' => Province::KalimantanSelatan]);
@@ -181,9 +181,9 @@ class LeaderboardSimulationTest extends TestCase
         ])->assertRedirect();
 
         $this->actingAs($member)->get(route('leaderboard.index'))
-            ->assertSee('Nilai (0–100)')->assertSee('66,67 / 100')->assertSee('80,00 / 100')->assertSee('62,37 / 100')
-            ->assertSee('Skor asli 10 dari 15 poin.')->assertDontSee('10 / 15')->assertDontSee('400 / 500')
-            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 2);
+            ->assertSee('Skor (poin)')->assertSee('10 / 15')->assertSee('400 / 500')->assertSee('62,37 poin')
+            ->assertSee('Dari 15 poin maksimal.')->assertDontSee(' / 100')->assertDontSee('skala 0–100')
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 3);
     }
 
     public function test_seeded_national_scores_are_varied_and_stable_across_pages_and_reseeding(): void

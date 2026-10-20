@@ -27,28 +27,30 @@ class ExamCatalog
             ->latest('id')->get()->groupBy('bank_slug');
         $entitlements = $user->userPackages()->active()->with('exams')->get();
 
-        $banks = Exam::query()->visibleToMembers()->where('kind', $kind)
+        $exams = Exam::query()->visibleToMembers()->where('kind', $kind)
             ->when($topicIds !== null, fn (Builder $query): Builder => $query->whereIn('topic_id', $topicIds))
             ->with(['topic' => fn (Builder|Relation $topic): Builder|Relation => $topic->withLearningProgress($user)])
             ->withCount(['questions as available_count' => fn (Builder $query) => $query->visibleToMembers(),
                 'questions as weighted_available_count' => fn (Builder $query) => $query->visibleToMembers()->where('scoring_type', QuestionScoring::Weighted)])
-            ->latest('id')->get()->map(function (Exam $exam) use ($attempts, $entitlements, $user): array {
-                $history = $attempts->get($exam->slug, collect());
-                $covering = $entitlements->filter(fn (UserPackage $item): bool => $item->exams->contains('id', $exam->id));
-                $freeAccess = $user->isAdmin() || $exam->access_level === MaterialAccess::Free;
-                $hasAccess = $freeAccess || $covering->isNotEmpty();
-                $topicReady = $exam->topicIsReadyFor($user);
-                $isAdminPreview = $user->isAdmin() && $exam->requires_topic_completion
-                    && $exam->topic?->hasCompletedMaterials() !== true;
-                $canStart = $topicReady && ($freeAccess || $covering->contains(fn (UserPackage $item): bool => $exam->kind === 'quiz' || $item->hasTryoutQuota()));
-                $remaining = $freeAccess || $covering->contains(fn (UserPackage $item): bool => $item->tryout_quota === null)
-                    ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts());
+            ->latest('id')->get();
+        $exams->where('random_questions', false)->load(['scoringQuestions' => fn (Builder|Relation $questions): Builder|Relation => $questions->limit(200)]);
+        $banks = $exams->map(function (Exam $exam) use ($attempts, $entitlements, $user): array {
+            $history = $attempts->get($exam->slug, collect());
+            $covering = $entitlements->filter(fn (UserPackage $item): bool => $item->exams->contains('id', $exam->id));
+            $freeAccess = $user->isAdmin() || $exam->access_level === MaterialAccess::Free;
+            $hasAccess = $freeAccess || $covering->isNotEmpty();
+            $topicReady = $exam->topicIsReadyFor($user);
+            $isAdminPreview = $user->isAdmin() && $exam->requires_topic_completion
+                && $exam->topic?->hasCompletedMaterials() !== true;
+            $canStart = $topicReady && ($freeAccess || $covering->contains(fn (UserPackage $item): bool => $exam->kind === 'quiz' || $item->hasTryoutQuota()));
+            $remaining = $freeAccess || $covering->contains(fn (UserPackage $item): bool => $item->tryout_quota === null)
+                ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts());
 
-                return ['exam' => $exam, 'open' => $history->firstWhere('status', ExamAttempt::IN_PROGRESS),
-                    'hasAccess' => $hasAccess, 'canStart' => $canStart, 'topicReady' => $topicReady,
-                    'isAdminPreview' => $isAdminPreview, 'remainingTryouts' => $remaining,
-                    'last' => $history->firstWhere('status', ExamAttempt::COMPLETED)];
-            });
+            return ['exam' => $exam, 'open' => $history->firstWhere('status', ExamAttempt::IN_PROGRESS),
+                'hasAccess' => $hasAccess, 'canStart' => $canStart, 'topicReady' => $topicReady,
+                'isAdminPreview' => $isAdminPreview, 'remainingTryouts' => $remaining,
+                'last' => $history->firstWhere('status', ExamAttempt::COMPLETED)];
+        });
 
         return ['banks' => $banks, 'kind' => $kind,
             'completedCount' => $attempts->flatten(1)->where('status', ExamAttempt::COMPLETED)->count()];
@@ -93,6 +95,7 @@ class ExamCatalog
             'canViewExplanations' => $canViewExplanations, 'reviewQuestions' => $reviewQuestions,
             'weightedQuestionCount' => count(array_filter($attempt?->question_snapshot['questions'] ?? [], fn (array $question): bool => ($question['scoringType'] ?? 'binary') === 'weighted')),
             'sections' => $attempt?->sectionBreakdown() ?? [],
+            'sectionGrades' => $attempt && $kind === 'tryout' ? $attempt->sectionGrades() : [],
             'compositionChart' => $attempt ? ['type' => 'donut', 'size' => 190, 'segments' => [
                 ['value' => $attempt->correct_count, 'color' => '#2DD4A7'],
                 ['value' => $attempt->wrong_count, 'color' => '#FF7A5C'],

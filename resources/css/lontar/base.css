@@ -239,7 +239,7 @@ p { text-wrap: pretty; }
 
 mark {
   background: var(--pop-amber);
-  color: var(--ink);
+  color: var(--pop-ink);
   padding: 0 4px;
   border-radius: var(--r-xs);
   font-weight: 700;

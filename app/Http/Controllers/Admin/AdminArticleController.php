@@ -100,6 +100,10 @@ class AdminArticleController extends Controller
         abort_if($newPath === false, 500, 'Gambar cover gagal disimpan. Silakan coba lagi.');
         $attributes = $request->articleAttributes();
         $attributes['cover_path'] = $newPath ?: ($request->boolean('remove_cover') ? null : $oldPath);
+        if (! $attributes['cover_path']) {
+            $attributes['cover_source'] = null;
+            $attributes['cover_source_url'] = null;
+        }
         $attributes['published_at'] = $attributes['status'] === ArticleStatus::Published->value ? ($article->published_at ?? now()) : null;
         $attributes['updated_by'] = $request->user()->id;
         if (! $article->exists) {

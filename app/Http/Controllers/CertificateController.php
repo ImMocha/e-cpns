@@ -16,7 +16,7 @@ class CertificateController extends Controller
 
         return view('Dashboard.User.certificates.index', [
             'attempts' => ExamAttempt::query()->whereBelongsTo($request->user())
-                ->certifiable()->select(['id', 'user_id', 'title', 'submitted_at', 'score', 'max_score'])
+                ->certifiable()->select(['id', 'user_id', 'title', 'submitted_at', 'score', 'max_score', 'section_scores'])
                 ->orderByDesc('submitted_at')->orderByDesc('id')->paginate(12),
         ]);
     }
@@ -29,7 +29,7 @@ class CertificateController extends Controller
         return view('Dashboard.User.certificates.show', [
             'attempt' => $attempt,
             'participant' => $request->user(),
-            'sections' => $attempt->sectionBreakdown(),
+            'sections' => $attempt->sectionGrades(),
         ]);
     }
 }

@@ -106,6 +106,9 @@ class AdminExamController extends Controller
     private function form(Exam $exam): View
     {
         $topic = $exam->topic_id ? Topic::find($exam->topic_id) : null;
+        $selected = $exam->exists ? $exam->questions()->pluck('questions.id')->all() : [];
+        $submittedOrder = old('question_ids', $selected);
+        $positions = array_flip(array_values(array_filter(is_array($submittedOrder) ? $submittedOrder : [], fn (mixed $id): bool => is_int($id) || is_string($id))));
 
         return view('Dashboard.Admin.exams.form', ['exam' => $exam,
             'isQuiz' => $exam->kind === 'quiz',
@@ -114,8 +117,9 @@ class AdminExamController extends Controller
                 ? route('admin.materials.index', ['section_id' => $topic->section_id, 'topic_id' => $topic->id])
                 : route($this->routePrefix($exam).'.index'),
             'topics' => Topic::query()->whereHas('section')->with('section')->ordered()->get(),
-            'selected' => $exam->exists ? $exam->questions()->pluck('questions.id')->all() : [],
-            'questions' => Question::query()->with('section')->withCount('exams')->orderBy('section_id')->orderBy('id')->get(),
+            'selected' => $selected,
+            'questions' => Question::query()->with('section')->withCount('exams')->orderBy('section_id')->orderBy('id')->get()
+                ->sortBy(fn (Question $question): int => $positions[$question->id] ?? PHP_INT_MAX)->values(),
             'sections' => Section::query()->ordered()->get(),
             'difficulties' => QuestionDifficulty::cases(),
             'inlineQuestion' => new Question(['status' => QuestionStatus::Draft, 'difficulty' => QuestionDifficulty::Medium,
@@ -137,7 +141,11 @@ class AdminExamController extends Controller
                 $data['created_by'] = $request->user()->id;
             }
             $exam->fill($data)->save();
-            $exam->questions()->sync($request->validated('question_ids'));
+            $questions = [];
+            foreach ($request->validated('question_ids') as $position => $questionId) {
+                $questions[$questionId] = ['position' => $position + 1];
+            }
+            $exam->questions()->sync($questions);
         });
     }
 }

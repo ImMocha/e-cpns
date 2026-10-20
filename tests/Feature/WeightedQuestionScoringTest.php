@@ -75,6 +75,17 @@ class WeightedQuestionScoringTest extends TestCase
             'passing_score' => 6, 'random_questions' => false, 'random_options' => false, 'status' => 'published',
             'question_ids' => [$question->id]])->assertUnprocessable()->assertJsonValidationErrors('passing_score');
         $this->assertDatabaseCount('exams', 0);
+
+        $quiz = ['title' => 'Latihan TKP', 'slug' => 'latihan-tkp-threshold', 'kind' => 'quiz',
+            'question_count' => 1, 'duration_minutes' => 0, 'points_per_correct' => 7, 'penalty_wrong' => 2,
+            'passing_score' => 6, 'random_questions' => false, 'random_options' => false, 'status' => 'published',
+            'question_ids' => [$question->id]];
+        $this->post(route('admin.materials.quizzes.store'), $quiz)
+            ->assertSessionHasErrors(['passing_score' => 'Nilai ambang tidak boleh melebihi skor maksimal sesi.']);
+        $this->assertDatabaseCount('exams', 0);
+        $this->post(route('admin.materials.quizzes.store'), array_replace($quiz, ['passing_score' => 5]))
+            ->assertSessionHasNoErrors();
+        $this->assertSame(5, Exam::sole()->maximumScore());
     }
 
     #[DataProvider('weightedAnswers')]
@@ -104,12 +115,13 @@ class WeightedQuestionScoringTest extends TestCase
             'four points' => [3, 4], 'five points' => [4, 5], 'blank' => [null, 0]];
     }
 
-    public function test_mixed_tryout_combines_binary_points_penalties_and_tkp_option_scores(): void
+    #[DataProvider('examKinds')]
+    public function test_mixed_sessions_combine_binary_points_penalties_and_tkp_option_scores(string $kind): void
     {
         $section = Section::factory()->create(['code' => 'TKP']);
         $ordinary = Question::factory()->published()->count(2)->create();
         $weighted = Question::factory()->published()->weighted()->for($section)->count(2)->create();
-        $exam = Exam::factory()->tryout()->create(['question_count' => 4, 'points_per_correct' => 7,
+        $exam = Exam::factory()->create(['kind' => $kind, 'question_count' => 4, 'points_per_correct' => 7,
             'penalty_wrong' => 2, 'random_options' => false, 'random_questions' => false]);
         $exam->questions()->attach($ordinary->concat($weighted)->modelKeys());
         $attempt = ExamAttempt::resumeOrStart(User::factory()->create(), $exam);
@@ -121,6 +133,12 @@ class WeightedQuestionScoringTest extends TestCase
             $attempt->wrong_count, $attempt->weighted_answered_count, $attempt->blank_count]);
         $tkp = $attempt->sectionBreakdown()['TKP'];
         $this->assertSame([4, 10, 1, 2], [$tkp['score'], $tkp['max'], $tkp['weighted'], $tkp['weighted_total']]);
+    }
+
+    /** @return array<string, array{string}> */
+    public static function examKinds(): array
+    {
+        return ['quiz' => ['quiz'], 'tryout' => ['tryout']];
     }
 
     public function test_shuffled_scores_follow_options_snapshots_survive_edits_and_active_client_has_no_scores(): void
@@ -149,7 +167,7 @@ class WeightedQuestionScoringTest extends TestCase
         $this->get($attempt->resultUrl())->assertSee('Skor 4/5')->assertDontSee('Jawaban benar:')->assertDontSee($question->safeExplanation(), false);
     }
 
-    public function test_quiz_normalizes_weighted_scores_and_statistics_report_points_instead_of_binary_accuracy(): void
+    public function test_quiz_keeps_weighted_points_on_results_dashboard_history_and_statistics(): void
     {
         $section = Section::factory()->create(['code' => 'TKP']);
         $question = Question::factory()->published()->weighted()->for($section)->create();
@@ -161,14 +179,14 @@ class WeightedQuestionScoringTest extends TestCase
 
         $attempt->complete();
 
-        $this->assertSame([80, 100], [$attempt->score, $attempt->max_score]);
+        $this->assertSame([4, 5], [$attempt->score, $attempt->max_score]);
         $summary = ExamAttempt::summaryFor($user);
         $this->assertNull($summary['accuracy']);
         $this->assertSame(1, $summary['weighted']);
         $this->actingAs($user)->get(route('statistics.index', ['kind' => 'quiz']))
-            ->assertViewHas('sectionChart', fn (array $chart): bool => $chart['values'] === [80])->assertSee('Berbobot dijawab');
-        $this->get(route('dashboard'))->assertSee('80% perolehan skor');
-        $this->get(route('history.index'))->assertSee('1 berbobot dijawab');
+            ->assertViewHas('sectionChart', fn (array $chart): bool => $chart['values'] === [4] && $chart['max'] === 5)->assertSee('Berbobot dijawab');
+        $this->get(route('dashboard'))->assertSee('4 / 5 poin');
+        $this->get(route('history.index'))->assertSee('1 berbobot dijawab')->assertSee('4 / 5');
         $this->get($attempt->resultUrl())->assertSee('Skor 4/5');
     }
 

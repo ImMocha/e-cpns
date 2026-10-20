@@ -28,8 +28,8 @@
 @endif
 <section class="card question-form-stack">
 <div class="card__title">Penilaian &amp; randomisasi</div>
-<p class="text-sm text-soft">{{ $isQuiz ? 'Nilai latihan memakai skala 0–100 dari total poin yang diperoleh dibandingkan skor maksimal.' : 'Nilai tryout menjumlahkan poin soal biasa dan skor pilihan TKP, dikurangi penalti pada jawaban salah soal biasa.' }} Jawaban kosong bernilai 0. TKP berbobot memakai skor 1–5 per pilihan dan tidak memakai penalti salah.</p>
-<div class="question-fields"><div class="field"><label class="label" for="exam-points">Poin per jawaban benar</label><input class="input" id="exam-points" type="number" name="points_per_correct" min="1" max="100" value="{{ old('points_per_correct', $exam->points_per_correct) }}" required></div><div class="field"><label class="label" for="exam-penalty">Penalti per jawaban salah</label><input class="input" id="exam-penalty" type="number" name="penalty_wrong" min="0" max="100" value="{{ old('penalty_wrong', $exam->penalty_wrong) }}" required></div><div class="field question-wide"><label class="label" for="exam-passing">Nilai ambang (opsional)</label><input class="input" id="exam-passing" type="number" name="passing_score" min="0" value="{{ old('passing_score', $exam->passing_score) }}"><p class="field__hint">Kosongkan jika sesi tidak memiliki nilai ambang.</p></div></div>
+<p class="text-sm text-soft">Nilai {{ $isQuiz ? 'latihan' : 'tryout' }} menjumlahkan poin soal biasa dan skor pilihan TKP, dikurangi penalti pada jawaban salah soal biasa. Jawaban kosong bernilai 0. TKP berbobot memakai skor 1–5 per pilihan dan tidak memakai penalti salah. Nilai ambang memakai satuan poin.</p>
+<div class="question-fields"><div class="field"><label class="label" for="exam-points">Poin per jawaban benar</label><input class="input" id="exam-points" type="number" name="points_per_correct" min="1" max="100" value="{{ old('points_per_correct', $exam->points_per_correct) }}" required></div><div class="field"><label class="label" for="exam-penalty">Penalti per jawaban salah</label><input class="input" id="exam-penalty" type="number" name="penalty_wrong" min="0" max="100" value="{{ old('penalty_wrong', $exam->penalty_wrong) }}" required></div>@if ($isQuiz)<div class="field question-wide"><label class="label" for="exam-passing">Nilai ambang (opsional)</label><input class="input" id="exam-passing" type="number" name="passing_score" min="0" value="{{ old('passing_score', $exam->passing_score) }}"><p class="field__hint">Kosongkan jika sesi tidak memiliki nilai ambang.</p></div>@else<div class="question-wide"><x-passing-grades /></div>@endif</div>
 <input type="hidden" name="random_questions" value="0"><label class="check"><input type="checkbox" name="random_questions" value="1" @checked(old('random_questions', $exam->random_questions))> Acak pengambilan dan urutan soal tiap pengerjaan</label>
 <input type="hidden" name="random_options" value="0"><label class="check"><input type="checkbox" name="random_options" value="1" @checked(old('random_options', $exam->random_options))> Acak urutan pilihan jawaban</label>
 <p class="field__hint">Urutan tetap selama sesi berjalan, termasuk setelah refresh.</p>
@@ -38,6 +38,30 @@
 <section class="card exam-question-manager" id="soal-sesi">
 <header class="exam-question-manager__head"><div><h2 class="card__title">Kumpulan soal sesi</h2><p class="card__sub">Pilih soal yang dipakai, atau tambah dan edit soal langsung di sini.</p></div><button class="btn btn--primary btn--sm" type="button" data-add-question><svg data-icon="plus"></svg> Tambah Soal</button></header>
 <div class="exam-question-feedback" data-exam-question-message role="status" hidden></div>
+<section class="exam-question-order" data-question-order hidden aria-labelledby="exam-order-title">
+    <div class="exam-question-order__heading"><h3 id="exam-order-title">Urutan soal dipilih</h3><span class="badge badge--primary badge--flat" data-question-order-count>0 soal</span></div>
+    <p class="field__hint" id="exam-order-help">Geser pegangan titik untuk mengurutkan soal, atau gunakan tombol naik/turun. Simpan sesi untuk menerapkan urutan.</p>
+    <div class="exam-question-order__random" data-question-order-random hidden>
+        <p>Pengacakan soal aktif. Nonaktifkan agar peserta mengikuti urutan di bawah ini.</p>
+        <button class="btn btn--outline btn--sm" type="button" data-question-order-use>Gunakan urutan ini</button>
+    </div>
+    <p class="field__hint" data-question-order-limit></p>
+    <ol class="exam-question-order__list" data-question-order-list aria-label="Urutan soal dipilih" aria-describedby="exam-order-help"></ol>
+    <p class="field__hint" data-question-order-empty>Belum ada soal dipilih. Centang soal dari kumpulan di bawah.</p>
+    <p class="sr-only" role="status" aria-live="polite" data-question-order-status></p>
+    <template data-question-order-template>
+        <li class="exam-order-item" data-question-order-item>
+            <button class="exam-order-handle" type="button" data-question-order-handle aria-describedby="exam-order-help"><span aria-hidden="true">⠿</span></button>
+            <span class="exam-order-number" data-question-order-number aria-hidden="true"></span>
+            <span class="exam-order-title" data-question-order-title></span>
+            <input type="hidden" name="question_ids[]">
+            <div class="exam-order-actions">
+                <button class="content-icon-button" type="button" data-question-order-up title="Naikkan soal"><svg data-icon="chevron-up"></svg></button>
+                <button class="content-icon-button" type="button" data-question-order-down title="Turunkan soal"><svg data-icon="chevron-down"></svg></button>
+            </div>
+        </li>
+    </template>
+</section>
 <div class="exam-pool-filters"><div class="input-group"><span class="input-group__icon"><svg data-icon="search"></svg></span><input class="input" id="exam-question-search" type="search" placeholder="Cari judul soal atau bidang..." aria-label="Cari soal sesi" data-exam-question-search></div><select class="select" data-exam-question-section aria-label="Filter bidang soal"><option value="">Semua bidang</option>@foreach($sections as $section)<option value="{{ $section->id }}">{{ $section->name }}</option>@endforeach</select></div>
 <div class="exam-pool-summary"><label class="check"><input type="checkbox" data-exam-selected-only> Hanya soal dipilih</label><span class="badge badge--primary badge--flat" data-exam-selected aria-live="polite">0 soal dipilih</span></div>
 <div class="exam-question-pool" data-exam-question-pool>
@@ -46,7 +70,7 @@
 @endforeach
 </div>
 <div class="exam-pool-empty" data-exam-pool-empty @if($questions->isNotEmpty()) hidden @endif><svg data-icon="search"></svg><strong>Tidak ada soal yang sesuai</strong><p>Ubah filter atau tambahkan soal baru untuk sesi ini.</p></div>
-<p class="field__hint">Pilihan kumpulan soal diterapkan saat sesi disimpan. Soal draft atau belum tersedia tidak diambil untuk pengerjaan baru.</p>
+<p class="field__hint">Pilihan dan urutan soal diterapkan saat sesi disimpan. Soal draft atau belum tersedia dilewati untuk pengerjaan baru; nomor soal peserta menyesuaikan.</p>
 </section>
 </div>
 </form>

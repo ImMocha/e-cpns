@@ -56,7 +56,15 @@ class IntegrationSettingController extends Controller
             } else {
                 $mail = $settings->mail();
                 if ($mail !== null && $mail['enabled']) {
-                    Mail::raw('Email uji integrasi berhasil dikirim dari '.config('app.name').'.', function (Message $message) use ($request): void {
+                    Mail::send(['html' => 'emails.notification', 'text' => 'emails.notification-text'], [
+                        'headline' => 'Email uji berhasil dikirim',
+                        'intro' => 'Koneksi email '.config('app.name').' siap digunakan. Email ini dikirim untuk menguji integrasi SMTP yang kamu simpan.',
+                        'actionText' => 'Buka pengaturan email',
+                        'actionUrl' => route('admin.settings.index'),
+                        'details' => [],
+                        'outro' => 'Ini adalah email uji yang diminta melalui halaman pengaturan integrasi admin.',
+                        'preferencesUrl' => null,
+                    ], function (Message $message) use ($request): void {
                         $message->to($request->user()->email)->subject('Uji integrasi email — '.config('app.name'));
                     });
                     $successful = true;

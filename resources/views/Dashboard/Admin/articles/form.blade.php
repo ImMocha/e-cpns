@@ -12,7 +12,7 @@
     </nav>
 
     <form method="POST" action="{{ $article->exists ? route('admin.articles.update', $article) : route('admin.articles.store') }}"
-          enctype="multipart/form-data" data-article-editor class="article-workspace" novalidate>
+          enctype="multipart/form-data" data-article-editor data-image-upload-url="{{ route('admin.articles.images.store') }}" class="article-workspace" novalidate>
         @csrf
         @if ($article->exists) @method('PUT') @endif
         <input type="hidden" name="status" value="{{ old('status', $article->status->value) }}">
@@ -76,6 +76,17 @@
                     </div>
                 </div>
             </div>
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2 mt-5">
+                <div class="field">
+                    <label class="label" for="article-cover-source">Sumber gambar cover</label>
+                    <input class="input" id="article-cover-source" name="cover_source" maxlength="255" value="{{ old('cover_source', $article->cover_source) }}" placeholder="Nama fotografer, pemilik gambar, atau Dokumentasi pribadi">
+                    <p class="hint">Kredit ditampilkan di bawah cover. Cantumkan pemilik dan lisensi bila diperlukan.</p>
+                </div>
+                <div class="field">
+                    <label class="label" for="article-cover-source-url">Tautan sumber cover (opsional)</label>
+                    <input class="input" id="article-cover-source-url" type="url" name="cover_source_url" maxlength="2048" value="{{ old('cover_source_url', $article->cover_source_url) }}" placeholder="https://situs-sumber.com/foto">
+                </div>
+            </div>
         </section>
 
         <div class="article-editor-grid">
@@ -110,6 +121,7 @@
                     </div>
                     <div class="article-toolbar-group">
                         <button type="button" data-editor-link title="Sisipkan link" aria-label="Sisipkan link"><svg data-icon="link"></svg></button>
+                        <button type="button" data-editor-image title="Sisipkan gambar dan sumber" aria-label="Sisipkan gambar dan sumber"><svg data-icon="image"></svg></button>
                         <button type="button" data-command="unlink" title="Hapus link" aria-label="Hapus link">⛓</button>
                         <button type="button" data-command="insertHorizontalRule" title="Garis pemisah" aria-label="Garis pemisah">―</button>
                         <button type="button" data-editor-table title="Tabel 2 × 3" aria-label="Sisipkan tabel"><svg data-icon="grid"></svg></button>
@@ -121,7 +133,7 @@
                 <label class="sr-only" for="article-body-source">Isi artikel dalam HTML</label>
                 <textarea class="textarea" name="body" id="article-body-source" rows="16" data-editor-source>{{ old('body', $article->safeBody()) }}</textarea>
                 <div class="article-prose article-editable" contenteditable="true" role="textbox" aria-label="Isi artikel" aria-multiline="true" aria-describedby="article-editor-help" spellcheck="true" data-editor-content hidden></div>
-                <div class="article-editor-footer"><span data-word-count>0 kata</span><span id="article-editor-help">Ctrl+B bold · Ctrl+I italic · Ctrl+Z undo</span></div>
+                <div class="article-editor-footer"><span data-word-count>0 kata</span><span id="article-editor-help">Klik gambar untuk mengubah sumber · Ctrl+Z undo</span></div>
                 <p class="article-editor-message" data-editor-message role="status" hidden></p>
                 <noscript><p class="hint">Aktifkan JavaScript untuk menggunakan toolbar dan preview langsung. Form HTML tetap bisa disimpan.</p></noscript>
             </section>
@@ -137,7 +149,10 @@
                         <h2 class="article-paper-title" data-preview-title>Judul artikel Anda</h2>
                         <p class="article-paper-excerpt" data-preview-excerpt></p>
                         <div class="article-paper-meta"><span>{{ $article->author?->name ?? auth()->user()->name }}</span><span>·</span><span data-reading-time>1 menit baca</span></div>
-                        <img class="article-paper-cover" data-preview-cover data-existing-cover="{{ $article->coverUrl() }}" alt="Cover artikel" hidden>
+                        <figure class="article-cover-figure" data-preview-cover-figure hidden>
+                            <img class="article-paper-cover" data-preview-cover data-existing-cover="{{ $article->coverUrl() }}" alt="Cover artikel" hidden>
+                            <figcaption class="article-image-credit" data-preview-cover-credit hidden></figcaption>
+                        </figure>
                         <div class="article-prose" data-preview-body><p class="article-placeholder">Mulai menulis untuk melihat preview artikel di sini…</p></div>
                     </article>
                 </div>
@@ -154,6 +169,37 @@
             <input class="input" id="article-link-url" type="url" placeholder="https://contoh.com" required>
             <p class="hint" data-link-error role="alert"></p>
             <div class="btn-row"><button class="btn btn--ghost" type="button" data-link-cancel>Batal</button><button class="btn btn--primary" type="submit">Terapkan link</button></div>
+        </form>
+    </dialog>
+
+    <dialog class="article-link-dialog article-image-dialog" data-image-dialog aria-labelledby="article-image-title">
+        <form data-image-form>
+            <h2 id="article-image-title">Sisipkan gambar</h2>
+            <p>Unggah gambar, lalu cantumkan sumbernya. Klik gambar di editor untuk mengubahnya kembali.</p>
+            <div class="field">
+                <label class="label" for="article-inline-image">File gambar</label>
+                <input class="input article-cover-input" id="article-inline-image" type="file" accept="image/jpeg,image/png,image/webp">
+                <p class="hint">JPG, PNG, WebP · maksimal 5 MB. Saat mengedit, kosongkan untuk memakai gambar yang sama.</p>
+            </div>
+            <div class="field">
+                <label class="label" for="article-image-alt">Deskripsi gambar (teks alternatif)</label>
+                <input class="input" id="article-image-alt" maxlength="255" placeholder="Jelaskan isi gambar untuk pembaca layar">
+            </div>
+            <div class="field">
+                <label class="label" for="article-image-source">Sumber gambar</label>
+                <input class="input" id="article-image-source" maxlength="255" placeholder="Nama fotografer, pemilik gambar, atau Dokumentasi pribadi">
+            </div>
+            <div class="field">
+                <label class="label" for="article-image-source-url">Tautan sumber (opsional)</label>
+                <input class="input" id="article-image-source-url" type="url" maxlength="2048" placeholder="https://situs-sumber.com/foto">
+            </div>
+            <p class="hint">Gunakan gambar sesuai izin atau lisensinya dan tuliskan kredit yang diminta pemilik.</p>
+            <p class="article-image-error" data-image-error role="alert"></p>
+            <div class="btn-row">
+                <button class="btn btn--ghost text-danger" type="button" data-image-remove hidden>Hapus gambar</button>
+                <button class="btn btn--ghost" type="button" data-image-cancel>Batal</button>
+                <button class="btn btn--primary" type="submit" data-image-submit>Sisipkan gambar</button>
+            </div>
         </form>
     </dialog>
 @endsection

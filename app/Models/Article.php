@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['section_id', 'title', 'slug', 'excerpt', 'body', 'cover_path', 'status', 'published_at', 'created_by', 'updated_by'])]
+#[Fillable(['section_id', 'title', 'slug', 'excerpt', 'body', 'cover_path', 'cover_source', 'cover_source_url', 'status', 'published_at', 'created_by', 'updated_by'])]
 class Article extends Model
 {
     /** @use HasFactory<ArticleFactory> */

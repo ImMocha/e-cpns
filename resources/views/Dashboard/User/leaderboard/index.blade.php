@@ -40,8 +40,8 @@
             </article>
             <article class="card">
                 <div class="stat__label">Nilai terbaikmu</div>
-                <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? number_format((float) $ownRank->score_percent, 2, ',', '.').'%' : '—' }}</div>
-                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Skor asli '.$ownRank->score.' dari '.$ownRank->max_score.' poin.' : 'Nilai tryoutmu akan tampil di sini.' }}</p>
+                <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? number_format((float) $ownRank->score, 0, ',', '.') : '—' }}</div>
+                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Dari '.$ownRank->max_score.' poin maksimal.' : 'Nilai tryoutmu akan tampil di sini.' }}</p>
             </article>
             <article class="card">
                 <div class="stat__label">Entri dalam peringkat</div>
@@ -52,20 +52,20 @@
 
         <section class="card">
             <div class="card__head"><div><h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2><p class="card__sub">{{ $simulatedCount ? 'Nilai tryout terbaik peserta · nilai contoh virtual' : 'Gabungan seluruh tryout · satu nilai terbaik per peserta' }}</p></div><span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span></div>
-            <p class="text-sm text-soft" style="margin-bottom:1rem">Nilai pada tabel disetarakan ke skala 0–100 dari persentase skor terhadap skor maksimal, agar tryout dengan jumlah soal berbeda bisa dibandingkan. Nilai sama mendapat peringkat sama, misalnya 1, 1, 3. Nilai latihan tidak masuk leaderboard.</p>
+            <p class="text-sm text-soft" style="margin-bottom:1rem">Peringkat memakai skor poin tertinggi dari tryout yang selesai. Skor ditampilkan sesuai poin yang diperoleh dan skor maksimal sesi. Nilai sama mendapat peringkat sama, misalnya 1, 1, 3. Nilai latihan tidak masuk leaderboard.</p>
             @if ($simulatedCount > 0)
                 <p class="text-xs text-soft" style="margin-bottom:1rem">Peserta virtual memakai nilai contoh dan ikut dihitung dalam peringkat selama fitur aktif.</p>
             @endif
             <div class="table-wrap" style="border:none;box-shadow:none">
                 <table class="table">
-                    <thead><tr><th class="num">Peringkat</th><th>Peserta</th><th>Provinsi</th><th class="num">Nilai (0–100)</th></tr></thead>
+                    <thead><tr><th class="num">Peringkat</th><th>Peserta</th><th>Provinsi</th><th class="num">Skor (poin)</th></tr></thead>
                     <tbody>
                     @forelse ($participants as $entry)
                         <tr @if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) class="bg-[var(--primary-050)]" @endif>
                             <td class="num"><span class="lb-rank leaderboard-rank{{ (int) $entry->position <= 3 ? ' lb-rank--'.$entry->position : '' }}" aria-label="Peringkat {{ $entry->position }}">{{ $entry->position }}</span></td>
                             <td><strong>{{ $entry->name }}</strong>@if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) <span class="badge badge--mint badge--flat">Kamu</span>@endif</td>
                             <td>{{ $entry->province ?? 'Belum diisi' }}</td>
-                            <td class="num"><strong>{{ number_format((float) $entry->score_percent, 2, ',', '.') }} / 100</strong></td>
+                            <td class="num"><strong>{{ rtrim(rtrim(number_format((float) $entry->score, 2, ',', '.'), '0'), ',') }}{{ $entry->max_score !== null ? ' / '.$entry->max_score : ' poin' }}</strong></td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="text-soft">Belum ada peserta yang menyelesaikan tryout{{ $scope === 'local' ? ' di provinsi ini' : '' }}. Jadilah yang pertama!</td></tr>

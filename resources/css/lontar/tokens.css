@@ -5,6 +5,8 @@
    ========================================================================== */
 
 :root {
+  color-scheme: light;
+
   /* ---- Brand ------------------------------------------------------------
      Primary #0191ED (requested). The -600/-700 are derived for hard-shadow
      and hover states so we never need opacity hacks on the brand color.     */
@@ -42,6 +44,18 @@
   --text-soft:     #64809A;
   --border:        #DCE8F2;
   --border-strong: #B9CFE0;
+
+  /* ---- Ink surfaces -----------------------------------------------------
+     `--ink` doubles as text/border AND as the background of "dark" blocks
+     (footer, table head, tryout bar). In dark mode the border role must turn
+     light while these surfaces stay dark, so they read from their own token.
+     `--pop-ink` is text placed on bright pop colours — dark in both themes. */
+  --ink-surface:        #16324F;
+  --ink-surface-strong: #0E2439;
+  --ink-surface-accent: #24486B;
+  --ink-deep:           #0A1B2C;
+  --pop-ink:            #16324F;
+  --nav-bg:        rgba(255, 253, 247, 0.9);
 
   /* ---- Semantic --------------------------------------------------------- */
   --success:       #12A97C;
@@ -108,6 +122,55 @@
   --nav-h: 72px;
   --gutter: clamp(1rem, 4vw, 2rem);
   --section-y: clamp(3.5rem, 8vw, 6.5rem);
+}
+
+/* ==========================================================================
+   DARK THEME
+   Activated by `data-theme="dark"` on <html> (see theme.js). Only the
+   colour-bearing tokens are redefined; type, spacing, radius and motion are
+   shared. `--ink` flips to a light tone (borders/text), while "ink surfaces"
+   keep their own dark navy so footer/table-head/tryout-bar still read as
+   dark blocks in both themes.
+
+   Scoped to `screen`: print (certificates) always falls back to the light
+   palette, even when the user is browsing in dark mode.
+   ========================================================================== */
+@media screen {
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --primary-600:   #35A9F2;
+  --primary-700:   #6EC6F8;
+  --primary-300:   #2C5A7C;
+  --primary-100:   #16395A;
+  --primary-050:   #122B42;
+
+  --pop-pink-050:  #3A1E2A;
+  --pop-amber-050: #3A2E12;
+  --pop-mint-050:  #12352B;
+  --pop-coral-050: #3A211A;
+  --pop-violet-050:#2A2140;
+
+  --bg:            #0B1622;
+  --bg-alt:        #0F1E2E;
+  --surface:       #13253A;
+  --surface-2:     #182C44;
+  --ink:           #F2F8FD;
+  --text:          #DCE9F4;
+  --text-soft:     #A9C3D9;
+  --border:        #2E4A68;
+  --border-strong: #46688C;
+
+  --success-050:   #0F3A2E;
+  --warning-050:   #3D2F10;
+  --danger-050:    #3E1D20;
+
+  --ink-surface:        #0A1929;
+  --ink-surface-strong: #152B42;
+  --ink-surface-accent: #1D3D5E;
+  --ink-deep:           #050D16;
+  --nav-bg:        rgba(13, 25, 38, 0.9);
+}
 }
 
 /* Reduced-motion: collapse every decorative animation, keep opacity cues. */

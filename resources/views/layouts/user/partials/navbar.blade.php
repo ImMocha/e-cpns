@@ -19,12 +19,14 @@
       <x-logo sub="CPNS Online" />
     </a>
 
-    <div class="appbar__search">
-      <svg data-icon="search"></svg>
-      <input class="input" type="search" placeholder="Cari materi, soal, tryout…" aria-label="Pencarian">
-    </div>
-
     <div class="appbar__right">
+      <x-navbar-search />
+      <button class="appbar__icon theme-toggle" type="button" data-theme-toggle
+              data-label-dark="Aktifkan mode gelap" data-label-light="Aktifkan mode terang"
+              aria-pressed="false" aria-label="Aktifkan mode gelap">
+        <svg class="theme-toggle__to-dark" data-icon="moon"></svg>
+        <svg class="theme-toggle__to-light" data-icon="sun"></svg>
+      </button>
       <a class="appbar__icon" href="{{ route('dashboard') }}" aria-label="Notifikasi"><svg data-icon="bell"></svg><span class="appbar__dot">3</span></a>
 
       <div class="dropdown" data-dropdown>

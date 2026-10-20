@@ -54,7 +54,7 @@
             </div>
         @else
             <div class="flex items-start gap-3 rounded-2xl border border-[var(--pop-amber)] bg-[var(--pop-amber-050)] p-4">
-                <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-white text-lg text-[var(--ink)]" aria-hidden="true"><svg data-icon="lock"></svg></span>
+                <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-lg text-[var(--ink)]" aria-hidden="true"><svg data-icon="lock"></svg></span>
                 <div class="min-w-0">
                     <strong class="block text-sm text-[var(--ink)]">Akses belum diaktifkan</strong>
                     <p class="mt-1! text-sm leading-relaxed text-[var(--text)]">Masa aktif baru dimulai setelah pembayaran terverifikasi.</p>

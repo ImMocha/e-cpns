@@ -127,8 +127,10 @@ class ArticleManagementTest extends TestCase
 
         $this->get(route('admin.articles.create'))->assertRedirect(route('login'));
         $this->post(route('admin.articles.store'), [])->assertRedirect(route('login'));
+        $this->post(route('admin.articles.images.store'), [])->assertRedirect(route('login'));
         $this->actingAs(User::factory()->create())->get(route('admin.articles.index'))->assertForbidden();
         $this->post(route('admin.articles.store'), [])->assertForbidden();
+        $this->postJson(route('admin.articles.images.store'), [])->assertForbidden();
         $this->put(route('admin.articles.update', $article), [])->assertForbidden();
         $this->delete(route('admin.articles.destroy', $article))->assertForbidden();
         $this->assertModelExists($article);
@@ -297,21 +299,23 @@ class ArticleManagementTest extends TestCase
         $section = Section::factory()->create();
 
         $this->actingAs(User::factory()->admin()->create())
-            ->post(route('admin.articles.store'), $this->payload($section, ['cover' => UploadedFile::fake()->image('cover.jpg')]))
+            ->post(route('admin.articles.store'), $this->payload($section, ['cover' => UploadedFile::fake()->image('cover.jpg'), 'cover_source' => 'Fotografer pertama', 'cover_source_url' => 'https://example.com/first']))
             ->assertSessionHasNoErrors();
         $article = Article::sole();
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_source' => 'Fotografer pertama', 'cover_source_url' => 'https://example.com/first']);
         $firstPath = $article->cover_path;
         Storage::disk('public')->assertExists($firstPath);
 
-        $this->put(route('admin.articles.update', $article), $this->payload($section, ['cover' => UploadedFile::fake()->image('new.png')]))
+        $this->put(route('admin.articles.update', $article), $this->payload($section, ['cover' => UploadedFile::fake()->image('new.png'), 'cover_source' => 'Dokumentasi pribadi']))
             ->assertSessionHasNoErrors();
         $secondPath = $article->fresh()->cover_path;
         Storage::disk('public')->assertExists($secondPath);
         Storage::disk('public')->assertMissing($firstPath);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_source' => 'Dokumentasi pribadi', 'cover_source_url' => null]);
 
         $this->put(route('admin.articles.update', $article), $this->payload($section, ['remove_cover' => 1]))
             ->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_path' => null]);
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_path' => null, 'cover_source' => null, 'cover_source_url' => null]);
         Storage::disk('public')->assertMissing($secondPath);
     }
 
@@ -354,5 +358,128 @@ class ArticleManagementTest extends TestCase
     {
         $this->actingAs(User::factory()->admin()->create())
             ->getJson(route('admin.articles.index', ['q' => ['bad']]))->assertUnprocessable()->assertJsonValidationErrors('q');
+    }
+
+    public function test_admin_can_upload_inline_image_and_publish_it_with_escaped_credit_and_alt_text(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->admin()->create();
+        $section = Section::factory()->create();
+        $image = UploadedFile::fake()->image('study.png');
+        $path = 'articles/content/'.$image->hashName();
+        $url = Storage::disk('public')->url($path);
+
+        $this->actingAs($admin)->postJson(route('admin.articles.images.store'), ['image' => $image])
+            ->assertCreated()->assertJsonPath('url', $url);
+
+        Storage::disk('public')->assertExists($path);
+        $this->assertDatabaseCount('articles', 0);
+
+        $body = '<p>Panduan belajar.</p><figure contenteditable="false" onclick="evil()"><img src="'.$url.'" alt="Buku &quot;CPNS&quot;" onerror="evil()"><figcaption>Sumber: <a href="https://example.com/photo" onclick="evil()">Foto &lt;script&gt;evil()&lt;/script&gt;</a></figcaption></figure>';
+        $this->post(route('admin.articles.store'), $this->payload($section, ['body' => $body, 'status' => 'published']))->assertSessionHasNoErrors();
+
+        $article = Article::sole();
+        $this->assertStringContainsString('<figure><img src="'.$url.'" alt="Buku &quot;CPNS&quot;" loading="lazy">', $article->body);
+        $this->assertStringNotContainsString('onerror', $article->body);
+        $this->assertStringNotContainsString('onclick', $article->body);
+        $this->assertStringNotContainsString('contenteditable', $article->body);
+        $this->get(route('admin.articles.edit', $article))->assertSee('data-image-dialog', false)->assertSee('Sumber gambar cover');
+        $this->get(route('articles.show', $article))
+            ->assertSee('<figure><img src="'.$url.'"', false)
+            ->assertSee('<figcaption>Sumber: <a href="https://example.com/photo"', false)
+            ->assertSee('Foto &lt;script&gt;evil()&lt;/script&gt;', false)
+            ->assertDontSee('<script>evil()</script>', false);
+    }
+
+    #[DataProvider('invalidInlineImages')]
+    public function test_inline_image_upload_rejects_invalid_files_without_storing_them(string $name, string $mimeType, int $size): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->postJson(route('admin.articles.images.store'), ['image' => UploadedFile::fake()->create($name, $size, $mimeType)])
+            ->assertUnprocessable()->assertJsonValidationErrors('image');
+
+        Storage::disk('public')->assertDirectoryEmpty('articles/content');
+    }
+
+    public static function invalidInlineImages(): array
+    {
+        return [
+            'document' => ['file.pdf', 'application/pdf', 10],
+            'svg' => ['file.svg', 'image/svg+xml', 10],
+            'gif' => ['file.gif', 'image/gif', 10],
+            'oversized image' => ['file.jpg', 'image/jpeg', 5121],
+        ];
+    }
+
+    #[DataProvider('unsafeInlineImageUrls')]
+    public function test_article_removes_unsafe_image_urls_and_unsafe_credit_links(string $url): void
+    {
+        $section = Section::factory()->create();
+        $body = '<p>Isi artikel.</p><figure><img src="'.e($url).'" onerror="evil()"><figcaption>Sumber: <a href="javascript:evil()">Pemilik foto</a></figcaption></figure>';
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.articles.store'), $this->payload($section, ['body' => $body]))->assertSessionHasNoErrors();
+
+        $this->assertSame('<p>Isi artikel.</p><figure><figcaption>Sumber: <a>Pemilik foto</a></figcaption></figure>', Article::sole()->body);
+    }
+
+    public static function unsafeInlineImageUrls(): array
+    {
+        return [
+            'javascript' => ['javascript:evil()'],
+            'data svg' => ['data:image/svg+xml,<svg onload="evil()"/>'],
+            'blob preview' => ['blob:https://example.com/123'],
+            'protocol relative' => ['//example.com/image.jpg'],
+            'backslash' => ['/\\example.com/image.jpg'],
+            'control character' => ["https://example.com/\nimage.jpg"],
+        ];
+    }
+
+    public function test_local_inline_image_and_plain_source_survive_editing(): void
+    {
+        $article = Article::factory()->create();
+        $body = '<p>Belajar.</p><figure><img src="/storage/articles/content/study.jpg" alt="Buku"><figcaption>Sumber: Dokumentasi pribadi</figcaption></figure>';
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put(route('admin.articles.update', $article), $this->payload($article->section, ['body' => $body]))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'body' => '<p>Belajar.</p><figure><img src="/storage/articles/content/study.jpg" alt="Buku" loading="lazy"><figcaption>Sumber: Dokumentasi pribadi</figcaption></figure>']);
+    }
+
+    public function test_cover_credits_are_escaped_and_visible_wherever_the_cover_is_displayed(): void
+    {
+        $credit = 'Fotografer <script>evil()</script>';
+        $article = Article::factory()->published()->create(['cover_path' => 'articles/covers/photo.jpg', 'cover_source' => $credit, 'cover_source_url' => 'https://example.com/photo']);
+
+        foreach (['home', 'articles.index'] as $route) {
+            $this->get(route($route))->assertSee($credit)->assertDontSee($credit, false)->assertSee('href="https://example.com/photo"', false);
+        }
+        $this->get(route('articles.show', $article))
+            ->assertSee($credit)->assertDontSee($credit, false)->assertSee('href="https://example.com/photo"', false);
+    }
+
+    public function test_admin_can_edit_and_clear_cover_credit_without_replacing_the_image(): void
+    {
+        $article = Article::factory()->create(['cover_path' => 'articles/covers/keep.jpg', 'cover_source' => 'Sumber lama']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put(route('admin.articles.update', $article), $this->payload($article->section, ['cover_source' => 'Sumber baru', 'cover_source_url' => 'https://example.com/new']))->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_path' => 'articles/covers/keep.jpg', 'cover_source' => 'Sumber baru', 'cover_source_url' => 'https://example.com/new']);
+
+        $this->put(route('admin.articles.update', $article), $this->payload($article->section, ['cover_source' => '', 'cover_source_url' => '']))->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_path' => 'articles/covers/keep.jpg', 'cover_source' => null, 'cover_source_url' => null]);
+    }
+
+    public function test_unsafe_cover_credit_url_is_rejected_without_saving_changes(): void
+    {
+        $article = Article::factory()->create(['cover_path' => 'articles/covers/keep.jpg', 'cover_source_url' => 'https://example.com/original']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put(route('admin.articles.update', $article), $this->payload($article->section, ['cover_source_url' => 'javascript:evil()']))
+            ->assertSessionHasErrors('cover_source_url');
+
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_source_url' => 'https://example.com/original']);
     }
 }

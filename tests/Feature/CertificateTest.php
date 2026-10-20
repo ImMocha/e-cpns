@@ -56,8 +56,8 @@ class CertificateTest extends TestCase
         $this->actingAs($user)->get(route('certificates.show', $attempt))
             ->assertOk()->assertSee('Sertifikat Kelulusan Tryout')->assertSee('Dewi Putri')
             ->assertSee('Simulasi SKD Oktober')->assertSee('GN-2026-000184')->assertSee('15 Oktober 2026')
-            ->assertSee('Nilai Total')->assertSee('100 <small>/ 100</small>', false)
-            ->assertSee('Passing Grade')->assertSee('<strong>60</strong>', false)
+            ->assertSee('Nilai Total')->assertSee('161 <small>/ 165</small>', false)
+            ->assertSee('Passing Grade: 65')->assertSee('Passing Grade: 80')->assertSee('Passing Grade: 16')
             ->assertSee('TWK')->assertSee('TIU')->assertSee('TKP')
             ->assertSee('Cetak / Simpan PDF')->assertDontSee('app-shell', false);
     }
@@ -144,26 +144,27 @@ class CertificateTest extends TestCase
             ->assertOk()->assertSee(route('certificates.show', $attempt))->assertSee('Cetak Sertifikat');
     }
 
-    public function test_score_at_the_passing_grade_can_be_printed(): void
+    public function test_scores_at_each_sections_passing_grade_can_be_printed(): void
     {
         $user = User::factory()->create();
         $attempt = ExamAttempt::factory()->passingTryout()->for($user)->create();
         $attempt->complete();
-        $attempt->update(['score' => 60, 'passing_score' => 60]);
 
         $this->actingAs($user)->get(route('certificates.show', $attempt))
-            ->assertOk()->assertSee('60 <small>/ 100</small>', false);
+            ->assertOk()->assertSee('161 <small>/ 165</small>', false)->assertSee('Ketiga bidang wajib PASS.');
         $this->get($attempt->resultUrl())->assertSee('Cetak Sertifikat');
     }
 
-    #[TestWith([59, 60])]
-    #[TestWith([100, null])]
-    public function test_failed_tryout_or_missing_passing_grade_has_no_certificate(int $score, ?int $passingScore): void
+    #[TestWith([false])]
+    #[TestWith([true])]
+    public function test_failed_tryout_or_missing_section_scores_has_no_certificate(bool $missing): void
     {
         $user = User::factory()->create();
         $attempt = ExamAttempt::factory()->passingTryout()->for($user)->create();
         $attempt->complete();
-        $attempt->update(['score' => $score, 'passing_score' => $passingScore]);
+        $sections = $attempt->section_scores;
+        $sections['TKP']['score'] = 15;
+        $attempt->update(['section_scores' => $missing ? null : $sections]);
 
         $this->actingAs($user)->get(route('certificates.show', $attempt))->assertNotFound();
         $this->get(route('certificates.index'))->assertSee('Belum ada sertifikat');

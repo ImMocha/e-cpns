@@ -24,7 +24,7 @@ class DatabaseExamTest extends TestCase
     {
         return array_replace(['title' => 'Latihan Numerik', 'slug' => 'latihan-numerik', 'kind' => 'quiz',
             'description' => 'Latihan dari bank soal', 'question_count' => 1, 'duration_minutes' => 0,
-            'points_per_correct' => 5, 'penalty_wrong' => 0, 'passing_score' => 70,
+            'points_per_correct' => 5, 'penalty_wrong' => 0, 'passing_score' => 5,
             'random_questions' => true, 'random_options' => true, 'status' => 'published',
             'question_ids' => [Question::factory()->published()->create()->id]], $overrides);
     }
@@ -128,10 +128,10 @@ class DatabaseExamTest extends TestCase
         $this->assertDatabaseCount('exam_attempts', 0);
     }
 
-    public function test_quiz_is_normalized_and_tryout_uses_configured_points_with_server_owned_scoring(): void
+    public function test_quiz_and_tryout_use_configured_points_with_server_owned_scoring(): void
     {
         $user = User::factory()->create();
-        foreach (['quiz' => 33, 'tryout' => 5] as $kind => $expected) {
+        foreach (['quiz' => 5, 'tryout' => 5] as $kind => $expected) {
             $exam = $this->exam(3, ['kind' => $kind, 'duration_minutes' => $kind === 'tryout' ? 1 : 0, 'passing_score' => 5]);
             $attempt = ExamAttempt::resumeOrStart($user, $exam);
             $ids = array_column($attempt->question_snapshot['questions'], 'id');
@@ -140,7 +140,7 @@ class DatabaseExamTest extends TestCase
             $this->postJson(route('exam-attempts.submit', $attempt), ['score' => 99999, 'answers' => [$ids[2] => 1]])->assertOk();
             $attempt->refresh();
             $this->assertSame($expected, $attempt->score);
-            $this->assertSame($kind === 'quiz' ? 100 : 15, $attempt->max_score);
+            $this->assertSame(15, $attempt->max_score);
             $this->assertSame([1, 1, 1], [$attempt->correct_count, $attempt->wrong_count, $attempt->blank_count]);
             $this->get($attempt->resultUrl())->assertOk()->assertSee('Kunci Jawaban')->assertSee('Jawaban benar');
         }
@@ -154,6 +154,36 @@ class DatabaseExamTest extends TestCase
         $attempt->update(['answers' => [$questions[0]['id'] => 1, $questions[1]['id'] => 0]]);
         $attempt->complete();
         $this->assertSame(0, $attempt->score);
+    }
+
+    public function test_quiz_accepts_and_awards_more_than_one_hundred_points_and_validates_its_actual_maximum(): void
+    {
+        $questions = Question::factory()->published()->count(3)->create();
+        $data = $this->payload(['question_ids' => $questions->modelKeys(), 'question_count' => 3,
+            'points_per_correct' => 50, 'passing_score' => 120, 'random_questions' => false, 'random_options' => false]);
+
+        $this->actingAs(User::factory()->admin()->create())->post(route('admin.materials.quizzes.store'), $data)
+            ->assertSessionHasNoErrors();
+
+        $exam = Exam::sole();
+        $this->assertSame(150, $exam->maximumScore());
+        $this->put(route('admin.materials.quizzes.update', $exam), array_replace($data, ['passing_score' => 151]))
+            ->assertSessionHasErrors(['passing_score' => 'Nilai ambang tidak boleh melebihi skor maksimal sesi.']);
+        $this->assertSame(120, $exam->fresh()->passing_score);
+
+        $user = User::factory()->create();
+        $attempt = ExamAttempt::resumeOrStart($user, $exam);
+        $this->actingAs($user)->patchJson(route('exam-attempts.save', $attempt), [
+            'answers' => array_fill_keys($questions->modelKeys(), 1), 'flags' => [], 'current' => 0,
+        ])->assertOk();
+        $this->postJson(route('exam-attempts.submit', $attempt))->assertOk();
+
+        $attempt->refresh();
+        $this->assertSame([150, 150, 120], [$attempt->score, $attempt->max_score, $attempt->passing_score]);
+        $this->get(route('quizzes.index'))->assertSee('150 / 150');
+        $this->get($attempt->resultUrl())->assertSee('dari 150')->assertSee('Di atas ambang');
+        $this->get(route('statistics.index', ['kind' => 'quiz']))
+            ->assertViewHas('trendChart', fn (array $chart): bool => $chart['values'] === [150]);
     }
 
     public function test_partial_saves_merge_two_tabs_and_explicit_clear_does_not_remove_other_answers(): void

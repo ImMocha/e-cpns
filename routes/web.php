@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminPackageController;
 use App\Http\Controllers\Admin\AdminQuestionController;
 use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\Admin\AdminVoucherController;
+use App\Http\Controllers\Admin\ArticleImageController;
 use App\Http\Controllers\Admin\IntegrationSettingController;
 use App\Http\Controllers\Admin\LeaderboardSimulationController;
 use App\Http\Controllers\Admin\MaterialController as AdminMaterialController;
@@ -190,6 +191,7 @@ Route::prefix('admin')
 
         Route::resource('questions', AdminQuestionController::class);
         Route::resource('exams', AdminExamController::class)->except('show');
+        Route::post('articles/images', [ArticleImageController::class, 'store'])->middleware('throttle:30,1')->name('articles.images.store');
         Route::resource('articles', AdminArticleController::class);
         Route::resource('packages', AdminPackageController::class)->except('show')->withTrashed(['edit']);
         Route::post('packages/{package}/members', [UserPackageController::class, 'store'])->name('packages.members.store');

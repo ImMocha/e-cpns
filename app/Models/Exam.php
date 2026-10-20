@@ -44,12 +44,18 @@ class Exam extends Model
 
     public function questions(): BelongsToMany
     {
-        return $this->belongsToMany(Question::class);
+        return $this->belongsToMany(Question::class)->withPivot('position')
+            ->orderByRaw('exam_question.position IS NULL')->orderByPivot('position')->orderBy('questions.id');
     }
 
     public function userPackages(): BelongsToMany
     {
         return $this->belongsToMany(UserPackage::class);
+    }
+
+    public function scoringQuestions(): BelongsToMany
+    {
+        return $this->questions()->visibleToMembers()->select(['questions.id', 'questions.scoring_type']);
     }
 
     /** @param Builder<Exam> $query */
@@ -69,8 +75,11 @@ class Exam extends Model
 
     public function maximumScore(): int
     {
-        if ($this->kind === 'quiz') {
-            return 100;
+        if (! $this->random_questions) {
+            $questions = $this->relationLoaded('scoringQuestions') ? $this->scoringQuestions : $this->scoringQuestions()->limit($this->question_count)->get();
+
+            return $questions->take($this->question_count)
+                ->sum(fn (Question $question): int => $question->isWeighted() ? 5 : $this->points_per_correct);
         }
         $weighted = $this->weighted_available_count ?? $this->questions()->visibleToMembers()->where('scoring_type', QuestionScoring::Weighted)->count();
         $available = $this->available_count ?? $this->questions()->visibleToMembers()->count();
@@ -86,9 +95,7 @@ class Exam extends Model
     {
         $questions = $this->questions()->visibleToMembers()->with('section');
         if ($this->random_questions) {
-            $questions->inRandomOrder();
-        } else {
-            $questions->orderBy('questions.id');
+            $questions->reorder()->inRandomOrder();
         }
         $selected = $questions->limit($this->question_count)->get();
         if ($selected->count() < $this->question_count) {
@@ -99,7 +106,7 @@ class Exam extends Model
             'id' => $this->slug, 'title' => $this->title, 'subtitle' => $this->description,
             'durationSeconds' => $this->duration_minutes * 60, 'showTimer' => $this->duration_minutes > 0,
             'pointsPerCorrect' => $this->points_per_correct, 'penaltyWrong' => $this->penalty_wrong,
-            'passingScore' => $this->passing_score, 'scoreMode' => $this->kind === 'quiz' ? 'percent' : 'points',
+            'passingScore' => $this->passing_score, 'scoreMode' => 'points',
             'randomQuestions' => $this->random_questions, 'randomOptions' => $this->random_options,
             'mediaPaths' => $selected->flatMap(fn (Question $question): array => [$question->image_path, $question->video_path])->filter()->values()->all(),
             'questions' => $selected->map(function (Question $question): array {
