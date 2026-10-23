@@ -32,8 +32,12 @@ class LeaderboardController extends Controller
         $participants = null;
         $ownRank = null;
         $simulatedCount = 0;
+        $referenceTryout = null;
+        $maximumScore = null;
         if ($hasAccess && ! $needsProvince) {
-            $rankings = $leaderboard->rankings($scope === 'local' ? $user->province : null);
+            $referenceTryout = $leaderboard->referenceTryout();
+            $maximumScore = $referenceTryout?->maximumScore();
+            $rankings = $leaderboard->rankings($scope === 'local' ? $user->province : null, $referenceTryout);
             $ownRank = (clone $rankings)->where('id', $user->id)->where('participant_type', 'real')->first();
             $participants = $rankings->paginate(25)->withQueryString();
 
@@ -49,6 +53,7 @@ class LeaderboardController extends Controller
             'needsProvince' => $needsProvince, 'province' => $user->province,
             'participants' => $participants, 'ownRank' => $ownRank,
             'simulatedCount' => $simulatedCount,
+            'referenceTryout' => $referenceTryout, 'maximumScore' => $maximumScore,
         ]);
     }
 }

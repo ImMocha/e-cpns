@@ -77,7 +77,7 @@
         <section class="card card--pop card--amber">
           <span class="card__icon ico--coral" style="position:static"><svg data-icon="alert"></svg></span>
           <h2 class="card__title" style="margin-top:.75rem">Perlu Perhatian</h2>
-          <div class="grid" style="--gap:.75rem;margin-top:1rem">
+          <div class="grid grid-cols-1" style="--gap:.75rem;margin-top:1rem">
             <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.index', ['status' => 'draft']) }}">
               <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="file"></svg></span>
               <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $draftMaterialCount }} materi draft</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Tinjau sebelum diterbitkan</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
@@ -132,7 +132,7 @@
           <a class="btn btn--ghost btn--block" href="{{ route('admin.articles.index') }}" style="margin-top:1.25rem">Lihat statistik artikel<svg data-icon="arrow-right"></svg></a>
         </section>
 
-        <section class="card card--dashed"><div class="card__title">Data transaksi belum tersedia</div><p class="text-sm text-soft" style="margin-top:.5rem">Pendapatan dan transaksi akan ditampilkan setelah modul pembayaran menyimpan transaksi nyata.</p></section>
+        <section class="card"><h2 class="card__title">Ringkasan Pembayaran</h2><p class="text-sm text-soft" style="margin-top:.5rem">Periksa pesanan, status pembayaran, dan aktivasi paket peserta.</p><a class="btn btn--ghost btn--block" style="margin-top:1rem" href="{{ route('admin.transactions.index') }}">Kelola Transaksi<svg data-icon="arrow-right"></svg></a></section>
       </aside>
     </div>
 @endsection

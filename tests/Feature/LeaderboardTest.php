@@ -7,7 +7,9 @@ namespace Tests\Feature;
 use App\Enums\LeaderboardAccess;
 use App\Enums\Province;
 use App\Enums\UserRole;
+use App\Models\Exam;
 use App\Models\ExamAttempt;
+use App\Models\LeaderboardBot;
 use App\Models\Material;
 use App\Models\Package;
 use App\Models\User;
@@ -15,6 +17,7 @@ use App\Models\UserPackage;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
@@ -256,6 +259,55 @@ class LeaderboardTest extends TestCase
         ])->assertSessionHasErrors('leaderboard_access');
 
         $this->assertDatabaseCount('packages', 0);
+    }
+
+    public function test_active_tryout_sets_the_default_maximum_and_old_results_start_at_zero(): void
+    {
+        $user = User::factory()->create(['province' => Province::KalimantanSelatan]);
+        $peer = User::factory()->create(['province' => Province::KalimantanSelatan]);
+        $this->grant($user, LeaderboardAccess::National);
+        $reference = Exam::factory()->tryout()->create(['title' => 'Tryout Utama', 'question_count' => 110]);
+        Exam::factory()->tryout()->create(['question_count' => 3]);
+        Exam::factory()->tryout()->create(['question_count' => 200, 'status' => 'draft']);
+        $archived = Exam::factory()->tryout()->create(['question_count' => 220]);
+        $archived->delete();
+        $oldResult = $this->createCompletedTryout($user, 10, 15);
+        $this->createCompletedTryout($user, 900, 1100, ['bank_slug' => $archived->slug]);
+        $this->createCompletedTryout($user, 550, 550, ['bank_slug' => $reference->slug, 'status' => ExamAttempt::IN_PROGRESS]);
+        $this->createCompletedTryout($peer, 400, 550, ['bank_slug' => $reference->slug]);
+        LeaderboardBot::factory()->create(['province' => Province::KalimantanSelatan, 'score' => 440]);
+        DB::table('leaderboard_settings')->insert(['id' => 1, 'simulations_enabled' => true]);
+
+        $response = $this->actingAs($user)->get(route('leaderboard.index'));
+
+        $response->assertSee('0 / 550')->assertSee('400 / 550')->assertSee('440 / 550')
+            ->assertSee('Acuan: Tryout Utama')->assertDontSee('10 / 15')->assertDontSee('900 / 1100')
+            ->assertViewHas('maximumScore', 550)
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->score === 0 && (int) $rank->max_score === 550 && (int) $rank->position === 3);
+        $this->get(route('leaderboard.index', ['scope' => 'national']))
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->score === 0 && (int) $rank->max_score === 550);
+        $this->assertDatabaseHas('exam_attempts', ['id' => $oldResult->id, 'score' => 10, 'max_score' => 15]);
+    }
+
+    public function test_leaderboard_follows_changes_to_the_active_tryout_and_keeps_real_scores_as_points(): void
+    {
+        $user = User::factory()->create(['province' => Province::KalimantanSelatan]);
+        $this->grant($user, LeaderboardAccess::Local);
+        $reference = Exam::factory()->tryout()->create(['question_count' => 110]);
+        $oldResult = $this->createCompletedTryout($user, 480, 550, ['bank_slug' => $reference->slug]);
+        LeaderboardBot::factory()->create(['province' => Province::KalimantanSelatan, 'score' => 440]);
+        DB::table('leaderboard_settings')->insert(['id' => 1, 'simulations_enabled' => true]);
+        $reference->update(['question_count' => 100]);
+
+        $this->actingAs($user)->get(route('leaderboard.index'))
+            ->assertSee('0 / 500')->assertSee('400 / 500')->assertDontSee(' / 550')
+            ->assertViewHas('maximumScore', 500);
+
+        $this->createCompletedTryout($user, 375, 500, ['bank_slug' => $reference->slug]);
+
+        $this->get(route('leaderboard.index'))->assertSee('375 / 500')
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->score === 375 && (int) $rank->position === 2);
+        $this->assertDatabaseHas('exam_attempts', ['id' => $oldResult->id, 'score' => 480, 'max_score' => 550]);
     }
 
     /** @return array<string, mixed> */

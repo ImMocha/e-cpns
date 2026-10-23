@@ -99,6 +99,7 @@
             <td class="email-footer" align="center" style="padding:32px 24px 0;">
               <p style="margin:0;color:#16324F;font-family:'Outfit',Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:1.6;">Langkah kecil, persiapan lebih baik.</p>
               <p style="margin:8px 0 0;color:#64809A;font-size:11px;line-height:1.9;">Dikirim otomatis oleh {{ config('app.name') }}.<br>Teman belajar dan persiapan CPNS kamu.</p>
+              <p style="margin:8px 0 0;color:#64809A;font-size:11px;line-height:1.9;">Butuh bantuan? <a href="{{ config('app.contact_whatsapp') }}" style="color:#01609B;text-decoration:underline;">Hubungi Kami</a> atau <a href="mailto:{{ config('app.contact_email') }}" style="color:#01609B;text-decoration:underline;">{{ config('app.contact_email') }}</a></p>
               @if ($preferencesUrl)
                 <p style="margin:16px 0 0;font-size:11px;line-height:1.8;"><a href="{{ $preferencesUrl }}" style="display:inline-block;padding:8px;color:#01609B;text-decoration:underline;">Atur preferensi email</a></p>
               @endif

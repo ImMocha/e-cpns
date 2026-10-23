@@ -28,28 +28,39 @@
           </select>
         </form>
       </div>
-      <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
-        <table class="table" style="min-width:900px"><thead><tr><th>Aktivitas</th><th>Jenis</th><th class="num">Soal</th><th class="num">Benar / Salah</th><th>Tanggal</th><th class="num">Durasi</th><th class="num">Nilai</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+      <div class="history-list">
           @forelse ($attempts as $attempt)
-            <tr>
-              <td><strong style="color:var(--ink)">{{ $attempt->title }}</strong><span class="text-xs text-soft" style="display:block">{{ implode(' · ', array_unique(array_column($attempt->question_snapshot['questions'], 'section'))) }}</span></td>
-              <td>{{ $attempt->kind === 'quiz' ? 'Latihan' : 'Tryout' }}</td>
-              <td class="num">{{ count($attempt->question_snapshot['questions']) }}</td>
-              <td class="num">{{ $attempt->status === 'completed' ? $attempt->correct_count.' / '.$attempt->wrong_count : '—' }}@if ($attempt->status === 'completed' && $attempt->weighted_answered_count)<span class="text-xs text-soft" style="display:block">{{ $attempt->weighted_answered_count }} berbobot dijawab</span>@endif</td>
-              <td>{{ ($attempt->submitted_at ?? $attempt->started_at)->translatedFormat('d M Y H:i') }}</td>
-              <td class="num">{{ $attempt->status === 'completed' ? floor($attempt->duration_seconds / 60).' menit' : 'Berjalan' }}</td>
-              <td class="num">{{ $attempt->status === 'completed' ? $attempt->score.' / '.$attempt->max_score : count($attempt->answers ?? []).' dijawab' }}
-                @if ($attempt->kind === 'tryout' && $attempt->status === 'completed')
-                  @foreach ($attempt->sectionGrades() as $grade)<span class="text-xs text-soft" style="display:block">{{ $grade['section'] }} {{ $grade['score'] }} · {{ $grade['passed'] ? 'PASS' : 'FAIL' }}</span>@endforeach
-                @endif
-              </td>
-              <td><span class="badge badge--{{ $attempt->status === 'completed' && ($attempt->kind === 'quiz' || $attempt->hasPassed()) ? 'mint' : 'amber' }} badge--flat">{{ $attempt->status !== 'completed' ? 'Berjalan' : ($attempt->kind === 'tryout' ? ($attempt->hasPassed() ? 'Lulus' : 'Belum Lulus') : 'Selesai') }}</span></td>
-              <td><a class="badge badge--primary badge--flat" href="{{ $attempt->status === 'completed' ? $attempt->resultUrl() : $attempt->attemptUrl() }}">{{ $attempt->status === 'completed' ? 'Lihat Hasil' : 'Lanjutkan Sesi' }}</a></td>
-            </tr>
+            <article class="history-item">
+              <div class="history-item-main">
+                <span class="history-item-icon"><svg data-icon="{{ $attempt->kind === 'quiz' ? 'pen-line' : 'timer' }}"></svg></span>
+                <div class="history-item-info">
+                  <div class="history-item-labels"><span class="history-kind">{{ $attempt->kind === 'quiz' ? 'Latihan' : 'Tryout CAT' }}</span><span class="badge badge--{{ $attempt->status === 'completed' && ($attempt->kind === 'quiz' || $attempt->hasPassed()) ? 'mint' : 'amber' }} badge--flat">{{ $attempt->status !== 'completed' ? 'Berjalan' : ($attempt->kind === 'tryout' ? ($attempt->hasPassed() ? 'Lulus' : 'Belum Lulus') : 'Selesai') }}</span></div>
+                  <h2>{{ $attempt->title }}</h2>
+                  <p class="history-item-meta"><span>{{ ($attempt->submitted_at ?? $attempt->started_at)->translatedFormat('d M Y · H:i') }}</span><span>{{ count($attempt->question_snapshot['questions']) }} soal</span><span>{{ $attempt->status === 'completed' ? floor($attempt->duration_seconds / 60).' menit' : 'Sedang dikerjakan' }}</span></p>
+                </div>
+                <div class="history-item-score"><small>{{ $attempt->status === 'completed' ? 'Nilai akhir' : 'Progres' }}</small><strong>{{ $attempt->status === 'completed' ? $attempt->score.' / '.$attempt->max_score : count($attempt->answers ?? []).' dijawab' }}</strong></div>
+                <a class="btn {{ $attempt->status === 'completed' ? 'btn--ghost' : 'btn--primary' }} btn--sm" href="{{ $attempt->status === 'completed' ? $attempt->resultUrl() : $attempt->attemptUrl() }}">{{ $attempt->status === 'completed' ? 'Lihat Hasil' : 'Lanjutkan Sesi' }}<svg data-icon="arrow-right"></svg></a>
+              </div>
+              <details class="history-item-details">
+                <summary>Rincian sesi <svg data-icon="chevron-down" aria-hidden="true"></svg></summary>
+                <div class="history-item-breakdown">
+                  <p><strong>Bidang</strong><span>{{ implode(' · ', array_unique(array_column($attempt->question_snapshot['questions'], 'section'))) }}</span></p>
+                  @if ($attempt->status === 'completed')
+                    <p><strong>Benar / Salah</strong><span>{{ $attempt->correct_count.' / '.$attempt->wrong_count }}</span></p>
+                    <p><strong>Kosong</strong><span>{{ $attempt->blank_count }} soal</span></p>
+                    @if ($attempt->weighted_answered_count)<p><strong>Soal berbobot</strong><span>{{ $attempt->weighted_answered_count }} berbobot dijawab</span></p>@endif
+                    @if ($attempt->kind === 'tryout')
+                      @foreach ($attempt->sectionGrades() as $grade)<p><strong>{{ $grade['section'] }}</strong><span>{{ $grade['score'] }} · {{ $grade['passed'] ? 'PASS' : 'FAIL' }}</span></p>@endforeach
+                    @endif
+                  @else
+                    <p><strong>Status</strong><span>Jawaban tersimpan. Lanjutkan sesi untuk menyelesaikannya.</span></p>
+                  @endif
+                </div>
+              </details>
+            </article>
           @empty
-            <tr><td colspan="9" class="text-soft">Belum ada sesi pada filter ini. <a href="{{ route('quizzes.index') }}">Mulai latihan</a> atau <a href="{{ route('tryouts.index') }}">coba tryout</a>.</td></tr>
+            <div class="empty"><span class="empty__icon"><svg data-icon="history"></svg></span><strong>Belum ada sesi pada filter ini.</strong><p><a href="{{ route('quizzes.index') }}">Mulai latihan</a> atau <a href="{{ route('tryouts.index') }}">coba tryout</a> untuk mencatat perkembanganmu.</p></div>
           @endforelse
-        </tbody></table>
       </div>
       @if ($attempts->hasPages())<div style="padding:1rem 1.5rem;border-top:2px solid var(--border)"><x-pager :paginator="$attempts" /></div>@endif
     </section>

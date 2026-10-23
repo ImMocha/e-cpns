@@ -25,6 +25,18 @@
         </div>
       </div>
     </header>
+    @if(auth()->user()->isAdmin())
+      <div class="card card--tight stack" style="--stack:.75rem;margin-bottom:1.5rem">
+        <strong>Khusus admin · Pengelolaan materi</strong>
+        <p class="text-sm text-soft">Aktifkan tampilan draft untuk memeriksa materi sebelum terbit. Peserta tetap hanya melihat materi terbit. Bidang dan topik nonaktif dapat diperiksa melalui Kelola Materi.</p>
+        <div class="flex flex-wrap items-center" style="gap:.75rem">
+          <x-material-publish scope="all" label="Terbitkan semua materi" />
+          @if($filters['section_id'])<x-material-publish scope="section" :section-id="$filters['section_id']" label="Terbitkan semua draft bidang ini" />@endif
+          <a class="btn btn--ghost btn--sm" href="{{ route('admin.materials.index', array_filter(['section_id' => $filters['section_id'], 'topic_id' => $filters['topic_id']])) }}">Kelola Materi</a>
+        </div>
+        @if($filters['show_drafts'])<p class="text-sm text-soft">Pratinjau admin aktif: jumlah dan daftar materi mencakup draft. Draft belum terlihat oleh peserta.</p>@endif
+      </div>
+    @endif
     @if ($counts['locked'] > 0)
       <div class="alert alert--info" style="margin-bottom:1.5rem">
         <span class="alert__icon"><svg data-icon="lock"></svg></span>
@@ -38,10 +50,10 @@
       @endif
       <div class="stack" style="--stack:1rem">
         <div class="pills material-field-pills">
-          <a class="pill {{ $filters['section_id'] === null ? 'is-active' : '' }}" href="{{ route('materials.index', array_filter(['q' => $filters['q'], 'type' => $filters['type']])) }}">Semua bidang</a>
+          <a class="pill {{ $filters['section_id'] === null ? 'is-active' : '' }}" href="{{ route('materials.index', array_filter(['q' => $filters['q'], 'type' => $filters['type'], 'show_drafts' => $filters['show_drafts']])) }}">Semua bidang</a>
           @foreach ($sections as $section)
             <a class="pill {{ (string) $filters['section_id'] === (string) $section->id ? 'is-active' : '' }}"
-               href="{{ route('materials.index', array_filter(['q' => $filters['q'], 'type' => $filters['type'], 'section_id' => $section->id])) }}">{{ $section->name }} ({{ $section->published_materials_count }})</a>
+               href="{{ route('materials.index', array_filter(['q' => $filters['q'], 'type' => $filters['type'], 'section_id' => $section->id, 'show_drafts' => $filters['show_drafts']])) }}">{{ $section->name }} ({{ $section->published_materials_count }})</a>
           @endforeach
         </div>
         <div class="flex items-center flex-wrap" style="gap:.75rem">
@@ -56,6 +68,9 @@
             @endforeach
           </select>
           <button class="btn btn--ghost" type="submit">Terapkan</button>
+          @if(auth()->user()->isAdmin())
+            <label class="flex items-center text-sm" style="gap:.5rem"><input type="checkbox" name="show_drafts" value="1" @checked($filters['show_drafts'])> Tampilkan draft (admin only)</label>
+          @endif
           @if ($filters['q'] || $filters['section_id'] || $filters['type'] || $filters['topic_id'])
             <a class="btn btn--ghost" href="{{ route('materials.index') }}">Reset</a>
           @endif
@@ -81,6 +96,9 @@
               <span class="lesson-topic__toggle" aria-hidden="true"><svg data-icon="chevron-down"></svg></span>
             </summary>
             <div class="lesson-topic__body">
+              @if(auth()->user()->isAdmin())
+                <x-material-publish scope="topic" :topic-id="$topic->id" :label="'Terbitkan topik: '.$topic->name" />
+              @endif
               @if ($topic->description)
                 <p class="text-sm text-soft lesson-topic__description">{{ $topic->description }}</p>
               @endif
@@ -91,6 +109,7 @@
                   <span class="lesson-row__icon"><svg data-icon="{{ $open ? $material->type->icon() : 'lock' }}"></svg></span>
                   <span class="lesson-row__title">{{ $material->title }}</span>
                   <span class="lesson-row__meta">
+                    @if(auth()->user()->isAdmin())<span class="badge {{ $material->status->badgeClass() }} badge--flat">{{ $material->status->label() }}</span>@endif
                     @if (isset($completedMaterialIds[$material->id]))<span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Selesai</span>@endif
                     @unless ($open)<span class="badge badge--amber badge--flat">Terkunci</span>@endunless
                     <span class="badge {{ $material->type->badgeClass() }} badge--flat">{{ $material->type->shortLabel() }}</span>
@@ -103,6 +122,14 @@
                     </span>
                   </span>
                 </a>
+                @if(auth()->user()->isAdmin())
+                  <form method="POST" action="{{ route('admin.materials.status', $material) }}" class="flex flex-wrap items-center" style="gap:.75rem;margin-bottom:.75rem">
+                    @csrf @method('PATCH')
+                    <input type="hidden" name="member_listing" value="1">
+                    <button class="btn btn--ghost btn--sm" type="submit" aria-label="{{ $material->isPublished() ? 'Jadikan draft: ' : 'Terbitkan: ' }}{{ $material->title }}">{{ $material->isPublished() ? 'Jadikan draft' : 'Terbitkan' }}</button>
+                    <a class="text-sm" href="{{ route('admin.materials.edit', $material) }}">Edit materi</a>
+                  </form>
+                @endif
               @endforeach
               @if ($topicQuizzes->has($topic->id))
                 <x-topic-quizzes :topic="$topic" :banks="$topicQuizzes->get($topic->id)" />

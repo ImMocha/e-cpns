@@ -118,3 +118,87 @@ video.exam-question-media { background: var(--ink-surface); }
 .exam-order-dragging, .exam-order-dragging * { cursor: grabbing !important; user-select: none !important; }
 @media (max-width: 480px) { .exam-question-order { padding: .7rem; }.exam-order-item { gap: .35rem; padding: .5rem; }.exam-order-actions { flex-direction: column; } }
 .exam-review-choice.is-selected { border-color: var(--primary); background: var(--primary-050); }
+
+/* Review uses a reading column so long questions remain comfortable to scan. */
+.exam-review .card__head { align-items: center; flex-wrap: wrap; }
+.exam-review-list { display: grid; gap: .85rem; }
+.exam-review-item { min-width: 0; border: 1px solid var(--border-strong); border-radius: 14px; background: var(--surface); scroll-margin-top: 110px; overflow: clip; }
+.exam-review-item[open] { border-color: var(--primary); }
+.exam-review-summary { display: flex; align-items: center; gap: .85rem; padding: 1rem 1.15rem; list-style: none; cursor: pointer; color: var(--ink); }
+.exam-review-summary::-webkit-details-marker, .history-item-details > summary::-webkit-details-marker { display: none; }
+.exam-review-summary:hover { background: var(--surface-2); }
+.exam-review-summary:focus-visible, .history-item-details > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: -4px; border-radius: 10px; }
+.exam-review-number { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 10px; background: var(--primary-050); color: var(--primary-700); font-weight: 800; font-size: 14px; }
+.exam-review-heading { flex: 1; min-width: 0; display: grid; gap: .2rem; }
+.exam-review-heading small { color: var(--text-soft); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.exam-review-heading strong { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.exam-review-chevron { width: 18px; height: 18px; flex: 0 0 18px; color: var(--text-soft); }
+.exam-review-item[open] > summary .exam-review-chevron { transform: rotate(180deg); }
+.exam-review-body { border-top: 1px solid var(--border); padding: 1.75rem 1.25rem; }
+.exam-review-reading { max-width: 88ch; margin-inline: auto; }
+.exam-review .article-prose { font-size: 15px; line-height: 1.85; color: var(--text); overflow-wrap: anywhere; }
+.exam-review .article-prose > :first-child { margin-top: 0; }
+.exam-review .article-prose > :last-child { margin-bottom: 0; }
+.exam-review-stem { margin-bottom: 1.5rem; }
+.exam-review .exam-review-options { list-style: none; padding: 0; margin: 1.5rem 0; gap: .65rem; }
+.exam-review .exam-review-choice { display: flex; align-items: flex-start; gap: .85rem; padding: 1rem; background: var(--surface); border-color: var(--border); }
+.exam-review-letter { display: grid; place-items: center; flex: 0 0 30px; height: 30px; border: 1px solid var(--border-strong); border-radius: 8px; font-size: 13px; font-weight: 800; color: var(--ink); background: var(--surface); }
+.exam-review-option-content { flex: 1; min-width: 0; font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; }
+.exam-review-option-labels { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-top: .55rem; font-size: 12px; font-weight: 700; color: var(--ink); }
+.exam-review-option-labels span { display: inline-flex; align-items: center; gap: .3rem; }
+.exam-review-option-labels svg { width: 14px; height: 14px; flex-shrink: 0; }
+.exam-review .exam-review-choice.is-correct { border-color: var(--success); background: var(--success-050); }
+.exam-review .exam-review-choice.is-wrong { border-color: var(--danger); background: var(--danger-050); }
+.exam-review .exam-review-choice.is-selected { border-color: var(--primary); background: var(--primary-050); }
+.exam-review-answer-summary { display: flex; flex-wrap: wrap; gap: .6rem 1.75rem; padding: 1rem 0; border-block: 1px solid var(--border); font-size: 13px; }
+.exam-review-answer-summary p { display: flex; align-items: center; gap: .5rem; }
+.exam-review-answer-summary strong { font-weight: 600; color: var(--text-soft); }
+.exam-review-answer-summary span { font-weight: 800; color: var(--ink); }
+.exam-review-scoring-note { font-size: 12px; color: var(--text-soft); margin-top: .65rem; }
+.exam-review-explanation { padding: 1.25rem 1.4rem; margin-top: 1.5rem; background: var(--surface-2); border-radius: 12px; border-left: 3px solid var(--primary); }
+.exam-review-explanation h3 { display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem; font-size: 15px; font-weight: 800; color: var(--ink); }
+.exam-review-explanation h3 svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--primary-700); }
+.exam-review-explanation .article-prose p { margin-bottom: .9rem; }
+.exam-review-explanation .article-prose li { margin-bottom: .65rem; }
+
+.history-list { display: grid; }
+.history-item { padding: 1.5rem; min-width: 0; }
+.history-item + .history-item { border-top: 1px solid var(--border); }
+.history-item-main { display: grid; grid-template-columns: 42px minmax(0,1fr) auto auto; align-items: center; gap: 1.1rem; }
+.history-item-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: var(--primary-050); color: var(--primary-700); }
+.history-item-icon svg { width: 21px; height: 21px; }
+.history-item-info { min-width: 0; }
+.history-item-labels { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; margin-bottom: .5rem; }
+.history-kind { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--text-soft); }
+.history-item-info h2 { font-size: 16px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+.history-item-meta { display: flex; flex-wrap: wrap; gap: .35rem 1rem; margin-top: .4rem; color: var(--text-soft); font-size: 12px; }
+.history-item-score { display: grid; gap: .3rem; min-width: 115px; padding-inline: 1rem; border-left: 1px solid var(--border); }
+.history-item-score small { font-size: 11px; color: var(--text-soft); }
+.history-item-score strong { font-family: var(--font-display); font-size: 20px; color: var(--ink); white-space: nowrap; }
+.history-item-details { margin-top: 1rem; margin-left: calc(42px + 1.1rem); }
+.history-item-details > summary { display: flex; align-items: center; gap: .5rem; width: fit-content; list-style: none; cursor: pointer; color: var(--primary-700); font-size: 12px; font-weight: 700; padding-block: .35rem; }
+.history-item-details > summary svg { width: 14px; height: 14px; }
+.history-item-details[open] > summary svg { transform: rotate(180deg); }
+.history-item-breakdown { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 1rem; margin-top: .65rem; padding: 1rem; background: var(--surface-2); border-radius: 10px; }
+.history-item-breakdown p { display: grid; align-content: start; gap: .4rem; font-size: 12px; }
+.history-item-breakdown strong { color: var(--text-soft); font-weight: 600; }
+.history-item-breakdown span { color: var(--ink); }
+@media(max-width:720px) {
+  .exam-review { padding: 1rem; }
+  .exam-review-summary { gap: .6rem; padding: .85rem; flex-wrap: wrap; }
+  .exam-review-heading { flex-basis: calc(100% - 60px); }
+  .exam-review-summary > .badge { margin-left: 46px; }
+  .exam-review-chevron { margin-left: auto; }
+  .exam-review-body { padding: 1.15rem .8rem; }
+  .exam-review .article-prose { font-size: 14px; line-height: 1.8; }
+  .exam-review .exam-review-choice { gap: .65rem; padding: .8rem; }
+  .exam-review-option-content { font-size: 13px; }
+  .exam-review-explanation { padding: 1rem; }
+  .history-item { padding: 1.15rem; }
+  .history-item-main { grid-template-columns: 36px minmax(0,1fr); gap: .85rem; }
+  .history-item-icon { width: 36px; height: 36px; align-self: start; }
+  .history-item-info h2 { font-size: 15px; }
+  .history-item-score { grid-column: 2; border: none; padding: 0; }
+  .history-item-main > .btn { grid-column: 2; justify-self: start; }
+  .history-item-details { margin-left: calc(36px + .85rem); }
+}

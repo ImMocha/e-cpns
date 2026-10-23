@@ -15,6 +15,10 @@ return [
 
     'name' => env('APP_NAME', 'Ganesha Nusa'),
 
+    'contact_email' => 'nusaganesha@gmail.com',
+    'contact_phone' => '087867876797',
+    'contact_whatsapp' => 'https://wa.me/6287867876797',
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

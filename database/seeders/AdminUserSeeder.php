@@ -17,6 +17,9 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            return;
+        }
         User::updateOrCreate(
             ['email' => 'admin@lontar.asia'],
             [
@@ -25,7 +28,7 @@ class AdminUserSeeder extends Seeder
                 'role' => UserRole::Admin,
                 'status' => UserStatus::Active,
                 'email_verified_at' => now(),
-                'phone' => '0812 3456 7890',
+                'phone' => config('app.contact_phone'),
                 'address' => 'Jakarta Selatan, DKI Jakarta',
                 'institution' => 'Ganesha Nusa',
                 'last_login_at' => now(),
@@ -40,7 +43,7 @@ class AdminUserSeeder extends Seeder
                 'role' => UserRole::Admin,
                 'status' => UserStatus::Inactive,
                 'email_verified_at' => now(),
-                'phone' => '0813 2211 9087',
+                'phone' => config('app.contact_phone'),
                 'address' => 'Bandung, Jawa Barat',
                 'institution' => 'Ganesha Nusa',
                 'last_login_at' => null,

@@ -27,7 +27,6 @@
         <svg class="theme-toggle__to-dark" data-icon="moon"></svg>
         <svg class="theme-toggle__to-light" data-icon="sun"></svg>
       </button>
-      <a class="appbar__icon" href="{{ route('dashboard') }}" aria-label="Notifikasi"><svg data-icon="bell"></svg><span class="appbar__dot">3</span></a>
 
       <div class="dropdown" data-dropdown>
         <button class="appbar__icon" data-dropdown-toggle aria-expanded="false" aria-label="Menu akun" style="box-shadow:none;border-color:transparent;background:transparent">

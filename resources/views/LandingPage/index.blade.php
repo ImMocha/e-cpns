@@ -35,15 +35,15 @@
 
         <div class="hero-stats">
           <div>
-            <div class="hero-stat__num" data-count-to="12480" data-count-suffix="+">0</div>
+            <div class="hero-stat__num" data-count-to="{{ $participantCount }}">{{ number_format($participantCount, 0, ",", ".") }}</div>
             <div class="hero-stat__label">Peserta Aktif</div>
           </div>
           <div>
-            <div class="hero-stat__num" data-count-to="3200" data-count-suffix="+">0</div>
+            <div class="hero-stat__num" data-count-to="{{ $questionCount }}">{{ number_format($questionCount, 0, ",", ".") }}</div>
             <div class="hero-stat__label">Bank Soal</div>
           </div>
           <div>
-            <div class="hero-stat__num" data-count-to="48" data-count-suffix=" Tryout">0</div>
+            <div class="hero-stat__num" data-count-to="{{ $tryoutCount }}">{{ $tryoutCount }}</div>
             <div class="hero-stat__label">Simulasi CAT</div>
           </div>
         </div>
@@ -55,26 +55,11 @@
           <img src="{{ asset('images/hero-tryout.jpg') }}" alt="Ilustrasi peserta belajar prepping CPNS dengan buku TWK, TIU, TKP, dan CAT CPNS" width="960" height="720">
         </div>
 
-        {{-- floating sticker cards --}}
-        <div class="card card--tight card--pop" style="position:absolute;left:-28px;bottom:34px;max-width:210px;z-index:3">
-          <div class="flex items-center gap-2">
-            <span class="stat__icon ico--mint" style="width:38px;height:38px;flex-basis:38px;border-radius:12px"><svg data-icon="target"></svg></span>
-            <div>
-              <div class="text-xs text-soft fw-700">Nilai Tryout</div>
-              <div class="fw-800" style="font-family:var(--font-display);font-size:1.25rem;color:var(--ink);line-height:1">452</div>
-            </div>
-          </div>
-          <div class="progress progress--mint" style="height:12px;margin-top:.7rem">
-            <div class="progress__bar" data-progress="78"></div>
-          </div>
-          <p class="text-xs text-soft" style="margin-top:.4rem">Naik 34 poin dari tryout lalu</p>
+        <div class="card card--tight card--pop" style="position:absolute;left:-18px;bottom:24px;max-width:210px;z-index:3">
+          <span class="badge badge--mint badge--flat"><svg data-icon="target"></svg> Belajar Terarah</span>
+          <p class="text-sm fw-700" style="margin-top:.5rem">Materi, latihan, dan hasil dalam satu akun.</p>
         </div>
 
-        <div class="card card--tight" style="position:absolute;right:-18px;top:26px;z-index:3;box-shadow:var(--sh-soft-amber)">
-          <div class="badge badge--premium"><svg data-icon="zap"></svg> Rata-rata naik</div>
-          <p class="fw-800" style="font-family:var(--font-display);font-size:1.05rem;color:var(--ink);margin-top:.5rem">+12%</p>
-          <p class="text-xs text-soft">setelah 3 sesi tryout</p>
-        </div>
       </div>
     </div>
   </div>
@@ -135,9 +120,9 @@
       <article class="card card--icon card--pop reveal" data-delay="180">
         <span class="card__icon ico--amber"><svg data-icon="layers"></svg></span>
         <h3>Bank Soal & Pembahasan</h3>
-        <p class="text-sm text-soft">Ribuan soal TWK, TIU, TKP dengan pembahasan di setiap soal. Bisa latihan per kategori.</p>
+        <p class="text-sm text-soft">Soal TWK, TIU, dan TKP dengan pembahasan serta latihan per kategori.</p>
         <div class="tile__foot">
-          <span class="badge badge--amber badge--flat">3.200+ soal</span>
+          <span class="badge badge--amber badge--flat">{{ number_format($questionCount, 0, ",", ".") }} soal terbit</span>
           <a class="btn btn--ghost btn--sm" href="{{ route('question-bank.index') }}">Buka<svg data-icon="arrow-right"></svg></a>
         </div>
       </article>
@@ -222,46 +207,14 @@
 
       <div class="reveal" data-delay="120">
         <div class="card card--pop">
-          <div class="card__head">
-            <div>
-              <div class="card__title">Preview Dashboard</div>
-              <div class="card__sub">Ringkasan progres belajar kamu</div>
-            </div>
-            <span class="badge badge--mint badge--flat">Live</span>
+          <h3 class="card__title">Ruang Belajar Kamu</h3>
+          <p class="text-soft" style="margin:.75rem 0 1.25rem">Dashboard mencatat aktivitas belajar dan hasil pengerjaan dari akunmu.</p>
+          <div class="kv">
+            <div class="kv__row"><span class="kv__key">Materi terbit</span><span class="kv__val">{{ $materialCount }}</span></div>
+            <div class="kv__row"><span class="kv__key">Soal tersedia</span><span class="kv__val">{{ $questionCount }}</span></div>
+            <div class="kv__row"><span class="kv__key">Tryout aktif</span><span class="kv__val">{{ $tryoutCount }}</span></div>
           </div>
-
-          <div class="result-hero" style="grid-template-columns:auto 1fr;gap:1.5rem;justify-items:start">
-            <div class="ring ring--sm ring--mint" data-pct="78">
-              <div class="ring__label">
-                <div class="ring__value">78%</div>
-                <div class="ring__unit">Progres</div>
-              </div>
-            </div>
-            <div class="kv" style="width:100%">
-              <div class="kv__row"><span class="kv__key">Materi selesai</span><span class="kv__val">8 / 10</span></div>
-              <div class="kv__row"><span class="kv__key">Quiz dikerjakan</span><span class="kv__val">15 / 20</span></div>
-              <div class="kv__row"><span class="kv__key">Tryout berturut-turut</span><span class="kv__val">3</span></div>
-            </div>
-          </div>
-
-          <div class="grid" style="--gap:.9rem;margin-top:1.25rem">
-            <div class="progress-wrap">
-              <div class="progress__row"><span>TWK</span><span>82%</span></div>
-              <div class="progress"><div class="progress__bar" data-progress="82"></div></div>
-            </div>
-            <div class="progress-wrap">
-              <div class="progress__row"><span>TIU</span><span>64%</span></div>
-              <div class="progress"><div class="progress__bar" data-progress="64"></div></div>
-            </div>
-            <div class="progress-wrap">
-              <div class="progress__row"><span>TKP</span><span>91%</span></div>
-              <div class="progress progress--amber"><div class="progress__bar" data-progress="91"></div></div>
-            </div>
-          </div>
-
-          <a class="btn btn--primary btn--block" href="{{ route('dashboard') }}" style="margin-top:1.25rem">
-            Buka Dashboard<svg data-icon="arrow-right"></svg>
-          </a>
+          <a class="btn btn--primary btn--block" href="{{ route('dashboard') }}" style="margin-top:1.25rem">Buka Dashboard<svg data-icon="arrow-right"></svg></a>
         </div>
       </div>
     </div>
@@ -272,119 +225,33 @@
 <section class="section" id="materi">
   <div class="container container--wide">
     <div class="section-head section-head--split reveal">
-      <div>
-        <span class="eyebrow">Konten Belajar</span>
-        <h2 style="margin:.75rem 0 0">Materi <span class="underline-squiggle">dan Video</span></h2>
-        <p style="max-width:52ch">Dua format materi agar kamu bisa belajar dengan cara yang paling nyaman.</p>
-      </div>
+      <div><span class="eyebrow">Konten Belajar</span><h2 style="margin:.75rem 0 0">Materi <span class="underline-squiggle">dan Video</span></h2><p>Pelajari konten yang tersedia sesuai bidang dan paket belajarmu.</p></div>
       <a class="btn btn--ghost" href="{{ route('materials.index') }}">Semua Materi<svg data-icon="arrow-right"></svg></a>
     </div>
-
     <div data-tabs>
       <div class="tabs" role="tablist" aria-label="Format materi">
         <button class="tab is-active" data-tab="t-pdf" role="tab" aria-selected="true">Materi PDF</button>
         <button class="tab" data-tab="t-video" role="tab" aria-selected="false">Video Pembelajaran</button>
       </div>
-
-      <div class="tab-panel is-active" id="t-pdf" data-tab-panel>
+      @foreach (['pdf' => $featuredPdfs, 'video' => $featuredVideos] as $format => $materials)
+      <div class="tab-panel{{ $loop->first ? ' is-active' : '' }}" id="t-{{ $format }}" data-tab-panel>
         <div class="grid-auto grid-auto--lg">
+          @forelse ($materials as $material)
           <article class="card card--pad-0 tile reveal">
-            <div class="tile__media">
-              <span class="tile__glyph"><svg data-icon="file"></svg></span>
-              <span class="badge badge--primary tile__badge">Gratis</span>
-            </div>
+            <div class="tile__media"><span class="tile__glyph"><svg data-icon="{{ $format === 'pdf' ? 'file' : 'play-circle' }}"></svg></span><span class="badge badge--primary tile__badge">{{ $material->access_level->value === 'premium' ? 'Premium' : 'Gratis' }}</span></div>
             <div class="tile__body">
-              <span class="tile__cat">TWK · Tes Pengetahuan Umum</span>
-              <h3 class="tile__title">Rangkuman Pengetahuan Umum Indonesia</h3>
-              <p class="tile__desc">Sejarah, Pancasila, konstitusi, dan geopolitik dalam 48 halaman ringkas.</p>
-              <div class="tile__meta"><span><svg data-icon="file"></svg> 48 hal</span><span><svg data-icon="download"></svg> 2.4 MB</span></div>
-              <div class="tile__foot">
-                <div class="mini-ring" data-pct="100"><span>100%</span></div>
-                <a class="btn btn--sm btn--primary" href="{{ route('materials.index') }}">Baca<svg data-icon="arrow-right"></svg></a>
-              </div>
+              <span class="tile__cat">{{ $material->section->code }} · {{ $material->topic->name }}</span>
+              <h3 class="tile__title">{{ $material->title }}</h3>
+              <p class="tile__desc">{{ $material->summary }}</p>
+              <div class="tile__foot"><span class="text-xs text-soft">{{ $format === 'pdf' ? ($material->page_count ? $material->page_count.' halaman' : 'Materi PDF') : ($material->humanDuration() ?? 'Video Pembelajaran') }}</span><a class="btn btn--sm btn--primary" href="{{ route('materials.show', $material) }}">Buka<svg data-icon="arrow-right"></svg></a></div>
             </div>
           </article>
-
-          <article class="card card--pad-0 tile reveal" data-delay="90">
-            <div class="tile__media tile__media--pink">
-              <span class="tile__glyph" style="color:var(--pop-pink)"><svg data-icon="file"></svg></span>
-              <span class="badge badge--premium tile__badge"><svg data-icon="lock"></svg> Premium</span>
-            </div>
-            <div class="tile__body">
-              <span class="tile__cat">TIU · Tes Intelektual Umum</span>
-              <h3 class="tile__title">Modul Matematika Dasar untuk ASN</h3>
-              <p class="tile__desc">Perbandingan, persentase, dan penalaran logis. Disertai latihan soal bertingkat.</p>
-              <div class="tile__meta"><span><svg data-icon="file"></svg> 72 hal</span><span><svg data-icon="clock"></svg> ± 3 jam</span></div>
-              <div class="tile__foot">
-                <div class="mini-ring" data-pct="35"><span>35%</span></div>
-                <a class="btn btn--sm btn--ghost" href="{{ route('packages.index') }}">Buka Paket</a>
-              </div>
-            </div>
-          </article>
-
-          <article class="card card--pad-0 tile reveal" data-delay="180">
-            <div class="tile__media tile__media--mint">
-              <span class="tile__glyph" style="color:var(--success)"><svg data-icon="file"></svg></span>
-              <span class="badge badge--primary tile__badge">Gratis</span>
-            </div>
-            <div class="tile__body">
-              <span class="tile__cat">TKP · Karakteristik &amp; Potensi</span>
-              <h3 class="tile__title">Panduan Integritas & Etika ASN</h3>
-              <p class="tile__desc">Contoh perilaku integritas di tempat kerja beserta simulasi kasus TKP.</p>
-              <div class="tile__meta"><span><svg data-icon="file"></svg> 36 hal</span><span><svg data-icon="download"></svg> 1.1 MB</span></div>
-              <div class="tile__foot">
-                <div class="mini-ring" data-pct="0"><span>0%</span></div>
-                <a class="btn btn--sm btn--ghost" href="{{ route('materials.index') }}">Mulai</a>
-              </div>
-            </div>
-          </article>
+          @empty
+          <div class="card"><h3 class="card__title">{{ $format === 'pdf' ? 'Materi PDF' : 'Video Pembelajaran' }}</h3><p class="text-soft" style="margin-top:.75rem">Lihat katalog materi untuk konten yang tersedia, atau hubungi admin untuk bantuan memilih bahan belajar.</p><a class="btn btn--ghost btn--sm" style="margin-top:1rem" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a></div>
+          @endforelse
         </div>
       </div>
-
-      <div class="tab-panel" id="t-video" data-tab-panel>
-        <div class="grid grid-2" style="--gap:1.75rem">
-          <div class="card card--pad-0 tile reveal">
-            <div class="tile__media" style="aspect-ratio:16/9;padding:0">
-              <div class="video-frame" style="border:none;border-radius:0;box-shadow:none">
-                <span class="video-frame__label">Video · 24 menit</span>
-                <button class="video-frame__play" type="button" aria-label="Putar video"><svg data-icon="play"></svg></button>
-                <div class="video-frame__ctrl">
-                  <svg data-icon="play"></svg>
-                  <div class="video-frame__track"><div class="video-frame__played"></div></div>
-                  <svg data-icon="volume"></svg>
-                  <svg data-icon="maximize"></svg>
-                </div>
-              </div>
-            </div>
-            <div class="tile__body">
-              <span class="tile__cat">TIU · Penalaran Analitis</span>
-              <h3 class="tile__title">Teknik Membaca Tabel & Grafik untuk Soal TIU</h3>
-              <p class="tile__meta"><span><svg data-icon="users"></svg> 4.210 peserta</span><span><svg data-icon="star"></svg> 4.8</span></p>
-            </div>
-          </div>
-
-          <div class="grid grid-auto--sm" style="--gap:1rem;align-content:start">
-            <div class="card card--tight flex items-center gap-3">
-              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px"><svg data-icon="play-circle"></svg></span>
-              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Logika Silogisme</strong><span class="text-xs text-soft">18 menit · TIU</span></div>
-            </div>
-            <div class="card card--tight flex items-center gap-3">
-              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px;background:var(--pop-pink-050);color:var(--pop-pink)"><svg data-icon="play-circle"></svg></span>
-              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Pancasila dalam Kehidupan ASN</strong><span class="text-xs text-soft">22 menit · TWK</span></div>
-            </div>
-            <div class="card card--tight flex items-center gap-3">
-              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px;background:var(--pop-mint-050);color:var(--success)"><svg data-icon="play-circle"></svg></span>
-              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Mengenal TKP: 5 Skenario</strong><span class="text-xs text-soft">15 menit · TKP</span></div>
-            </div>
-            <div class="card card--tight flex items-center gap-3">
-              <span class="tile__glyph" style="width:44px;height:44px;border-radius:14px;flex:0 0 44px;background:var(--pop-amber-050);color:#B4830C"><svg data-icon="play-circle"></svg></span>
-              <div><strong style="display:block;font-family:var(--font-display);color:var(--ink)">Tips Manajemen Waktu CAT</strong><span class="text-xs text-soft">12 menit · Strategi</span></div>
-            </div>
-            <a class="btn btn--ghost btn--block" href="{{ route('materials.index') }}">Lihat semua video<svg data-icon="arrow-right"></svg></a>
-          </div>
-        </div>
-      </div>
-
+      @endforeach
     </div>
   </div>
 </section>
@@ -430,39 +297,18 @@
     <div class="split split--reverse">
       <div class="reveal">
         <div class="card card--pop">
-          <div class="flex items-center justify-between" style="margin-bottom:1rem">
-            <span class="badge badge--ink"><svg data-icon="timer"></svg> Tryout SKD #4</span>
-            <span class="timer" id="demoTimer"><svg data-icon="clock"></svg>01:23:45</span>
+          <span class="badge badge--ink"><svg data-icon="timer"></svg> Tryout CAT</span>
+          <h3 class="card__title" style="margin-top:1.25rem">{{ $referenceTryout?->title ?? 'Persiapkan Diri untuk Seleksi CPNS' }}</h3>
+          @if ($referenceTryout)
+          <div class="kv" style="margin-top:1rem">
+            <div class="kv__row"><span class="kv__key">Jumlah soal</span><span class="kv__val">{{ $referenceTryout->question_count }}</span></div>
+            <div class="kv__row"><span class="kv__key">Durasi</span><span class="kv__val">{{ $referenceTryout->duration_minutes }} menit</span></div>
+            <div class="kv__row"><span class="kv__key">Poin maksimal</span><span class="kv__val">{{ $referenceTryout->maximumScore() }}</span></div>
           </div>
-
-          <div class="qhead" style="margin-bottom:.75rem">
-            <span class="qnum">12</span>
-            <span class="badge badge--primary badge--flat">TWK</span>
-          </div>
-          <p class="qstem" style="font-size:var(--fs-base)">12. Salah satu konsep berikut yang paling tepat menggambarkan Bonus Point dalam ujian CAT adalah ...</p>
-
-          <div class="grid" style="--gap:.55rem;margin-top:1rem">
-            <div class="opt is-selected">
-              <span class="opt__key">A</span>
-              <span class="opt__text">Menguatkan ruang kebebasan berpendapat</span>
-            </div>
-            <div class="opt"><span class="opt__key">B</span><span class="opt__text">Membatasi perbedaan suku dan agama</span></div>
-            <div class="opt"><span class="opt__key">C</span><span class="opt__text">Menegakkan budaya yang dominan</span></div>
-            <div class="opt"><span class="opt__key">D</span><span class="opt__text">Mengganti identitas nasional</span></div>
-          </div>
-
-          <div class="flex items-center justify-between" style="margin-top:1.25rem">
-            <div class="palette" style="flex:1;max-width:220px;grid-template-columns:repeat(6,1fr)">
-              <span class="pal is-answered">1</span><span class="pal is-answered">2</span><span class="pal is-answered">3</span>
-              <span class="pal is-answered">4</span><span class="pal is-answered">5</span><span class="pal is-answered">6</span>
-              <span class="pal">7</span><span class="pal">8</span><span class="pal">9</span><span class="pal">10</span>
-              <span class="pal is-answered">11</span><span class="pal is-answered is-flagged">12</span><span class="pal is-answered">13</span>
-              <span class="pal">14</span><span class="pal">15</span><span class="pal">16</span>
-              <span class="pal is-answered">17</span><span class="pal is-answered">18</span><span class="pal is-answered">19</span>
-              <span class="pal">20</span>
-            </div>
-            <a class="btn btn--primary btn--sm" href="{{ route('tryouts.index') }}">Mulai<svg data-icon="arrow-right"></svg></a>
-          </div>
+          @else
+          <p class="text-soft" style="margin-top:1rem">Periksa katalog tryout untuk memilih sesi belajar sesuai targetmu.</p>
+          @endif
+          <a class="btn btn--primary btn--block" style="margin-top:1.25rem" href="{{ route('tryouts.index') }}">Lihat Tryout<svg data-icon="arrow-right"></svg></a>
         </div>
       </div>
 
@@ -532,11 +378,16 @@
           @if ($package->leaderboard_access === \App\Enums\LeaderboardAccess::National)<li><span class="price__check"><svg data-icon="check"></svg></span> Progres belajar &amp; statistik nilai</li>@endif
         </ul>
         <div class="price__foot">
+          @if ($package->hasAvailableContent())
           <a class="btn btn--primary btn--block" href="{{ route('checkout', ['package' => $package->id]) }}">Pilih {{ $package->name }}<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
+          @else
+          <p class="text-sm text-soft" style="margin-bottom:.75rem">Hubungi admin untuk ketersediaan konten paket ini.</p>
+          <a class="btn btn--ghost btn--block" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a>
+          @endif
         </div>
       </article>
       @empty
-      <div class="card price"><h3 class="card__title">Paket belajar segera hadir</h3><p class="text-sm text-soft" style="margin-top:.6rem">Sambil menunggu, kamu bisa belajar lewat materi dan latihan gratis.</p></div>
+      <div class="card price"><h3 class="card__title">Konsultasi Paket Belajar</h3><p class="text-sm text-soft" style="margin-top:.6rem">Hubungi admin untuk menyesuaikan paket dengan kebutuhan belajarmu.</p><a class="btn btn--primary" style="margin-top:1rem" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a></div>
       @endforelse
     </div>
 
@@ -544,67 +395,12 @@
   </div>
 </section>
 
-{{-- ===================== LEADERBOARD PREVIEW ===================== --}}
+{{-- ===================== LEADERBOARD ===================== --}}
 <section class="section section--alt">
   <div class="container container--wide">
-    <div class="grid grid-2" style="--gap:2.5rem;align-items:center">
-      <div class="reveal">
-        <span class="eyebrow">Leaderboard</span>
-        <h2 style="margin:.75rem 0 1rem">Tahu Posisimu <span class="underline-squiggle">di Antara Peserta Lain</span></h2>
-        <p class="lead">
-          Papan peringkat memakai skor poin tertinggi dari seluruh tryout yang selesai. Lihat posisi di provinsimu atau secara nasional sesuai paketmu.
-        </p>
-        <div class="btn-row" style="margin-top:1.75rem">
-          <a class="btn btn--primary" href="{{ route('leaderboard.index') }}">Lihat Leaderboard<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
-        </div>
-      </div>
-
-      <div class="reveal" data-delay="120">
-        <div class="card">
-          <div class="card__head">
-            <div><div class="card__title">Top 3 Tryout SKD #4</div><div class="card__sub">Diperbarui 3 Oktober 2026</div></div>
-            <span class="badge badge--amber badge--flat"><svg data-icon="trophy"></svg> Mingguan</span>
-          </div>
-          <div>
-            <div class="lb-row"><span class="lb-rank lb-rank--1">1</span>
-              <div><div class="lb-name">Dewi Anggraini</div><div class="lb-meta">12 tryout · rata-rata 468</div></div>
-              <span class="lb-score">481</span></div>
-            <div class="lb-row"><span class="lb-rank lb-rank--2">2</span>
-              <div><div class="lb-name">Ahmad Fauzi</div><div class="lb-meta">9 tryout · rata-rata 455</div></div>
-              <span class="lb-score">472</span></div>
-            <div class="lb-row lb-row--me"><span class="lb-rank">18</span>
-              <div><div class="lb-name">Rani Kusuma <span class="badge badge--primary badge--flat">Kamu</span></div><div class="lb-meta">4 tryout · rata-rata 428</div></div>
-              <span class="lb-score">452</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-{{-- ===================== TESTIMONI ===================== --}}
-<section class="section">
-  <div class="container container--wide">
-    <div class="section-head section-head--center reveal">
-      <span class="eyebrow" style="justify-content:center">Kata Peserta</span>
-      <h2 style="margin:.75rem 0 0">Cerita dari <span class="underline-squiggle">Peserta</span></h2>
-    </div>
-    <div class="grid grid-3">
-      <blockquote class="card card--pop reveal" style="border-left:6px solid var(--primary)">
-        {{-- <svg data-icon="quote" style="width:26px;height:26px;color:var(--primary-300)"></svg> --}}
-        <p class="text-sm" style="margin:.75rem 0 1rem">Timer-nya bantu banget. Aku biasa panik di 10 menit terakhir, sekarang bisa manage waktu per soal.</p>
-        <footer class="userchip"><span class="avatar avatar--sm avatar--amber">S</span><div><strong>Sarah Nur</strong><span>Peserta Premium</span></div></footer>
-      </blockquote>
-      <blockquote class="card card--pop reveal" data-delay="90" style="border-left:6px solid var(--pop-pink)">
-        {{-- <svg data-icon="quote" style="width:26px;height:26px;color:var(--pop-pink)"></svg> --}}
-        <p class="text-sm" style="margin:.75rem 0 1rem">Grafik perkembangan nilai bikin semangat. Keliatan jelas area mana yang masih perlu dibenahi.</p>
-        <footer class="userchip"><span class="avatar avatar--sm avatar--pink">B</span><div><strong>Bima Saputra</strong><span>Peserta Basic</span></div></footer>
-      </blockquote>
-      <blockquote class="card card--pop reveal" data-delay="180" style="border-left:6px solid var(--pop-mint)">
-        {{-- <svg data-icon="quote" style="width:26px;height:26px;color:var(--pop-mint)"></svg> --}}
-        <p class="text-sm" style="margin:.75rem 0 1rem">Pembahasannya jelas dan tidak berbelit. Langsung ke jawaban benar beserta alasannya.</p>
-        <footer class="userchip"><span class="avatar avatar--sm avatar--mint">N</span><div><strong>Nadia Putri</strong><span>Peserta Ultimate</span></div></footer>
-      </blockquote>
+    <div class="split">
+      <div class="reveal"><span class="eyebrow">Leaderboard</span><h2 style="margin:.75rem 0 1rem">Pantau Peringkat <span class="underline-squiggle">dan Perkembanganmu</span></h2><p class="lead">Bandingkan poin tryout sesuai acuan tryout aktif. Akses lokal mengikuti provinsimu; paket nasional juga membuka peringkat seluruh Indonesia.</p><a class="btn btn--primary" style="margin-top:1.5rem" href="{{ route('leaderboard.index') }}">Lihat Leaderboard<svg data-icon="arrow-right"></svg></a></div>
+      <div class="card reveal"><h3 class="card__title">Hasil belajar yang bisa ditinjau kembali</h3><p class="text-soft" style="margin-top:.75rem">Buka riwayat untuk meninjau poin per bidang, jawaban, dan hasil sesi. Statistik membantu menentukan materi yang perlu dipelajari berikutnya.</p><a class="btn btn--ghost" style="margin-top:1.25rem" href="{{ route('statistics.index') }}">Buka Statistik<svg data-icon="chart"></svg></a></div>
     </div>
   </div>
 </section>
@@ -632,7 +428,7 @@
       </div>
       <div class="acc-item reveal" data-delay="180">
         <button class="acc-trigger" aria-expanded="false" aria-controls="f4">Apakah saya bisa melakukan refund?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
-        <div class="acc-panel" id="f4">Kebijakan refund mengikuti aturan paket belajar yang berlaku. <span class="badge badge--amber badge--flat">TBD — perlu konfirmasi client</span></div>
+        <div class="acc-panel" id="f4">Untuk kendala transaksi atau permintaan pengembalian dana, <a class="text-primary fw-700" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a> dengan nomor pesanan dan rincian kendala agar transaksi dapat diperiksa.</div>
       </div>
       <div class="acc-item reveal" data-delay="240">
         <button class="acc-trigger" aria-expanded="false" aria-controls="f5">Apakah bisa belajar lewat HP?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
@@ -658,20 +454,5 @@
   </div>
 </section>
 
-<script>
-  /* Demo countdown on the landing page (purely decorative) */
-  (function () {
-    var el = document.getElementById('demoTimer');
-    if (!el) return;
-    var left = 5025;
-    setInterval(function () {
-      left = Math.max(0, left - 1);
-      var h = String(Math.floor(left / 3600)).padStart(2, '0');
-      var m = String(Math.floor((left % 3600) / 60)).padStart(2, '0');
-      var s = String(left % 60).padStart(2, '0');
-      el.innerHTML = '<svg data-icon="clock"></svg>' + h + ':' + m + ':' + s;
-      window.LIcons && window.LIcons.hydrate(el);
-    }, 1000);
-  })();
-</script>
+
 @endsection

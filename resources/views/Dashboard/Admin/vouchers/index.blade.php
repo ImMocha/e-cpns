@@ -1,224 +1,61 @@
 @extends('layouts.admin.main')
-
 @section('title', 'Kelola Voucher — Ganesha Nusa')
-
 @section('content')
-    <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="{{ route('admin.dashboard') }}">Admin Dashboard</a>
-      <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
-      <span class="crumbs__current">Voucher</span>
-    </nav>
-
+    @include('components.flash')
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a><span class="crumbs__sep">›</span><span class="crumbs__current">Voucher</span></nav>
     <header class="page-head page-head__row">
-      <div>
-        <span class="eyebrow">Bisnis</span>
-        <h1 style="margin-top:.5rem">Voucher &amp; Diskon</h1>
-        <p>Buat kode voucher, atur nilai diskon, dan pantau pemakaiannya.</p>
-      </div>
-      <button class="btn btn--primary" type="button" data-modal-open="voucherModal"><svg data-icon="plus"></svg> Buat Voucher</button>
+        <div><span class="eyebrow">Bisnis</span><h1>Voucher &amp; Diskon</h1><p>Buat kode voucher, atur diskon, dan pantau pemakaiannya.</p></div>
+        <a class="btn btn--primary" href="{{ route('admin.vouchers.create') }}"><svg data-icon="plus"></svg> Buat Voucher</a>
     </header>
-
-    <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
-      <article class="stat">
-        <span class="stat__icon ico--amber"><svg data-icon="tag"></svg></span>
-        <div><div class="stat__label">Voucher Aktif</div><div class="stat__value" data-count-to="6">0</div></div>
-      </article>
-      <article class="stat">
-        <span class="stat__icon"><svg data-icon="percent"></svg></span>
-        <div><div class="stat__label">Total Dipakai</div><div class="stat__value" data-count-to="1840">0</div></div>
-      </article>
-      <article class="stat">
-        <span class="stat__icon ico--mint"><svg data-icon="credit-card"></svg></span>
-        <div><div class="stat__label">Total Diskon Diberikan</div><div class="stat__value" data-count-to="24850000" data-count-prefix="Rp">0</div></div>
-      </article>
-      <article class="stat">
-        <span class="stat__icon ico--pink"><svg data-icon="alert"></svg></span>
-        <div><div class="stat__label">Kedaluwarsa</div><div class="stat__value" data-count-to="2">0</div><div class="stat__delta text-soft">Bulan ini</div></div>
-      </article>
+    <section class="grid grid-4 mb-7!" style="--gap:1.15rem">
+        <article class="stat"><div><div class="stat__label">Total Voucher</div><div class="stat__value">{{ number_format($stats['total'], 0, ',', '.') }}</div></div></article>
+        <article class="stat"><div><div class="stat__label">Transaksi Lunas</div><div class="stat__value">{{ number_format($stats['paid'], 0, ',', '.') }}</div></div></article>
+        <article class="stat"><div><div class="stat__label">Diskon Transaksi Lunas</div><div class="stat__value">Rp{{ number_format($stats['discount'], 0, ',', '.') }}</div></div></article>
+        <article class="stat"><div><div class="stat__label">Menunggu Pembayaran</div><div class="stat__value">{{ number_format($stats['pending'], 0, ',', '.') }}</div></div></article>
     </section>
-
-    <div class="flex items-center justify-between flex-wrap" style="gap:1rem;margin-bottom:1.25rem">
-      <div class="pills">
-        <button class="pill is-active" type="button">Semua</button>
-        <button class="pill" type="button">Aktif</button>
-        <button class="pill" type="button">Nonaktif</button>
-        <button class="pill" type="button">Kedaluwarsa</button>
-      </div>
-      <div class="input-group" style="min-width:230px">
-        <span class="input-group__icon"><svg data-icon="search"></svg></span>
-        <input class="input" type="search" placeholder="Cari kode voucher..." aria-label="Cari voucher" data-table-filter="tabelVoucher">
-      </div>
-    </div>
-
-    <section class="card card--pad-0">
-      <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
-        <table class="table" id="tabelVoucher">
-          <thead>
-            <tr>
-              <th>Kode</th>
-              <th>Tipe Diskon</th>
-              <th class="num">Nilai</th>
-              <th>Masa Berlaku</th>
-              <th>Kuota</th>
-              <th class="is-sortable num" aria-sort="descending">Dipakai<span class="sort-ind">↕</span></th>
-              <th>Status</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="badge badge--ink">GAIN20</span></td>
-              <td>Nominal</td>
-              <td class="num">Rp20.000</td>
-              <td>1 Sep - 31 Okt 2026</td>
-              <td>500</td>
-              <td class="num" data-sort="312">312</td>
-              <td><span class="badge badge--mint badge--flat">Aktif</span></td>
-              <td>
-                <div class="flex" style="--gap:.35rem">
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="voucherModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Voucher dinonaktifkan.','warn')" aria-label="Nonaktifkan"><svg data-icon="x-circle"></svg></button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="badge badge--ink">CERDAS15</span></td>
-              <td>Nominal</td>
-              <td class="num">Rp15.000</td>
-              <td>15 Sep - 15 Nov 2026</td>
-              <td>300</td>
-              <td class="num" data-sort="188">188</td>
-              <td><span class="badge badge--mint badge--flat">Aktif</span></td>
-              <td>
-                <div class="flex" style="--gap:.35rem">
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="voucherModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Voucher dinonaktifkan.','warn')" aria-label="Nonaktifkan"><svg data-icon="x-circle"></svg></button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="badge badge--ink">NAVIGASI10</span></td>
-              <td>Persentase</td>
-              <td class="num">10%</td>
-              <td>1 Sep - 30 Sep 2026</td>
-              <td>200</td>
-              <td class="num" data-sort="200">200</td>
-              <td><span class="badge badge--flat">Kedaluwarsa</span></td>
-              <td>
-                <div class="flex" style="--gap:.35rem">
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="voucherModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="badge badge--ink">EARLYBIRD25</span></td>
-              <td>Persentase</td>
-              <td class="num">25%</td>
-              <td>1 Sep - 31 Des 2026</td>
-              <td>150</td>
-              <td class="num" data-sort="96">96</td>
-              <td><span class="badge badge--mint badge--flat">Aktif</span></td>
-              <td>
-                <div class="flex" style="--gap:.35rem">
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="voucherModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" onclick="L.toast('Voucher dinonaktifkan.','warn')" aria-label="Nonaktifkan"><svg data-icon="x-circle"></svg></button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td><span class="badge badge--ink">HEMAT30K</span></td>
-              <td>Nominal</td>
-              <td class="num">Rp30.000</td>
-              <td>Tidak dibatasi</td>
-              <td>50</td>
-              <td class="num" data-sort="50">50</td>
-              <td><span class="badge badge--amber badge--flat">Kuota habis</span></td>
-              <td>
-                <div class="flex" style="--gap:.35rem">
-                  <button class="btn btn--ghost btn--square btn--sm" type="button" data-modal-open="voucherModal" aria-label="Ubah"><svg data-icon="pencil"></svg></button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="empty" data-table-empty hidden style="margin:1.5rem">
-        <span class="empty__icon"><svg data-icon="search"></svg></span>
-        <strong style="color:var(--ink);font-family:var(--font-display)">Voucher tidak ditemukan</strong>
-      </div>
-
-      <div style="padding:1.25rem 1.5rem;border-top:2px solid var(--border)">
-        <div class="alert alert--warn">
-          <span class="alert__icon"><svg data-icon="alert"></svg></span>
-          <div>Detail seperti tanggal mulai, tanggal berakhir, minimum transaksi, dan kuota voucher <strong>TBD</strong>. Invoice hanya menyebut kode, tipe, nilai, dan status.</div>
-        </div>
-      </div>
-    </section>
-@endsection
-
-@section('modals')
-{{-- ============ MODAL VOUCHER ============ --}}
-<div class="modal" id="voucherModal" role="dialog" aria-modal="true" aria-labelledby="vouTitle" aria-hidden="true">
-  <div class="modal__backdrop"></div>
-  <div class="modal__panel">
-    <button class="modal__close" type="button" data-modal-close aria-label="Tutup"><svg data-icon="close"></svg></button>
-    <h2 class="modal__title" id="vouTitle">Buat Voucher</h2>
-
-    <form class="stack" style="--stack:1.15rem;margin-top:1.25rem" data-demo-submit="Voucher disimpan.">
-      <div class="field">
-        <label class="label" for="kode">Kode Voucher</label>
-        <input class="input" type="text" id="kode" placeholder="Contoh: GAIN20" required style="text-transform:uppercase">
-        <span class="field__hint">Gunakan huruf kapital dan angka tanpa spasi.</span>
-      </div>
-
-      <div class="form-grid">
-        <div class="field">
-          <label class="label" for="tipe">Tipe Diskon</label>
-          <select class="select" id="tipe">
-            <option selected>Nominal</option>
-            <option>Persentase</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="label" for="nilai">Nilai Diskon</label>
-          <input class="input" type="number" id="nilai" placeholder="20000" min="0">
-        </div>
-        <div class="field">
-          <label class="label" for="mulai">Tanggal Mulai</label>
-          <input class="input" type="date" id="mulai" value="2026-10-03">
-        </div>
-        <div class="field">
-          <label class="label" for="akhir">Tanggal Berakhir</label>
-          <input class="input" type="date" id="akhir" value="2026-12-31">
-        </div>
-        <div class="field">
-          <label class="label" for="kuota">Kuota</label>
-          <input class="input" type="number" id="kuota" placeholder="500" min="1">
-        </div>
-        <div class="field">
-          <label class="label" for="minTrans">Minimum Transaksi</label>
-          <input class="input" type="number" id="minTrans" placeholder="99000" min="0">
-        </div>
-      </div>
-
-      <div class="field">
-        <label class="label" for="paketVou">Berlaku untuk Paket</label>
-        <select class="select" id="paketVou">
-          <option>Semua paket</option>
-          <option>Basic</option>
-          <option>Premium</option>
-          <option>Ultimate</option>
+    <form method="GET" action="{{ route('admin.vouchers.index') }}" class="flex flex-wrap items-center gap-3 mb-5!">
+        <input class="input max-w-sm" type="search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="40" placeholder="Cari kode voucher..." aria-label="Cari voucher">
+        <select class="select max-w-xs" name="state" aria-label="Filter status">
+            <option value="">Semua status</option>
+            @foreach (['active' => 'Dalam masa aktif', 'inactive' => 'Nonaktif', 'expired' => 'Kedaluwarsa', 'scheduled' => 'Terjadwal'] as $value => $label)
+                <option value="{{ $value }}" @selected(($filters['state'] ?? '') === $value)>{{ $label }}</option>
+            @endforeach
         </select>
-      </div>
-
-      <label class="switch"><input type="checkbox" checked><span>Aktifkan voucher setelah disimpan</span></label>
-
-      <div class="modal__foot" style="margin-top:0">
-        <button class="btn btn--ghost" type="button" data-modal-close>Batal</button>
-        <button class="btn btn--primary" type="submit">Simpan Voucher</button>
-      </div>
+        <button class="btn btn--ghost" type="submit">Cari</button>
+        <a class="btn btn--ghost" href="{{ route('admin.vouchers.index') }}">Reset</a>
     </form>
-  </div>
-</div>
+    <section class="card card--pad-0">
+        <div class="table-wrap">
+            <table class="table" id="tabelVoucher">
+                <thead><tr><th>Kode / Paket</th><th>Diskon</th><th>Masa Berlaku</th><th>Minimum Transaksi</th><th>Kuota Terpakai</th><th>Lunas</th><th>Status</th><th>Aksi</th></tr></thead>
+                <tbody>
+                    @forelse ($vouchers as $voucher)
+                        <tr>
+                            <td><strong>{{ $voucher->code }}</strong><div class="text-sm text-soft">{{ $voucher->package?->name ?? 'Semua paket' }}</div></td>
+                            <td>{{ $voucher->formattedValue() }}<div class="text-sm text-soft">{{ $voucher->type === 'fixed' ? 'Nominal' : 'Persentase' }}</div></td>
+                            <td>{{ $voucher->starts_on?->format('d/m/Y') ?? 'Tanpa batas awal' }}<br>{{ $voucher->ends_on?->format('d/m/Y') ?? 'Tanpa batas akhir' }}</td>
+                            <td>Rp{{ number_format($voucher->minimum_amount, 0, ',', '.') }}</td>
+                            <td>{{ $voucher->reserved_count }} / {{ $voucher->usage_limit ?? 'Tanpa batas' }}</td>
+                            <td>{{ $voucher->paid_count }}</td>
+                            <td><span class="badge badge--flat">{{ $voucher->statusLabel() }}</span></td>
+                            <td><div class="flex flex-wrap items-center gap-2">
+                                <a class="btn btn--ghost btn--sm" href="{{ route('admin.vouchers.edit', $voucher) }}">Ubah</a>
+                                <form method="POST" action="{{ route('admin.vouchers.status', $voucher) }}">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="is_active" value="{{ $voucher->is_active ? '0' : '1' }}">
+                                    <button class="btn btn--ghost btn--sm" type="submit">{{ $voucher->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+                                </form>
+                            </div></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="8"><div class="empty"><strong>Voucher tidak ditemukan</strong><p>Buat voucher baru atau ubah filter pencarian.</p></div></td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="p-5">
+            <p class="text-sm text-soft">Kuota terpakai mencakup pesanan menunggu pembayaran dan pemakaian selesai, termasuk pengembalian dana. Kuota pesanan gagal atau kedaluwarsa dilepas setelah status pembayaran diperiksa. Batas tanggal berlaku sampai akhir hari dalam zona waktu aplikasi.</p>
+            <x-pager :paginator="$vouchers" />
+        </div>
+    </section>
 @endsection

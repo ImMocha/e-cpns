@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\TransactionStatus;
 use App\Http\Requests\CheckoutRequest;
 use App\MidtransGateway;
 use App\Models\Package;
 use App\PackagePayment;
+use App\VoucherDiscount;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class CheckoutController extends Controller
 {
-    public function index(Request $request, MidtransGateway $gateway): View|RedirectResponse
+    public function index(Request $request, MidtransGateway $gateway, VoucherDiscount $discounts): View|RedirectResponse
     {
         abort_if($request->user()->isAdmin(), 403);
         if (! $request->filled('package')) {
@@ -27,9 +30,22 @@ class CheckoutController extends Controller
             'materials' => fn ($query) => $query->visibleToMembers(),
             'exams' => fn ($query) => $query->published(),
         ])->findOrFail($id);
+        $pending = $request->user()->transactions()->whereBelongsTo($package)->where('status', TransactionStatus::Pending)->first();
+        if ($pending !== null) {
+            return redirect()->route('transactions.show', $pending);
+        }
+
+        $request->validate(['voucher_code' => ['nullable', 'string', 'max:40']]);
+        $voucherError = null;
+        try {
+            $quote = $discounts->quote($package, $request->query('voucher_code'));
+        } catch (ValidationException $exception) {
+            $voucherError = $exception->errors()['voucher_code'][0];
+            $quote = $discounts->quote($package, null);
+        }
 
         return view('Dashboard.User.checkout.index', [
-            'package' => $package, 'paymentAvailable' => $package->price === 0 || $gateway->configured(),
+            'package' => $package, 'quote' => $quote, 'voucherError' => $voucherError, 'paymentAvailable' => $quote['amount'] === 0 || $gateway->configured(),
             'contentAvailable' => $package->hasAvailableContent(),
             'alreadyOwned' => $request->user()->userPackages()->active()->whereBelongsTo($package)->exists(),
         ]);
@@ -37,7 +53,7 @@ class CheckoutController extends Controller
 
     public function store(CheckoutRequest $request, PackagePayment $payments): RedirectResponse
     {
-        $transaction = $payments->checkout($request->user(), Package::query()->findOrFail($request->validated('package_id')));
+        $transaction = $payments->checkout($request->user(), Package::query()->findOrFail($request->validated('package_id')), $request->validated('voucher_code'));
         try {
             $payments->prepare($transaction);
         } catch (RuntimeException $exception) {

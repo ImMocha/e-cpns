@@ -157,8 +157,6 @@
       @php($videoUrl = $material->video_url)
 
       @if ($videoUrl)
-        {{-- Sumber video masih TBD (§44 TBD-11), jadi dipakai <video> apa adanya.
-               Kalau nanti pindah ke YouTube atau Vimeo, hanya blok ini yang berubah. --}}
         <div style="max-width:900px">
           <div class="video-frame" style="border-radius:var(--r-md);overflow:hidden">
             <video controls preload="metadata" style="display:block;width:100%;aspect-ratio:16/9;background:#000"
@@ -168,7 +166,7 @@
             </video>
           </div>
           <p class="text-xs text-soft" style="margin-top:.6rem">
-            Durasi catatan: {{ $material->humanDuration() ?? 'tidak diisi' }}. Sumber video masih menunggu keputusan client.
+            {{ $material->humanDuration() ? 'Durasi: '.$material->humanDuration().'.' : 'Gunakan kontrol pemutar untuk menonton video.' }}
           </p>
         </div>
       @else
@@ -188,9 +186,7 @@
           <span class="alert__icon"><svg data-icon="info"></svg></span>
           <div>
             <strong>Dokumen hanya untuk dibaca</strong>
-            Situs ini tidak menyediakan tombol unduh, dan pintasan Ctrl+S / Ctrl+P
-            dinonaktifkan. Apakah materi boleh diunduh tetap menunggu keputusan
-            client (§44 TBD-12).
+            Baca materi melalui pembaca PDF di halaman ini. Tombol unduh dan cetak tidak disediakan.
           </div>
         </div>
       @endif

@@ -93,7 +93,7 @@
 
         <label class="check{{ $errors->has('terms') ? ' is-invalid' : '' }}">
           <input type="checkbox" id="terms" name="terms" value="1" required @checked(old('terms'))>
-          <span>Saya setuju dengan <a class="fw-700 text-primary" href="#">Syarat &amp; Ketentuan</a> serta <a class="fw-700 text-primary" href="#">Kebijakan Privasi</a> Ganesha Nusa.</span>
+          <span>Saya setuju dengan <a class="fw-700 text-primary" href="{{ route('terms') }}" data-legal-open="terms" aria-haspopup="dialog" aria-controls="legal-terms">Syarat &amp; Ketentuan</a> serta <a class="fw-700 text-primary" href="{{ route('privacy') }}" data-legal-open="privacy" aria-haspopup="dialog" aria-controls="legal-privacy">Kebijakan Privasi</a> Ganesha Nusa.</span>
         </label>
         @error('terms')<span class="field__error" style="display:flex"><svg data-icon="alert"></svg><span>{{ $message }}</span></span>@enderror
 
@@ -143,25 +143,17 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3" style="margin-top:1.5rem;padding-top:1.25rem;border-top:2px dashed var(--border)">
-        <div class="socials" style="flex:0 0 auto">
-          <span class="avatar avatar--sm avatar--pink">S</span>
-          <span class="avatar avatar--sm avatar--mint" style="margin-left:-14px">B</span>
-          <span class="avatar avatar--sm avatar--violet" style="margin-left:-14px">N</span>
-          <span class="avatar avatar--sm avatar--ink" style="margin-left:-14px">+12k</span>
-        </div>
-        <p class="text-xs text-soft">Peserta sudah belajar bersama Ganesha Nusa.</p>
-      </div>
+      <p class="text-sm text-soft" style="margin-top:1.5rem">Butuh bantuan pendaftaran? <a class="text-primary fw-700" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a>.</p>
     </div>
   </aside>
 </main>
 
 <footer class="footer auth-footer" style="padding-block:1.5rem">
   <div class="container container--wide flex items-center justify-between flex-wrap" style="gap:1rem">
-    <span class="text-sm">© <span data-year>2026</span> Ganesha Nusa · Prototipe demonstrasi.</span>
+    <span class="text-sm">© <span data-year>2026</span> Ganesha Nusa. Hak cipta dilindungi.</span>
     <div class="footer__links">
-      <a href="#">Syarat &amp; Ketentuan</a>
-      <a href="#">Kebijakan Privasi</a>
+      <a href="{{ route('terms') }}" data-legal-open="terms" aria-haspopup="dialog" aria-controls="legal-terms">Syarat &amp; Ketentuan</a>
+      <a href="{{ route('privacy') }}" data-legal-open="privacy" aria-haspopup="dialog" aria-controls="legal-privacy">Kebijakan Privasi</a>
       <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
     </div>
   </div>

@@ -180,9 +180,37 @@ class MaterialController extends Controller
             ->with('success', "Materi {$material->title} dihapus.");
     }
 
+    /** Terbitkan draft dalam seluruh katalog, satu bidang, atau satu topik. */
+    public function bulkPublish(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'scope' => ['required', Rule::in(['all', 'section', 'topic'])],
+            'section_id' => ['required_if:scope,section', 'nullable', 'integer', Rule::exists(Section::class, 'id')->whereNull('deleted_at')],
+            'topic_id' => ['required_if:scope,topic', 'nullable', 'integer', Rule::exists(Topic::class, 'id')->whereNull('deleted_at')],
+        ]);
+
+        $query = Material::query()->where('status', MaterialStatus::Draft)
+            ->when($validated['scope'] === 'section', fn (Builder $query) => $query->where('section_id', $validated['section_id']))
+            ->when($validated['scope'] === 'topic', fn (Builder $query) => $query->where('topic_id', $validated['topic_id']));
+        $eligible = (clone $query)->where(fn (Builder $query) => $query
+            ->where(fn (Builder $query) => $query->where('type', MaterialType::Pdf)->whereNotNull('file_path')->where('file_path', '!=', ''))
+            ->orWhere(fn (Builder $query) => $query->where('type', MaterialType::Video)->whereNotNull('video_url')->where('video_url', '!=', '')));
+        $skipped = (clone $query)->count() - (clone $eligible)->count();
+        $published = $eligible->update([
+            'status' => MaterialStatus::Published,
+            'published_at' => now(),
+            'updated_by' => $request->user()->id,
+        ]);
+
+        return back()->with('success', "{$published} materi berhasil diterbitkan. {$skipped} draft tanpa sumber dilewati. Materi pada bidang atau topik nonaktif tetap tersembunyi dari peserta.");
+    }
+
     /** Terbitkan atau tahan kembali tanpa membuka form edit. */
     public function toggleStatus(Request $request, Material $material): RedirectResponse
     {
+        $redirect = $request->boolean('member_listing')
+            ? redirect()->route('materials.index', ['show_drafts' => 1, 'section_id' => $material->section_id, 'topic_id' => $material->topic_id])
+            : redirect()->route('admin.materials.index', $request->boolean('workspace') ? ['section_id' => $material->section_id, 'topic_id' => $material->topic_id] : []);
         if ($material->isPublished()) {
             $material->update([
                 'status' => MaterialStatus::Draft,
@@ -190,14 +218,12 @@ class MaterialController extends Controller
                 'updated_by' => $request->user()->id,
             ]);
 
-            return redirect()
-                ->route('admin.materials.index', $request->boolean('workspace') ? ['section_id' => $material->section_id, 'topic_id' => $material->topic_id] : [])
+            return $redirect
                 ->with('success', "Materi {$material->title} dikembalikan ke draft.");
         }
 
         if (! $material->hasContentSource()) {
-            return redirect()
-                ->route('admin.materials.index', $request->boolean('workspace') ? ['section_id' => $material->section_id, 'topic_id' => $material->topic_id] : [])
+            return $redirect
                 ->with('error', "Materi {$material->title} belum punya berkas PDF atau URL video, jadi belum bisa diterbitkan.");
         }
 
@@ -207,8 +233,7 @@ class MaterialController extends Controller
             'updated_by' => $request->user()->id,
         ]);
 
-        return redirect()
-            ->route('admin.materials.index', $request->boolean('workspace') ? ['section_id' => $material->section_id, 'topic_id' => $material->topic_id] : [])
+        return $redirect
             ->with('success', "Materi {$material->title} diterbitkan.");
     }
 

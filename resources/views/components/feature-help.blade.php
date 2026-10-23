@@ -31,8 +31,8 @@
     ];
 @endphp
 <div class="feature-help no-print" data-feature-help data-help-audience="{{ $audience }}" data-help-route="{{ request()->route()?->getName() }}">
-    <button class="btn btn--primary help-launcher" type="button" data-help-open aria-haspopup="dialog" aria-controls="feature-help-center">
-        <svg data-icon="book"></svg><span>Bantuan &amp; Panduan</span>
+    <button class="appbar__icon help-launcher" type="button" data-help-open aria-label="Bantuan &amp; Panduan" title="Bantuan &amp; Panduan" aria-haspopup="dialog" aria-controls="feature-help-center">
+        <svg data-icon="book" aria-hidden="true"></svg>
     </button>
 
     <section class="help-banner" data-help-banner aria-label="Panduan halaman ini" hidden>

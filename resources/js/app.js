@@ -2,6 +2,7 @@ import './lontar/icons.js';
 import './lontar/charts.js';
 import './lontar/app.js';
 import './lontar/theme.js';
+import './lontar/legal-dialogs.js';
 import './lontar/navbar-search.js';
 import './lontar/content-workspace.js';
 import './lontar/article-editor.js';

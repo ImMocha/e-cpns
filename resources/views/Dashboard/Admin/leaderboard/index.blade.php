@@ -19,7 +19,7 @@
             <div><h2 class="card__title">Tampilan leaderboard</h2><p class="card__sub">Satu tombol untuk menampilkan atau menyembunyikan seluruh peserta virtual.</p></div>
             <span class="badge {{ $simulationEnabled ? 'badge--mint' : 'badge--flat' }}">{{ $simulationEnabled ? 'Aktif' : 'Nonaktif' }}</span>
         </div>
-        <p class="text-sm text-soft" style="margin-bottom:1.25rem">Profil virtual punya nilai contoh dengan variasi dua angka desimal. Keterangan peserta virtual ditampilkan di atas tabel leaderboard. Saat dimatikan, semuanya hilang dari peringkat lokal dan nasional; nilai serta riwayat peserta nyata tetap tersimpan.</p>
+        <p class="text-sm text-soft" style="margin-bottom:1.25rem">Profil virtual memakai skor contoh berupa poin bulat, dengan acuan tryout 550 poin. Skor bot baru bervariasi antara 231–534 poin. Keterangan peserta virtual ditampilkan di atas tabel leaderboard. Saat dimatikan, semuanya hilang dari peringkat lokal dan nasional; nilai serta riwayat peserta nyata tetap tersimpan.</p>
         <form method="POST" action="{{ route('admin.leaderboard-simulation.update') }}">
             @csrf
             @method('PATCH')
@@ -61,7 +61,7 @@
             <table class="table"><thead><tr><th>Nama</th><th>Provinsi</th><th class="num">Nilai</th></tr></thead>
                 <tbody>
                 @forelse ($sampleBots as $bot)
-                    <tr><td><strong>{{ $bot->name }}</strong> <span class="badge badge--amber badge--flat">Virtual</span></td><td>{{ $bot->province->value }}</td><td class="num">{{ $bot->score }} poin</td></tr>
+                    <tr><td><strong>{{ $bot->name }}</strong> <span class="badge badge--amber badge--flat">Virtual</span></td><td>{{ $bot->province->value }}</td><td class="num">{{ number_format((float) $bot->score, 0, ',', '.') }} poin</td></tr>
                 @empty
                     <tr><td colspan="3" class="text-soft">Profil contoh akan disiapkan saat fitur diaktifkan.</td></tr>
                 @endforelse

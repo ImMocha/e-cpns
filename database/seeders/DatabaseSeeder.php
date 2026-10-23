@@ -13,6 +13,12 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->call([SectionSeeder::class, PremiumRf05Seeder::class, LearningPackageSeeder::class]);
+
+            return;
+        }
+
         $this->call([
             AdminUserSeeder::class,
             UserSeeder::class,

@@ -17,7 +17,8 @@ class LeaderboardBotFactory extends Factory
             'source_key' => fake()->unique()->bothify('test-########'),
             'name' => fake()->name(),
             'province' => fake()->randomElement(Province::cases()),
-            'score' => fake()->randomFloat(2, 42, 97),
+            'score' => fake()->numberBetween(231, 534),
+            'generation_version' => 3,
         ];
     }
 }

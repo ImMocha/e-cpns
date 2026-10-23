@@ -39,7 +39,10 @@ class LoginController extends Controller
 
         // Pesan yang sama untuk "email tidak terdaftar" maupun "password salah",
         // supaya halaman ini tidak bisa dipakai menebak email yang terdaftar.
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (! Auth::attempt([
+            'email' => $credentials['email'],
+            'password' => $credentials['password'],
+        ], $request->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey($request));
 
             throw ValidationException::withMessages([

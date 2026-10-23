@@ -1,6 +1,6 @@
 /* ==========================================================================
    LONTAR · app.js
-   Shared behaviour for every prototype page. No dependencies, no build step.
+   Shared behaviour for the Ganesha Nusa website.
    Exposes a tiny global namespace: window.L = { toast, modal, confirmAction }
    ========================================================================== */
 (function () {
@@ -377,26 +377,6 @@
 
   document.addEventListener('input', (e) => {
     if (e.target.closest('.field.is-invalid')) validateInput(e.target);
-  });
-
-  /* ======================================================================
-     DEMO FORM SUBMIT  ·  form[data-demo-submit]
-     ====================================================================== */
-  document.addEventListener('submit', (e) => {
-    const form = e.target.closest('form[data-demo-submit]');
-    if (!form) return;
-    e.preventDefault();
-    const btn = $('[type="submit"]', form);
-    const original = btn ? btn.innerHTML : '';
-    if (btn) { btn.disabled = true; btn.innerHTML = 'Memproses…'; }
-    setTimeout(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = original; }
-      const msg = form.dataset.demoSubmit || 'Berhasil disimpan.';
-      window.toast(msg, 'success');
-      const redirect = form.dataset.demoRedirect;
-      if (redirect) setTimeout(() => (location.href = redirect), 800);
-      else form.reset();
-    }, 750);
   });
 
   /* ======================================================================

@@ -7,11 +7,10 @@ namespace App;
 use App\Enums\Province;
 use App\Models\LeaderboardBot;
 use Illuminate\Support\Facades\DB;
-use LogicException;
 
 class LeaderboardSimulation
 {
-    private const int PROFILE_VERSION = 2;
+    private const int PROFILE_VERSION = 3;
 
     public function enabled(): bool
     {
@@ -50,16 +49,15 @@ class LeaderboardSimulation
         $range = $this->populationRange();
         $existingProfiles = LeaderboardBot::query()->orderBy('id')->get();
         $usedNames = array_fill_keys($existingProfiles->pluck('name')->all(), true);
-        $usedScores = $existingProfiles->map(fn (LeaderboardBot $profile): int => (int) round((float) $profile->score * 100))->all();
-        $availableScores = array_values(array_diff(range(4200, 9700), $usedScores));
-        shuffle($availableScores);
 
         foreach (Province::cases() as $province) {
             $profiles = $existingProfiles->filter(fn (LeaderboardBot $profile): bool => $profile->province === $province)->values();
 
             foreach ($profiles as $profile) {
-                if ($profile->generation_version < self::PROFILE_VERSION && preg_match('/\Astarter-'.$province->name.'-[1-9][0-9]*\z/', $profile->source_key) === 1) {
-                    $profile->update($this->generateProfile($availableScores, $usedNames));
+                if ($profile->generation_version < self::PROFILE_VERSION) {
+                    $score = (float) $profile->score;
+                    $profile->update(['score' => (int) round($score <= 100 ? $score * 5.5 : $score),
+                        'generation_version' => self::PROFILE_VERSION]);
                 }
             }
 
@@ -80,7 +78,7 @@ class LeaderboardSimulation
 
                 $profiles->push(LeaderboardBot::query()->firstOrCreate(
                     ['source_key' => $key],
-                    ['province' => $province] + $this->generateProfile($availableScores, $usedNames),
+                    ['province' => $province] + $this->generateProfile($usedNames),
                 ));
             }
 
@@ -91,17 +89,11 @@ class LeaderboardSimulation
     }
 
     /**
-     * @param  list<int>  $availableScores
      * @param  array<string, true>  $usedNames
-     * @return array{name: string, score: float, generation_version: int}
+     * @return array{name: string, score: int, generation_version: int}
      */
-    private function generateProfile(array &$availableScores, array &$usedNames): array
+    private function generateProfile(array &$usedNames): array
     {
-        $score = array_pop($availableScores);
-        if ($score === null) {
-            throw new LogicException('Tidak ada nilai contoh unik yang tersedia untuk peserta virtual.');
-        }
-
         $maleFirstNames = ['Aditya', 'Agus', 'Akbar', 'Andi', 'Arif', 'Bagas', 'Bambang', 'Bayu', 'Dimas', 'Eko', 'Fajar', 'Farhan', 'Gilang', 'Hendra', 'Ilham', 'Irwan', 'Kevin', 'Raka', 'Reza', 'Rizky', 'Surya', 'Taufik', 'Wahyu', 'Yoga'];
         $femaleFirstNames = ['Amelia', 'Anisa', 'Aulia', 'Ayu', 'Citra', 'Dewi', 'Dinda', 'Dita', 'Fitri', 'Hana', 'Indah', 'Intan', 'Kartika', 'Laras', 'Maya', 'Nabila', 'Nadia', 'Nisa', 'Putri', 'Rani', 'Ratna', 'Salsabila', 'Tiara', 'Wulan'];
         $maleLastNames = ['Pratama', 'Nugraha', 'Saputra', 'Firmansyah', 'Wibowo', 'Permana', 'Ramadhan', 'Wijaya', 'Setiawan', 'Hidayat', 'Kurniawan', 'Maulana', 'Hakim', 'Pangestu', 'Santoso', 'Wicaksono', 'Prasetyo', 'Kusuma', 'Gunawan', 'Syahputra'];
@@ -122,6 +114,6 @@ class LeaderboardSimulation
 
         $usedNames[$name] = true;
 
-        return ['name' => $name, 'score' => $score / 100, 'generation_version' => self::PROFILE_VERSION];
+        return ['name' => $name, 'score' => random_int(231, 534), 'generation_version' => self::PROFILE_VERSION];
     }
 }

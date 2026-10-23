@@ -29,6 +29,7 @@
 @yield('body')
 
 <x-whatsapp-button />
+<x-legal-dialogs />
 
 @auth
     <x-feature-help :audience="request()->routeIs('admin.*') ? 'admin' : 'member'" />

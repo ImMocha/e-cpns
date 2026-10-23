@@ -40,8 +40,8 @@
             </article>
             <article class="card">
                 <div class="stat__label">Nilai terbaikmu</div>
-                <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? number_format((float) $ownRank->score, 0, ',', '.') : '—' }}</div>
-                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Dari '.$ownRank->max_score.' poin maksimal.' : 'Nilai tryoutmu akan tampil di sini.' }}</p>
+                <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? number_format((float) $ownRank->score, 0, ',', '.') : ($maximumScore !== null ? '0' : '—') }}{{ $maximumScore !== null ? ' / '.$maximumScore : '' }}</div>
+                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $maximumScore !== null ? 'Mengikuti '.$referenceTryout->title.'.' : ($ownRank ? 'Dari '.$ownRank->max_score.' poin maksimal.' : 'Nilai tryoutmu akan tampil di sini.') }}</p>
             </article>
             <article class="card">
                 <div class="stat__label">Entri dalam peringkat</div>
@@ -51,10 +51,14 @@
         </section>
 
         <section class="card">
-            <div class="card__head"><div><h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2><p class="card__sub">{{ $simulatedCount ? 'Nilai tryout terbaik peserta · nilai contoh virtual' : 'Gabungan seluruh tryout · satu nilai terbaik per peserta' }}</p></div><span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span></div>
+            <div class="card__head"><div><h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2><p class="card__sub">{{ $referenceTryout ? 'Acuan: '.$referenceTryout->title.' · '.$maximumScore.' poin maksimal' : 'Gabungan seluruh tryout · satu nilai terbaik per peserta' }}</p></div><span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span></div>
+            @if ($referenceTryout)
+                <p class="text-sm text-soft" style="margin-bottom:1rem">Skor maksimal otomatis mengikuti tryout aktif dengan poin maksimal tertinggi. Peringkat memakai poin terbaik dari tryout aktif dengan skor maksimal yang sama. Jika hasilmu hanya dari tryout lama atau sesi yang lebih pendek, nilai awal di sini 0 / {{ $maximumScore }} sampai tryout acuan diselesaikan. Riwayat hasil lama tetap tersimpan. Nilai sama mendapat peringkat sama; nilai latihan tidak masuk leaderboard.</p>
+            @else
             <p class="text-sm text-soft" style="margin-bottom:1rem">Peringkat memakai skor poin tertinggi dari tryout yang selesai. Skor ditampilkan sesuai poin yang diperoleh dan skor maksimal sesi. Nilai sama mendapat peringkat sama, misalnya 1, 1, 3. Nilai latihan tidak masuk leaderboard.</p>
+            @endif
             @if ($simulatedCount > 0)
-                <p class="text-xs text-soft" style="margin-bottom:1rem">Peserta virtual memakai nilai contoh dan ikut dihitung dalam peringkat selama fitur aktif.</p>
+                <p class="text-xs text-soft" style="margin-bottom:1rem">Peserta virtual memakai nilai contoh berupa poin bulat dengan acuan tryout {{ $maximumScore ?? 550 }} poin dan ikut dihitung dalam peringkat selama fitur aktif.</p>
             @endif
             <div class="table-wrap" style="border:none;box-shadow:none">
                 <table class="table">

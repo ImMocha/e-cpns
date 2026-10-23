@@ -10,6 +10,10 @@
     <p style="margin-top:1rem"><span class="badge badge--{{ $transaction->status === \App\Enums\TransactionStatus::Paid ? 'mint' : 'amber' }} badge--flat">{{ $transaction->status->label() }}</span></p>
     <div class="price__amount" style="margin-top:1.5rem">{{ $transaction->formattedAmount() }}</div>
     <ul class="price__list">
+        @if ($transaction->voucher_code)
+            <li>Harga paket: Rp{{ number_format($transaction->amount + $transaction->discount_amount, 0, ',', '.') }}</li>
+            <li>Voucher {{ $transaction->voucher_code }}: −Rp{{ number_format($transaction->discount_amount, 0, ',', '.') }}</li>
+        @endif
         <li>{{ (\App\Enums\LeaderboardAccess::tryFrom($transaction->package_snapshot['leaderboard_access'] ?? 'none') ?? \App\Enums\LeaderboardAccess::None)->label() }}</li>
         <li>Dibuat: {{ $transaction->created_at->format('d/m/Y H:i') }}</li>
         @if ($transaction->status === \App\Enums\TransactionStatus::Pending)<li>Batas pembayaran: {{ $transaction->expires_at->format('d/m/Y H:i') }}</li>@endif

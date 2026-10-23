@@ -5,6 +5,11 @@ const root = document.querySelector('[data-feature-help]');
 if (root) initializeHelp(root);
 
 function initializeHelp(container) {
+  const launcher = container.querySelector('.help-launcher');
+  const navbar = document.querySelector('.appbar__right');
+  const themeToggle = navbar?.querySelector('[data-theme-toggle]');
+  if (themeToggle) themeToggle.after(launcher);
+  else if (navbar) navbar.prepend(launcher);
   const audience = container.dataset.helpAudience;
   const current = findHelpGuide(container.dataset.helpRoute || '', audience);
   const dialog = container.querySelector('[data-help-dialog]');
@@ -187,7 +192,7 @@ function initializeHelp(container) {
         onDestroyed: () => {
           activeTour = null;
           if (origin?.isConnected && origin.getClientRects().length) origin.focus({ preventScroll: true });
-          else container.querySelector('.help-launcher').focus({ preventScroll: true });
+          else launcher.focus({ preventScroll: true });
         },
         steps,
       });

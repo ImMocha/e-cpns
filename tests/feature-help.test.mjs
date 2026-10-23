@@ -48,7 +48,7 @@ test('search finds detailed content and field explanations with multiple case-in
   assert.ok(searchHelpGuides('passing grade sertifikat', 'admin').some(item => item.id === 'admin-exams'));
   assert.ok(searchHelpGuides('label A–E', 'admin').some(item => item.id === 'admin-questions'));
   assert.ok(searchHelpGuides('timer berjalan', 'member').some(item => item.id === 'member-attempt'));
-  assert.ok(searchHelpGuides('voucher demonstrasi', 'admin').some(item => item.id === 'admin-vouchers'));
+  assert.ok(searchHelpGuides('voucher kuota', 'admin').some(item => item.id === 'admin-vouchers'));
 });
 
 test('search does not leak admin instructions into the member library and handles no results', () => {

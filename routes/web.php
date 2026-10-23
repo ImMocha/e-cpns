@@ -49,6 +49,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', HomeController::class)->name('home');
+Route::redirect('/syarat-ketentuan', '/#syarat-ketentuan')->name('terms');
+Route::redirect('/kebijakan-privasi', '/#kebijakan-privasi')->name('privacy');
 Route::resource('articles', ArticleController::class)->only(['index', 'show']);
 Route::post('/payments/midtrans/notification', MidtransNotificationController::class)->name('payments.midtrans.notification');
 
@@ -185,6 +187,7 @@ Route::prefix('admin')
         Route::prefix('materials')->name('materials.')->group(function (): void {
             Route::resource('quizzes', AdminExamController::class)->except('show')->parameters(['quizzes' => 'exam']);
         });
+        Route::post('materials/publish', [AdminMaterialController::class, 'bulkPublish'])->name('materials.publish');
         Route::patch('materials/{material}/status', [AdminMaterialController::class, 'toggleStatus'])
             ->name('materials.status');
         Route::resource('materials', AdminMaterialController::class)->parameters(['materials' => 'material']);
@@ -197,5 +200,6 @@ Route::prefix('admin')
         Route::post('packages/{package}/members', [UserPackageController::class, 'store'])->name('packages.members.store');
         Route::delete('packages/{package}/members/{userPackage}', [UserPackageController::class, 'destroy'])->withTrashed()->name('packages.members.destroy');
         Route::get('/transactions', AdminTransactionController::class)->name('transactions.index');
-        Route::get('/vouchers', AdminVoucherController::class)->name('vouchers.index');
+        Route::patch('vouchers/{voucher}/status', [AdminVoucherController::class, 'toggleStatus'])->name('vouchers.status');
+        Route::resource('vouchers', AdminVoucherController::class)->except(['show', 'destroy']);
     });

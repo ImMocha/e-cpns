@@ -7,9 +7,8 @@
         </a>
         <p class="text-sm" style="margin-top:1rem;max-width:34ch">Platform belajar dan simulasi tryout CPNS untuk peserta yang mempersiapkan diri dengan cara yang lebih terukur.</p>
         <div class="socials" style="margin-top:1.25rem">
-          <a href="#" aria-label="Instagram"><svg data-icon="image"></svg></a>
-          <a href="#" aria-label="Telegram"><svg data-icon="send"></svg></a>
-          <a href="#" aria-label="Email"><svg data-icon="mail"></svg></a>
+          <a href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer" aria-label="Hubungi Kami"><svg data-icon="send"></svg></a>
+          <a href="mailto:{{ config('app.contact_email') }}" aria-label="Email {{ config('app.contact_email') }}"><svg data-icon="mail"></svg></a>
         </div>
       </div>
       <div>
@@ -35,15 +34,17 @@
         <h4>Informasi</h4>
         <div class="footer__links">
           <a href="{{ route('home') }}#faq">FAQ</a>
-          <a href="#">Syarat &amp; Ketentuan</a>
-          <a href="#">Kebijakan Privasi</a>
+          <a href="mailto:{{ config('app.contact_email') }}">{{ config('app.contact_email') }}</a>
+          <a href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a>
+          <a href="{{ route('terms') }}" data-legal-open="terms" aria-haspopup="dialog" aria-controls="legal-terms">Syarat &amp; Ketentuan</a>
+          <a href="{{ route('privacy') }}" data-legal-open="privacy" aria-haspopup="dialog" aria-controls="legal-privacy">Kebijakan Privasi</a>
           <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
         </div>
       </div>
     </div>
     <div class="footer__bottom">
-      <span>© <span data-year>2026</span> Ganesha Nusa · Prototipe demonstrasi, bukan situs produksi.</span>
-      <span class="badge badge--flat" style="background:rgba(255,255,255,.08);color:#A9C1D6;border-color:rgba(255,255,255,.2);box-shadow:none">v0.1 Prototype</span>
+      <span>© <span data-year>2026</span> Ganesha Nusa. Hak cipta dilindungi.</span>
+      <span class="text-sm">Propositum &amp; Excellentia</span>
     </div>
   </div>
 </footer>

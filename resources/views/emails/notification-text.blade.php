@@ -11,6 +11,9 @@
 {{ $actionText }}: {!! $actionUrl !!}
 
 {{ $outro }}
+
+Butuh bantuan? Hubungi Kami: {!! config('app.contact_whatsapp') !!}
+Email: {{ config('app.contact_email') }}
 @if ($preferencesUrl)
 
 Atur preferensi email: {!! $preferencesUrl !!}

@@ -14,7 +14,7 @@
       <a class="text-xs fw-700 text-primary" href="{{ route('dashboard') }}">Mode Peserta</a>
       <a class="text-xs fw-700 text-primary" href="{{ route('profile.edit') }}">Profil Saya</a>
       <a class="text-xs fw-700 text-primary" href="{{ route('home') }}">Situs Publik</a>
-      <span class="badge badge--flat text-xs">v0.1</span>
+      <a class="text-xs fw-700 text-primary" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a>
     </div>
   </div>
 </footer>

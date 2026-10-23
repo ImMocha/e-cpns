@@ -128,6 +128,7 @@
         <strong style="font-family:var(--font-display);font-size:var(--fs-sm);color:var(--ink)">Butuh bantuan?</strong>
       </div>
       <p class="text-xs text-soft">Tim kami siap bantu soal materi atau paket.</p>
+      <a class="text-xs" href="mailto:{{ config('app.contact_email') }}">{{ config('app.contact_email') }}</a>
     </div>
   </div>
 </aside>

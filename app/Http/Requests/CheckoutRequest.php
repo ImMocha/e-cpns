@@ -16,6 +16,7 @@ class CheckoutRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['package_id' => ['required', 'integer', Rule::exists('packages', 'id')->whereNull('deleted_at')->where('is_active', true)]];
+        return ['package_id' => ['required', 'integer', Rule::exists('packages', 'id')->whereNull('deleted_at')->where('is_active', true)],
+            'voucher_code' => ['nullable', 'string', 'max:40']];
     }
 }

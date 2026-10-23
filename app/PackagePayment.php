@@ -19,11 +19,11 @@ use RuntimeException;
 
 class PackagePayment
 {
-    public function __construct(private PaymentGatewayContract $gateway, private IntegrationSettings $settings) {}
+    public function __construct(private PaymentGatewayContract $gateway, private IntegrationSettings $settings, private VoucherDiscount $discounts) {}
 
-    public function checkout(User $user, Package $package): Transaction
+    public function checkout(User $user, Package $package, ?string $voucherCode = null): Transaction
     {
-        return DB::transaction(function () use ($user, $package): Transaction {
+        return DB::transaction(function () use ($user, $package, $voucherCode): Transaction {
             IntegrationSetting::query()->lockForUpdate()->findOrFail('midtrans');
             $user = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $package = Package::query()->whereKey($package->id)->lockForUpdate()->firstOrFail();
@@ -35,6 +35,10 @@ class PackagePayment
             }
             $pending = Transaction::query()->whereBelongsTo($user)->whereBelongsTo($package)->where('status', TransactionStatus::Pending)->first();
             if ($pending !== null) {
+                if (filled($voucherCode) && Str::upper(trim($voucherCode)) !== $pending->voucher_code) {
+                    throw ValidationException::withMessages(['voucher_code' => 'Paket ini memiliki pesanan menunggu pembayaran. Selesaikan pesanan tersebut sebelum mengganti voucher.']);
+                }
+
                 return $pending;
             }
             if (! $package->hasAvailableContent()) {
@@ -42,13 +46,15 @@ class PackagePayment
             }
             $materials = $package->materials()->get();
             $exams = $package->exams()->get();
-            if ($package->price > 0 && ! $this->gateway->configured()) {
+            $quote = $this->discounts->quote($package, $voucherCode, lock: true);
+            if ($quote['amount'] > 0 && ! $this->gateway->configured()) {
                 throw ValidationException::withMessages(['package_id' => 'Pembayaran belum tersedia. Silakan hubungi admin.']);
             }
             $transaction = Transaction::create([
                 'order_id' => 'GANESHA-NUSA-'.Str::uuid(), 'user_id' => $user->id, 'package_id' => $package->id,
-                'provider' => $package->price === 0 ? 'free' : 'midtrans',
-                'is_production' => $this->settings->midtrans()['is_production'], 'amount' => $package->price,
+                'provider' => $quote['amount'] === 0 ? 'free' : 'midtrans',
+                'voucher_id' => $quote['voucher']?->id, 'voucher_code' => $quote['voucher']?->code, 'discount_amount' => $quote['discount'],
+                'is_production' => $this->settings->midtrans()['is_production'], 'amount' => $quote['amount'],
                 'package_snapshot' => [
                     'leaderboard_access' => $package->leaderboard_access->value,
                     'name' => $package->name, 'duration_days' => $package->duration_days, 'tryout_quota' => $package->tryout_quota,

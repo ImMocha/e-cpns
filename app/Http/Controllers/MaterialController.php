@@ -50,9 +50,11 @@ class MaterialController extends Controller
         ];
 
         $user = $request->user();
+        $showDrafts = $user->isAdmin() && $request->boolean('show_drafts');
+        $filters['show_drafts'] = $showDrafts;
 
-        $lessonQuery = function (Builder|Relation $query) use ($filters, $user): void {
-            $query->visibleToMembers()
+        $lessonQuery = function (Builder|Relation $query) use ($filters, $user, $showDrafts): void {
+            $query->inActiveTopics()->when(! $showDrafts, fn (Builder $query) => $query->published())
                 ->with(['userPackages' => fn (Builder|Relation $grants) => $grants->active()->whereBelongsTo($user)])
                 ->when($filters['type'], fn (Builder $query, $type) => $query->where('type', $type))
                 ->when($filters['q'] !== '', fn (Builder $query) => $query->where(function (Builder $query) use ($filters): void {
@@ -84,9 +86,9 @@ class MaterialController extends Controller
         return view('Dashboard.User.materials.index', [
             'topics' => $topics,
             'filters' => $filters,
-            'sections' => $this->sectionsWithCounts(),
+            'sections' => $this->sectionsWithCounts($showDrafts),
             'types' => MaterialType::cases(),
-            'counts' => $this->counts($user),
+            'counts' => $this->counts($user, $showDrafts),
             'completedMaterialIds' => $completedMaterialIds,
             'topicQuizzes' => $topicQuizzes,
             // Callable, bukan array: akses dicek per materi tanpa query ulang,
@@ -194,24 +196,24 @@ class MaterialController extends Controller
      *
      * @return Collection<int, Section>
      */
-    private function sectionsWithCounts(): Collection
+    private function sectionsWithCounts(bool $showDrafts = false): Collection
     {
         return Section::query()
             ->active()
             ->ordered()
-            ->withCount(['materials as published_materials_count' => fn (Builder $query) => $query->visibleToMembers()])
+            ->withCount(['materials as published_materials_count' => fn (Builder $query) => $query->inActiveTopics()->when(! $showDrafts, fn (Builder $query) => $query->published())])
             ->get()
             ->filter(fn (Section $section) => $section->published_materials_count > 0)
             ->values();
     }
 
     /** @return array{total:int, pdf:int, video:int, locked:int} */
-    private function counts(User $user): array
+    private function counts(User $user, bool $showDrafts = false): array
     {
         return [
-            'total' => $this->visibleQuery()->count(),
-            'pdf' => $this->visibleQuery()->where('type', MaterialType::Pdf->value)->count(),
-            'video' => $this->visibleQuery()->where('type', MaterialType::Video->value)->count(),
+            'total' => $this->visibleQuery($showDrafts)->count(),
+            'pdf' => $this->visibleQuery($showDrafts)->where('type', MaterialType::Pdf->value)->count(),
+            'video' => $this->visibleQuery($showDrafts)->where('type', MaterialType::Video->value)->count(),
             'locked' => $user->isAdmin() ? 0 : $this->visibleQuery()->where('access_level', MaterialAccess::Premium->value)
                 ->whereDoesntHave('userPackages', fn (Builder $grants) => $grants->active()->whereBelongsTo($user))->count(),
         ];
@@ -225,9 +227,9 @@ class MaterialController extends Controller
      *
      * @return Builder<Material>
      */
-    private function visibleQuery(): Builder
+    private function visibleQuery(bool $showDrafts = false): Builder
     {
-        return Material::query()->visibleToMembers()->withoutEagerLoads();
+        return Material::query()->inActiveTopics()->when(! $showDrafts, fn (Builder $query) => $query->published())->withoutEagerLoads();
     }
 
     /**

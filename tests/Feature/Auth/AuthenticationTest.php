@@ -347,15 +347,58 @@ class AuthenticationTest extends TestCase
 
     public function test_remember_me_issues_a_remember_token(): void
     {
-        $user = $this->peserta();
+        $user = User::factory()->create([
+            'password' => Hash::make('rahasia123'),
+            'remember_token' => null,
+        ]);
 
         $this->post(route('login.store'), [
             'email' => $user->email,
             'password' => 'rahasia123',
             'remember' => '1',
+        ])->assertRedirect(route('dashboard'))
+            ->assertSessionHasNoErrors()
+            ->assertCookie(Auth::guard('web')->getRecallerName());
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertNotNull($user->fresh()->remember_token);
+    }
+
+    public function test_login_with_remember_disabled_does_not_issue_a_remember_cookie(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('rahasia123'),
+            'remember_token' => null,
         ]);
 
-        $this->assertNotNull($user->fresh()->remember_token);
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'rahasia123',
+            'remember' => '0',
+        ])->assertRedirect(route('dashboard'))
+            ->assertSessionHasNoErrors()
+            ->assertCookieMissing(Auth::guard('web')->getRecallerName());
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertNull($user->fresh()->remember_token);
+    }
+
+    public function test_remember_me_does_not_authenticate_with_wrong_password(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('rahasia123'),
+            'remember_token' => null,
+        ]);
+
+        $this->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password-salah',
+            'remember' => '1',
+        ])->assertInvalid(['email' => 'Email atau password tidak cocok dengan akun kami.'])
+            ->assertCookieMissing(Auth::guard('web')->getRecallerName());
+
+        $this->assertGuest();
+        $this->assertNull($user->fresh()->remember_token);
     }
 
     public function test_auth_guard_is_configured_for_the_user_model(): void

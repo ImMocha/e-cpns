@@ -78,13 +78,7 @@
       </div>
     </form>
 
-    <div class="alert alert--info" style="margin-top:1.25rem">
-      <span class="alert__icon"><svg data-icon="info"></svg></span>
-      <div>
-        <strong>Akun demo</strong>
-        Gunakan email akun admin atau peserta yang sudah tersedia &mdash; password <code class="text-mono text-xs">password</code>.
-      </div>
-    </div>
+    <p class="text-sm text-soft" style="margin-top:1.25rem">Kesulitan masuk? <a class="fw-700 text-primary" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a>.</p>
   </div>
 
   <!-- ===================== SIDE PANEL ===================== -->
@@ -95,16 +89,8 @@
         <img src="{{ asset('images/hero-tryout.jpg') }}" alt="Ilustrasi peserta belajar prepping CPNS" style="width:100%;height:100%;object-fit:cover" width="960" height="720">
       </div>
       <div style="padding:1.75rem">
-        <blockquote>
-          <svg data-icon="quote" style="width:26px;height:26px;color:var(--primary-300)"></svg>
-          <p style="margin:.75rem 0 1.25rem;font-size:var(--fs-lg);line-height:1.55;color:var(--ink);font-family:var(--font-display);font-weight:600">
-            "Nilai tryout pertamaku 312, yang sekarang 452. Yang berubah cuma cara mengatur waktu pengerjaan."
-          </p>
-          <footer class="userchip">
-            <span class="avatar avatar--amber">D</span>
-            <div><strong>Dewi Anggraini</strong><span>Peserta Ultimate · 12 tryout</span></div>
-          </footer>
-        </blockquote>
+        <h2 class="card__title">Lanjutkan persiapan CPNS kamu</h2>
+        <p class="text-soft" style="margin-top:.75rem">Akses materi, kerjakan latihan dan tryout, lalu pantau hasil belajarmu dari satu akun.</p>
       </div>
     </div>
 
@@ -117,10 +103,10 @@
 
 <footer class="footer auth-footer" style="padding-block:1.5rem">
   <div class="container container--wide flex items-center justify-between flex-wrap" style="gap:1rem">
-    <span class="text-sm">© <span data-year>2026</span> Ganesha Nusa · Prototipe demonstrasi.</span>
+    <span class="text-sm">© <span data-year>2026</span> Ganesha Nusa. Hak cipta dilindungi.</span>
     <div class="footer__links">
-      <a href="#">Syarat &amp; Ketentuan</a>
-      <a href="#">Kebijakan Privasi</a>
+      <a href="{{ route('terms') }}" data-legal-open="terms" aria-haspopup="dialog" aria-controls="legal-terms">Syarat &amp; Ketentuan</a>
+      <a href="{{ route('privacy') }}" data-legal-open="privacy" aria-haspopup="dialog" aria-controls="legal-privacy">Kebijakan Privasi</a>
       <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
     </div>
   </div>

@@ -343,8 +343,13 @@ class Material extends Model
      */
     public function scopeVisibleToMembers(Builder $query): Builder
     {
-        return $query->published()
-            ->whereHas('section', fn (Builder $section) => $section->active())
+        return $query->published()->inActiveTopics();
+    }
+
+    /** @param Builder<Material> $query */
+    public function scopeInActiveTopics(Builder $query): Builder
+    {
+        return $query->whereHas('section', fn (Builder $section) => $section->active())
             ->whereHas('topic', fn (Builder $topic) => $topic->active()
                 ->whereColumn('topics.section_id', 'materials.section_id'))
             ->with(['section', 'topic']);

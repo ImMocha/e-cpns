@@ -109,22 +109,25 @@
         </section>
       @endif
 
-      <section class="card">
-        <div class="card__head"><div><div class="card__title">{{ $canViewExplanations ? 'Pembahasan Soal' : 'Kunci Jawaban' }}</div><div class="card__sub">{{ $canViewExplanations ? 'Jawaban dan penjelasan dari sesi yang tersimpan' : 'Jawaban benar dan pilihanmu dari sesi yang tersimpan' }}</div></div></div>
-        <div class="stack" style="--stack:.8rem">
+      <section class="card exam-review" aria-label="Tinjauan jawaban">
+        <div class="card__head"><div><h2 class="card__title">{{ $canViewExplanations ? 'Pembahasan Soal' : 'Kunci Jawaban' }}</h2><p class="card__sub">Buka satu soal untuk melihat pilihanmu{{ $canViewExplanations ? ' dan memahami penjelasannya' : ' dan kunci jawaban' }}.</p></div><span class="badge badge--primary badge--flat">{{ count($reviewQuestions) }} soal</span></div>
+        <div class="exam-review-list">
           @unless ($canViewExplanations)
             <x-explanation-lock />
           @endunless
           @foreach ($reviewQuestions as $index => $question)
             @php($chosen = $attempt->answers[(string) $question['id']] ?? null)
             @php($weighted = ($question['scoringType'] ?? 'binary') === 'weighted')
-            <details class="card card--tight card--dashed">
-              <summary style="cursor:pointer;font-weight:700;color:var(--ink)">
-                {{ $index + 1 }}. {{ $question['topic'] ?? 'Soal' }}
-                <span class="badge badge--{{ $chosen === null ? 'amber' : ($weighted ? 'primary' : ($chosen === $question['answer'] ? 'mint' : 'coral')) }} badge--flat" style="margin-left:.5rem">{{ $chosen === null ? 'Kosong' : ($weighted ? 'Skor '.$question['optionScores'][$chosen].'/5' : ($chosen === $question['answer'] ? 'Benar' : 'Salah')) }}</span>
+            <details class="exam-review-item" id="review-{{ $index + 1 }}">
+              <summary class="exam-review-summary">
+                <span class="exam-review-number">{{ $index + 1 }}</span>
+                <span class="exam-review-heading"><small>{{ $question['section'] ?? 'Soal' }}</small><strong>{{ $question['topic'] ?? 'Soal' }}</strong></span>
+                <span class="badge badge--{{ $chosen === null ? 'amber' : ($weighted ? 'primary' : ($chosen === $question['answer'] ? 'mint' : 'coral')) }} badge--flat">{{ $chosen === null ? 'Kosong' : ($weighted ? 'Skor '.$question['optionScores'][$chosen].'/5' : ($chosen === $question['answer'] ? 'Benar' : 'Salah')) }}</span>
+                <svg class="exam-review-chevron" data-icon="chevron-down" aria-hidden="true"></svg>
               </summary>
-              <div class="text-sm" style="margin-top:1rem">
-                <div class="article-prose">@if (!empty($question['stemHtml'])){!! \App\ArticleContent::sanitize($question['stemHtml']) !!}@else{{ $question['stem'] }}@endif</div>
+              <div class="exam-review-body">
+                <div class="exam-review-reading">
+                <div class="exam-review-stem article-prose">@if (!empty($question['stemHtml'])){!! \App\ArticleContent::sanitize($question['stemHtml']) !!}@else{{ $question['stem'] }}@endif</div>
                 @foreach (['image', 'video'] as $media)
                   @if (!empty($question[$media.'_path']))
                     @php($mediaUrl = route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => $media]))
@@ -132,20 +135,34 @@
                     @else<video class="exam-question-media" src="{{ $mediaUrl }}" controls playsinline preload="metadata"></video>@endif
                   @endif
                 @endforeach
-                <ol class="exam-review-options" type="A">
+                <ol class="exam-review-options" aria-label="Pilihan jawaban">
                   @foreach ($question['options'] as $optionIndex => $option)
-                    <li class="exam-review-choice {{ $weighted ? ($chosen === $optionIndex ? 'is-selected' : '') : ($optionIndex === $question['answer'] ? 'is-correct' : ($chosen === $optionIndex ? 'is-wrong' : '')) }}">{{ $option }}
-                      @if ($weighted)<strong> · Skor {{ $question['optionScores'][$optionIndex] }}/5</strong>@elseif ($optionIndex === $question['answer'])<strong> · Jawaban benar</strong>@endif
-                      @if ($chosen === $optionIndex)<span> · Pilihan kamu</span>@endif
+                    <li class="exam-review-choice {{ $weighted ? ($chosen === $optionIndex ? 'is-selected' : '') : ($optionIndex === $question['answer'] ? 'is-correct' : ($chosen === $optionIndex ? 'is-wrong' : '')) }}">
+                      <span class="exam-review-letter" aria-hidden="true">{{ chr(65 + $optionIndex) }}</span>
+                      <div class="exam-review-option-content"><p>{{ $option }}</p>
+                        @if ($weighted || $optionIndex === $question['answer'] || $chosen === $optionIndex)
+                          <div class="exam-review-option-labels">
+                            @if ($weighted)<span>Skor {{ $question['optionScores'][$optionIndex] }}/5</span>@elseif ($optionIndex === $question['answer'])<span><svg data-icon="check"></svg> Jawaban benar</span>@endif
+                            @if ($chosen === $optionIndex)<span><svg data-icon="user"></svg> Pilihan kamu</span>@endif
+                          </div>
+                        @endif
+                      </div>
                     </li>
                   @endforeach
                 </ol>
-                <p><strong>Jawaban kamu:</strong> {{ $chosen === null ? 'Tidak dijawab' : ($question['options'][$chosen] ?? 'Pilihan tidak tersedia') }}</p>
-                @if ($weighted)<p style="margin-top:.4rem"><strong>Skor yang diperoleh:</strong> {{ $chosen === null ? 0 : $question['optionScores'][$chosen] }} dari 5. Setiap pilihan memiliki skor; tidak ada jawaban benar atau salah.</p>
-                @else<p style="margin-top:.4rem"><strong>Jawaban benar:</strong> {{ $question['options'][$question['answer']] }}</p>@endif
+                <div class="exam-review-answer-summary">
+                  <p><strong>Jawaban kamu:</strong> <span>{{ $chosen === null ? 'Tidak dijawab' : chr(65 + $chosen) }}</span></p>
+                  @if ($weighted)<p><strong>Skor yang diperoleh:</strong> <span>{{ $chosen === null ? 0 : $question['optionScores'][$chosen] }} dari 5</span></p>
+                  @else<p><strong>Jawaban benar:</strong> <span>{{ chr(65 + $question['answer']) }}</span></p>@endif
+                </div>
+                @if ($weighted)<p class="exam-review-scoring-note">Setiap pilihan memiliki skor; tidak ada jawaban benar atau salah.</p>@endif
                 @if ($canViewExplanations)
-                  <div class="article-prose text-soft" style="margin-top:.65rem">@if (!empty($question['explainHtml'])){!! \App\ArticleContent::sanitize($question['explainHtml']) !!}@else{{ $question['explain'] ?? '' }}@endif</div>
+                  <section class="exam-review-explanation" aria-label="Penjelasan soal {{ $index + 1 }}">
+                    <h3><svg data-icon="book"></svg> Pembahasan</h3>
+                    <div class="article-prose">@if (!empty($question['explainHtml'])){!! \App\ArticleContent::sanitize($question['explainHtml']) !!}@else{{ $question['explain'] ?? '' }}@endif</div>
+                  </section>
                 @endif
+                </div>
               </div>
             </details>
           @endforeach

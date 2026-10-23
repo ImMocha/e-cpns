@@ -125,12 +125,29 @@
                 <p class="break-all text-sm text-[var(--text-soft)]">{{ auth()->user()->email }}</p>
             </div>
 
+            @if (! $alreadyOwned && $contentAvailable && $package->price > 0)
+                <form method="GET" action="{{ route('checkout') }}" class="stack mt-6!" style="--stack:.75rem">
+                    <input type="hidden" name="package" value="{{ $package->id }}">
+                    <div class="field">
+                        <label class="label" for="voucher_code">Kode Voucher (opsional)</label>
+                        <input class="input uppercase" id="voucher_code" name="voucher_code" maxlength="40" value="{{ old('voucher_code', request('voucher_code', '')) }}" placeholder="Masukkan kode voucher">
+                    </div>
+                    <div class="btn-row"><button class="btn btn--ghost btn--sm" type="submit">Terapkan Voucher</button>@if(request()->filled('voucher_code'))<a class="btn btn--ghost btn--sm" href="{{ route('checkout', ['package' => $package->id]) }}">Hapus Voucher</a>@endif</div>
+                    @if ($voucherError)<p class="text-sm" role="alert">{{ $voucherError }}</p>@endif
+                    @if ($quote['voucher'])<p class="text-sm" role="status">Voucher {{ $quote['voucher']->code }} diterapkan. Ketersediaan diperiksa kembali saat pesanan dibuat.</p>@endif
+                </form>
+            @endif
+
             <div class="mt-6! rounded-2xl bg-[var(--ink-surface)] p-5 text-white">
+                @if ($quote['discount'] > 0)
+                    <p class="text-sm text-white/80">Harga paket: {{ $package->formattedPrice() }}</p>
+                    <p class="text-sm text-white/80">Diskon {{ $quote['voucher']->code }}: −Rp{{ number_format($quote['discount'], 0, ',', '.') }}</p>
+                @endif
                 <div class="flex items-center justify-between gap-3 text-sm text-white/80">
                     <span>Total pembayaran</span>
                     <svg data-icon="credit-card" class="size-5" aria-hidden="true"></svg>
                 </div>
-                <strong class="mt-3! block font-[var(--font-display)] text-3xl leading-none font-extrabold tracking-tight sm:text-4xl">{{ $package->formattedPrice() }}</strong>
+                <strong class="mt-3! block font-[var(--font-display)] text-3xl leading-none font-extrabold tracking-tight sm:text-4xl">Rp{{ number_format($quote['amount'], 0, ',', '.') }}</strong>
                 <span class="mt-2! block text-xs text-white/70">Sekali bayar untuk paket ini</span>
             </div>
 
@@ -139,14 +156,17 @@
                 <a class="btn btn--primary btn--block mt-5!" href="{{ route('packages.index') }}">Lihat akses paket <svg data-icon="arrow-right"></svg></a>
             @elseif (! $contentAvailable)
                 <p class="mt-5! text-sm leading-relaxed text-[var(--text)]" role="status">Paket ini belum bisa dibeli karena kontennya sedang tidak tersedia. Silakan pilih paket lain atau hubungi admin.</p>
+            @elseif ($voucherError)
+                <p class="mt-5! text-sm">Perbaiki atau hapus kode voucher untuk melanjutkan.</p>
             @elseif (! $paymentAvailable)
                 <p class="mt-5! text-sm leading-relaxed text-[var(--text)]" role="status">Pembayaran belum tersedia. Silakan hubungi admin untuk mendapatkan paket ini.</p>
             @else
-                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]">{{ $package->price === 0 ? 'Paket gratis akan langsung diaktifkan untuk akunmu.' : 'Kamu akan memilih metode pembayaran di Midtrans. Paket aktif otomatis setelah pembayaran terverifikasi.' }}</p>
+                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]">{{ $quote['amount'] === 0 ? 'Paket akan langsung diaktifkan tanpa pembayaran.' : 'Kamu akan memilih metode pembayaran di Midtrans. Paket aktif otomatis setelah pembayaran terverifikasi.' }}</p>
                 <form action="{{ route('checkout.store') }}" method="POST" class="mt-6!">
                     @csrf
                     <input type="hidden" name="package_id" value="{{ $package->id }}">
-                    <button class="btn btn--primary btn--block" type="submit">{{ $package->price === 0 ? 'Aktifkan paket gratis' : 'Lanjut ke pembayaran' }} <svg data-icon="arrow-right"></svg></button>
+                    <input type="hidden" name="voucher_code" value="{{ $quote['voucher']?->code }}">
+                    <button class="btn btn--primary btn--block" type="submit">{{ $quote['amount'] === 0 ? 'Aktifkan paket gratis' : 'Lanjut ke pembayaran' }} <svg data-icon="arrow-right"></svg></button>
                 </form>
             @endif
 

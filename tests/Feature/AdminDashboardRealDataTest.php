@@ -34,7 +34,7 @@ class AdminDashboardRealDataTest extends TestCase
             ->assertSee('Materi Terbit Nyata')
             ->assertSee('Materi Draft Nyata')
             ->assertSee($participant->name)
-            ->assertSee('Data transaksi belum tersedia')
+            ->assertSee('Ringkasan Pembayaran')
             ->assertDontSee('TRX-90412')
             ->assertViewHas('participantCount', 2)
             ->assertViewHas('completedTryoutCount', 1)

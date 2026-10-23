@@ -10,6 +10,16 @@
     <div class="alert alert--warn"><div><strong>Belum ada bidang.</strong> <a href="{{ route('admin.sections.create') }}">Buat bidang terlebih dahulu</a> sebelum menambahkan topik dan materi.</div></div>
   @endif
   @include('Dashboard.Admin.materials._navigation')
+  <div class="card card--tight stack" style="--stack:.75rem;margin-bottom:1.5rem">
+    <strong>Publish massal</strong>
+    <p class="text-sm text-soft">Terbitkan seluruh draft, termasuk di halaman lain. Draft tanpa sumber dilewati. Pilih bidang atau topik di navigasi untuk membatasi cakupan.</p>
+    <div class="flex flex-wrap items-center" style="gap:.75rem">
+      <x-material-publish scope="all" label="Terbitkan semua materi" />
+      @if($selectedSection)<x-material-publish scope="section" :section-id="$selectedSection->id" :label="'Terbitkan bidang: '.$selectedSection->name" />@endif
+      @if($selectedTopic)<x-material-publish scope="topic" :topic-id="$selectedTopic->id" :label="'Terbitkan topik: '.$selectedTopic->name" />@endif
+      <a class="btn btn--ghost btn--sm" href="{{ route('materials.index', ['show_drafts' => 1]) }}">Lihat draft di halaman Materi</a>
+    </div>
+  </div>
   <div class="content-workspace">
     <aside class="content-topic-panel card" aria-label="Navigasi topik">
       <div class="content-panel-heading"><div><h2>Topik</h2><p>{{ $selectedSection?->name ?? 'Semua bidang' }}</p></div><a class="content-icon-button" href="{{ route('admin.topics.create', array_filter(['section_id' => $selectedSection?->id, 'workspace' => 1])) }}" aria-label="Tambah topik" title="Tambah topik"><svg data-icon="plus"></svg></a></div>
@@ -76,10 +86,10 @@
             </div>
             <span class="badge {{ $material->isPublished() ? 'badge--mint' : 'badge--amber' }} badge--flat">{{ $material->isPublished() ? 'Terbit' : 'Draft' }}</span>
             <div class="content-row-actions">
+              <form method="POST" action="{{ route('admin.materials.status', $material) }}">@csrf @method('PATCH')<input type="hidden" name="workspace" value="1"><button class="btn btn--ghost btn--sm" type="submit">{{ $material->isPublished() ? 'Jadikan draft' : 'Terbitkan' }}</button></form>
               <a class="btn btn--ghost btn--sm" href="{{ route('admin.materials.edit', [$material, 'workspace' => 1]) }}" aria-label="Edit {{ $material->title }}">Edit</a>
               <details class="content-menu"><summary class="content-icon-button" aria-label="Tindakan untuk {{ $material->title }}" title="Tindakan lainnya"><svg data-icon="more"></svg></summary><div class="content-menu__items">
                 <a href="{{ route('materials.show', $material) }}" target="_blank" rel="noopener"><svg data-icon="external"></svg> Pratinjau</a>
-                <form method="POST" action="{{ route('admin.materials.status', $material) }}">@csrf @method('PATCH')<input type="hidden" name="workspace" value="1"><button type="submit"><svg data-icon="{{ $material->isPublished() ? 'pause' : 'send' }}"></svg>{{ $material->isPublished() ? 'Jadikan draft' : 'Terbitkan' }}</button></form>
                 <form method="POST" action="{{ route('admin.materials.destroy', $material) }}" data-content-confirm data-confirm-title="Arsipkan materi?" data-confirm-body="Materi &quot;{{ $material->title }}&quot; akan disembunyikan. Berkas PDF tetap disimpan." data-confirm-ok="Ya, arsipkan">@csrf @method('DELETE')<input type="hidden" name="workspace" value="1"><button type="submit" class="is-danger"><svg data-icon="trash"></svg> Arsipkan materi</button></form>
               </div></details>
             </div>
