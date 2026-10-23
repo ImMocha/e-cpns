@@ -61,6 +61,18 @@ class AdminPackageController extends Controller
         return redirect()->route('admin.packages.edit', $package)->with('success', 'Paket diperbarui. Hak peserta yang sudah aktif tetap mengikuti ketentuan saat aktivasi.');
     }
 
+    public function deactivate(Request $request, Package $package): RedirectResponse
+    {
+        DB::transaction(function () use ($request, $package): void {
+            Package::query()->whereKey($package->id)->lockForUpdate()->firstOrFail()->update([
+                'is_active' => false,
+                'updated_by' => $request->user()->id,
+            ]);
+        });
+
+        return back()->with('success', 'Paket dinonaktifkan. Pembelian dan aktivasi baru dihentikan. Akses peserta yang sudah aktif tetap berlaku.');
+    }
+
     public function destroy(Package $package): RedirectResponse
     {
         DB::transaction(function () use ($package): void {

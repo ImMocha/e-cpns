@@ -22,7 +22,7 @@
         @if (! $package->trashed() && $package->is_active && ! $package->hasAvailableContent())<p class="text-xs text-soft" style="margin-top:.5rem">Konten belum tersedia. Perbarui isi paket agar dapat dibeli.</p>@endif
     </td>
     <td><div class="btn-row"><a class="btn btn--ghost btn--sm" href="{{ route('admin.packages.edit', $package) }}">{{ $package->trashed() ? 'Lihat peserta' : 'Kelola' }}</a>
-    @unless ($package->trashed())<form method="POST" action="{{ route('admin.packages.destroy', $package) }}" data-content-confirm data-confirm-title="Arsipkan paket?" data-confirm-body="Paket hilang dari katalog. Akses peserta yang sudah aktif tetap berlaku.">@csrf @method('DELETE')<button class="btn btn--ghost btn--sm">Arsipkan</button></form>@endunless
+    @include('Dashboard.Admin.packages._actions')
     </div></td>
 </tr>
 @empty<tr><td colspan="8" class="text-soft">Belum ada paket yang sesuai. Buat paket dan pilih konten untuk mulai.</td></tr>@endforelse

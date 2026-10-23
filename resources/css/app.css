@@ -12,6 +12,7 @@
 @import './lontar/exams.css';
 @import './lontar/certificates.css';
 @import './lontar/feature-help.css';
+@import './lontar/packages.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

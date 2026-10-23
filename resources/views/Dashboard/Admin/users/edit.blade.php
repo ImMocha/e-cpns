@@ -33,17 +33,17 @@
     </div>
 
     @include('Dashboard.Admin.users._form', ['mode' => 'edit'])
-@endsection
-
-@section('modals')
+    @unless (auth()->user()->is($user))
     {{-- ============ ZONA BERBAHAYA ============ --}}
     <div class="card card--tight card--dashed" style="margin-top:1.5rem;border-color:#F5C6C7">
-      <div class="card__title" style="font-size:var(--fs-base);color:#B3282C">Tindakan Permanen</div>
+      <div class="card__title" style="font-size:var(--fs-base);color:#B3282C">Hapus akun peserta</div>
       <p class="text-sm text-soft" style="margin:.4rem 0 1rem">
         Menghapus akun akan menyembunyikannya dari daftar. Riwayat tryout dan transaksi peserta tetap tersimpan di sistem.
       </p>
       <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
-            onsubmit="event.preventDefault(); L.confirmAction({ title: 'Hapus akun ini?', body: 'Akun {{ $user->name }} akan dihapus dari daftar peserta. Tindakan ini tidak bisa dibatalkan.', ok: 'Ya, hapus', tone: 'danger', onOk: function () { this.closest('form').submit(); } }.bind(this));">
+            data-content-confirm data-confirm-title="Hapus akun peserta?"
+            data-confirm-body="Akun {{ $user->name }} akan dihapus dari daftar dan tidak dapat masuk. Riwayat tryout dan transaksi tetap tersimpan."
+            data-confirm-ok="Ya, hapus">
         @csrf
         @method('DELETE')
         <button class="btn btn--ghost btn--sm" type="submit" style="color:#B3282C">
@@ -51,4 +51,5 @@
         </button>
       </form>
     </div>
+    @endunless
 @endsection

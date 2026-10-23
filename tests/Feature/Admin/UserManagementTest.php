@@ -338,6 +338,40 @@ class UserManagementTest extends TestCase
 
     // ---- Delete --------------------------------------------------------------
 
+    public function test_delete_account_forms_use_confirmation_and_hide_self_deletion(): void
+    {
+        $participant = User::factory()->create(['name' => "Peserta O'Connor"]);
+        $admin = $this->admin();
+        $this->actingAs($admin);
+
+        $this->get(route('admin.users.index'))
+            ->assertSee(route('admin.users.destroy', $participant), false)
+            ->assertDontSee('action="'.route('admin.users.destroy', $admin).'"', false)
+            ->assertSee('data-content-confirm', false);
+        $this->get(route('admin.users.edit', $participant))
+            ->assertSee('data-content-confirm', false)->assertDontSee('onsubmit=', false);
+        $this->get(route('admin.users.edit', $admin))->assertDontSee('Hapus Akun');
+    }
+
+    public function test_participant_cannot_delete_another_account(): void
+    {
+        $participant = User::factory()->create();
+        $target = User::factory()->create();
+
+        $this->actingAs($participant)->delete(route('admin.users.destroy', $target))->assertForbidden();
+
+        $this->assertNotSoftDeleted($target);
+    }
+
+    public function test_guest_cannot_delete_an_account(): void
+    {
+        $target = User::factory()->create();
+
+        $this->delete(route('admin.users.destroy', $target))->assertRedirect(route('login'));
+
+        $this->assertNotSoftDeleted($target);
+    }
+
     public function test_admin_can_delete_a_user(): void
     {
         $user = User::factory()->create();

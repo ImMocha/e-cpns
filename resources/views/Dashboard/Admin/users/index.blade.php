@@ -151,6 +151,18 @@
                           <svg data-icon="{{ $user->isActive() ? 'x-circle' : 'check-circle' }}"></svg>
                         </button>
                       </form>
+                      @unless (auth()->user()->is($user))
+                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
+                              data-content-confirm data-confirm-title="Hapus akun peserta?"
+                              data-confirm-body="Akun {{ $user->name }} akan dihapus dari daftar dan tidak dapat masuk. Riwayat tryout dan transaksi tetap tersimpan."
+                              data-confirm-ok="Ya, hapus">
+                          @csrf
+                          @method('DELETE')
+                          <button class="btn btn--ghost btn--sm" style="color:#B3282C" type="submit" aria-label="Hapus akun {{ $user->name }}">
+                            <svg data-icon="trash"></svg> Hapus
+                          </button>
+                        </form>
+                      @endunless
                     </div>
                   </td>
                 </tr>

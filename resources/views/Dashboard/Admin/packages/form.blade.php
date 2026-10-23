@@ -43,6 +43,9 @@
 </fieldset>
 </form>
 @if ($package->exists)
+<div class="btn-row question-section" style="margin-top:1.5rem">
+    @include('Dashboard.Admin.packages._actions')
+</div>
 <section class="card question-section" style="margin-top:1.5rem">
     <div class="card__head"><div><h2 class="card__title">Paket Peserta</h2><p class="card__sub">Daftar akses dari pembelian atau pemberian manual oleh admin.</p></div><span class="badge badge--primary badge--flat">{{ $grants->total() }} akses</span></div>
     @if ($package->is_active && ! $package->trashed())

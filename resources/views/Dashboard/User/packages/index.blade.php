@@ -4,23 +4,49 @@
 <header class="page-head"><span class="eyebrow">Akses Belajar</span><h1 style="margin-top:.5rem">Paket Belajar</h1><p>Pilih konten belajar sesuai kebutuhanmu dan pantau masa aktif paket.</p></header>
 @if ($ownedPackages->isNotEmpty())
 <section class="question-section">
-    <h2 class="card__title" style="margin-bottom:1rem">Paket Saya</h2>
-    <div class="grid grid-cols-1 lg:grid-cols-2">
+    <div class="package-section-head"><div><h2 class="card__title">Paket Saya</h2><p class="text-sm text-soft">Semua akses belajarmu, dalam satu tempat.</p></div><span class="badge badge--primary badge--flat">{{ $ownedPackages->count() }} paket</span></div>
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
     @foreach ($ownedPackages as $owned)
-    <article class="card question-form-stack">
-        <div class="flex items-center justify-between"><h3 class="card__title">{{ $owned->name }}</h3><span class="badge badge--{{ $owned->isActive() ? 'mint' : 'amber' }} badge--flat">{{ $owned->statusLabel() }}</span></div>
-        <div class="kv">
-            <div class="kv__row"><span class="kv__key">Akses leaderboard</span><span class="kv__val">{{ $owned->leaderboard_access->label() }}</span></div>
-            <div class="kv__row"><span class="kv__key">Aktif sejak</span><span class="kv__val">{{ $owned->starts_at->translatedFormat('d M Y, H:i') }}</span></div>
-            <div class="kv__row"><span class="kv__key">Berlaku sampai</span><span class="kv__val">{{ $owned->expires_at?->translatedFormat('d M Y, H:i') ?? 'Tanpa batas waktu' }}</span></div>
-            <div class="kv__row"><span class="kv__key">Kuota tryout tersisa</span><span class="kv__val">{{ $owned->remainingTryouts() ?? 'Tanpa batas' }}{{ $owned->tryout_quota === null ? '' : ' / '.$owned->tryout_quota }}</span></div>
+    <article class="card owned-package">
+        <header class="owned-package__head">
+            <div class="owned-package__identity"><span class="owned-package__icon" aria-hidden="true"><svg data-icon="package"></svg></span><div><span class="eyebrow">Paket Belajar</span><h3 class="owned-package__name">{{ $owned->name }}</h3></div></div>
+            <span class="badge badge--{{ $owned->isActive() ? 'mint' : 'amber' }} badge--flat">{{ $owned->statusLabel() }}</span>
+        </header>
+        <div class="owned-package__body">
+            <dl class="owned-package__stats">
+                <div><dt><svg data-icon="clock" aria-hidden="true"></svg> Aktif sejak</dt><dd>{{ $owned->starts_at->translatedFormat('d M Y') }}<small>{{ $owned->starts_at->translatedFormat('H:i') }}</small></dd></div>
+                <div><dt><svg data-icon="calendar" aria-hidden="true"></svg> Berlaku sampai</dt><dd>{{ $owned->expires_at?->translatedFormat('d M Y') ?? 'Tanpa batas waktu' }}@if ($owned->expires_at)<small>{{ $owned->expires_at->translatedFormat('H:i') }}</small>@endif</dd></div>
+                <div><dt><svg data-icon="timer" aria-hidden="true"></svg> Kuota tryout tersisa</dt><dd>{{ $owned->remainingTryouts() ?? 'Tanpa batas' }}@if ($owned->tryout_quota !== null)<small>dari {{ $owned->tryout_quota }} sesi</small>@else<small>Tanpa batas sesi</small>@endif</dd></div>
+                <div><dt><svg data-icon="layers" aria-hidden="true"></svg> Konten belajar</dt><dd>{{ $owned->materials->count() + $owned->exams->count() }} konten<small>{{ $owned->materials->count() }} materi · {{ $owned->exams->count() }} sesi soal</small></dd></div>
+            </dl>
+            <div class="owned-package__leaderboard"><span class="owned-package__trophy" aria-hidden="true"><svg data-icon="trophy"></svg></span><div><span>Akses leaderboard</span><strong>{{ $owned->leaderboard_access->label() }}</strong></div></div>
+        @if ($owned->isActive())
+            <details class="package-content">
+                <summary><span><svg data-icon="book" aria-hidden="true"></svg> Lihat konten paket</span><svg class="package-content__chevron" data-icon="chevron-down" aria-hidden="true"></svg></summary>
+                <div class="package-content__scroll" tabindex="0" role="region" aria-label="Konten {{ $owned->name }}">
+                    @if ($owned->materials->isNotEmpty())
+                    <h4 class="package-content__heading">Materi belajar <span>{{ $owned->materials->count() }}</span></h4>
+                    <ul class="package-content__list">
+                        @foreach ($owned->materials as $material)
+                        <li><a href="{{ route('materials.show', $material) }}"><span class="package-content__number">{{ $loop->iteration }}</span><span>{{ $material->title }}</span><svg data-icon="arrow-right" aria-hidden="true"></svg></a></li>
+                        @endforeach
+                    </ul>
+                    @endif
+                    @if ($owned->exams->isNotEmpty())
+                    <h4 class="package-content__heading">Latihan &amp; tryout <span>{{ $owned->exams->count() }}</span></h4>
+                    <ul class="package-content__list">
+                        @foreach ($owned->exams as $exam)
+                        <li><a href="{{ route($exam->kind === 'quiz' ? 'quizzes.index' : 'tryouts.index') }}"><span class="package-content__number"><svg data-icon="{{ $exam->kind === 'quiz' ? 'pencil' : 'timer' }}" aria-hidden="true"></svg></span><span>{{ $exam->title }}<small>{{ $exam->kind === 'quiz' ? 'Latihan' : 'Tryout' }}</small></span><svg data-icon="arrow-right" aria-hidden="true"></svg></a></li>
+                        @endforeach
+                    </ul>
+                    @endif
+                    @if ($owned->materials->isEmpty() && $owned->exams->isEmpty())<p class="text-sm text-soft">Konten paket belum tersedia.</p>@endif
+                </div>
+            </details>
+        @endif
         </div>
         @if ($owned->isActive())
-        <details><summary class="text-sm">Lihat konten paket</summary><ul class="price__list">
-            @foreach ($owned->materials as $material)<li><a href="{{ route('materials.show', $material) }}">{{ $material->title }}</a></li>@endforeach
-            @foreach ($owned->exams as $exam)<li><a href="{{ route($exam->kind === 'quiz' ? 'quizzes.index' : 'tryouts.index') }}">{{ $exam->title }} · {{ $exam->kind === 'quiz' ? 'Latihan' : 'Tryout' }}</a></li>@endforeach
-        </ul></details>
-        <div class="btn-row"><a class="btn btn--primary btn--sm" href="{{ route('materials.index') }}">Belajar</a><a class="btn btn--ghost btn--sm" href="{{ route('tryouts.index') }}">Tryout</a></div>
+        <footer class="owned-package__footer"><a class="btn btn--primary btn--sm" href="{{ route('materials.index') }}"><svg data-icon="book" aria-hidden="true"></svg> Mulai belajar <svg data-icon="arrow-right" aria-hidden="true"></svg></a><a class="btn btn--ghost btn--sm" href="{{ route('tryouts.index') }}"><svg data-icon="timer" aria-hidden="true"></svg> Buka tryout</a></footer>
         @endif
     </article>
     @endforeach
@@ -42,7 +68,7 @@
             <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Kuota tryout tanpa batas' : 'Total kuota '.$package->tryout_quota.' sesi tryout' }}</li>
             @if ($package->price > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> Kunci jawaban &amp; pembahasan</li>@endif
         </ul>
-        <details><summary class="text-sm">Lihat daftar konten</summary><ul class="price__list">
+        <details class="package-content"><summary><span>Lihat daftar konten</span><svg class="package-content__chevron" data-icon="chevron-down" aria-hidden="true"></svg></summary><ul class="price__list package-content__scroll">
             @foreach ($package->materials as $material)<li>{{ $material->title }}</li>@endforeach
             @foreach ($package->exams as $exam)<li>{{ $exam->title }}</li>@endforeach
         </ul></details>

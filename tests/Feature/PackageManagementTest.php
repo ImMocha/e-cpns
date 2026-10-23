@@ -56,6 +56,57 @@ class PackageManagementTest extends TestCase
         $this->assertDatabaseCount('packages', 0);
     }
 
+    public function test_admin_deactivates_package_without_changing_existing_access(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $participant = User::factory()->create();
+        $material = Material::factory()->premium()->video()->create();
+        $package = Package::factory()->create();
+        $package->materials()->attach($material);
+        $grant = UserPackage::grant($participant, $package, $admin);
+
+        $this->actingAs($admin)->from(route('admin.packages.index'))
+            ->patch(route('admin.packages.deactivate', $package))
+            ->assertRedirect(route('admin.packages.index'))->assertSessionHas('success');
+
+        $this->assertDatabaseHas('packages', ['id' => $package->id, 'is_active' => false, 'updated_by' => $admin->id]);
+        $this->assertNotSoftDeleted($package);
+        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'revoked_at' => null]);
+        $this->assertTrue($material->fresh()->isAccessibleBy($participant));
+        $this->post(route('admin.packages.members.store', $package), ['email' => $participant->email, 'note' => 'Uji'])
+            ->assertSessionHasErrors('email');
+        $this->get(route('admin.packages.index', ['status' => 'inactive']))->assertSee($package->name);
+        $this->actingAs($participant)->get(route('packages.index'))->assertViewHas('packages', fn ($packages): bool => $packages->isEmpty());
+    }
+
+    public function test_guest_cannot_deactivate_package(): void
+    {
+        $package = Package::factory()->create();
+
+        $this->patch(route('admin.packages.deactivate', $package))->assertRedirect(route('login'));
+
+        $this->assertTrue($package->fresh()->is_active);
+    }
+
+    public function test_archived_package_cannot_be_deactivated(): void
+    {
+        $package = Package::factory()->create();
+        $package->delete();
+
+        $this->actingAs(User::factory()->admin()->create())->patch(route('admin.packages.deactivate', $package))->assertNotFound();
+
+        $this->assertSoftDeleted($package);
+    }
+
+    public function test_package_actions_are_available_in_admin_list_and_edit_pages(): void
+    {
+        $package = Package::factory()->create();
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->get(route('admin.packages.index'))->assertSee('Nonaktifkan')->assertSee('Hapus paket');
+        $this->get(route('admin.packages.edit', $package))->assertSee('Nonaktifkan')->assertSee('Hapus paket');
+    }
+
     public function test_content_picker_supplies_topics_and_marks_only_available_content_for_bulk_selection(): void
     {
         $ready = Material::factory()->premium()->video()->create();
@@ -95,6 +146,7 @@ class PackageManagementTest extends TestCase
         return ['list' => ['get', 'admin.packages.index'], 'create form' => ['get', 'admin.packages.create'],
             'edit form' => ['get', 'admin.packages.edit'], 'store' => ['post', 'admin.packages.store'],
             'update' => ['put', 'admin.packages.update'], 'archive' => ['delete', 'admin.packages.destroy'],
+            'deactivate' => ['patch', 'admin.packages.deactivate'],
             'grant' => ['post', 'admin.packages.members.store'], 'revoke' => ['delete', 'admin.packages.members.destroy']];
     }
 
@@ -110,6 +162,7 @@ class PackageManagementTest extends TestCase
         $this->assertDatabaseCount('packages', 1);
         $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'revoked_at' => null]);
         $this->assertNotSoftDeleted($package);
+        $this->assertTrue($package->fresh()->is_active);
     }
 
     /** @return array<string, array{array<string, mixed>, string}> */

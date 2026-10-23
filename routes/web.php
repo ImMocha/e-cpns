@@ -196,6 +196,7 @@ Route::prefix('admin')
         Route::resource('exams', AdminExamController::class)->except('show');
         Route::post('articles/images', [ArticleImageController::class, 'store'])->middleware('throttle:30,1')->name('articles.images.store');
         Route::resource('articles', AdminArticleController::class);
+        Route::patch('packages/{package}/deactivate', [AdminPackageController::class, 'deactivate'])->name('packages.deactivate');
         Route::resource('packages', AdminPackageController::class)->except('show')->withTrashed(['edit']);
         Route::post('packages/{package}/members', [UserPackageController::class, 'store'])->name('packages.members.store');
         Route::delete('packages/{package}/members/{userPackage}', [UserPackageController::class, 'destroy'])->withTrashed()->name('packages.members.destroy');
