@@ -5,22 +5,52 @@
 <header class="page-head"><span class="eyebrow">Pembelian Paket</span><h1 style="margin-top:.5rem">{{ $transaction->package_snapshot['name'] }}</h1><p class="break-all">{{ $transaction->order_id }}</p></header>
 @if ($errors->any() || $paymentError)<div class="article-errors question-section" role="alert"><ul>@foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach @if ($paymentError)<li>{{ $paymentError }}</li>@endif</ul></div>@endif
 <div class="grid items-start gap-6 lg:grid-cols-2">
-<section class="card">
-    <h2 class="card__title">Status pembayaran</h2>
-    <p style="margin-top:1rem"><span class="badge badge--{{ $transaction->status === \App\Enums\TransactionStatus::Paid ? 'mint' : 'amber' }} badge--flat">{{ $transaction->status->label() }}</span></p>
-    <div class="price__amount" style="margin-top:1.5rem">{{ $transaction->formattedAmount() }}</div>
-    <ul class="price__list">
+<section class="card min-w-0 overflow-hidden p-0!" aria-labelledby="payment-status-title">
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border)] bg-[var(--primary-050)] p-5 sm:p-6">
+        <div class="flex items-center gap-4">
+            <span class="grid size-12 shrink-0 place-items-center rounded-2xl border-2 border-[var(--ink)] bg-[var(--pop-mint)] text-xl text-[var(--pop-ink)] shadow-[3px_3px_0_var(--ink)]" aria-hidden="true"><svg data-icon="credit-card"></svg></span>
+            <div>
+                <h2 id="payment-status-title" class="font-[var(--font-display)] text-xl! font-extrabold text-[var(--ink)]">Status pembayaran</h2>
+                <p class="mt-1! text-sm text-[var(--text-soft)]">Ringkasan transaksi paketmu</p>
+            </div>
+        </div>
+        <span class="badge badge--{{ $transaction->status === \App\Enums\TransactionStatus::Paid ? 'mint' : 'amber' }} badge--flat">{{ $transaction->status->label() }}</span>
+    </div>
+    <div class="flex flex-col gap-6 p-5 sm:p-6">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-[var(--text-soft)]">Total pembayaran</p>
+            <div class="mt-2! font-[var(--font-display)] text-4xl font-extrabold tracking-tight text-[var(--ink)] sm:text-5xl">{{ $transaction->formattedAmount() }}</div>
+            <p class="mt-2! flex items-center gap-2 text-sm text-[var(--text-soft)]"><svg data-icon="trophy" aria-hidden="true"></svg>{{ (\App\Enums\LeaderboardAccess::tryFrom($transaction->package_snapshot['leaderboard_access'] ?? 'none') ?? \App\Enums\LeaderboardAccess::None)->label() }}</p>
+        </div>
         @if ($transaction->voucher_code)
-            <li>Harga paket: Rp{{ number_format($transaction->amount + $transaction->discount_amount, 0, ',', '.') }}</li>
-            <li>Voucher {{ $transaction->voucher_code }}: −Rp{{ number_format($transaction->discount_amount, 0, ',', '.') }}</li>
+            <dl class="flex flex-col gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm">
+                <div class="flex flex-wrap justify-between gap-2"><dt>Harga paket</dt><dd class="font-bold">Rp{{ number_format($transaction->amount + $transaction->discount_amount, 0, ',', '.') }}</dd></div>
+                <div class="flex flex-wrap justify-between gap-2"><dt class="break-all">Voucher {{ $transaction->voucher_code }}</dt><dd class="font-bold text-[var(--success)]">−Rp{{ number_format($transaction->discount_amount, 0, ',', '.') }}</dd></div>
+            </dl>
         @endif
-        <li>{{ (\App\Enums\LeaderboardAccess::tryFrom($transaction->package_snapshot['leaderboard_access'] ?? 'none') ?? \App\Enums\LeaderboardAccess::None)->label() }}</li>
-        <li>Dibuat: {{ $transaction->created_at->format('d/m/Y H:i') }}</li>
-        @if ($transaction->status === \App\Enums\TransactionStatus::Pending)<li>Batas pembayaran: {{ $transaction->expires_at->format('d/m/Y H:i') }}</li>@endif
-        @if ($transaction->paid_at)<li>Terverifikasi: {{ $transaction->paid_at->format('d/m/Y H:i') }}</li>@endif
-        <li>Metode: {{ $transaction->payment_type ? str_replace('_', ' ', $transaction->payment_type) : ($transaction->provider === 'free' ? 'Paket gratis' : 'Belum dipilih') }}</li>
-        @if ($transaction->checked_at)<li>Terakhir diperiksa: {{ $transaction->checked_at->format('d/m/Y H:i') }}</li>@endif
-    </ul>
+        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="calendar" aria-hidden="true"></svg>Dibuat</dt>
+                <dd class="mt-2! text-sm font-bold text-[var(--ink)]">{{ $transaction->created_at->format('d/m/Y H:i') }}</dd>
+            </div>
+            <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
+                <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="credit-card" aria-hidden="true"></svg>Metode pembayaran</dt>
+                <dd class="mt-2! break-words text-sm font-bold text-[var(--ink)]">{{ $transaction->payment_type ? ($transaction->payment_type === 'qris' ? 'QRIS' : ucwords(str_replace('_', ' ', $transaction->payment_type))) : ($transaction->provider === 'free' ? 'Paket gratis' : 'Belum dipilih') }}</dd>
+            </div>
+            @if ($transaction->status === \App\Enums\TransactionStatus::Pending)
+                <div class="rounded-2xl border border-[var(--border)] bg-[var(--warning-050)] p-4 sm:col-span-2">
+                    <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="clock" aria-hidden="true"></svg>Batas pembayaran</dt>
+                    <dd class="mt-2! text-sm font-bold text-[var(--ink)]">{{ $transaction->expires_at->format('d/m/Y H:i') }}</dd>
+                </div>
+            @endif
+            @if ($transaction->paid_at)
+                <div class="rounded-2xl border border-[var(--border)] bg-[var(--success-050)] p-4 sm:col-span-2">
+                    <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="check-circle" aria-hidden="true"></svg>Terverifikasi</dt>
+                    <dd class="mt-2! text-sm font-bold text-[var(--ink)]">{{ $transaction->paid_at->format('d/m/Y H:i') }}</dd>
+                </div>
+            @endif
+        </dl>
+        <div class="flex flex-col gap-4 border-t border-dashed border-[var(--border-strong)] pt-5">
     @if ($transaction->status === \App\Enums\TransactionStatus::Pending)
         <p class="text-sm text-soft">Sudah membayar? Periksa status jika aksesmu belum aktif. Kamu bisa melanjutkan pembayaran dari pesanan yang sama.</p>
         @if ($transaction->expires_at->isFuture())
@@ -28,11 +58,14 @@
         @endif
     @endif
     @if ($transaction->provider === 'midtrans')
-        <form method="POST" action="{{ route('transactions.refresh', $transaction) }}" style="margin-top:.75rem">@csrf<button class="btn btn--ghost btn--block">Periksa status pembayaran</button></form>
+        <form method="POST" action="{{ route('transactions.refresh', $transaction) }}">@csrf<button class="btn btn--outline btn--block"><svg data-icon="refresh" aria-hidden="true"></svg>Periksa status pembayaran</button></form>
     @endif
+    @if ($transaction->checked_at)<p class="flex items-center justify-center gap-2 text-center text-xs text-[var(--text-soft)]"><svg data-icon="clock" aria-hidden="true"></svg>Terakhir diperiksa: {{ $transaction->checked_at->format('d/m/Y H:i') }}</p>@endif
     @if (in_array($transaction->status, [\App\Enums\TransactionStatus::Failed, \App\Enums\TransactionStatus::Expired, \App\Enums\TransactionStatus::Refunded], true))
         <a class="btn btn--primary btn--block" style="margin-top:1rem" href="{{ route('packages.index') }}">Pilih paket lagi</a>
     @endif
+        </div>
+    </div>
 </section>
 <section class="card card--blue card--pad-0 min-w-0 p-0!" aria-labelledby="package-access-title">
     <div class="flex items-center gap-4 border-b border-[var(--border)] bg-[var(--primary-050)] p-5 sm:p-6">
