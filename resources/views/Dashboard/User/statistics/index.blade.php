@@ -24,7 +24,15 @@
       <article class="stat reveal"><span class="stat__icon"><svg data-icon="trending-up"></svg></span><div><div class="stat__label">Nilai Terbaru</div><div class="stat__value">{{ $summary['latest']?->score ?? '—' }}</div><div class="stat__delta text-soft">{{ $summary['latest'] ? 'Maks. '.$summary['latest']->max_score : 'Belum ada sesi' }}</div></div></article>
       <article class="stat reveal" data-delay="70"><span class="stat__icon ico--amber"><svg data-icon="crown"></svg></span><div><div class="stat__label">Nilai Tertinggi</div><div class="stat__value">{{ $summary['highest']?->score ?? '—' }}</div><div class="stat__delta text-soft">{{ $summary['highest']?->title ?? 'Belum ada sesi' }}</div></div></article>
       <article class="stat reveal" data-delay="140"><span class="stat__icon ico--pink"><svg data-icon="gauge"></svg></span><div><div class="stat__label">Rata-rata Nilai</div><div class="stat__value">{{ $summary['averageScore'] ?? '—' }}</div><div class="stat__delta text-soft">{{ $summary['count'] }} sesi selesai</div></div></article>
-      <article class="stat reveal" data-delay="210"><span class="stat__icon ico--mint"><svg data-icon="target"></svg></span><div><div class="stat__label">Akurasi Jawaban</div><div class="stat__value">{{ $summary['accuracy'] !== null ? $summary['accuracy'].'%' : '—' }}</div><div class="stat__delta text-soft">{{ $summary['correct'] }} benar dari {{ $summary['correct'] + $summary['wrong'] }} dijawab</div></div></article>
+      <article class="stat reveal" data-delay="210">
+        <span class="stat__icon ico--mint"><svg data-icon="target"></svg></span>
+        <div>
+          <div class="stat__label">Akurasi Soal Benar/Salah</div>
+          <div class="stat__value">{{ $summary['accuracy'] !== null ? $summary['accuracy'].'%' : '—' }}</div>
+          <div class="stat__delta text-soft">{{ $summary['correct'] }} benar dari {{ $summary['correct'] + $summary['wrong'] }} jawaban · akumulasi {{ $summary['count'] }} sesi</div>
+          <div class="stat__delta text-soft">Tidak termasuk soal berbobot seperti TKP.</div>
+        </div>
+      </article>
     </section>
 
     @if ($summary['count'] === 0)

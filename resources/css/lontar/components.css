@@ -1032,7 +1032,7 @@
 }
 .scorebar__fill {
   height: 100%;
-  width: 0;
+  width: clamp(0%, calc(var(--pct, 0) * 1%), 100%);
   border-radius: var(--r-full);
   background: var(--primary);
   background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.26) 0 5px, transparent 5px 10px);
