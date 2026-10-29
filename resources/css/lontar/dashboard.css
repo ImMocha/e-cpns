@@ -1,4 +1,44 @@
 /* Sky accents are scoped to dashboard content so navigation keeps its palette. */
+.admin-activity { align-self:start; }
+.admin-activity__head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border); }
+.admin-activity__heading { display:flex; align-items:center; gap:.85rem; min-width:0; }
+.admin-activity__icon { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; border:1px solid var(--border-strong); border-radius:14px; color:var(--primary-700); background:var(--primary-050); }
+.admin-activity__icon svg { width:22px; height:22px; }
+.admin-activity__head .chip svg { width:14px; height:14px; }
+.admin-activity__summary { display:flex; align-items:center; gap:.85rem; padding:1.25rem 0; }
+.admin-activity__summary > strong { font-family:var(--font-display); font-size:2.75rem; font-weight:800; letter-spacing:-.05em; line-height:1; color:var(--ink); }
+.admin-activity__summary > div { display:grid; gap:.2rem; font-size:var(--fs-sm); font-weight:600; color:var(--ink); }
+.admin-activity__summary small { color:var(--text-soft); font-size:var(--fs-xs); font-weight:400; }
+.admin-activity__chart { height:250px; }
+.admin-activity__empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.7rem; padding:2rem 1rem; border:1px dashed var(--border-strong); border-radius:var(--r-md); text-align:center; background:linear-gradient(160deg, var(--primary-050), var(--surface)); }
+.admin-activity__empty-icon { position:relative; display:grid; place-items:center; width:58px; height:58px; margin-bottom:.3rem; border:1px solid var(--border-strong); border-radius:18px; color:var(--primary-700); background:var(--surface); box-shadow:3px 3px 0 var(--border); }
+.admin-activity__empty-icon > svg { width:27px; height:27px; }
+.admin-activity__empty-icon > span { position:absolute; right:-7px; bottom:-5px; display:grid; place-items:center; width:25px; height:25px; border:2px solid var(--surface); border-radius:50%; background:var(--primary-100); }
+.admin-activity__empty-icon > span svg { width:14px; height:14px; }
+.admin-activity__empty h3 { color:var(--ink); font-family:var(--font-display); font-size:var(--fs-md); font-weight:700; }
+.admin-activity__empty p { max-width:440px; color:var(--text-soft); font-size:var(--fs-sm); line-height:1.8; }
+.admin-activity__months { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:.35rem; padding-top:1rem; color:var(--text-soft); font-size:var(--fs-xs); text-align:center; }
+.admin-activity--recent .admin-activity__head { padding:1.25rem 1.5rem; }
+.admin-activity__empty--recent { margin:1.25rem; padding:2.25rem 1rem; }
+.admin-activity__note { display:inline-flex; align-items:center; gap:.4rem; margin-top:.5rem; color:var(--primary-700); font-size:var(--fs-xs); }
+.admin-activity__note svg { width:15px; height:15px; }
+.admin-activity__table-wrap { border:none; border-radius:0; box-shadow:none; }
+.admin-activity__table { min-width:620px; }
+.admin-activity__table thead th { background:var(--primary-050); color:var(--primary-700); border-bottom:1px solid var(--border); }
+.admin-activity__participant { display:flex; align-items:center; gap:.65rem; color:var(--ink); }
+.admin-activity__avatar { display:grid; place-items:center; width:34px; height:34px; flex:0 0 34px; border-radius:11px; background:var(--primary-050); color:var(--primary-700); }
+.admin-activity__avatar svg { width:17px; height:17px; }
+.admin-activity__session { display:flex; flex-direction:column; align-items:flex-start; gap:.4rem; color:var(--ink); }
+.admin-activity__score { display:inline-block; padding:.35rem .65rem; border-radius:9px; background:var(--primary-050); color:var(--primary-700); font-weight:800; white-space:nowrap; }
+.admin-activity__score small { color:var(--text-soft); font-size:var(--fs-xs); font-weight:500; }
+@media (max-width:540px) {
+  .admin-activity--monthly { padding:1rem; }
+  .admin-activity--recent .admin-activity__head { padding:1rem; }
+  .admin-activity__empty--recent { margin:1rem; }
+  .admin-activity__heading { align-items:flex-start; gap:.65rem; }
+  .admin-activity__head .card__sub { line-height:1.7; }
+  .admin-activity__months { font-size:.625rem; }
+}
 .dashboard-row + .dashboard-row { margin-top: 1.5rem; }
 .dashboard-row--full { grid-template-columns: minmax(0, 1fr); }
 .dashboard-row > .card:not(.card--pad-0):not(.question-form-stack) { display: flex; flex-direction: column; }

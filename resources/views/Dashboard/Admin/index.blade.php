@@ -35,12 +35,31 @@
     </section>
 
     <div class="panes panes--wide panes--equal dashboard-row">
-      <section class="card">
-        <div class="card__head"><div><div class="card__title">Sesi Selesai per Bulan</div><div class="card__sub">Latihan Soal dan tryout yang dikumpulkan selama 6 bulan terakhir</div></div></div>
+      <section class="card admin-activity admin-activity--monthly" aria-labelledby="monthly-activity-title">
+        <div class="admin-activity__head">
+          <div class="admin-activity__heading">
+            <span class="admin-activity__icon" aria-hidden="true"><svg data-icon="chart"></svg></span>
+            <div><h2 class="card__title" id="monthly-activity-title">Sesi Selesai per Bulan</h2><p class="card__sub">Pantau aktivitas latihan soal dan tryout peserta.</p></div>
+          </div>
+          <span class="chip chip--primary"><svg data-icon="calendar" aria-hidden="true"></svg> 6 bulan terakhir</span>
+        </div>
+        <div class="admin-activity__summary">
+          <strong>{{ number_format(array_sum($monthlyChart['values']), 0, ',', '.') }}</strong>
+          <div><span>sesi selesai</span><small>Latihan soal &amp; tryout</small></div>
+        </div>
         @if (array_sum($monthlyChart['values']) > 0)
-          <div style="height:250px" data-chart='@json($monthlyChart)'></div>
+          <div class="admin-activity__chart" data-chart='@json($monthlyChart)'></div>
         @else
-          <p class="text-sm text-soft">Belum ada sesi yang selesai dalam enam bulan terakhir.</p>
+          <div class="admin-activity__empty">
+            <span class="admin-activity__empty-icon" aria-hidden="true"><svg data-icon="trending-up"></svg></span>
+            <h3>Aktivitas belajar dimulai dari sini</h3>
+            <p>Belum ada sesi yang selesai dalam enam bulan terakhir.<br>Grafik akan muncul setelah peserta menyelesaikan sesi.</p>
+          </div>
+          <div class="admin-activity__months" aria-label="Periode grafik">
+            @foreach ($monthlyChart['labels'] as $label)
+              <span>{{ $label }}</span>
+            @endforeach
+          </div>
         @endif
       </section>
       <section class="card card--pop card--amber">
@@ -68,22 +87,34 @@
       </section>
     </div>
     <div class="panes panes--wide panes--equal dashboard-row">
-      <section class="card card--pad-0">
-        <div class="flex items-center justify-between" style="padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
-          <div><div class="card__title">Pengerjaan Terbaru</div><div class="card__sub">Sesi peserta yang benar-benar selesai</div></div>
+      <section class="card card--pad-0 admin-activity admin-activity--recent" aria-labelledby="recent-activity-title">
+        <div class="admin-activity__head">
+          <div class="admin-activity__heading">
+            <span class="admin-activity__icon" aria-hidden="true"><svg data-icon="history"></svg></span>
+            <div><h2 class="card__title" id="recent-activity-title">Pengerjaan Terbaru</h2><p class="card__sub">Hasil terbaru dari sesi yang telah diselesaikan.</p></div>
+          </div>
+          <span class="badge badge--mint badge--flat"><svg data-icon="check-circle" aria-hidden="true"></svg> Sesi selesai</span>
         </div>
-        <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
-          <table class="table" style="min-width:620px">
+        @if ($recentAttempts->isNotEmpty())
+        <div class="table-wrap admin-activity__table-wrap">
+          <table class="table admin-activity__table">
+            <caption class="sr-only">Hasil pengerjaan peserta terbaru</caption>
             <thead><tr><th>Peserta</th><th>Aktivitas</th><th>Tanggal</th><th class="num">Nilai</th></tr></thead>
             <tbody>
-              @forelse ($recentAttempts as $attempt)
-                <tr><td><strong style="color:var(--ink)">{{ $attempt->user?->name ?? 'Peserta terhapus' }}</strong></td><td>{{ $attempt->title }} <span class="badge badge--{{ $attempt->kind === 'tryout' ? 'primary' : 'mint' }} badge--flat">{{ \App\Enums\ExamKind::from($attempt->kind)->label() }}</span></td><td><x-local-time :value="$attempt->submitted_at" format="d M Y H:i" /></td><td class="num">{{ $attempt->score }} / {{ $attempt->max_score }}</td></tr>
-              @empty
-                <tr><td colspan="4" class="text-soft">Belum ada hasil ujian peserta.</td></tr>
-              @endforelse
+              @foreach ($recentAttempts as $attempt)
+                <tr><td><div class="admin-activity__participant"><span class="admin-activity__avatar" aria-hidden="true"><svg data-icon="user"></svg></span><strong>{{ $attempt->user?->name ?? 'Peserta terhapus' }}</strong></div></td><td><div class="admin-activity__session"><strong>{{ $attempt->title }}</strong><span class="badge badge--{{ $attempt->kind === 'tryout' ? 'primary' : 'mint' }} badge--flat">{{ \App\Enums\ExamKind::from($attempt->kind)->label() }}</span></div></td><td><x-local-time :value="$attempt->submitted_at" format="d M Y H:i" /></td><td class="num"><span class="admin-activity__score">{{ $attempt->score }} <small>/ {{ $attempt->max_score }}</small></span></td></tr>
+              @endforeach
             </tbody>
           </table>
         </div>
+        @else
+          <div class="admin-activity__empty admin-activity__empty--recent">
+            <span class="admin-activity__empty-icon" aria-hidden="true"><svg data-icon="file"></svg><span><svg data-icon="clock"></svg></span></span>
+            <h3>Menunggu hasil pertama</h3>
+            <p>Belum ada hasil ujian peserta.<br>Nama peserta, aktivitas, dan nilai akan tampil di sini setelah sesi selesai.</p>
+            <span class="admin-activity__note"><svg data-icon="check-circle" aria-hidden="true"></svg> Hanya sesi yang sudah dikumpulkan</span>
+          </div>
+        @endif
       </section>
       <section class="card">
         <div class="card__head"><div><div class="card__title">Status Peserta</div><div class="card__sub">Akun aktif dan nonaktif</div></div></div>
