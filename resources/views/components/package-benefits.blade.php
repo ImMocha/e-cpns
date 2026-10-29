@@ -1,7 +1,7 @@
 @props(['package'])
 <div {{ $attributes->class(['grid content-start gap-4']) }}>
 <ul class="price__list">
-    @foreach ($package->tier->benefits() as $benefit)
+    @foreach ($package->tier->configuredBenefits($package->tryout_tokens, $package->tryout_quota, $package->leaderboard_access) as $benefit)
         <li><span class="price__check"><svg data-icon="check" aria-hidden="true"></svg></span> {{ $benefit }}</li>
     @endforeach
 </ul>

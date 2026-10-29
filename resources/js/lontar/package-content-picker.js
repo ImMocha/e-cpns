@@ -83,7 +83,7 @@ if (typeof document !== 'undefined') initPackagePickers(document);
 export function initPackageTiers(scope) {
   scope.querySelectorAll('[data-package-tier-form]').forEach(form => {
     const select = form.querySelector('[data-package-tier]');
-    const update = () => {
+    const update = (applyDefaults = false) => {
       const tier = select.value;
       form.querySelectorAll('[data-tier-benefits]').forEach(panel => {
         panel.hidden = panel.dataset.tierBenefits !== tier;
@@ -98,15 +98,13 @@ export function initPackageTiers(scope) {
           row.hidden = restricted;
         });
       });
-      const fields = ['tryout_quota', 'tryout_tokens', 'leaderboard_access'];
-      fields.forEach(name => { form.elements[name].disabled = !!tier; });
-      if (tier) {
+      if (tier && applyDefaults) {
         form.elements.tryout_quota.value = tier === 'regular' ? 2 : tier === 'bundling' ? 3 : '';
         form.elements.tryout_tokens.value = tier === 'premium' ? 0 : tier === 'regular' ? 1 : 3;
         form.elements.leaderboard_access.value = tier === 'regular' ? 'none' : tier === 'bundling' ? 'local' : 'national';
       }
     };
-    select.addEventListener('change', update);
+    select.addEventListener('change', () => update(true));
     form.addEventListener('change', event => {
       if (event.target.closest('[data-package-picker]')) update();
     });

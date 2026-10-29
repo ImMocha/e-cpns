@@ -90,7 +90,7 @@
     "isDynamicEntry": true
   },
   "node_modules/pdfjs-dist/build/pdf.mjs": {
-    "file": "assets/pdf-Cp2XiPMI.js",
+    "file": "assets/pdf-se9m9NLZ.js",
     "name": "pdf",
     "src": "node_modules/pdfjs-dist/build/pdf.mjs",
     "isDynamicEntry": true,
@@ -103,7 +103,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CwSduvtN.css",
+    "file": "assets/app-B9bHtKtt.css",
     "name": "app",
     "names": [
       "app.css"
@@ -112,7 +112,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DXH_WzaM.js",
+    "file": "assets/app-DvpRvjc4.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/lontar/feature-help.js": {
-    "file": "assets/feature-help-CCPInXxO.js",
+    "file": "assets/feature-help-DhmGNegO.js",
     "name": "feature-help",
     "src": "resources/js/lontar/feature-help.js",
     "isDynamicEntry": true,
@@ -147,7 +147,7 @@
     "isDynamicEntry": true
   },
   "resources/js/lontar/package-content-picker.js": {
-    "file": "assets/package-content-picker-CA4kHf3H.js",
+    "file": "assets/package-content-picker-yzCG0obs.js",
     "name": "package-content-picker",
     "src": "resources/js/lontar/package-content-picker.js",
     "isDynamicEntry": true

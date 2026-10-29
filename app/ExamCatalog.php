@@ -50,7 +50,7 @@ class ExamCatalog
             $covering = $entitlements->filter(fn (UserPackage $item): bool => $item->tier === PackageTier::Premium
                 || (($exam->kind === 'tryout' || $item->tier === null) && $item->exams->contains('id', $exam->id)));
             $claim = $claims->get($exam->id);
-            $freeAccess = $user->isAdmin() || $hasPremium || ($exam->free_claim_enabled ? $claim?->status === 'approved' : $exam->access_level === MaterialAccess::Free);
+            $freeAccess = $user->isAdmin() || ($exam->free_claim_enabled ? ($hasPremium || $claim?->status === 'approved') : $exam->access_level === MaterialAccess::Free);
             $hasAccess = $freeAccess || (! $exam->free_claim_enabled && $covering->isNotEmpty());
             $topicReady = $exam->topicIsReadyFor($user);
             $isAdminPreview = $user->isAdmin() && ($exam->free_claim_enabled || ($exam->requires_topic_completion

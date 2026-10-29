@@ -26,11 +26,16 @@ class PackageRequest extends FormRequest
         $this->merge(['tier' => $this->input('tier', $this->route('package')?->tier?->value)]);
         $tier = is_string($this->input('tier')) ? PackageTier::tryFrom($this->input('tier')) : null;
         if ($tier !== null) {
-            $this->merge([
-                'tryout_quota' => $tier->attemptCount(),
-                'tryout_tokens' => $tier->tryoutCount() ?? 0,
-                'leaderboard_access' => $tier->leaderboardAccess()->value,
-            ]);
+            $package = $this->route('package');
+            foreach ([
+                'tryout_quota' => $package ? $package->tryout_quota : $tier->attemptCount(),
+                'tryout_tokens' => $package ? $package->tryout_tokens : ($tier->tryoutCount() ?? 0),
+                'leaderboard_access' => $package ? $package->leaderboard_access->value : $tier->leaderboardAccess()->value,
+            ] as $field => $default) {
+                if (! $this->exists($field)) {
+                    $this->merge([$field => $default]);
+                }
+            }
         }
     }
 

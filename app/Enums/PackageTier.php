@@ -49,10 +49,27 @@ enum PackageTier: string
     /** @return list<string> */
     public function benefits(): array
     {
-        return match ($this) {
-            self::Regular => ['Akses satu paket soal Tryout SKD', 'Dapat akses 2 x percobaan', 'Kunci jawaban dan pembahasan'],
-            self::Bundling => ['Akses tiga paket soal Tryout SKD', 'Dapat akses 3 x percobaan total', 'Kunci jawaban dan pembahasan', 'Perangkingan Daerah'],
-            self::Premium => ['Akses paket soal Tryout SKD unlimited', 'Akses percobaan unlimited', 'Kunci jawaban dan pembahasan', 'Materi Lengkap SKD', 'Latihan soal SKD', 'Progress belajar (analisa pembelajaran)', 'Statistik nilai', 'Perangkingan Nasional', 'Sertifikat'],
-        };
+        return $this->configuredBenefits($this->tryoutCount() ?? 0, $this->attemptCount(), $this->leaderboardAccess());
+    }
+
+    /** @return list<string> */
+    public function configuredBenefits(int $tokens, ?int $quota, LeaderboardAccess $leaderboard): array
+    {
+        $benefits = [
+            $this === self::Premium ? 'Akses paket soal Tryout SKD unlimited' : $tokens.' token pilihan paket soal Tryout SKD',
+            $quota === null ? 'Akses percobaan unlimited' : 'Dapat akses '.$quota.' x percobaan total',
+            'Kunci jawaban dan pembahasan',
+        ];
+        if ($this === self::Premium) {
+            array_push($benefits, 'Materi Lengkap SKD', 'Latihan soal SKD', 'Progress belajar (analisa pembelajaran)', 'Statistik nilai');
+        }
+        if ($leaderboard !== LeaderboardAccess::None) {
+            $benefits[] = $leaderboard === LeaderboardAccess::National ? 'Perangkingan Nasional' : 'Perangkingan Daerah';
+        }
+        if ($this === self::Premium) {
+            $benefits[] = 'Sertifikat';
+        }
+
+        return $benefits;
     }
 }

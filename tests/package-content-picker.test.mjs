@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { matchesPackageContent, selectPackageContent } from '../resources/js/lontar/package-content-picker.js';
+import { matchesPackageContent, selectPackageContent, initPackageTiers } from '../resources/js/lontar/package-content-picker.js';
 
 const items = [
   { id: 1, topic: 10, search: 'Pancasila TWK Topik Nasionalisme', access: 'free', kind: 'pdf', available: true },
@@ -60,4 +60,27 @@ test('archived or otherwise disabled controls cannot be changed by bulk actions'
   const disabled = items.map(item => ({ ...item, disabled: true }));
   assert.deepEqual([...selectPackageContent(disabled, ['1'], 'all')], ['1']);
   assert.deepEqual([...selectPackageContent(disabled, ['1'], 'clear')], ['1']);
+});
+
+
+test('tier initialization keeps saved limits editable and changes only apply defaults on tier selection', () => {
+  const listeners = {};
+  const select = { value: 'regular', addEventListener: (event, callback) => { listeners[event] = callback; } };
+  const elements = {
+    tryout_quota: { value: '8', disabled: false },
+    tryout_tokens: { value: '4', disabled: false },
+    leaderboard_access: { value: 'national', disabled: false },
+  };
+  const formListeners = {};
+  const form = { elements, querySelector: () => select, querySelectorAll: () => [],
+    addEventListener: (event, callback) => { formListeners[event] = callback; } };
+  initPackageTiers({ querySelectorAll: () => [form] });
+  assert.deepEqual(Object.values(elements).map(field => field.value), ['8', '4', 'national']);
+  assert.ok(Object.values(elements).every(field => !field.disabled));
+  formListeners.change({ target: { closest: () => true } });
+  assert.equal(elements.tryout_quota.value, '8');
+  select.value = 'bundling';
+  listeners.change();
+  assert.deepEqual(Object.values(elements).map(field => field.value), [3, 3, 'local']);
+  assert.ok(Object.values(elements).every(field => !field.disabled));
 });

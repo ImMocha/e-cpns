@@ -22,13 +22,14 @@
                     <option value="{{ $tier->value }}" @selected(old('tier', $package->tier?->value) === $tier->value)>{{ $tier->label() }}</option>
                 @endforeach
             </select>
-            <p class="field__hint">Benefit, kuota percobaan, token, dan perangkingan otomatis mengikuti jenis paket. Harga serta masa aktif dapat diatur sendiri.</p>
+            <p class="field__hint">Jenis paket menentukan cakupan akses konten. Kuota percobaan, token, leaderboard, harga, dan masa aktif dapat diatur sendiri. Mengganti jenis paket mengisi nilai awal yang bisa kamu ubah.</p>
         </div>
         @foreach (\App\Enums\PackageTier::cases() as $tier)
             <div data-tier-benefits="{{ $tier->value }}" @if (old('tier', $package->tier?->value) !== $tier->value) hidden @endif>
-                <strong>{{ $tier->label() }}</strong>
+                <strong>Benefit bawaan {{ $tier->label() }}</strong>
+                <p class="field__hint">Jumlah token, percobaan, dan akses leaderboard mengikuti nilai yang kamu simpan di bawah.</p>
                 <ul>@foreach ($tier->benefits() as $benefit)<li>{{ $benefit }}</li>@endforeach</ul>
-                <p class="field__hint">{{ $tier === \App\Enums\PackageTier::Premium ? 'Seluruh materi, latihan soal, dan tryout terbit otomatis terbuka, termasuk konten baru. Tidak perlu memilih konten satu per satu.' : 'Tanpa akses materi dan latihan soal. Tidak perlu memilih konten. Peserta memilih tryout setelah paket aktif menggunakan 1 token Reguler atau 3 token Bundling.' }}</p>
+                <p class="field__hint">{{ $tier === \App\Enums\PackageTier::Premium ? 'Seluruh materi, latihan soal, dan tryout terbit otomatis terbuka, termasuk konten baru. Tidak perlu memilih konten satu per satu.' : 'Tanpa akses materi dan latihan soal. Tidak perlu memilih konten. Peserta memilih tryout setelah paket aktif menggunakan token sesuai pengaturan di bawah.' }}</p>
             </div>
         @endforeach
         <div class="field"><label class="label" for="package-name">Nama paket</label><input class="input" id="package-name" name="name" maxlength="180" value="{{ old('name', $package->name) }}" required></div>
@@ -38,7 +39,7 @@
             <div class="field"><label class="label" for="package-price">Harga sebenarnya (Rp)</label><input class="input" id="package-price" type="number" name="price" min="0" max="1000000000" step="1" value="{{ old('price', $package->price) }}" required><p class="field__hint">Harga yang dibayar peserta, misalnya 80000. Isi rupiah tanpa titik pemisah.</p></div>
             <div class="field"><label class="label" for="package-duration">Masa aktif (hari)</label><input class="input" id="package-duration" type="number" name="duration_days" min="1" max="36500" value="{{ old('duration_days', $package->duration_days) }}"><p class="field__hint">Dihitung sejak aktivasi. Kosong = tanpa batas waktu.</p></div>
             <div class="field"><label class="label" for="package-quota">Total kuota percobaan tryout</label><input class="input" id="package-quota" type="number" name="tryout_quota" min="0" max="100000" value="{{ old('tryout_quota', $package->tryout_quota) }}"><p class="field__hint">Kosong = tanpa batas. 0 = tanpa tryout. Latihan Soal tidak memotong kuota.</p></div>
-            <div class="field"><label class="label" for="package-tokens">Token pilihan tryout</label><input class="input" id="package-tokens" type="number" name="tryout_tokens" min="0" max="100000" value="{{ old('tryout_tokens', $package->tryout_tokens) }}" required><p class="field__hint">1 token membuka 1 tryout premium pilihan peserta. Untuk Reguler: 1 token dan total kuota 2 percobaan. Isi 0 jika tanpa token. Sesi yang dipilih di konten paket tetap langsung terbuka tanpa token.</p></div>
+            <div class="field"><label class="label" for="package-tokens">Token pilihan tryout</label><input class="input" id="package-tokens" type="number" name="tryout_tokens" min="0" max="100000" value="{{ old('tryout_tokens', $package->tryout_tokens) }}" required><p class="field__hint">1 token membuka 1 tryout premium pilihan peserta. Isi 0 jika tanpa token. Sesi yang dipilih di konten paket tetap langsung terbuka tanpa token.</p></div>
             <div class="field"><label class="label" for="package-position">Urutan katalog</label><input class="input" id="package-position" type="number" name="position" min="0" max="65535" value="{{ old('position', $package->position) }}" required></div>
         </div>
         <div class="field">

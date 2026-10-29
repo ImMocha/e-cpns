@@ -39,7 +39,7 @@ class AdminPackageController extends Controller
 
     public function create(): View
     {
-        return $this->form(new Package(['tier' => PackageTier::Regular, 'is_active' => false, 'position' => 0]));
+        return $this->form(new Package(['tier' => PackageTier::Regular, 'tryout_quota' => 2, 'tryout_tokens' => 1, 'is_active' => false, 'position' => 0]));
     }
 
     public function store(PackageRequest $request): RedirectResponse

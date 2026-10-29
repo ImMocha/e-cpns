@@ -41,7 +41,7 @@ class PackageTierTest extends TestCase
     }
 
     #[DataProvider('limitedPackages')]
-    public function test_admin_saves_limited_packages_without_content_and_assigns_all_tokens(PackageTier $tier, int $count, int $attempts, string $leaderboard): void
+    public function test_admin_saves_custom_limits_and_leaderboard_without_content(PackageTier $tier, int $count, int $attempts, string $leaderboard): void
     {
         $this->actingAs(User::factory()->admin()->create())->post(route('admin.packages.store'), [
             'tier' => $tier->value, 'name' => $tier->label(), 'price' => 15000,
@@ -51,8 +51,54 @@ class PackageTierTest extends TestCase
 
         $package = Package::sole();
         $this->assertDatabaseHas('packages', ['id' => $package->id, 'tier' => $tier->value,
-            'tryout_quota' => $attempts, 'tryout_tokens' => $count, 'leaderboard_access' => $leaderboard]);
+            'tryout_quota' => 999, 'tryout_tokens' => 999, 'leaderboard_access' => 'national']);
         $this->get(route('admin.packages.edit', $package))->assertOk()->assertSee('Jenis paket dan benefit');
+    }
+
+    public function test_admin_updates_limits_without_changing_existing_grants_and_new_grants_use_saved_values(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $package = Package::factory()->create(['tier' => PackageTier::Regular, 'tryout_tokens' => 1,
+            'tryout_quota' => 2, 'leaderboard_access' => 'none']);
+        $existing = UserPackage::grant(User::factory()->create(), $package, $admin, 'Sebelum perubahan');
+        $payload = ['tier' => 'regular', 'name' => $package->name, 'price' => 17000, 'duration_days' => 90,
+            'tryout_quota' => 8, 'tryout_tokens' => 4, 'leaderboard_access' => 'local', 'position' => 2, 'is_active' => true];
+
+        $this->actingAs($admin)->put(route('admin.packages.update', $package), $payload)->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('packages', ['id' => $package->id, 'tryout_quota' => 8, 'tryout_tokens' => 4,
+            'leaderboard_access' => 'local', 'duration_days' => 90, 'price' => 17000]);
+        $this->assertDatabaseHas('user_packages', ['id' => $existing->id, 'tryout_quota' => 2,
+            'tryout_tokens' => 1, 'leaderboard_access' => 'none']);
+        $grant = UserPackage::grant(User::factory()->create(), $package->fresh(), $admin, 'Sesudah perubahan');
+        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryout_quota' => 8,
+            'tryout_tokens' => 4, 'leaderboard_access' => 'local']);
+        $this->get(route('packages.index'))->assertSee('4 token pilihan paket soal Tryout SKD')
+            ->assertSee('Dapat akses 8 x percobaan total')->assertSee('Perangkingan Daerah');
+        $this->put(route('admin.packages.update', $package), array_replace($payload, ['tryout_quota' => null]))
+            ->assertSessionHasNoErrors();
+        $this->assertNull($package->fresh()->tryout_quota);
+        $this->put(route('admin.packages.update', $package), array_replace($payload, [
+            'tryout_quota' => -1, 'tryout_tokens' => -1, 'leaderboard_access' => 'invalid',
+        ]))->assertSessionHasErrors(['tryout_quota', 'tryout_tokens', 'leaderboard_access']);
+        $this->put(route('admin.packages.update', $package), array_replace($payload, ['tryout_quota' => 0]))
+            ->assertSessionHasErrors('tryout_quota');
+    }
+
+    public function test_premium_catalog_and_start_respect_a_custom_attempt_limit(): void
+    {
+        $user = User::factory()->create();
+        $exam = $this->exam();
+        $package = Package::factory()->create(['tier' => PackageTier::Premium, 'tryout_quota' => 1]);
+        $grant = UserPackage::grant($user, $package, User::factory()->admin()->create(), 'Premium terbatas');
+        $this->actingAs($user)->post(route('tryouts.start', $exam->slug))->assertSessionHasNoErrors();
+        $attempt = ExamAttempt::sole();
+        $this->post(route('exam-attempts.submit', $attempt))->assertOk();
+
+        $this->get(route('tryouts.index'))->assertViewHas('banks', fn ($banks): bool => ! $banks->firstWhere('exam.id', $exam->id)['canStart']);
+        $this->post(route('tryouts.start', $exam->slug))->assertSessionHasErrors('exam');
+        $this->assertSame(1, $grant->fresh()->tryouts_used);
+        $this->assertDatabaseCount('exam_attempts', 1);
     }
 
     #[DataProvider('limitedPackages')]
@@ -163,7 +209,7 @@ class PackageTierTest extends TestCase
     public function test_package_benefits_are_consistent_across_catalog_and_checkout(): void
     {
         $this->exam();
-        $package = Package::factory()->unlimited()->create(['tier' => PackageTier::Premium]);
+        $package = Package::factory()->unlimited()->create(['tier' => PackageTier::Premium, 'leaderboard_access' => 'national']);
 
         $this->get(route('home'))->assertSee('Akses paket soal Tryout SKD unlimited')->assertSee('Sertifikat');
         $this->actingAs(User::factory()->create())->get(route('packages.index'))
@@ -196,7 +242,7 @@ class PackageTierTest extends TestCase
         $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tier' => $tier->value, 'tryouts_used' => $attempts, 'tryout_tokens' => 0]);
     }
 
-    public function test_admin_can_activate_premium_without_selecting_content_and_cannot_limit_its_quota(): void
+    public function test_admin_can_activate_premium_without_selecting_content_and_set_its_quota(): void
     {
         $this->exam();
 
@@ -205,7 +251,7 @@ class PackageTierTest extends TestCase
             'tryout_quota' => 1, 'leaderboard_access' => 'none',
         ])->assertSessionHasNoErrors();
 
-        $this->assertDatabaseHas('packages', ['tier' => 'premium', 'tryout_quota' => null, 'tryout_tokens' => 0, 'leaderboard_access' => 'national']);
+        $this->assertDatabaseHas('packages', ['tier' => 'premium', 'tryout_quota' => 1, 'tryout_tokens' => 0, 'leaderboard_access' => 'none']);
     }
 
     #[DataProvider('limitedPackages')]
