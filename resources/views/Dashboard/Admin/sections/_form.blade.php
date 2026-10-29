@@ -73,11 +73,11 @@
                 <div class="field{{ $errors->has('slug') ? ' is-invalid' : '' }}">
                     <label class="label" for="slug">
                         Slug
-                        <span class="label__opt">— opsional, dibuat otomatis dari nama bila kosong</span>
+                        <span class="label__opt">— otomatis dari nama, diberi akhiran jika sudah dipakai</span>
                     </label>
                     <div class="input-group">
                         <span class="input-group__icon"><svg data-icon="external"></svg></span>
-                        <input class="input text-mono" type="text" id="slug" name="slug"
+                        <input class="input text-mono" type="text" id="slug" maxlength="140" name="slug" data-auto-slug="sections" data-slug-url="{{ route('admin.slugs.preview') }}" data-slug-id="{{ $section->id }}"
                                value="{{ old('slug', $section->slug) }}"
                                placeholder="bahasa-indonesia" autocomplete="off">
                     </div>
@@ -152,8 +152,8 @@
             <div class="kv" style="margin-top:.85rem">
                 <div class="kv__row"><span class="kv__key">ID bidang</span><span class="kv__val">{{ $isEdit ? '#'.$section->id : 'otomatis' }}</span></div>
                 <div class="kv__row"><span class="kv__key">Slug</span><span class="kv__val">{{ $section->slug ?: '—' }}</span></div>
-                <div class="kv__row"><span class="kv__key">Dibuat</span><span class="kv__val">{{ $isEdit ? $section->created_at->format('d M Y') : '—' }}</span></div>
-                <div class="kv__row"><span class="kv__key">Diubah terakhir</span><span class="kv__val">{{ $isEdit && $section->updated_at ? $section->updated_at->format('d M Y H:i') : '—' }}</span></div>
+                <div class="kv__row"><span class="kv__key">Dibuat</span><span class="kv__val"><x-local-time :value="$isEdit ? $section->created_at : null" format="d M Y" /></span></div>
+                <div class="kv__row"><span class="kv__key">Diubah terakhir</span><span class="kv__val"><x-local-time :value="$isEdit ? $section->updated_at : null" /></span></div>
             </div>
         </section>
 

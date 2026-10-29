@@ -85,11 +85,6 @@ class Question extends Model
         return ArticleContent::sanitize($this->explanation);
     }
 
-    public function revision(): string
-    {
-        return hash('sha256', json_encode([$this->body, $this->options, $this->correct_option, $this->scoring_type, $this->option_scores, $this->shuffle_options, $this->explanation, $this->image_path, $this->video_path], JSON_THROW_ON_ERROR));
-    }
-
     public function isWeighted(): bool
     {
         return $this->scoring_type === QuestionScoring::Weighted;

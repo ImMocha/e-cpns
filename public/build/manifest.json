@@ -1,7 +1,23 @@
 {
-  "_fonts-bzdJ2Avl.css": {
-    "file": "assets/fonts-bzdJ2Avl.css",
-    "src": "_fonts-bzdJ2Avl.css"
+  "_fonts-DIO1rdR2.css": {
+    "file": "assets/fonts-DIO1rdR2.css",
+    "src": "_fonts-DIO1rdR2.css"
+  },
+  "_outfit-400-normal-BGsTXAXT.woff2": {
+    "file": "assets/outfit-400-normal-BGsTXAXT.woff2",
+    "src": "_outfit-400-normal-BGsTXAXT.woff2"
+  },
+  "_outfit-400-normal-DMwTpYkH.woff": {
+    "file": "assets/outfit-400-normal-DMwTpYkH.woff",
+    "src": "_outfit-400-normal-DMwTpYkH.woff"
+  },
+  "_outfit-500-normal-ClnHRwRh.woff": {
+    "file": "assets/outfit-500-normal-ClnHRwRh.woff",
+    "src": "_outfit-500-normal-ClnHRwRh.woff"
+  },
+  "_outfit-500-normal-DKnIMDSk.woff2": {
+    "file": "assets/outfit-500-normal-DKnIMDSk.woff2",
+    "src": "_outfit-500-normal-DKnIMDSk.woff2"
   },
   "_outfit-600-normal-B7SfZ07L.woff2": {
     "file": "assets/outfit-600-normal-B7SfZ07L.woff2",
@@ -74,7 +90,7 @@
     "isDynamicEntry": true
   },
   "node_modules/pdfjs-dist/build/pdf.mjs": {
-    "file": "assets/pdf-vs7m4qf_.js",
+    "file": "assets/pdf-Cp2XiPMI.js",
     "name": "pdf",
     "src": "node_modules/pdfjs-dist/build/pdf.mjs",
     "isDynamicEntry": true,
@@ -87,7 +103,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CSFo3FCP.css",
+    "file": "assets/app-DRi8ejRv.css",
     "name": "app",
     "names": [
       "app.css"
@@ -96,21 +112,24 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-B6apqwh7.js",
+    "file": "assets/app-DXH_WzaM.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "dynamicImports": [
       "node_modules/pdfjs-dist/build/pdf.mjs",
+      "resources/js/lontar/tryout-demo.js",
+      "resources/js/lontar/typography-settings.js",
       "resources/js/lontar/feature-help.js",
-      "resources/js/lontar/package-content-picker.js"
+      "resources/js/lontar/package-content-picker.js",
+      "resources/js/lontar/package-carousel.js"
     ],
     "assets": [
       "assets/pdf.worker.min-CjEcRF4W.mjs"
     ]
   },
   "resources/js/lontar/feature-help.js": {
-    "file": "assets/feature-help-BZ_BI2KW.js",
+    "file": "assets/feature-help-CCPInXxO.js",
     "name": "feature-help",
     "src": "resources/js/lontar/feature-help.js",
     "isDynamicEntry": true,
@@ -121,10 +140,28 @@
       "node_modules/driver.js/dist/driver.js.mjs"
     ]
   },
+  "resources/js/lontar/package-carousel.js": {
+    "file": "assets/package-carousel-Dja_NPEP.js",
+    "name": "package-carousel",
+    "src": "resources/js/lontar/package-carousel.js",
+    "isDynamicEntry": true
+  },
   "resources/js/lontar/package-content-picker.js": {
-    "file": "assets/package-content-picker-MVeCC_FB.js",
+    "file": "assets/package-content-picker-CA4kHf3H.js",
     "name": "package-content-picker",
     "src": "resources/js/lontar/package-content-picker.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/lontar/tryout-demo.js": {
+    "file": "assets/tryout-demo-CjtFpD8V.js",
+    "name": "tryout-demo",
+    "src": "resources/js/lontar/tryout-demo.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/lontar/typography-settings.js": {
+    "file": "assets/typography-settings-Bw08qNrF.js",
+    "name": "typography-settings",
+    "src": "resources/js/lontar/typography-settings.js",
     "isDynamicEntry": true
   }
 }

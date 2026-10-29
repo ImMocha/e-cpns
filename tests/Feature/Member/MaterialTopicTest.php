@@ -15,7 +15,7 @@ class MaterialTopicTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_topics_and_their_lessons_are_ordered_in_accordions(): void
+    public function test_topics_link_to_pages_with_lessons_in_learning_order(): void
     {
         $first = Topic::factory()->create(['name' => 'Dasar Kebangsaan', 'position' => 1]);
         $second = Topic::factory()->create(['section_id' => $first->section_id, 'name' => 'Pendalaman', 'position' => 2]);
@@ -24,8 +24,10 @@ class MaterialTopicTest extends TestCase
         Material::factory()->create(['section_id' => $second->section_id, 'topic_id' => $second->id, 'title' => 'PDF Lanjutan']);
         Material::factory()->draft()->create(['section_id' => $first->section_id, 'topic_id' => $first->id, 'title' => 'Draft Rahasia']);
         $this->actingAs(User::factory()->create())->get(route('materials.index'))
-            ->assertOk()->assertSee('<details', false)
-            ->assertSeeInOrder(['Dasar Kebangsaan', 'PDF Pengantar', 'Video Pembahasan', 'Pendalaman', 'PDF Lanjutan'])
+            ->assertOk()->assertDontSee('<details', false)
+            ->assertSeeInOrder(['Dasar Kebangsaan', 'Pendalaman'])->assertSee(route('materials.topic', $first), false);
+        $this->get(route('materials.topic', $first))
+            ->assertSeeInOrder(['PDF Pengantar', 'Video Pembahasan'])
             ->assertSee('15 menit')->assertSee('12 halaman')->assertDontSee('Draft Rahasia');
     }
 
@@ -53,7 +55,8 @@ class MaterialTopicTest extends TestCase
         Material::factory()->video()->create(['section_id' => $topic->section_id, 'topic_id' => $topic->id, 'title' => 'Video Pengantar']);
         Material::factory()->create(['title' => 'Materi Bidang Lain']);
         $this->actingAs(User::factory()->create())->get(route('materials.index', ['q' => 'Nasionalisme', 'type' => 'pdf']))
-            ->assertOk()->assertSee('Dokumen Pengantar')->assertDontSee('Video Pengantar')->assertDontSee('Materi Bidang Lain');
+            ->assertOk()->assertSee('Nasionalisme')
+            ->assertViewHas('topics', fn ($topics): bool => $topics->count() === 1 && $topics->first()->materials->pluck('title')->all() === ['Dokumen Pengantar']);
     }
 
     public function test_pagination_keeps_all_lessons_of_one_topic_together(): void
@@ -63,7 +66,7 @@ class MaterialTopicTest extends TestCase
             Material::factory()->create(['section_id' => $topic->section_id, 'topic_id' => $topic->id, 'title' => 'Pelajaran nomor '.$number, 'position' => $number]);
         }
         $this->actingAs(User::factory()->create())->get(route('materials.index'))
-            ->assertOk()->assertSee('Pelajaran nomor 1')->assertSee('Pelajaran nomor 13')
+            ->assertOk()->assertSee('13 materi')
             ->assertViewHas('topics', fn ($topics) => $topics->total() === 1 && $topics->first()->materials->count() === 13);
     }
 

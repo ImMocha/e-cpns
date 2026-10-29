@@ -21,7 +21,7 @@ class FeatureHelpTest extends TestCase
             ->assertSee('data-help-route="admin.exams.create"', false)
             ->assertSee('Bantuan &amp; Panduan', false)
             ->assertSee('data-help-destination="admin-packages"', false)
-            ->assertSee('Bantuan editor soal')
+            ->assertSee('aria-controls="feature-help-center"', false)
             ->assertDontSee('data-help-destination="member-profile"', false);
     }
 

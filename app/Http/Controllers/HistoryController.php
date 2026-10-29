@@ -14,7 +14,7 @@ class HistoryController extends SliceController
     {
         $user = $request->user();
         ExamAttempt::finalizeExpiredFor($user);
-        $kind = in_array($request->query('kind'), ['tryout', 'quiz'], true)
+        $kind = in_array($request->query('kind'), ['tryout', 'quiz', 'practice'], true)
             ? $request->query('kind') : null;
         $status = in_array($request->query('status'), [ExamAttempt::COMPLETED, ExamAttempt::IN_PROGRESS], true)
             ? $request->query('status') : null;

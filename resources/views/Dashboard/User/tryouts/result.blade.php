@@ -1,12 +1,12 @@
 @extends('layouts.user.main')
 
-@section('title', 'Hasil '.($kind === 'quiz' ? 'Latihan' : 'Tryout').' — Ganesha Nusa CPNS Online')
+@section('title', 'Hasil '.\App\Enums\ExamKind::from($kind)->label().' — Ganesha Nusa CPNS Online')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">
       <a href="{{ route('dashboard') }}">Dashboard</a>
       <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
-      <a href="{{ route($kind === 'quiz' ? 'quizzes.index' : 'tryouts.index') }}">{{ $kind === 'quiz' ? 'Latihan' : 'Tryout CAT' }}</a>
+      <a href="{{ route(\App\Enums\ExamKind::from($kind)->catalogRoute()) }}">{{ \App\Enums\ExamKind::from($kind)->label() }}</a>
       <span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span>
       <span class="crumbs__current">{{ $canViewExplanations ? 'Hasil & Pembahasan' : 'Hasil & Kunci Jawaban' }}</span>
     </nav>
@@ -18,13 +18,13 @@
         <p>{{ $attempt ? 'Rincian jawaban yang tersimpan pada sesi ini.' : 'Kerjakan sesi terlebih dahulu untuk melihat hasil dan kunci jawaban.' }}</p>
       </div>
       @if ($exam?->access_level === \App\Enums\MaterialAccess::Premium)
-        <a class="btn btn--primary" href="{{ route($kind === 'quiz' ? 'quizzes.index' : 'tryouts.index') }}">Lihat sesi &amp; kuota</a>
+        <a class="btn btn--primary" href="{{ route(\App\Enums\ExamKind::from($kind)->catalogRoute()) }}">Lihat sesi &amp; kuota</a>
       @elseif ($exam)
-        <form method="POST" action="{{ route($kind === 'quiz' ? 'quizzes.start' : 'tryouts.start', $exam->slug) }}">@csrf
+        <form method="POST" action="{{ route(\App\Enums\ExamKind::from($kind)->routePrefix().'.start', $exam->slug) }}">@csrf
           <button class="btn btn--primary" type="submit">{{ $attempt ? 'Kerjakan Lagi' : 'Mulai Sekarang' }}</button>
         </form>
       @else
-        <a class="btn btn--primary" href="{{ route($kind === 'quiz' ? 'quizzes.index' : 'tryouts.index') }}">Pilih sesi lain</a>
+        <a class="btn btn--primary" href="{{ route(\App\Enums\ExamKind::from($kind)->catalogRoute()) }}">Pilih sesi lain</a>
       @endif
     </header>
 
@@ -36,7 +36,7 @@
       </section>
     @else
       @if ($kind === 'tryout')<x-passing-grades style="margin-bottom:1.5rem" />@endif
-      @if ($attempt->canPrintCertificate())
+      @if ($attempt->canPrintCertificate() && auth()->user()->canAccessLearningFeatures())
         <div class="btn-row" style="margin-bottom:1.5rem">
           <a class="btn btn--ghost" href="{{ route('certificates.show', $attempt) }}"><svg data-icon="award"></svg> Cetak Sertifikat</a>
         </div>
@@ -54,14 +54,14 @@
               <span class="badge badge--{{ $attempt->hasPassed() ? 'mint' : 'amber' }} badge--flat">
                 {{ $kind === 'tryout' ? ($attempt->hasPassed() ? 'Lulus' : 'Belum Lulus') : ($attempt->passing_score === null ? 'Selesai' : ($attempt->hasPassed() ? 'Di atas ambang' : 'Di bawah ambang')) }}
               </span>
-              <span class="badge badge--primary badge--flat">{{ $attempt->submitted_at->translatedFormat('d M Y H:i') }}</span>
+              <span class="badge badge--primary badge--flat"><x-local-time :value="$attempt->submitted_at" format="d M Y H:i" /></span>
               @if ($attempt->auto_submitted)
                 <span class="badge badge--amber badge--flat">Terkumpul otomatis</span>
               @endif
             </div>
-            <h2>Hasil {{ $kind === 'quiz' ? 'Latihan' : 'Tryout' }} Kamu</h2>
+            <h2>Hasil {{ \App\Enums\ExamKind::from($kind)->label() }} Kamu</h2>
             <p class="text-soft" style="margin-top:.4rem;max-width:56ch">Nilai dihitung dari jawaban yang tersimpan. Soal biasa: benar +{{ $attempt->question_snapshot['pointsPerCorrect'] }}, salah −{{ $attempt->question_snapshot['penaltyWrong'] }}. @if ($weightedQuestionCount)TKP berbobot: skor pilihan 1–5, tanpa penalti salah.@endif Jawaban kosong bernilai 0.
-              @if ($kind === 'quiz' && $attempt->passing_score !== null) Nilai ambang sesi: {{ $attempt->passing_score }}.@endif
+              @if ($kind !== 'tryout' && $attempt->passing_score !== null) Nilai ambang sesi: {{ $attempt->passing_score }}.@endif
             </p>
             <div class="grid grid-4" style="--gap:.75rem;margin-top:1.5rem">
               <div class="card card--tight card--dashed" style="text-align:center"><div class="text-xs text-soft fw-700">{{ $weightedQuestionCount ? 'Benar (soal biasa)' : 'Benar' }}</div><div class="fw-800" style="font-family:var(--font-display);font-size:1.5rem;color:var(--success)">{{ $attempt->correct_count }}</div></div>
@@ -73,7 +73,7 @@
         </div>
       </section>
 
-      <div class="panes" style="--gap:1.5rem;margin-bottom:1.5rem">
+      <div class="panes panes--equal" style="--gap:1.5rem;margin-bottom:1.5rem">
         <section class="card">
           <div class="card__head"><div><div class="card__title">Nilai per Bidang</div><div class="card__sub">Berdasarkan jawaban pada sesi ini</div></div></div>
           @if ($kind === 'tryout')
@@ -104,7 +104,7 @@
 
       @if (count($trendChart['values']) > 1)
         <section class="card" style="margin-bottom:1.5rem">
-          <div class="card__head"><div><div class="card__title">Perkembangan Nilai</div><div class="card__sub">{{ count($trendChart['values']) }} sesi terakhir dari bank soal ini</div></div></div>
+          <div class="card__head"><div><div class="card__title">Perkembangan Nilai</div><div class="card__sub">{{ count($trendChart['values']) }} pengerjaan terakhir dari sesi ini</div></div></div>
           <div style="height:230px" data-chart='@json($trendChart)'></div>
         </section>
       @endif

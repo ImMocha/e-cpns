@@ -35,7 +35,7 @@ class MaterialSeederTest extends TestCase
             $this->assertTrue($section->materials()->where('type', 'pdf')->exists());
             $this->assertTrue($section->materials()->where('type', 'video')->exists());
         }
-        $this->assertTrue(Material::where('access_level', 'free')->exists());
+        $this->assertFalse(Material::where('access_level', '!=', 'premium')->exists());
         $this->assertTrue(Material::where('access_level', 'premium')->exists());
         $this->assertTrue(Material::where('status', 'draft')->exists());
         $this->assertTrue(Topic::where('is_active', false)->exists());

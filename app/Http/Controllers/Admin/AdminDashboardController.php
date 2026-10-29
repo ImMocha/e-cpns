@@ -11,6 +11,7 @@ use App\Http\Controllers\SliceController;
 use App\Models\Article;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
+use App\Models\ExamClaim;
 use App\Models\Material;
 use App\Models\Question;
 use App\Models\User;
@@ -61,6 +62,7 @@ class AdminDashboardController extends SliceController
             ->orderByDesc('views_count')->limit(3)->get();
 
         return view('Dashboard.Admin.index', [
+            'pendingClaimCount' => ExamClaim::query()->where('status', 'pending')->count(),
             'participantCount' => $participantCount,
             'activeParticipantCount' => $activeParticipantCount,
             'inactiveParticipantCount' => $inactiveParticipantCount,
@@ -77,6 +79,7 @@ class AdminDashboardController extends SliceController
             'publishedQuestionCount' => Question::where('status', 'published')->count(),
             'draftQuestionCount' => Question::where('status', 'draft')->count(),
             'quizCount' => $banks->where('kind', 'quiz')->count(),
+            'practiceCount' => $banks->where('kind', 'practice')->count(),
             'tryoutCount' => $banks->where('kind', 'tryout')->count(),
             'completedTryoutCount' => ExamAttempt::query()->completed()->where('kind', 'tryout')->count(),
             'completedQuizCount' => ExamAttempt::query()->completed()->where('kind', 'quiz')->count(),
@@ -92,7 +95,7 @@ class AdminDashboardController extends SliceController
                 'values' => array_column($monthlyCounts, 'count'),
                 'max' => 4 * (int) ceil(max(1, ...array_column($monthlyCounts, 'count')) / 4),
                 'height' => 250,
-                'aria' => 'Jumlah sesi quiz dan tryout selesai dalam enam bulan terakhir',
+                'aria' => 'Jumlah sesi latihan soal dan tryout selesai dalam enam bulan terakhir',
             ],
             'bankActivity' => $banks->sortByDesc('participants')->values(),
             'recentAttempts' => ExamAttempt::query()->with('user')->completed()

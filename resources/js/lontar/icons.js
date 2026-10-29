@@ -73,6 +73,7 @@
     'monitor': '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
     'volume': '<path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>',
     'maximize': '<path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"/>',
+    'fit-width': '<path d="M3 3v18M21 3v18M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/>',
     'skip-forward': '<path d="m5 4 10 8-10 8Z"/><path d="M19 5v14"/>',
     'list-checks': '<path d="m3 6 2 2 3-3M3 13l2 2 3-3M3 20l2 2 3-3M12 6h9M12 13h9M12 20h9"/>',
     'gauge': '<path d="M12 14 8 9"/><path d="M20.5 17a9 9 0 1 0-17 0"/>',

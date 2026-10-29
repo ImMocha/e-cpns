@@ -56,8 +56,8 @@ class CertificateTest extends TestCase
         $this->actingAs($user)->get(route('certificates.show', $attempt))
             ->assertOk()->assertSee('Sertifikat Kelulusan Tryout')->assertSee('Dewi Putri')
             ->assertSee('Simulasi SKD Oktober')->assertSee('GN-2026-000184')->assertSee('15 Oktober 2026')
-            ->assertSee('Nilai Total')->assertSee('161 <small>/ 165</small>', false)
-            ->assertSee('Passing Grade: 65')->assertSee('Passing Grade: 80')->assertSee('Passing Grade: 16')
+            ->assertSee('Nilai Total')->assertSee('311 <small>/ 315</small>', false)
+            ->assertSee('Passing Grade: 65')->assertSee('Passing Grade: 80')->assertSee('Passing Grade: 166')
             ->assertSee('TWK')->assertSee('TIU')->assertSee('TKP')
             ->assertSee('Cetak / Simpan PDF')->assertDontSee('app-shell', false);
     }
@@ -151,7 +151,7 @@ class CertificateTest extends TestCase
         $attempt->complete();
 
         $this->actingAs($user)->get(route('certificates.show', $attempt))
-            ->assertOk()->assertSee('161 <small>/ 165</small>', false)->assertSee('Ketiga bidang wajib PASS.');
+            ->assertOk()->assertSee('311 <small>/ 315</small>', false)->assertSee('Ketiga bidang wajib PASS.');
         $this->get($attempt->resultUrl())->assertSee('Cetak Sertifikat');
     }
 
@@ -163,7 +163,7 @@ class CertificateTest extends TestCase
         $attempt = ExamAttempt::factory()->passingTryout()->for($user)->create();
         $attempt->complete();
         $sections = $attempt->section_scores;
-        $sections['TKP']['score'] = 15;
+        $sections['TKP']['score'] = 165;
         $attempt->update(['section_scores' => $missing ? null : $sections]);
 
         $this->actingAs($user)->get(route('certificates.show', $attempt))->assertNotFound();

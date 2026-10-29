@@ -16,7 +16,7 @@
   <div class="container container--wide appbar__inner">
     <button class="appbar__icon drawer-toggle" data-drawer-toggle aria-label="Buka menu"><svg data-icon="menu"></svg></button>
     <a class="logo" href="{{ route('dashboard') }}">
-      <x-logo sub="CPNS Online" />
+      <x-logo />
     </a>
 
     <div class="appbar__right">
@@ -38,7 +38,6 @@
             <span>{{ $email }}</span>
           </div>
           <a class="side__link" href="{{ route('profile.edit') }}"><svg data-icon="user"></svg>Profil Saya</a>
-          <a class="side__link" href="{{ route('profile.edit') }}#pengaturan"><svg data-icon="settings"></svg>Pengaturan</a>
           {{-- Admin yang juga peserta perlu jalan pintas ke Admin Panel. --}}
           @if (auth()->user()?->isAdmin())
             <a class="side__link" href="{{ route('admin.dashboard') }}"><svg data-icon="shield"></svg>Admin Panel</a>

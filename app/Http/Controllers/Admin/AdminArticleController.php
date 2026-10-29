@@ -104,7 +104,10 @@ class AdminArticleController extends Controller
             $attributes['cover_source'] = null;
             $attributes['cover_source_url'] = null;
         }
-        $attributes['published_at'] = $attributes['status'] === ArticleStatus::Published->value ? ($article->published_at ?? now()) : null;
+        $publishedAt = $request->date('publish_at', 'Y-m-d\TH:i', 'Asia/Makassar')?->setTimezone(config('app.timezone'));
+        $attributes['published_at'] = $attributes['status'] === ArticleStatus::Published->value
+            ? ($publishedAt ?? ($article->published_at?->isPast() ? $article->published_at : now()))
+            : null;
         $attributes['updated_by'] = $request->user()->id;
         if (! $article->exists) {
             $attributes['created_by'] = $request->user()->id;

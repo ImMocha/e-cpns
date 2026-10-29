@@ -120,5 +120,6 @@ class ExamAttemptController extends Controller
     private function ensureOwner(Request $request, ExamAttempt $attempt): void
     {
         abort_unless($attempt->user_id === $request->user()->id, 404);
+        abort_if($attempt->kind !== 'tryout' && ! $request->user()->canAccessLearningFeatures(), 403, 'Latihan soal tersedia dalam paket Premium.');
     }
 }

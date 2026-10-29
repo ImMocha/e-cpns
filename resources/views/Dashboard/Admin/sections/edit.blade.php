@@ -18,7 +18,7 @@
         <p>
           Kode <span class="text-mono">{{ $section->code }}</span>
           &middot; urut tampil <span class="text-mono">{{ $section->position }}</span>
-          &middot; dibuat {{ $section->created_at->format('d M Y') }}
+          &middot; dibuat <x-local-time :value="$section->created_at" format="d M Y" />
         </p>
       </div>
       <div class="btn-row">

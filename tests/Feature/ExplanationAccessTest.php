@@ -43,36 +43,6 @@ class ExplanationAccessTest extends TestCase
         ];
     }
 
-    public function test_paid_member_gets_question_explanation_only_after_answering(): void
-    {
-        $user = User::factory()->create();
-        UserPackage::factory()->for($user)->create();
-        $question = Question::factory()->published()->create(['explanation' => '<p>Pembahasan khusus peserta berbayar.</p>']);
-        $this->actingAs($user);
-
-        $this->get(route('question-bank.show', $question))->assertDontSee('Pembahasan khusus peserta berbayar.')
-            ->assertViewHas('explanationHtml', null);
-        $this->post(route('question-bank.answer', $question), ['option' => 1, 'revision' => $question->revision()])
-            ->assertRedirect(route('question-bank.show', $question))->assertSessionHasNoErrors();
-        $this->get(route('question-bank.show', $question))->assertSee('Pembahasan khusus peserta berbayar.')
-            ->assertSee('Jawaban B')->assertDontSee('Lihat paket belajar');
-    }
-
-    public function test_question_feedback_stops_revealing_explanation_when_package_is_revoked(): void
-    {
-        $user = User::factory()->create();
-        $grant = UserPackage::factory()->for($user)->create();
-        $question = Question::factory()->published()->create(['explanation' => '<p>Pembahasan yang aksesnya dicabut.</p>']);
-        $this->actingAs($user)->post(route('question-bank.answer', $question), ['option' => 1, 'revision' => $question->revision()]);
-        $this->get(route('question-bank.show', $question))->assertSee('Pembahasan yang aksesnya dicabut.');
-        $grant->revoke(User::factory()->admin()->create());
-
-        $this->withSession(['question_feedback' => ['question_id' => $question->id, 'user_id' => $user->id,
-            'revision' => $question->revision(), 'option' => 1]])
-            ->get(route('question-bank.show', $question))->assertDontSee('Pembahasan yang aksesnya dicabut.')
-            ->assertSee('Jawaban B')->assertViewHas('explanationHtml', null);
-    }
-
     #[DataProvider('examKinds')]
     public function test_free_member_gets_result_keys_without_plain_or_html_explanations(string $kind): void
     {

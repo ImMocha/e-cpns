@@ -98,9 +98,11 @@ class MaterialPublishingTest extends TestCase
         $draft = Material::factory()->draft()->video()->create(['title' => 'Draft untuk pemeriksaan']);
 
         $this->actingAs(User::factory()->admin()->create())->get(route('materials.index', ['show_drafts' => 1]))
-            ->assertSee($draft->title)->assertSee($draft->section->name)->assertSee('Pratinjau admin aktif')
-            ->assertSee(route('admin.materials.status', $draft))
+            ->assertSee($draft->topic->name)->assertSee($draft->section->name)->assertSee('Pratinjau admin aktif')
+            ->assertSee(route('materials.topic', ['topic' => $draft->topic, 'show_drafts' => 1]))
             ->assertViewHas('counts', fn (array $counts): bool => $counts['total'] === 1 && $counts['video'] === 1);
+        $this->get(route('materials.topic', ['topic' => $draft->topic, 'show_drafts' => 1]))
+            ->assertSee($draft->title)->assertSee(route('admin.materials.status', $draft));
     }
 
     public function test_admin_listing_hides_drafts_until_preview_is_enabled(): void

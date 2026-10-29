@@ -106,8 +106,9 @@ class TopicQuizTest extends TestCase
         $this->quiz($first, ['title' => 'Latihan Draft', 'status' => 'draft']);
         Exam::factory()->create(['title' => 'Latihan Umum']);
 
-        $this->actingAs(User::factory()->create())->get(route('materials.index'))->assertOk()
-            ->assertSeeInOrder(['Topik Pertama', 'Materi Pertama', 'Materi Terakhir', 'Latihan Pertama', 'Topik Kedua', 'Materi Kedua', 'Latihan Kedua'])
+        $this->actingAs(User::factory()->create())->get(route('materials.topic', $first))->assertOk()
+            ->assertSeeInOrder(['Topik Pertama', 'Materi Pertama', 'Materi Terakhir', 'Latihan Pertama'])
+            ->assertDontSee('Latihan Kedua')
             ->assertDontSee('Latihan Draft')->assertDontSee('Latihan Umum');
         $this->get(route('materials.show', $material))->assertOk()->assertSee('Latihan Pertama')->assertDontSee('Latihan Kedua');
     }
@@ -119,14 +120,14 @@ class TopicQuizTest extends TestCase
         $quiz = $this->quiz($topic, ['status' => 'draft']);
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get(route('materials.index'))->assertOk()->assertDontSee('Latihan Topik')
+        $this->actingAs($user)->get(route('materials.topic', $topic))->assertOk()->assertDontSee('Latihan Soal Topik')
             ->assertDontSee('Belum ada soal latihan');
-        $this->get(route('materials.show', $material))->assertOk()->assertDontSee('Latihan Topik');
+        $this->get(route('materials.show', $material))->assertOk()->assertDontSee('Latihan Soal Topik');
 
         $quiz->update(['status' => 'published']);
 
-        $this->get(route('materials.index'))->assertSee('Latihan Topik')->assertSee($quiz->title);
-        $this->get(route('materials.show', $material))->assertSee('Latihan Topik')->assertSee($quiz->title);
+        $this->get(route('materials.topic', $topic))->assertSee('Latihan Soal Topik')->assertSee($quiz->title);
+        $this->get(route('materials.show', $material))->assertSee('Latihan Soal Topik')->assertSee($quiz->title);
     }
 
     public function test_unrestricted_quiz_can_start_without_finishing_materials(): void
@@ -154,15 +155,15 @@ class TopicQuizTest extends TestCase
             ->assertSessionHasErrors(['exam' => 'Selesaikan semua materi pada topik ini sebelum memulai latihan.']);
         $this->assertDatabaseCount('exam_attempts', 0);
         $this->post(route('materials.progress.store', $first))->assertRedirect();
-        $this->get(route('materials.index', ['q' => 'Pengantar Dasar']))->assertOk()
-            ->assertSee('Selesaikan materi topik dahulu')->assertSee('1/2')->assertDontSee('Pendalaman Materi')
+        $this->get(route('materials.topic', $topic))->assertOk()
+            ->assertSee('Selesaikan materi topik dahulu')->assertSee('1/2')->assertSee('Pendalaman Materi')
             ->assertSee('Selesaikan semua materi untuk membuka latihan.')->assertDontSee('Mulai latihan')
             ->assertDontSee('Pratinjau sebagai admin');
-        $this->get(route('quizzes.index'))->assertSee('Selesaikan materi topik dahulu');
+        $this->get(route('quizzes.topics'))->assertSee('Selesaikan materi topik dahulu');
         $this->post(route('quizzes.start', $quiz->slug))->assertSessionHasErrors('exam');
         $this->post(route('materials.progress.store', $second))->assertRedirect();
         $this->get(route('materials.show', $second))->assertSee('2/2')->assertSee('Mulai latihan')
-            ->assertSee('Semua materi selesai. Latihan terbuka.');
+            ->assertSee('Semua materi selesai. Latihan Soal terbuka.');
         $this->post(route('quizzes.start', $quiz->slug))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertDatabaseCount('exam_attempts', 1);
     }
@@ -184,16 +185,16 @@ class TopicQuizTest extends TestCase
         $quiz = $this->quiz($topic, ['requires_topic_completion' => true]);
         $admin = User::factory()->admin()->create();
 
-        $this->actingAs($admin)->get(route('materials.index'))->assertSee('0/1')
+        $this->actingAs($admin)->get(route('materials.topic', $topic))->assertSee('0/1')
             ->assertSee('Pratinjau admin: bisa dibuka tanpa menyelesaikan materi.')
             ->assertSee('Pratinjau sebagai admin')->assertDontSee('Mulai latihan')
-            ->assertDontSee('Semua materi selesai. Latihan terbuka.');
+            ->assertDontSee('Semua materi selesai. Latihan Soal terbuka.');
         $this->get(route('materials.show', $material))->assertSee('Pratinjau sebagai admin');
-        $this->get(route('quizzes.index'))->assertSee('Pratinjau sebagai admin')
+        $this->get(route('quizzes.topics'))->assertSee('Pratinjau sebagai admin')
             ->assertSee('Pratinjau admin: bisa dibuka tanpa menyelesaikan materi.');
 
         $this->post(route('quizzes.start', $quiz->slug))->assertRedirect()->assertSessionHasNoErrors();
-        $this->get(route('materials.index'))->assertSee('Lanjutkan pratinjau');
+        $this->get(route('materials.topic', $topic))->assertSee('Lanjutkan pratinjau');
     }
 
     public function test_premium_topic_quiz_still_requires_covering_package_and_does_not_use_tryout_quota(): void
@@ -215,14 +216,14 @@ class TopicQuizTest extends TestCase
         $quiz = $this->quiz($topic, ['title' => 'Latihan Tersembunyi']);
         $this->actingAs(User::factory()->create());
         $topic->update(['is_active' => false]);
-        $this->get(route('quizzes.index'))->assertDontSee($quiz->title);
+        $this->get(route('quizzes.topics'))->assertDontSee($quiz->title);
         $this->post(route('quizzes.start', $quiz->slug))->assertNotFound();
         $topic->update(['is_active' => true]);
         $topic->section->update(['is_active' => false]);
         $this->post(route('quizzes.start', $quiz->slug))->assertNotFound();
         $topic->section->update(['is_active' => true]);
         $topic->delete();
-        $this->get(route('quizzes.index'))->assertDontSee($quiz->title);
+        $this->get(route('quizzes.topics'))->assertDontSee($quiz->title);
         $this->post(route('quizzes.start', $quiz->slug))->assertNotFound();
         $this->assertDatabaseCount('exam_attempts', 0);
     }
@@ -235,11 +236,11 @@ class TopicQuizTest extends TestCase
         $this->actingAs($user)->post(route('quizzes.start', $quiz->slug))->assertRedirect();
         $attempt = ExamAttempt::sole();
         $quiz->update(['requires_topic_completion' => true]);
-        $this->get(route('quizzes.index'))->assertSee('Lanjutkan');
+        $this->get(route('quizzes.topics'))->assertSee('Lanjutkan');
         $this->post(route('quizzes.start', $quiz->slug))->assertRedirect($attempt->attemptUrl());
         $this->assertDatabaseCount('exam_attempts', 1);
         $this->postJson(route('exam-attempts.submit', $attempt))->assertOk();
-        $this->get(route('quizzes.index'))->assertSee('Hasil terakhir')->assertSee('Selesaikan materi topik dahulu');
+        $this->get(route('quizzes.topics'))->assertSee('Hasil terakhir')->assertSee('Selesaikan materi topik dahulu');
         $this->get($attempt->resultUrl())->assertOk();
         $this->post(route('quizzes.start', $quiz->slug))->assertSessionHasErrors('exam');
     }
@@ -267,7 +268,7 @@ class TopicQuizTest extends TestCase
         $topic = Topic::factory()->create();
         $this->material($topic);
         $quiz = $this->quiz($topic, ['title' => '<script>alert(1)</script>', 'description' => '<img src=x onerror=alert(2)>']);
-        $this->actingAs(User::factory()->create())->get(route('materials.index'))
+        $this->actingAs(User::factory()->create())->get(route('materials.topic', $topic))
             ->assertSee($quiz->title)->assertSee($quiz->description)->assertDontSee($quiz->title, false)->assertDontSee($quiz->description, false);
     }
 

@@ -18,6 +18,7 @@ export function selectPackageContent(items, selectedIds, action, filters = {}) {
     if (action === 'all'
       || (action === 'premium' && item.access === 'premium')
       || (action === 'quiz' && item.kind === 'quiz')
+      || (action === 'practice' && item.kind === 'practice')
       || (action === 'tryout' && item.kind === 'tryout')
       || (action === 'filtered' && matchesPackageContent(item, filters))) {
       selected.add(id);
@@ -48,7 +49,7 @@ export function initPackagePickers(scope) {
       let selected = 0;
       let unavailable = 0;
       rows.forEach((row, index) => {
-        row.hidden = !matchesPackageContent(content[index], filters());
+        row.hidden = row.querySelector('input').disabled || !matchesPackageContent(content[index], filters());
         if (!row.hidden) shown++;
         if (row.querySelector('input').checked) {
           selected++;
@@ -78,3 +79,39 @@ export function initPackagePickers(scope) {
 }
 
 if (typeof document !== 'undefined') initPackagePickers(document);
+
+export function initPackageTiers(scope) {
+  scope.querySelectorAll('[data-package-tier-form]').forEach(form => {
+    const select = form.querySelector('[data-package-tier]');
+    const update = () => {
+      const tier = select.value;
+      form.querySelectorAll('[data-tier-benefits]').forEach(panel => {
+        panel.hidden = panel.dataset.tierBenefits !== tier;
+      });
+      form.querySelectorAll('[data-package-picker]').forEach(picker => {
+        picker.hidden = !!tier;
+        picker.querySelectorAll('[data-package-item]').forEach(row => {
+          const input = row.querySelector('input');
+          const restricted = !!tier;
+          input.disabled = restricted;
+          if (restricted) input.checked = false;
+          row.hidden = restricted;
+        });
+      });
+      const fields = ['tryout_quota', 'tryout_tokens', 'leaderboard_access'];
+      fields.forEach(name => { form.elements[name].disabled = !!tier; });
+      if (tier) {
+        form.elements.tryout_quota.value = tier === 'regular' ? 2 : tier === 'bundling' ? 3 : '';
+        form.elements.tryout_tokens.value = tier === 'premium' ? 0 : tier === 'regular' ? 1 : 3;
+        form.elements.leaderboard_access.value = tier === 'regular' ? 'none' : tier === 'bundling' ? 'local' : 'national';
+      }
+    };
+    select.addEventListener('change', update);
+    form.addEventListener('change', event => {
+      if (event.target.closest('[data-package-picker]')) update();
+    });
+    update();
+  });
+}
+
+if (typeof document !== 'undefined') initPackageTiers(document);

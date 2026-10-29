@@ -57,7 +57,7 @@ class ExamAttemptFactory extends Factory
             $templates = collect($definition['questions'])->keyBy('section');
             $questions = [];
             $answers = [];
-            foreach (['TWK' => 13, 'TIU' => 16, 'TKP' => 4] as $code => $count) {
+            foreach (['TWK' => 13, 'TIU' => 16, 'TKP' => 34] as $code => $count) {
                 for ($index = 0; $index < $count; $index++) {
                     $question = $templates[$code];
                     $question['id'] = count($questions) + 1;
@@ -67,7 +67,7 @@ class ExamAttemptFactory extends Factory
                         $question['answer'] = null;
                     }
                     $questions[] = $question;
-                    $answers[(string) $question['id']] = $code === 'TKP' ? 3 : $question['answer'];
+                    $answers[(string) $question['id']] = $code === 'TKP' ? ($index === 33 ? 0 : 4) : $question['answer'];
                 }
             }
             $definition['questions'] = $questions;

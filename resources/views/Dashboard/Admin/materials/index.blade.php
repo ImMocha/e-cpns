@@ -102,8 +102,8 @@
       </div>
       @if($materials->total() > 0)<footer class="content-list-footer"><span>Menampilkan {{ $materials->firstItem() }}–{{ $materials->lastItem() }} dari {{ $materials->total() }} materi</span><x-pager :paginator="$materials" /></footer>@endif
       @if($selectedTopic)
-        <section class="content-topic-quizzes" aria-label="Latihan pada {{ $selectedTopic->name }}">
-          <div class="content-panel-heading content-panel-heading--main"><div><div class="content-location"><svg data-icon="list-checks"></svg> Evaluasi pembelajaran</div><h3>Latihan Topik</h3><p>{{ $selectedTopic->quizzes_count }} latihan · Atur soal dan syarat penyelesaian materi.</p></div><a class="btn btn--primary btn--sm" href="{{ route('admin.materials.quizzes.create', ['topic_id' => $selectedTopic->id]) }}"><svg data-icon="plus"></svg> Tambah Latihan</a></div>
+        <section class="content-topic-quizzes" aria-label="Latihan Soal pada {{ $selectedTopic->name }}">
+          <div class="content-panel-heading content-panel-heading--main"><div><div class="content-location"><svg data-icon="list-checks"></svg> Evaluasi pembelajaran</div><h3>Latihan Soal Topik</h3><p>{{ $selectedTopic->quizzes_count }} latihan · Atur soal dan syarat penyelesaian materi.</p></div><a class="btn btn--primary btn--sm" href="{{ route('admin.materials.quizzes.create', ['topic_id' => $selectedTopic->id]) }}"><svg data-icon="plus"></svg> Tambah Latihan Soal</a></div>
           <div class="content-exam-list">
             @forelse($topicQuizzes as $exam)
               @include('Dashboard.Admin.exams._item', ['exam' => $exam])

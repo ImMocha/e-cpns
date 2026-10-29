@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\LeaderboardAccess;
+use App\Enums\PackageTier;
 use App\Enums\TransactionStatus;
 use App\Models\Exam;
+use App\Models\ExamAttempt;
 use App\Models\Material;
 use App\Models\Package;
+use App\Models\Question;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\UserPackage;
@@ -47,6 +50,22 @@ class PackagePaymentTest extends TestCase
         return app(PackagePayment::class)->checkout($user ?? User::factory()->create(), $package ?? $this->package());
     }
 
+    public function test_paid_activation_uses_the_tier_from_checkout_after_the_catalog_changes(): void
+    {
+        $this->configureGateway();
+        $exam = Exam::factory()->tryout()->create();
+        $package = $this->package(['tier' => PackageTier::Premium, 'tryout_quota' => null]);
+        $transaction = $this->order(package: $package);
+        $package->update(['tier' => PackageTier::Regular]);
+        Http::fake([$this->statusUrl($transaction) => Http::response($this->providerPayload($transaction))]);
+
+        $this->actingAs($transaction->user)->post(route('transactions.refresh', $transaction))->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('user_packages', ['id' => $transaction->fresh()->user_package_id, 'tier' => 'premium', 'tryout_quota' => null]);
+        $this->assertSame('premium', $transaction->package_snapshot['tier']);
+        Http::assertSentCount(1);
+    }
+
     /** @param array<string, mixed> $overrides
      * @return array<string, mixed>
      */
@@ -80,7 +99,7 @@ class PackagePaymentTest extends TestCase
         $this->configureGateway();
         Http::fake([self::SNAP => Http::response(['token' => 'test-token', 'redirect_url' => self::PAYMENT_URL], 201)]);
         $user = User::factory()->create();
-        $package = $this->package(['price' => 75000, 'duration_days' => 14, 'tryout_quota' => 3]);
+        $package = $this->package(['price' => 75000, 'original_price' => 100000, 'duration_days' => 14, 'tryout_quota' => 3]);
 
         $this->actingAs($user)->get(route('checkout', ['package' => $package->id]))->assertSee('Konfirmasi paketmu');
         $this->post(route('checkout.store'), ['package_id' => $package->id, 'amount' => 1, 'status' => 'paid'])->assertSessionHasNoErrors();
@@ -122,9 +141,87 @@ class PackagePaymentTest extends TestCase
         $this->assertNotNull($transaction->paid_at);
         $this->assertDatabaseHas('user_packages', ['id' => $transaction->user_package_id, 'price' => 0, 'expires_at' => null, 'tryout_quota' => null]);
         $this->assertSame(LeaderboardAccess::Local, $user->leaderboardAccess());
-        $this->post(route('checkout.store'), ['package_id' => $package->id])->assertInvalid(['package_id' => 'Kamu sudah memiliki paket ini']);
-        $this->assertDatabaseCount('user_packages', 1);
+        $this->post(route('checkout.store'), ['package_id' => $package->id])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('user_packages', 2);
+        $this->assertDatabaseCount('transactions', 2);
         Http::assertNothingSent();
+    }
+
+    public function test_customer_can_repurchase_active_package_and_each_payment_adds_separate_access(): void
+    {
+        $this->freezeTime();
+        $this->configureGateway();
+        $exam = Exam::factory()->tryout()->create(['access_level' => 'premium']);
+        $exam->questions()->attach(Question::factory()->published()->create());
+        $user = User::factory()->create();
+        $package = Package::factory()->create(['price' => 15000, 'tryout_tokens' => 1, 'tryout_quota' => 2]);
+        $firstOrder = $this->order($user, $package);
+        $paid = $this->providerPayload($firstOrder);
+        Http::fake([
+            $this->statusUrl($firstOrder) => Http::response($paid),
+            self::SNAP => Http::response(['token' => 'test-token', 'redirect_url' => self::PAYMENT_URL], 201),
+        ]);
+        $this->postJson(route('payments.midtrans.notification'), $this->signed($paid))->assertOk();
+        $firstGrant = UserPackage::sole();
+        $this->actingAs($user)->post(route('tryout-tokens.redeem', [$firstGrant, $exam]))->assertSessionHasNoErrors();
+        $this->post(route('tryouts.start', $exam->slug))->assertRedirect();
+        $this->post(route('exam-attempts.submit', ExamAttempt::sole()))->assertOk();
+        $this->travel(1)->day();
+
+        $this->get(route('packages.index'))->assertSee('Beli lagi');
+        $this->get(route('checkout', ['package' => $package->id]))
+            ->assertSee('Kamu bisa membeli paket ini lagi.')->assertSee('Lanjut ke pembayaran')->assertSee('Kode Voucher');
+        $this->post(route('checkout.store'), ['package_id' => $package->id])->assertSessionHasNoErrors();
+        $secondOrder = Transaction::query()->latest('id')->firstOrFail();
+        $this->post(route('checkout.store'), ['package_id' => $package->id])->assertRedirect(route('transactions.show', $secondOrder));
+
+        $this->assertDatabaseCount('transactions', 2);
+        $this->assertDatabaseCount('user_packages', 1);
+        $this->assertDatabaseHas('transactions', ['id' => $secondOrder->id, 'status' => 'pending', 'user_package_id' => null]);
+        $secondPaid = $this->providerPayload($secondOrder);
+        Http::fake([$this->statusUrl($secondOrder) => Http::response($secondPaid)]);
+        $this->postJson(route('payments.midtrans.notification'), $this->signed($secondPaid))->assertOk();
+        $this->postJson(route('payments.midtrans.notification'), $this->signed($secondPaid))->assertOk();
+
+        $secondGrant = UserPackage::query()->latest('id')->firstOrFail();
+        $this->assertDatabaseCount('user_packages', 2);
+        $this->assertDatabaseHas('user_packages', ['id' => $firstGrant->id, 'tryout_tokens' => 0, 'tryouts_used' => 1]);
+        $this->assertDatabaseHas('user_packages', ['id' => $secondGrant->id, 'package_id' => $package->id, 'tryout_tokens' => 1, 'tryouts_used' => 0]);
+        $this->assertTrue($secondGrant->expires_at->isAfter($firstGrant->expires_at));
+        $this->assertDatabaseMissing('exam_user_package', ['user_package_id' => $secondGrant->id, 'exam_id' => $exam->id]);
+        $this->get(route('packages.index'))->assertSee('1 token pilihan tryout tersisa')->assertSee('Paket Belajar · #'.$secondGrant->id);
+        Http::assertSentCount(2);
+    }
+
+    public function test_paid_token_package_issues_checkout_snapshot_once_and_refund_blocks_redemption(): void
+    {
+        $this->freezeTime();
+        $this->configureGateway();
+        $exam = Exam::factory()->tryout()->create(['access_level' => 'premium']);
+        $exam->questions()->attach(Question::factory()->published()->create());
+        $package = Package::factory()->create(['price' => 15000, 'tryout_tokens' => 1, 'tryout_quota' => 2]);
+        $transaction = $this->order(package: $package);
+        $package->update(['tryout_tokens' => 5]);
+        $payload = $this->providerPayload($transaction);
+        $refund = $this->providerPayload($transaction, ['transaction_status' => 'refund']);
+        Http::fake([$this->statusUrl($transaction) => Http::sequence()->push($payload)->push($payload)->push($refund)]);
+
+        $this->assertDatabaseCount('user_packages', 0);
+        $this->postJson(route('payments.midtrans.notification'), $this->signed($payload))->assertOk();
+        $grant = UserPackage::sole();
+        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryout_tokens' => 1, 'tryouts_used' => 0]);
+        $this->assertDatabaseCount('exam_user_package', 0);
+        $this->actingAs($transaction->user)->post(route('tryout-tokens.redeem', [$grant, $exam]))->assertSessionHasNoErrors();
+        $this->postJson(route('payments.midtrans.notification'), $this->signed($payload))->assertOk();
+
+        $this->assertDatabaseCount('user_packages', 1);
+        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryout_tokens' => 0, 'tryouts_used' => 0]);
+
+        $this->postJson(route('payments.midtrans.notification'), $this->signed($refund))->assertOk();
+        $this->post(route('tryouts.start', $exam->slug))->assertForbidden();
+        $this->post(route('tryout-tokens.redeem', [$grant, $exam]))->assertForbidden();
+        $this->assertDatabaseCount('exam_attempts', 0);
+        Http::assertSentCount(3);
     }
 
     public function test_unconfigured_payment_is_unavailable_and_does_not_create_order(): void

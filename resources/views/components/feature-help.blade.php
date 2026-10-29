@@ -7,6 +7,7 @@
         'admin-materials' => 'admin.materials.index',
         'admin-quizzes' => 'admin.materials.quizzes.index',
         'admin-exams' => 'admin.exams.index',
+        'admin-practices' => 'admin.practices.index',
         'admin-questions' => 'admin.questions.index',
         'admin-articles' => 'admin.articles.index',
         'admin-users' => 'admin.users.index',
@@ -17,8 +18,8 @@
     ] : [
         'member-dashboard' => 'dashboard',
         'member-materials' => 'materials.index',
-        'member-question-bank' => 'question-bank.index',
-        'member-quizzes' => 'quizzes.index',
+        'member-quizzes' => 'quizzes.topics',
+        'member-practices' => 'quizzes.index',
         'member-tryouts' => 'tryouts.index',
         'member-history' => 'history.index',
         'member-statistics' => 'statistics.index',
@@ -34,14 +35,6 @@
     <button class="appbar__icon help-launcher" type="button" data-help-open aria-label="Bantuan &amp; Panduan" title="Bantuan &amp; Panduan" aria-haspopup="dialog" aria-controls="feature-help-center">
         <svg data-icon="book" aria-hidden="true"></svg>
     </button>
-
-    <section class="help-banner" data-help-banner aria-label="Panduan halaman ini" hidden>
-        <div><span class="help-eyebrow">Panduan halaman ini</span><p data-help-summary></p></div>
-        <div class="btn-row">
-            <button class="btn btn--ghost btn--sm" type="button" data-help-current>Baca penjelasan</button>
-            <button class="btn btn--primary btn--sm" type="button" data-help-tour>Mulai tur halaman</button>
-        </div>
-    </section>
 
     <dialog class="help-center" id="feature-help-center" role="dialog" aria-modal="true" aria-labelledby="feature-help-title" aria-describedby="feature-help-description" data-help-dialog>
         <div class="help-center__header">
@@ -65,5 +58,4 @@
             <a data-help-destination="{{ $guideId }}" href="{{ route($routeName) }}">{{ $guideId }}</a>
         @endforeach
     </div>
-    <noscript><p class="help-noscript">Aktifkan JavaScript untuk membuka pusat bantuan dan tur interaktif.</p></noscript>
 </div>

@@ -10,6 +10,7 @@ use App\Models\ExamAttempt;
 use App\Models\Question;
 use App\Models\Section;
 use App\Models\User;
+use App\Models\UserPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -81,6 +82,7 @@ class ExamQuestionOrderTest extends TestCase
         $this->assertSame($snapshot, ExamAttempt::resumeOrStart($reader, $exam->fresh())->question_snapshot);
         $this->assertSame($questions->modelKeys(), array_column($attempt->fresh()->question_snapshot['questions'], 'id'));
         $nextReader = User::factory()->create();
+        UserPackage::factory()->for($nextReader)->create(['tier' => 'premium', 'tryout_quota' => null]);
         $this->actingAs($nextReader)->post(route('quizzes.start', $exam->slug))->assertRedirect();
         $nextAttempt = ExamAttempt::where('user_id', $nextReader->id)->sole();
         $this->assertSame($reversed, array_column($nextAttempt->question_snapshot['questions'], 'id'));

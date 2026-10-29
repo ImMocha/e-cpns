@@ -35,7 +35,7 @@ class StoreMaterialRequest extends MaterialRequest
                     fn ($query) => $query->where('section_id', $this->input('section_id'))
                 ),
             ],
-            'slug' => ['nullable', 'string', 'max:200', Rule::unique('materials', 'slug')],
+            'slug' => ['nullable', 'string', 'max:200'],
             'summary' => ['nullable', 'string', 'max:1000'],
             'file' => ['nullable', 'file', 'mimes:pdf', 'max:'.Material::MAX_PDF_KILOBYTES],
         ]);

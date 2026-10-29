@@ -125,9 +125,9 @@
                     @endif
                   </td>
                   <td class="text-mono text-sm" style="white-space:nowrap">{{ $user->phone ?? '—' }}</td>
-                  <td data-sort="{{ $user->created_at->timestamp }}" style="white-space:nowrap">{{ $user->created_at->format('d M Y') }}</td>
+                  <td data-sort="{{ $user->created_at->timestamp }}" style="white-space:nowrap"><x-local-time :value="$user->created_at" format="d M Y" /></td>
                   <td class="text-sm text-soft" style="white-space:nowrap">
-                    {{ $user->last_login_at ? $user->last_login_at->format('d M Y H:i') : 'Belum pernah' }}
+                    <x-local-time :value="$user->last_login_at" fallback="Belum pernah" />
                   </td>
                   <td>
                     @if ($user->isActive())

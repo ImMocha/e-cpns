@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ExamBank;
+use App\Enums\ExamKind;
 use App\Enums\MaterialAccess;
+use App\Enums\PackageTier;
 use App\ExamScoring;
 use Database\Factories\ExamAttemptFactory;
 use DateTimeInterface;
@@ -96,7 +98,7 @@ class ExamAttempt extends Model
             return false;
         }
 
-        if ($this->kind === 'quiz') {
+        if ($this->kind !== 'tryout') {
             return $this->passing_score !== null && $this->score >= $this->passing_score;
         }
 
@@ -122,6 +124,9 @@ class ExamAttempt extends Model
     {
         return DB::transaction(function () use ($user, $bank): self {
             User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            $kind = $bank instanceof Exam ? $bank->kind : $bank->kind();
+            abort_if($kind !== 'tryout' && ! $user->canAccessLearningFeatures(), 403, 'Latihan soal tersedia dalam paket Premium.');
 
             $attempt = self::query()
                 ->whereBelongsTo($user)
@@ -149,14 +154,21 @@ class ExamAttempt extends Model
                 }
             }
             $entitlement = null;
-            if ($bank instanceof Exam && $bank->access_level === MaterialAccess::Premium && ! $user->isAdmin()) {
+            if ($bank instanceof Exam && $bank->free_claim_enabled && ! $user->hasPremiumPackage()) {
+                abort_unless(ExamClaim::query()->whereBelongsTo($user)->whereBelongsTo($bank)->where('status', 'approved')->exists(),
+                    403, 'Sesi gratis ini perlu di-unlock melalui bukti yang disetujui admin.');
+            }
+            if ($bank instanceof Exam && (! $bank->free_claim_enabled || $user->hasPremiumPackage()) && $bank->access_level === MaterialAccess::Premium && ! $user->isAdmin()) {
                 $entitlements = $user->userPackages()->active()
-                    ->whereHas('exams', fn (Builder $query) => $query->whereKey($bank->id))
+                    ->where(fn (Builder $access): Builder => $access->where('tier', PackageTier::Premium)
+                        ->orWhere(fn (Builder $selected): Builder => $selected
+                            ->when($bank->kind !== 'tryout', fn (Builder $legacy): Builder => $legacy->whereNull('tier'))
+                            ->whereHas('exams', fn (Builder $query): Builder => $query->whereKey($bank->id))))
                     ->orderBy('id')->lockForUpdate()->get();
                 abort_if($entitlements->isEmpty(), 403, 'Sesi ini membutuhkan paket aktif yang memuatnya.');
-                $entitlement = $entitlements->first(fn (UserPackage $item): bool => $bank->kind === 'quiz' || $item->hasTryoutQuota());
+                $entitlement = $entitlements->first(fn (UserPackage $item): bool => $bank->kind !== 'tryout' || $item->hasTryoutQuota());
                 if ($entitlement === null) {
-                    throw ValidationException::withMessages(['exam' => 'Kuota tryout paket sudah habis. Pilih paket lain untuk memulai sesi baru.']);
+                    throw ValidationException::withMessages(['exam' => 'Kuota tryout paket sudah habis. Beli paket lagi dan gunakan token untuk mengisi ulang tryout, atau pilih paket lain.']);
                 }
             }
             $definition = $bank->definition();
@@ -210,7 +222,7 @@ class ExamAttempt extends Model
         $definition['kind'] = $this->kind;
         $definition['saveUrl'] = route('exam-attempts.save', $this);
         $definition['submitUrl'] = route('exam-attempts.submit', $this);
-        $definition['exitUrl'] = $this->kind === 'quiz' ? route('quizzes.index') : route('tryouts.index');
+        $definition['exitUrl'] = route(ExamKind::from($this->kind)->catalogRoute());
         $definition['serverNow'] = now()->getTimestampMs();
         $definition['serverUpdatedAt'] = $this->updated_at->getTimestampMs();
         $definition['expiresAt'] = $this->expires_at?->getTimestampMs();
@@ -292,7 +304,7 @@ class ExamAttempt extends Model
             ->orderByDesc('submitted_at')->orderByDesc('id');
 
         $summary = [
-            'count' => 0, 'tryoutCount' => 0, 'quizCount' => 0,
+            'count' => 0, 'tryoutCount' => 0, 'quizCount' => 0, 'practiceCount' => 0,
             'latest' => null, 'highest' => null, 'averageScore' => null,
             'accuracy' => null, 'correct' => 0, 'wrong' => 0, 'blank' => 0, 'weighted' => 0,
             'totalSeconds' => 0, 'sections' => [], 'recent' => [], 'trend' => [],
@@ -357,15 +369,13 @@ class ExamAttempt extends Model
 
     public function attemptUrl(): string
     {
-        return route($this->kind === 'quiz' ? 'quizzes.attempt' : 'tryouts.attempt',
-            [$this->kind === 'quiz' ? 'quiz' : 'tryout' => $this->bank_slug, 'attempt' => $this->id]);
+        return route(ExamKind::from($this->kind)->routePrefix().'.attempt',
+            [$this->bank_slug, 'attempt' => $this->id]);
     }
 
     public function resultUrl(): string
     {
-        $route = $this->kind === 'quiz' ? 'quizzes.result' : 'tryouts.result';
-        $parameter = $this->kind === 'quiz' ? 'quiz' : 'tryout';
-
-        return route($route, [$parameter => $this->bank_slug, 'attempt' => $this->id]);
+        return route(ExamKind::from($this->kind)->routePrefix().'.result',
+            [$this->bank_slug, 'attempt' => $this->id]);
     }
 }

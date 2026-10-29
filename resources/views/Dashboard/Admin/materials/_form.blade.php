@@ -62,11 +62,11 @@
                 <div class="field{{ $errors->has('slug') ? ' is-invalid' : '' }}">
                     <label class="label" for="slug">
                         Slug
-                        <span class="label__opt">— opsional, dibuat otomatis dari judul bila kosong</span>
+                        <span class="label__opt">— otomatis dari judul, diberi akhiran jika sudah dipakai</span>
                     </label>
                     <div class="input-group">
                         <span class="input-group__icon"><svg data-icon="external"></svg></span>
-                        <input class="input text-mono" type="text" id="slug" name="slug"
+                        <input class="input text-mono" type="text" id="slug" maxlength="200" name="slug" data-auto-slug="materials" data-slug-url="{{ route('admin.slugs.preview') }}" data-slug-id="{{ $material->id }}"
                                value="{{ old('slug', $material->slug) }}"
                                placeholder="rangkuman-penalaran-verbal" autocomplete="off">
                     </div>
@@ -129,11 +129,7 @@
                     <div class="field{{ $errors->has('access_level') ? ' is-invalid' : '' }}">
                         <label class="label" for="access_level">Level Akses</label>
                         <select class="select" id="access_level" name="access_level" required>
-                            @foreach (\App\Enums\MaterialAccess::cases() as $access)
-                                <option value="{{ $access->value }}" @selected(old('access_level', $material->access_level->value) === $access->value)>
-                                    {{ $access->label() }}
-                                </option>
-                            @endforeach
+                            <option value="premium">Premium</option>
                         </select>
                         <span class="field__hint">Premium butuh paket aktif peserta.</span>
                         <span class="field__error"><svg data-icon="alert"></svg><span>{{ $err('access_level') ?? 'Level akses tidak dikenal.' }}</span></span>
@@ -204,7 +200,7 @@
                         <div class="kv" style="margin-top:.6rem">
                             <div class="kv__row"><span class="kv__key">Ukuran</span><span class="kv__val">{{ $material->humanFileSize() ?? '—' }}</span></div>
                             <div class="kv__row"><span class="kv__key">Jumlah halaman</span><span class="kv__val">{{ $material->page_count ?? '—' }}</span></div>
-                            <div class="kv__row"><span class="kv__key">Diunggah</span><span class="kv__val">{{ $material->created_at?->format('d M Y') }}</span></div>
+                            <div class="kv__row"><span class="kv__key">Diunggah</span><span class="kv__val"><x-local-time :value="$material->created_at" format="d M Y" /></span></div>
                         </div>
                     </div>
                 @endif
@@ -258,8 +254,8 @@
                 <div class="kv__row"><span class="kv__key">ID materi</span><span class="kv__val">{{ $isEdit ? '#'.$material->id : 'otomatis' }}</span></div>
                 <div class="kv__row"><span class="kv__key">Format</span><span class="kv__val">{{ \App\Enums\MaterialType::tryFrom(old('type', $material->type->value))?->shortLabel() }}</span></div>
                 <div class="kv__row"><span class="kv__key">Slug</span><span class="kv__val">{{ old('slug', $material->slug) ?: 'otomatis' }}</span></div>
-                <div class="kv__row"><span class="kv__key">Dibuat</span><span class="kv__val">{{ $isEdit ? $material->created_at->format('d M Y') : '—' }}</span></div>
-                <div class="kv__row"><span class="kv__key">Diubah terakhir</span><span class="kv__val">{{ $isEdit && $material->updated_at ? $material->updated_at->format('d M Y H:i') : '—' }}</span></div>
+                <div class="kv__row"><span class="kv__key">Dibuat</span><span class="kv__val"><x-local-time :value="$isEdit ? $material->created_at : null" format="d M Y" /></span></div>
+                <div class="kv__row"><span class="kv__key">Diubah terakhir</span><span class="kv__val"><x-local-time :value="$isEdit ? $material->updated_at : null" /></span></div>
             </div>
         </section>
 

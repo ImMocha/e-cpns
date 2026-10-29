@@ -86,7 +86,7 @@ class ContentWorkspaceTest extends TestCase
             ->post(route('admin.materials.store'), [
                 'title' => 'Materi Baru Dalam Topik', 'section_id' => $topic->section_id,
                 'topic_id' => $topic->id, 'type' => 'video', 'status' => 'draft',
-                'access_level' => 'free', 'workspace' => 1,
+                'access_level' => 'premium', 'workspace' => 1,
             ])
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('admin.materials.index', ['section_id' => $topic->section_id, 'topic_id' => $topic->id]));

@@ -4,7 +4,7 @@
   <nav class="content-tabs" aria-label="Kelola konten belajar">
     <a href="{{ route('admin.materials.index', $sectionParams) }}" class="{{ request()->routeIs('admin.materials.*') && ! request()->routeIs('admin.materials.quizzes.*') ? 'is-active' : '' }}" @if(request()->routeIs('admin.materials.*') && ! request()->routeIs('admin.materials.quizzes.*')) aria-current="page" @endif><svg data-icon="book"></svg> Materi</a>
     <a href="{{ route('admin.topics.index', array_filter(['section_id' => $selectedSection?->id])) }}" class="{{ request()->routeIs('admin.topics.*') ? 'is-active' : '' }}" @if(request()->routeIs('admin.topics.*')) aria-current="page" @endif><svg data-icon="layers"></svg> Topik</a>
-    <a href="{{ route('admin.materials.quizzes.index', $sectionParams) }}" class="{{ request()->routeIs('admin.materials.quizzes.*') ? 'is-active' : '' }}" @if(request()->routeIs('admin.materials.quizzes.*')) aria-current="page" @endif><svg data-icon="list-checks"></svg> Latihan</a>
+    <a href="{{ route('admin.materials.quizzes.index', $sectionParams) }}" class="{{ request()->routeIs('admin.materials.quizzes.*') ? 'is-active' : '' }}" @if(request()->routeIs('admin.materials.quizzes.*')) aria-current="page" @endif><svg data-icon="list-checks"></svg> Latihan Soal</a>
   </nav>
   @if(request()->routeIs('admin.topics.*'))
     <form method="GET" action="{{ route('admin.topics.index') }}" class="content-field-picker">

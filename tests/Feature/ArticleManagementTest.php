@@ -482,4 +482,167 @@ class ArticleManagementTest extends TestCase
 
         $this->assertDatabaseHas('articles', ['id' => $article->id, 'cover_source_url' => 'https://example.com/original']);
     }
+
+    public function test_scheduled_article_is_hidden_until_the_selected_wita_time(): void
+    {
+        $this->travelTo(now()->setDate(2026, 10, 29)->setTime(0, 0));
+        $section = Section::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.articles.store'), $this->payload($section, ['status' => 'published', 'publish_at' => '2026-10-30T10:15']))
+            ->assertSessionHasNoErrors();
+
+        $article = Article::sole();
+        $this->assertSame('2026-10-30 02:15:00', $article->published_at->copy()->utc()->format('Y-m-d H:i:s'));
+        $this->get(route('admin.articles.index'))->assertSee('Terjadwal');
+        $this->get(route('articles.show', $article))->assertSee('Dijadwalkan');
+
+        $this->actingAs(User::factory()->create());
+        $this->get(route('articles.index'))->assertDontSee($article->title);
+        $this->get(route('articles.show', $article))->assertNotFound();
+
+        $this->travelTo($article->published_at);
+        $this->get(route('articles.index'))->assertSee($article->title);
+        $this->get(route('articles.show', $article))->assertSee($article->title);
+    }
+
+    public function test_clearing_a_schedule_publishes_now_and_saving_draft_does_not_publish(): void
+    {
+        $this->freezeTime();
+        $article = Article::factory()->published()->create(['published_at' => now()->addDay()]);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put(route('admin.articles.update', $article), $this->payload($article->section, ['status' => 'published', 'publish_at' => '']))
+            ->assertSessionHasNoErrors();
+        $this->assertTrue($article->fresh()->published_at->equalTo(now()->startOfSecond()));
+
+        $this->put(route('admin.articles.update', $article), $this->payload($article->section, ['publish_at' => '2026-12-31T09:00']))
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'status' => 'draft', 'published_at' => null]);
+    }
+
+    #[DataProvider('invalidPublicationTimes')]
+    public function test_invalid_publication_time_does_not_change_the_article(mixed $time): void
+    {
+        $article = Article::factory()->create(['title' => 'Judul tersimpan']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put(route('admin.articles.update', $article), $this->payload($article->section, ['publish_at' => $time]))
+            ->assertSessionHasErrors('publish_at');
+
+        $this->assertDatabaseHas('articles', ['id' => $article->id, 'title' => 'Judul tersimpan', 'published_at' => null]);
+    }
+
+    public static function invalidPublicationTimes(): array
+    {
+        return [
+            'invalid date' => ['2026-02-30T10:00'],
+            'invalid hour' => ['2026-10-30T25:00'],
+            'ambiguous format' => ['30/10/2026 10:00'],
+            'array' => [['2026-10-30T10:00']],
+        ];
+    }
+
+    public function test_advanced_article_blocks_survive_saving_editing_and_reader_rendering(): void
+    {
+        $section = Section::factory()->create();
+        $body = '<h2>Rumus</h2><p>H<sub>2</sub>O dan x<sup>2</sup> <mark>penting</mark></p>'
+            .'<div data-callout="tip"><p><strong>Tips belajar</strong></p><p>Belajar rutin.</p></div>'
+            .'<details><summary>Mengapa?</summary><p>Penjelasan lengkap.</p></details>'
+            .'<pre><code>&lt;script&gt;contoh()&lt;/script&gt;</code></pre>'
+            .'<ol start="5"><li>Langkah kelima</li></ol>'
+            .'<table><caption>Jadwal belajar</caption><tbody><tr><th>Hari</th><th>Materi</th></tr><tr><td>Senin</td><td>TWK</td></tr></tbody></table>'
+            .'<figure data-width="50" data-align="right"><img src="/storage/articles/content/study.jpg" alt="Buku"><figcaption><p>Buku latihan.</p><p>Sumber: Dokumentasi pribadi</p></figcaption></figure>'
+            .'<h2>Referensi</h2><p><a href="https://example.com" target="_blank">Baca referensi</a></p>';
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.articles.store'), $this->payload($section, ['status' => 'published', 'body' => $body]))
+            ->assertSessionHasNoErrors();
+
+        $article = Article::sole();
+        $storedBody = $article->body;
+        $this->assertStringContainsString('<div data-callout="tip">', $storedBody);
+        $this->assertStringContainsString('<figure data-align="right" data-width="50">', $storedBody);
+        $this->assertStringContainsString('rel="noopener noreferrer" target="_blank"', $storedBody);
+        $this->assertStringNotContainsString('<script>', $storedBody);
+        $this->get(route('articles.show', $article))->assertSee($storedBody, false)->assertSee('Cetak / Simpan PDF')->assertSee('Ukuran teks');
+
+        $this->put(route('admin.articles.update', $article), $this->payload($section, ['body' => $storedBody]))->assertSessionHasNoErrors();
+        $this->assertSame($storedBody, $article->fresh()->body);
+    }
+
+    public function test_advanced_blocks_discard_unsafe_attributes_and_unapproved_layout_values(): void
+    {
+        $section = Section::factory()->create();
+        $body = '<div data-callout="danger" class="fixed" onclick="evil()">Informasi</div>'
+            .'<figure data-width="999" data-align="fixed" style="position:fixed"><img src="/storage/safe.jpg" onerror="evil()"></figure>'
+            .'<details ontoggle="evil()" open><summary onclick="evil()">Tanya</summary><p>Jawab</p></details>'
+            .'<ol start="999999"><li>Langkah</li></ol><a href="javascript:evil()" target="_blank">Link</a>';
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.articles.store'), $this->payload($section, ['body' => $body]))->assertSessionHasNoErrors();
+
+        $this->assertSame('<div>Informasi</div><figure><img src="/storage/safe.jpg" alt="" loading="lazy"></figure><details><summary>Tanya</summary><p>Jawab</p></details><ol><li>Langkah</li></ol><a>Link</a>', Article::sole()->body);
+    }
+
+    public function test_reading_time_counts_table_cells_code_and_closed_answers_as_separate_words(): void
+    {
+        $article = Article::factory()->make(['body' => '<table><tr>'.str_repeat('<td>kata</td>', 100).'</tr></table><pre>'.str_repeat('kode ', 50).'</pre><details><summary>Tanya</summary><p>'.str_repeat('jawab ', 50).'</p></details>']);
+
+        $this->assertSame(2, $article->readingMinutes());
+    }
+
+    public function test_mixed_nested_numbering_survives_saving_reopening_and_reader_rendering(): void
+    {
+        $section = Section::factory()->create();
+        $body = '<ol type="1" data-list-type="1" data-list-suffix="period"><li>UTAMA<ol type="1" data-list-type="1" data-list-suffix="paren"><li>sub 1</li><li>sub 2</li></ol></li>'
+            .'<li>UTAMA<ol type="a" data-list-type="a" data-list-suffix="paren"><li>sub a</li><li>sub b</li></ol></li></ol>';
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.articles.store'), $this->payload($section, ['status' => 'published', 'body' => $body]))
+            ->assertSessionHasNoErrors();
+
+        $article = Article::sole();
+        $this->assertSame($body, $article->body);
+        $this->get(route('articles.show', $article))->assertSee($body, false);
+        $this->get(route('admin.articles.edit', $article))->assertViewHas('article', fn (Article $saved): bool => $saved->safeBody() === $body);
+
+        $this->put(route('admin.articles.update', $article), $this->payload($section, ['status' => 'published', 'body' => $article->safeBody()]))
+            ->assertSessionHasNoErrors();
+        $this->assertSame($body, $article->fresh()->body);
+    }
+
+    #[DataProvider('supportedNumberingFormats')]
+    public function test_numbering_keeps_its_format_start_number_and_item_value(string $type, string $suffix): void
+    {
+        $section = Section::factory()->create();
+        $body = '<ol type="'.$type.'" data-list-suffix="'.$suffix.'" start="27"><li value="28">Langkah berikutnya</li><li>Lanjutan</li></ol>';
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.articles.store'), $this->payload($section, ['body' => $body]))->assertSessionHasNoErrors();
+
+        $this->assertSame('<ol type="'.$type.'" data-list-type="'.$type.'" data-list-suffix="'.$suffix.'" start="27"><li value="28">Langkah berikutnya</li><li>Lanjutan</li></ol>', Article::sole()->body);
+    }
+
+    public static function supportedNumberingFormats(): array
+    {
+        return [
+            'decimal period' => ['1', 'period'], 'decimal parentheses' => ['1', 'paren'],
+            'lower alpha period' => ['a', 'period'], 'lower alpha parentheses' => ['a', 'paren'],
+            'upper alpha period' => ['A', 'period'], 'upper alpha parentheses' => ['A', 'paren'],
+            'lower roman period' => ['i', 'period'], 'lower roman parentheses' => ['i', 'paren'],
+            'upper roman period' => ['I', 'period'], 'upper roman parentheses' => ['I', 'paren'],
+        ];
+    }
+
+    public function test_numbering_discards_invalid_formats_and_unsafe_attributes(): void
+    {
+        $section = Section::factory()->create();
+        $body = '<ol type="javascript:evil()" data-list-suffix="url(evil)" start="10000" onclick="evil()"><li value="-1" style="list-style-image:url(evil)">Satu</li><li value="1.5">Dua</li></ol>';
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->post(route('admin.articles.store'), $this->payload($section, ['body' => $body]))->assertSessionHasNoErrors();
+
+        $this->assertSame('<ol><li>Satu</li><li>Dua</li></ol>', Article::sole()->body);
+    }
 }

@@ -12,7 +12,6 @@
     <input type="hidden" name="status" value="{{ $questionValue('status', $question->status->value) }}">
     @if($inline)
     <header class="exam-question-dialog__head"><div><span class="eyebrow">Editor Soal</span><h2 id="inline-question-title" data-inline-question-title>Tambah Soal</h2><p>Lengkapi soal dan periksa pratinjau sebelum menyimpan.</p></div><button class="content-icon-button" type="button" data-inline-close aria-label="Tutup editor soal"><svg data-icon="close"></svg></button></header>
-    <button class="btn btn--ghost btn--sm" type="button" data-help-open data-help-guide="admin-questions">Bantuan editor soal</button>
     <div class="exam-question-feedback" data-inline-errors role="alert" hidden></div>
     <div class="exam-question-feedback exam-question-feedback--info" data-inline-shared hidden></div>
     <div class="exam-question-feedback" data-inline-discard hidden><p>Perubahan soal belum disimpan. Tutup editor dan buang perubahan?</p><div class="btn-row"><button class="btn btn--ghost btn--sm" type="button" data-inline-keep>Lanjutkan mengedit</button><button class="btn btn--outline btn--sm" type="button" data-inline-discard-confirm>Buang perubahan</button></div></div>
@@ -38,7 +37,7 @@
             @unless($inline)
             <section class="card question-form-stack" id="sesi-tujuan" data-question-exams>
                 <div class="card__head"><div><div class="card__title">Sesi tujuan soal</div><div class="card__sub">Pilih latihan atau tryout yang memakai soal ini.</div></div></div>
-                <div class="btn-row flex-wrap"><a class="btn btn--ghost btn--sm" href="{{ route('admin.materials.quizzes.index') }}" target="_blank" rel="noopener">Latihan Materi ↗</a><a class="btn btn--ghost btn--sm" href="{{ route('admin.exams.index') }}" target="_blank" rel="noopener">Tryout ↗</a></div>
+                <div class="btn-row flex-wrap"><a class="btn btn--ghost btn--sm" href="{{ route('admin.materials.quizzes.index') }}" target="_blank" rel="noopener">Latihan Topik ↗</a><a class="btn btn--ghost btn--sm" href="{{ route('admin.practices.index') }}" target="_blank" rel="noopener">Latihan Soal ↗</a><a class="btn btn--ghost btn--sm" href="{{ route('admin.exams.index') }}" target="_blank" rel="noopener">Tryout ↗</a></div>
                 <input type="hidden" name="exam_ids" value="">
                 @php
                     $formExamIds = is_array($questionValue('exam_ids', $selectedExamIds)) ? $questionValue('exam_ids', $selectedExamIds) : [];
@@ -47,7 +46,7 @@
                     <div class="field"><label class="label" for="question-exam-search">Cari sesi</label><input class="input" type="search" id="question-exam-search" placeholder="Cari nama latihan atau tryout..." data-question-exam-search></div>
                     <p class="text-sm text-soft" data-question-exam-count aria-live="polite">{{ count($formExamIds) }} sesi dipilih</p>
                     <div class="question-exam-picker">
-                        @foreach (['quiz' => 'Latihan', 'tryout' => 'Tryout CAT'] as $kind => $label)
+                        @foreach (['quiz' => 'Latihan Topik', 'practice' => 'Latihan Soal', 'tryout' => 'Tryout CAT'] as $kind => $label)
                             @if ($exams->where('kind', $kind)->isNotEmpty())
                                 <fieldset class="question-exam-group" data-question-exam-group><legend class="label">{{ $label }}</legend>
                                     @foreach ($exams->where('kind', $kind) as $exam)
@@ -100,7 +99,7 @@
             </section>
             <section class="card">
                 <x-question-rich-text name="explanation" label="Pembahasan" :value="$questionValue('explanation', $question->explanation)" />
-                <p class="field__hint question-hint">Pembahasan wajib diisi untuk menerbitkan soal. Peserta melihatnya setelah menjawab.</p>
+                <p class="field__hint question-hint">Pembahasan wajib diisi untuk menerbitkan soal. Peserta dengan paket berbayar aktif melihatnya setelah menyelesaikan sesi latihan atau tryout.</p>
             </section>
             <p class="text-sm text-soft" data-question-save-note>Perubahan disimpan saat Anda menekan Simpan draft atau Terbitkan soal.</p>
         </div>
@@ -110,8 +109,8 @@
                 <div class="question-preview-meta"><span class="badge badge--primary badge--flat" data-preview-field>Bidang</span><span class="text-sm text-soft" data-preview-level></span></div>
                 <h2 class="question-preview-title" data-preview-title></h2>
                 <div class="article-prose question-stem" data-preview-stem></div>
-                <img class="question-image" data-preview-image data-existing-image="{{ $question->image_path ? route('question-bank.image', $question) : '' }}" alt="Gambar soal" hidden>
-                <video class="question-video" data-preview-video data-existing-video="{{ $question->video_path ? route('question-bank.video', $question) : '' }}" controls playsinline preload="metadata" aria-label="Preview video soal" hidden>Browser Anda tidak mendukung pemutar video.</video>
+                <img class="question-image" data-preview-image data-existing-image="{{ $question->image_path ? route('admin.questions.image', $question) : '' }}" alt="Gambar soal" hidden>
+                <video class="question-video" data-preview-video data-existing-video="{{ $question->video_path ? route('admin.questions.video', $question) : '' }}" controls playsinline preload="metadata" aria-label="Preview video soal" hidden>Browser Anda tidak mendukung pemutar video.</video>
                 <div class="question-preview-options" data-preview-options></div>
                 <div class="explain explain--info question-preview-explanation"><div class="explain__title"><svg data-icon="book"></svg> Pembahasan</div><div class="article-prose" data-preview-explanation></div></div>
             </section>
@@ -119,7 +118,7 @@
         </aside>
     </div>
     @if($inline)
-    <footer class="exam-question-dialog__foot"><p data-inline-save-hint>Soal disimpan ke bank soal. Simpan sesi untuk menerapkan kumpulan soal yang dipilih.</p><div class="btn-row"><button class="btn btn--ghost" type="button" data-inline-close>Batal</button><button class="btn btn--outline" name="status" value="draft">Simpan draft</button><button class="btn btn--primary" name="status" value="published"><svg data-icon="send"></svg> Simpan &amp; terbitkan</button></div></footer>
+    <footer class="exam-question-dialog__foot"><p data-inline-save-hint>Soal disimpan untuk latihan dan tryout. Simpan sesi untuk menerapkan kumpulan soal yang dipilih.</p><div class="btn-row"><button class="btn btn--ghost" type="button" data-inline-close>Batal</button><button class="btn btn--outline" name="status" value="draft">Simpan draft</button><button class="btn btn--primary" name="status" value="published"><svg data-icon="send"></svg> Simpan &amp; terbitkan</button></div></footer>
     @endif
 </form>
 

@@ -40,16 +40,17 @@ class LearningPackageSeederTest extends TestCase
 
         $this->seed(LearningPackageSeeder::class);
 
-        $first = Package::query()->where('name', 'Paket 1')->sole();
-        $second = Package::query()->where('name', 'Paket 2')->sole();
-        $third = Package::query()->where('name', 'Paket 3')->sole();
+        $first = Package::query()->where('name', 'Paket Reguler')->sole();
+        $second = Package::query()->where('name', 'Paket Bundling')->sole();
+        $third = Package::query()->where('name', 'Paket Premium')->sole();
         $this->assertSame([15000, 35000, 80000], [$first->price, $second->price, $third->price]);
         $this->assertSame([2, 3, null], [$first->tryout_quota, $second->tryout_quota, $third->tryout_quota]);
         $this->assertSame([LeaderboardAccess::None, LeaderboardAccess::Local, LeaderboardAccess::National],
             [$first->leaderboard_access, $second->leaderboard_access, $third->leaderboard_access]);
         $this->assertSame([365, 365, 365], [$first->duration_days, $second->duration_days, $third->duration_days]);
         $this->assertSame('1 tahun', $first->durationLabel());
-        $this->assertSame([1, 3, 4], [$first->exams()->count(), $second->exams()->count(), $third->exams()->count()]);
+        $this->assertSame([0, 0, 4], [$first->exams()->count(), $second->exams()->count(), $third->exams()->count()]);
+        $this->assertSame([1, 3], [$first->tryout_tokens, $second->tryout_tokens]);
         $this->assertSame([0, 0, 1], [$first->materials()->count(), $second->materials()->count(), $third->materials()->count()]);
         $this->assertSame(3, Exam::query()->where('kind', 'tryout')->where('access_level', MaterialAccess::Premium)->count());
         foreach (PremiumTryoutSeeder::SLUGS as $slug) {
@@ -65,8 +66,8 @@ class LearningPackageSeederTest extends TestCase
     {
         $this->seedableContent();
         $this->seed(LearningPackageSeeder::class);
-        $first = Package::query()->where('name', 'Paket 1')->sole();
-        $second = Package::query()->where('name', 'Paket 2')->sole();
+        $first = Package::query()->where('name', 'Paket Reguler')->sole();
+        $second = Package::query()->where('name', 'Paket Bundling')->sole();
         $tryout = Exam::query()->where('slug', PremiumTryoutSeeder::SLUGS['TKP'])->sole();
         $first->update(['price' => 17500]);
         $first->exams()->detach();
@@ -83,14 +84,14 @@ class LearningPackageSeederTest extends TestCase
         $this->assertSame(3, Exam::query()->whereIn('slug', array_values(PremiumTryoutSeeder::SLUGS))->count());
     }
 
-    public function test_seeder_does_not_sell_incomplete_bundle_or_material_access(): void
+    public function test_seeder_creates_choice_packages_without_requiring_complete_tryout_content(): void
     {
         $section = Section::factory()->create(['code' => 'TWK']);
         Question::factory()->published()->for($section)->count(3)->create();
 
         $this->seed(LearningPackageSeeder::class);
 
-        $this->assertSame(['Paket 1'], Package::query()->pluck('name')->all());
+        $this->assertSame(['Paket Reguler', 'Paket Bundling'], Package::query()->pluck('name')->all());
         $this->assertSame(1, Exam::count());
     }
 }

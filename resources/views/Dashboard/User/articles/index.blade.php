@@ -15,7 +15,7 @@
                 <span class="badge {{ $article->section->resolvedTone()->badgeClass() }}">{{ $article->section->name }}</span>
                 <h2><a href="{{ route('articles.show', $article) }}">{{ $article->title }}</a></h2>
                 <p class="text-soft">{{ $article->summary() }}</p>
-                <div class="article-card-meta"><span>{{ $article->published_at->format('d M Y') }}</span><span>{{ $article->readingMinutes() }} menit baca</span></div>
+                <div class="article-card-meta"><span><x-local-time :value="$article->published_at" format="d M Y" /></span><span>{{ $article->readingMinutes() }} menit baca</span></div>
                 <a class="btn btn--outline" href="{{ route('articles.show', $article) }}">Baca artikel <svg data-icon="arrow-right"></svg></a>
             </article>
         @empty

@@ -19,6 +19,7 @@ class DashboardController extends SliceController
     public function __invoke(Request $request): View
     {
         $user = $request->user();
+        $user->load('userPackages');
         ExamAttempt::finalizeExpiredFor($user);
         $summary = ExamAttempt::summaryFor($user);
         $tryoutSummary = ExamAttempt::summaryFor($user, 'tryout');

@@ -153,21 +153,19 @@
   color: var(--ink);
 }
 .logo__mark {
-  width: 72px; height: 72px;
-  flex: 0 0 72px;
+  width: 84px; height: 56px;
+  flex: 0 0 84px;
   display: grid;
   place-items: center;
   padding: 0;
-  border-radius: 50%;
-  background: #FFFDF7;
   transition: transform var(--t) var(--ease-pop);
 }
 .logo:hover .logo__mark { transform: scale(1.05); }
 .logo__mark img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .logo__sub { display: block; font-size: 10px; line-height: 1.5; letter-spacing: 0.08em; color: var(--text-soft); font-weight: 700; }
-.nav .logo__mark, .appbar .logo__mark { width: 80px; height: 80px; flex-basis: 80px; }
+.nav .logo__mark, .appbar .logo__mark { width: 72px; height: 48px; flex-basis: 72px; }
 @media (max-width: 560px) {
-  .logo__mark, .nav .logo__mark { width: 64px; height: 64px; flex-basis: 64px; }
+  .logo__mark, .nav .logo__mark { width: 60px; height: 40px; flex-basis: 60px; }
 }
 
 .badge {
@@ -324,6 +322,8 @@
 
 /* Icon disc that sits half-in / half-out of the top border */
 .card.card--icon {
+  display: flex;
+  flex-direction: column;
   margin-top: calc(var(--card-icon-size) / 2);
   padding-top: calc(var(--card-icon-size) / 2 + 1rem);
 }
@@ -766,7 +766,7 @@
   .appbar__search { --search-control-size: 36px; }
   .appbar__inner { gap: .5rem; }
   .appbar .logo { font-size: 16px; gap: .4rem; }
-  .appbar .logo__mark { width: 64px; height: 64px; flex-basis: 64px; }
+  .appbar .logo__mark { width: 60px; height: 40px; flex-basis: 60px; }
   .appbar .logo__sub { font-size: 8px; letter-spacing: .12em; }
   .appbar__right { gap: .35rem; }
   .appbar__icon, .appbar-site-link { width: 36px; height: 36px; min-height: 36px; padding: .4rem; }
@@ -1674,10 +1674,10 @@
 /* ==========================================================================
    13 · CONTENT TILES (materi / video / artikel / paket)
    ========================================================================== */
-.grid-auto { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.grid-auto--lg { grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); }
-.grid-auto--sm { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-.grid-auto--xs { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.grid-auto { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+.grid-auto--lg { grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); }
+.grid-auto--sm { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+.grid-auto--xs { grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
 @media (max-width: 600px) {
   .related-material-grid { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
   .related-material-card__row { min-width: 0; gap: 0.75rem; }
@@ -1864,7 +1864,13 @@
   padding: 1.85rem;
 }
 .price--featured { box-shadow: var(--sh-lg); border-color: var(--ink); }
-@media (min-width: 861px) { .price--featured { transform: scale(1.045); } }
+.price-grid { align-items: stretch; }
+@media (min-width: 561px) {
+  .price-grid > .price { display: grid; grid-template-rows: subgrid; grid-row: span 4; }
+  .price-grid > article.price > :nth-child(2) { display: grid; grid-template-rows: 1.5em auto auto; align-content: start; }
+  .price-grid .price__amount { grid-row: 2; }
+  .price-grid .price__period { grid-row: 3; }
+}
 .price__amount {
   display: flex;
   align-items: baseline;
@@ -1878,7 +1884,7 @@
 }
 .price__amount small { font-size: var(--fs-md); font-weight: 700; }
 .price__period { margin-top: 0.35rem; font-size: var(--fs-sm); font-weight: 600; color: var(--text-soft); }
-.price__list { display: grid; gap: 0.65rem; font-size: var(--fs-base); }
+.price__list { display: grid; align-content: start; gap: 0.65rem; font-size: var(--fs-base); }
 .price__list li { display: flex; gap: 0.65rem; align-items: flex-start; color: var(--text); line-height: 1.5; }
 .price__check {
   width: 22px; height: 22px;

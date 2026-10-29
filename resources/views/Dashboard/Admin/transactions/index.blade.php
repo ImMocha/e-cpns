@@ -15,8 +15,8 @@
     <td><strong>{{ $transaction->user->name }}</strong><p class="text-xs text-soft">{{ $transaction->user->email }}</p></td>
     <td><strong>{{ $transaction->package_snapshot['name'] }}</strong><p>{{ $transaction->formattedAmount() }}</p></td>
     <td><span class="badge badge--{{ $transaction->status === \App\Enums\TransactionStatus::Paid ? 'mint' : 'amber' }} badge--flat">{{ $transaction->status->label() }}</span><p class="text-xs text-soft">{{ $transaction->provider === 'free' ? 'Paket gratis' : 'Midtrans · '.($transaction->is_production ? 'Production' : 'Sandbox') }}{{ $transaction->payment_type ? ' · '.str_replace('_', ' ', $transaction->payment_type) : '' }}</p></td>
-    <td>{{ $transaction->userPackage?->statusLabel() ?? 'Belum aktif' }}@if ($transaction->userPackage)<p class="text-xs text-soft">{{ $transaction->userPackage->expires_at ? 's/d '.$transaction->userPackage->expires_at->format('d/m/Y H:i') : 'Tanpa batas waktu' }}</p>@endif</td>
-    <td>{{ $transaction->created_at->format('d/m/Y H:i') }}@if ($transaction->paid_at)<p class="text-xs text-soft">Lunas {{ $transaction->paid_at->format('d/m/Y H:i') }}</p>@endif</td>
+    <td>{{ $transaction->userPackage?->statusLabel() ?? 'Belum aktif' }}@if ($transaction->userPackage)<p class="text-xs text-soft">@if ($transaction->userPackage->expires_at)s/d <x-local-time :value="$transaction->userPackage->expires_at" format="d/m/Y H:i" />@else Tanpa batas waktu @endif</p>@endif</td>
+    <td><x-local-time :value="$transaction->created_at" format="d/m/Y H:i" />@if ($transaction->paid_at)<p class="text-xs text-soft">Lunas <x-local-time :value="$transaction->paid_at" format="d/m/Y H:i" /></p>@endif</td>
 </tr>
 @empty<tr><td colspan="6" class="text-soft">Belum ada transaksi yang sesuai.</td></tr>@endforelse
 </tbody></table></div>

@@ -1,11 +1,13 @@
 @extends('layouts.admin.main')
-@section('title', 'Pengaturan Integrasi — Admin Ganesha Nusa')
+@section('title', 'Pengaturan Integrasi & Tampilan — Admin Ganesha Nusa')
 @section('content')
 @php
     $editingMidtrans = old('integration') === 'midtrans';
     $editingMail = old('integration') === 'mail';
     $paymentConfigured = $midtrans['is_production'] ? $productionConfigured : $sandboxConfigured;
     $fieldLabels = [
+        'heading_font' => 'Font judul', 'body_font' => 'Font teks',
+        'landing' => 'Font landing page', 'member' => 'Font dashboard peserta', 'admin' => 'Font dashboard admin',
         'enabled' => 'Status layanan', 'is_production' => 'Mode pembayaran',
         'sandbox_server_key' => 'Server key sandbox', 'production_server_key' => 'Server key production',
         'smtp_host' => 'Server SMTP', 'smtp_port' => 'Port SMTP', 'smtp_username' => 'Username SMTP',
@@ -15,8 +17,8 @@
 @endphp
 <header class="page-head">
     <span class="eyebrow">Administrasi</span>
-    <h1 class="mt-2!">Pengaturan Integrasi</h1>
-    <p>Kelola pembayaran dan pengiriman email. Setiap perubahan membutuhkan password akun admin kamu.</p>
+    <h1 class="mt-2!">Pengaturan Integrasi &amp; Tampilan</h1>
+    <p>Kelola font website, maintenance, pembayaran, dan pengiriman email. Setiap perubahan membutuhkan password akun admin kamu.</p>
 </header>
 
 @if ($errors->any())
@@ -27,6 +29,10 @@
         </ul>
     </div>
 @endif
+
+@include('Dashboard.Admin.settings._typography')
+
+@include('Dashboard.Admin.settings._maintenance')
 
 <div class="grid gap-6 xl:grid-cols-2">
     <section class="card card--static">
@@ -138,9 +144,9 @@
             <tbody>
                 @forelse ($audits as $audit)
                     <tr>
-                        <td class="text-sm">{{ \Illuminate\Support\Carbon::parse($audit->created_at)->timezone('Asia/Makassar')->format('d/m/Y H:i') }} WITA</td>
+                        <td class="text-sm"><x-local-time :value="$audit->created_at" format="d/m/Y H:i" /></td>
                         <td>{{ $audit->actor_name ?? 'Akun telah dihapus' }}</td>
-                        <td>{{ $audit->key === 'midtrans' ? 'Midtrans' : 'Email' }}</td>
+                        <td>{{ ['midtrans' => 'Midtrans', 'mail' => 'Email', 'typography' => 'Font & Tipografi'][$audit->key] ?? $audit->key }}</td>
                         <td>{{ $actionLabels[$audit->action] ?? $audit->action }}</td>
                         <td class="text-sm text-soft">{{ implode(', ', array_map(fn (string $field): string => $fieldLabels[$field] ?? $field, json_decode($audit->changed_fields, true))) ?: '—' }}</td>
                     </tr>

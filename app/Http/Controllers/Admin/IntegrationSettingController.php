@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateIntegrationSettingRequest;
 use App\IntegrationSettings;
 use App\MidtransGateway;
 use App\Models\IntegrationSetting;
+use App\TypographySettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Mail\Message;
@@ -20,12 +21,15 @@ use Throwable;
 
 class IntegrationSettingController extends Controller
 {
-    public function index(IntegrationSettings $settings): View
+    public function index(IntegrationSettings $settings, TypographySettings $typography): View
     {
         $midtrans = $settings->midtrans();
         $mail = $settings->mail() ?? $settings->mailDefaults();
 
         return view('Dashboard.Admin.settings.index', [
+            'maintenanceEnabled' => app()->isDownForMaintenance(),
+            'typography' => $typography->current(),
+            'fontOptions' => $typography->fonts(),
             'midtrans' => Arr::except($midtrans, IntegrationSettings::SECRET_FIELDS),
             'mail' => Arr::except($mail, IntegrationSettings::SECRET_FIELDS),
             'sandboxConfigured' => $midtrans['sandbox_server_key'] !== '',

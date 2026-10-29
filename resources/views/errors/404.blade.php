@@ -1,0 +1,6 @@
+@extends('errors.layout')
+@section('code', '404')
+@section('label', 'Halaman tidak ditemukan')
+@section('title', 'Sepertinya kamu tersesat.')
+@section('description', 'Halaman yang kamu cari tidak ditemukan. Alamatnya mungkin berubah, sudah dihapus, atau ada sedikit salah ketik. Yuk, mulai lagi dari beranda.')
+@section('sticker', 'Yuk, kembali ke jalur belajar!')

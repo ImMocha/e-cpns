@@ -119,13 +119,13 @@
   /* ---- Layout ----------------------------------------------------------- */
   --container: 1180px;
   --container-wide: 1360px;
-  --nav-h: 96px;
+  --nav-h: 72px;
   --gutter: clamp(1rem, 4vw, 2rem);
   --section-y: clamp(3.5rem, 8vw, 6.5rem);
 }
 
 @media (max-width: 560px) {
-  :root { --nav-h: 84px; }
+  :root { --nav-h: 64px; }
 }
 
 /* ==========================================================================

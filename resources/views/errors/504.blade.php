@@ -1,0 +1,6 @@
+@extends('errors.layout')
+@section('code', '504')
+@section('label', 'Waktu tunggu habis')
+@section('title', 'Responsnya lebih lama dari biasanya.')
+@section('description', 'Layanan pendukung belum merespons dalam waktu yang tersedia. Silakan tunggu sebentar, lalu coba buka kembali halaman ini.')
+@section('note', 'Jika baru mengirim formulir atau pembayaran, periksa statusnya sebelum mencoba ulang.')

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\LeaderboardAccess;
+use App\Enums\PackageTier;
 use Database\Factories\PackageFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,17 +15,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'description', 'price', 'duration_days', 'tryout_quota', 'leaderboard_access', 'is_active', 'position', 'created_by', 'updated_by'])]
+#[Fillable(['tier', 'name', 'description', 'price', 'original_price', 'duration_days', 'tryout_quota', 'tryout_tokens', 'leaderboard_access', 'is_active', 'position', 'created_by', 'updated_by'])]
 class Package extends Model
 {
     /** @use HasFactory<PackageFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $attributes = ['leaderboard_access' => 'none'];
+    protected $attributes = ['leaderboard_access' => 'none', 'tryout_tokens' => 0];
 
     protected function casts(): array
     {
-        return ['price' => 'integer', 'duration_days' => 'integer', 'tryout_quota' => 'integer', 'leaderboard_access' => LeaderboardAccess::class, 'is_active' => 'boolean', 'position' => 'integer'];
+        return ['tier' => PackageTier::class, 'price' => 'integer', 'original_price' => 'integer', 'duration_days' => 'integer', 'tryout_quota' => 'integer', 'tryout_tokens' => 'integer', 'leaderboard_access' => LeaderboardAccess::class, 'is_active' => 'boolean', 'position' => 'integer'];
     }
 
     public function materials(): BelongsToMany
@@ -59,6 +60,12 @@ class Package extends Model
         if (! $this->exists) {
             return false;
         }
+        if (in_array($this->tier, [PackageTier::Regular, PackageTier::Bundling], true)) {
+            return true;
+        }
+        if ($this->tier === PackageTier::Premium) {
+            return Exam::query()->visibleToMembers()->where('kind', 'tryout')->exists();
+        }
         if (! array_key_exists('selected_materials_count', $this->getAttributes())) {
             $this->loadCount(self::contentAvailabilityCounts());
         }
@@ -66,7 +73,13 @@ class Package extends Model
         $selectedMaterials = (int) $this->selected_materials_count;
         $selectedExams = (int) $this->selected_exams_count;
 
-        return $selectedMaterials + $selectedExams > 0
+        $hasTokenContent = false;
+        if ($this->tryout_tokens > 0 && ($this->tryout_quota === null || $this->tryout_quota > 0)) {
+            $hasTokenContent = Exam::query()->availableForTokens()->exists();
+        }
+
+        return ($selectedMaterials + $selectedExams > 0 || $hasTokenContent)
+            && ($this->tryout_tokens === 0 || $hasTokenContent)
             && (int) $this->available_materials_count === $selectedMaterials
             && (int) $this->available_exams_count === $selectedExams;
     }
@@ -85,6 +98,16 @@ class Package extends Model
     public function formattedPrice(): string
     {
         return 'Rp'.number_format($this->price, 0, ',', '.');
+    }
+
+    public function hasDiscount(): bool
+    {
+        return $this->original_price !== null && $this->original_price > $this->price;
+    }
+
+    public function formattedOriginalPrice(): string
+    {
+        return 'Rp'.number_format($this->original_price ?? $this->price, 0, ',', '.');
     }
 
     public function durationLabel(): string

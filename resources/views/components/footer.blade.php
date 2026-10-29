@@ -16,7 +16,6 @@
         <div class="footer__links">
           <a href="{{ route('materials.index') }}">Materi Pembelajaran</a>
           <a href="{{ route('articles.index') }}">Artikel</a>
-          <a href="{{ route('question-bank.index') }}">Bank Soal</a>
           <a href="{{ route('quizzes.index') }}">Latihan Soal</a>
           <a href="{{ route('tryouts.index') }}">Try Out CAT</a>
         </div>

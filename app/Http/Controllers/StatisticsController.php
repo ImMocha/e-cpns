@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\ExamKind;
 use App\Models\ExamAttempt;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -12,10 +13,13 @@ class StatisticsController extends SliceController
 {
     public function __invoke(Request $request): View
     {
-        $kind = in_array($request->query('kind'), ['tryout', 'quiz'], true)
+        $kind = in_array($request->query('kind'), ['tryout', 'quiz', 'practice'], true)
             ? $request->query('kind') : 'tryout';
         $period = in_array($request->query('period'), ['30', '90', 'all'], true)
             ? $request->query('period') : 'all';
+        if (! $request->user()->canAccessLearningFeatures()) {
+            return view('Dashboard.User.statistics.index', ['kind' => $kind, 'period' => $period, 'contentAccessible' => false]);
+        }
         $since = $period === 'all' ? null : now()->subDays((int) $period);
         $user = $request->user();
         ExamAttempt::finalizeExpiredFor($user);
@@ -24,6 +28,7 @@ class StatisticsController extends SliceController
         $sections = array_values($summary['sections']);
 
         return view('Dashboard.User.statistics.index', [
+            'contentAccessible' => true,
             'summary' => $summary,
             'kind' => $kind,
             'period' => $period,
@@ -33,7 +38,7 @@ class StatisticsController extends SliceController
                 'values' => array_map(fn (ExamAttempt $attempt): int => $attempt->score, $trend),
                 'avg' => $summary['averageScore'],
                 'height' => 300,
-                'aria' => 'Grafik nilai '.($kind === 'quiz' ? 'latihan' : 'tryout'),
+                'aria' => 'Grafik nilai '.strtolower(ExamKind::from($kind)->label()),
             ] : null,
             'sectionChart' => count($sections) > 0 ? [
                 'type' => 'bar',

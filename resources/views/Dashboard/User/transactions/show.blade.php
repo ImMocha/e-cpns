@@ -31,7 +31,7 @@
         <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
                 <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="calendar" aria-hidden="true"></svg>Dibuat</dt>
-                <dd class="mt-2! text-sm font-bold text-[var(--ink)]">{{ $transaction->created_at->format('d/m/Y H:i') }}</dd>
+                <dd class="mt-2! text-sm font-bold text-[var(--ink)]"><x-local-time :value="$transaction->created_at" format="d/m/Y H:i" /></dd>
             </div>
             <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
                 <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="credit-card" aria-hidden="true"></svg>Metode pembayaran</dt>
@@ -40,13 +40,13 @@
             @if ($transaction->status === \App\Enums\TransactionStatus::Pending)
                 <div class="rounded-2xl border border-[var(--border)] bg-[var(--warning-050)] p-4 sm:col-span-2">
                     <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="clock" aria-hidden="true"></svg>Batas pembayaran</dt>
-                    <dd class="mt-2! text-sm font-bold text-[var(--ink)]">{{ $transaction->expires_at->format('d/m/Y H:i') }}</dd>
+                    <dd class="mt-2! text-sm font-bold text-[var(--ink)]"><x-local-time :value="$transaction->expires_at" format="d/m/Y H:i" /></dd>
                 </div>
             @endif
             @if ($transaction->paid_at)
                 <div class="rounded-2xl border border-[var(--border)] bg-[var(--success-050)] p-4 sm:col-span-2">
                     <dt class="flex items-center gap-2 text-xs text-[var(--text-soft)]"><svg data-icon="check-circle" aria-hidden="true"></svg>Terverifikasi</dt>
-                    <dd class="mt-2! text-sm font-bold text-[var(--ink)]">{{ $transaction->paid_at->format('d/m/Y H:i') }}</dd>
+                    <dd class="mt-2! text-sm font-bold text-[var(--ink)]"><x-local-time :value="$transaction->paid_at" format="d/m/Y H:i" /></dd>
                 </div>
             @endif
         </dl>
@@ -60,7 +60,7 @@
     @if ($transaction->provider === 'midtrans')
         <form method="POST" action="{{ route('transactions.refresh', $transaction) }}">@csrf<button class="btn btn--outline btn--block"><svg data-icon="refresh" aria-hidden="true"></svg>Periksa status pembayaran</button></form>
     @endif
-    @if ($transaction->checked_at)<p class="flex items-center justify-center gap-2 text-center text-xs text-[var(--text-soft)]"><svg data-icon="clock" aria-hidden="true"></svg>Terakhir diperiksa: {{ $transaction->checked_at->format('d/m/Y H:i') }}</p>@endif
+    @if ($transaction->checked_at)<p class="flex items-center justify-center gap-2 text-center text-xs text-[var(--text-soft)]"><svg data-icon="clock" aria-hidden="true"></svg>Terakhir diperiksa: <x-local-time :value="$transaction->checked_at" format="d/m/Y H:i" /></p>@endif
     @if (in_array($transaction->status, [\App\Enums\TransactionStatus::Failed, \App\Enums\TransactionStatus::Expired, \App\Enums\TransactionStatus::Refunded], true))
         <a class="btn btn--primary btn--block" style="margin-top:1rem" href="{{ route('packages.index') }}">Pilih paket lagi</a>
     @endif
@@ -84,7 +84,7 @@
                     <span class="badge badge--{{ $transaction->userPackage->isActive() ? 'mint' : 'amber' }} badge--flat">{{ $transaction->userPackage->statusLabel() }}</span>
                 </div>
                 <div class="mt-3! flex flex-col gap-1 text-sm text-[var(--text)]">
-                    <p>{{ $transaction->userPackage->expires_at ? 'Akses sampai '.$transaction->userPackage->expires_at->format('d/m/Y H:i') : 'Tanpa batas waktu' }}</p>
+                    <p>@if ($transaction->userPackage->expires_at)Akses sampai <x-local-time :value="$transaction->userPackage->expires_at" format="d/m/Y H:i" />@else Tanpa batas waktu @endif</p>
                     <p>Sisa kuota tryout: <strong>{{ $transaction->userPackage->remainingTryouts() ?? 'Tanpa batas' }}</strong></p>
                 </div>
                 <a class="btn btn--primary btn--sm mt-4!" href="{{ route('packages.index') }}">Buka paket saya <svg data-icon="arrow-right"></svg></a>
@@ -115,42 +115,51 @@
             <p class="mt-1! text-sm text-[var(--text-soft)]">Buka kategori untuk melihat semua konten yang termasuk.</p>
             <div class="mt-4! flex flex-col gap-3">
                 @if ($transaction->package_snapshot['materials'])
-                    <details class="group overflow-hidden rounded-2xl border border-[var(--border)]">
-                        <summary class="flex cursor-pointer list-none items-center gap-3 p-4 transition-colors hover:bg-[var(--primary-050)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--primary)] [&::-webkit-details-marker]:hidden">
-                            <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--primary-100)] text-lg text-[var(--primary-700)]" aria-hidden="true"><svg data-icon="book"></svg></span>
-                            <span class="min-w-0 flex-1"><strong class="block text-sm text-[var(--ink)]">Materi</strong><span class="text-xs text-[var(--text-soft)]">Modul, pembahasan, dan panduan belajar</span></span>
-                            <span class="badge badge--primary badge--flat shrink-0">{{ count($transaction->package_snapshot['materials']) }}</span>
-                            <svg data-icon="chevron-down" class="size-4 shrink-0 text-[var(--text-soft)] group-open:rotate-180" aria-hidden="true"></svg>
+                    <details class="transaction-content-group">
+                        <summary class="transaction-content-group__header">
+                            <span class="transaction-content-group__icon" aria-hidden="true"><svg data-icon="book"></svg></span>
+                            <span class="transaction-content-group__copy"><strong>Materi</strong><span>Modul, pembahasan, dan panduan belajar</span></span>
+                            <span class="transaction-content-group__count">{{ count($transaction->package_snapshot['materials']) }} materi</span>
+                            <svg data-icon="chevron-down" class="transaction-content-group__chevron" aria-hidden="true"></svg>
                         </summary>
-                        <ul class="border-t border-[var(--border)] px-4">
+                        <ul class="transaction-content-group__list">
                             @foreach ($transaction->package_snapshot['materials'] as $material)
-                                <li class="flex items-start gap-3 border-b border-[var(--border)] py-3 last:border-b-0">
-                                    <svg data-icon="file" class="mt-0.5! size-4 shrink-0 text-[var(--primary-700)]" aria-hidden="true"></svg>
-                                    <span class="min-w-0 text-sm leading-relaxed break-words text-[var(--text)]">{{ $material['title'] }}</span>
+                                <li class="transaction-content-group__item">
+                                    <span class="transaction-content-group__item-icon" aria-hidden="true"><svg data-icon="file"></svg></span>
+                                    <span class="transaction-content-group__item-title">{{ $material['title'] }}</span>
                                 </li>
                             @endforeach
                         </ul>
                     </details>
                 @endif
                 @if ($transaction->package_snapshot['exams'])
-                    <details class="group overflow-hidden rounded-2xl border border-[var(--border)]">
-                        <summary class="flex cursor-pointer list-none items-center gap-3 p-4 transition-colors hover:bg-[var(--primary-050)] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--primary)] [&::-webkit-details-marker]:hidden">
-                            <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--pop-amber-050)] text-lg text-[var(--ink)]" aria-hidden="true"><svg data-icon="list-checks"></svg></span>
-                            <span class="min-w-0 flex-1"><strong class="block text-sm text-[var(--ink)]">Latihan &amp; tryout</strong><span class="text-xs text-[var(--text-soft)]">Latihan soal dan simulasi ujian</span></span>
-                            <span class="badge badge--amber badge--flat shrink-0">{{ count($transaction->package_snapshot['exams']) }}</span>
-                            <svg data-icon="chevron-down" class="size-4 shrink-0 text-[var(--text-soft)] group-open:rotate-180" aria-hidden="true"></svg>
+                    <details class="transaction-content-group transaction-content-group--exams">
+                        <summary class="transaction-content-group__header">
+                            <span class="transaction-content-group__icon" aria-hidden="true"><svg data-icon="list-checks"></svg></span>
+                            <span class="transaction-content-group__copy"><strong>Latihan Soal &amp; Tryout</strong><span>Latihan soal dan simulasi ujian</span></span>
+                            <span class="transaction-content-group__count">{{ count($transaction->package_snapshot['exams']) }} sesi</span>
+                            <svg data-icon="chevron-down" class="transaction-content-group__chevron" aria-hidden="true"></svg>
                         </summary>
-                        <ul class="border-t border-[var(--border)] px-4">
+                        <ul class="transaction-content-group__list">
                             @foreach ($transaction->package_snapshot['exams'] as $exam)
-                                <li class="flex items-start gap-3 border-b border-[var(--border)] py-3 last:border-b-0">
-                                    <svg data-icon="list-checks" class="mt-0.5! size-4 shrink-0 text-[var(--primary-700)]" aria-hidden="true"></svg>
-                                    <span class="min-w-0 text-sm leading-relaxed break-words text-[var(--text)]">{{ $exam['title'] }}</span>
+                                <li class="transaction-content-group__item">
+                                    <span class="transaction-content-group__item-icon" aria-hidden="true"><svg data-icon="list-checks"></svg></span>
+                                    <span class="transaction-content-group__item-title">{{ $exam['title'] }}</span>
                                 </li>
                             @endforeach
                         </ul>
                     </details>
                 @endif
-                @if (! $transaction->package_snapshot['materials'] && ! $transaction->package_snapshot['exams'])
+                @if (($transaction->package_snapshot['tryout_tokens'] ?? 0) > 0)
+                    <div class="card card--tight flex flex-col items-start gap-4 p-5! sm:p-6!">
+                        <div class="flex flex-col gap-2">
+                            <strong class="text-sm text-[var(--ink)]">{{ $transaction->package_snapshot['tryout_tokens'] }} token pilihan tryout</strong>
+                            <p class="text-sm leading-relaxed text-soft">Setelah pembayaran terverifikasi, token tersedia di akunmu untuk membuka tryout premium pilihanmu.</p>
+                        </div>
+                        <a class="btn btn--ghost btn--sm" href="{{ route('tryouts.index') }}">Pilih tryout</a>
+                    </div>
+                @endif
+                @if (! $transaction->package_snapshot['materials'] && ! $transaction->package_snapshot['exams'] && ($transaction->package_snapshot['tryout_tokens'] ?? 0) === 0)
                     <p class="rounded-xl bg-[var(--surface-2)] p-4 text-sm text-[var(--text-soft)]">Daftar konten belum tersedia.</p>
                 @endif
             </div>

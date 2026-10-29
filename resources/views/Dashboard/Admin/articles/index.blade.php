@@ -30,10 +30,10 @@
                         <tr>
                             <td><a class="font-bold text-primary" href="{{ route('admin.articles.edit', $article) }}">{{ $article->title }}</a><div class="text-xs text-soft">{{ $article->author?->name ?? 'Tim Ganesha Nusa' }} · {{ $article->readingMinutes() }} menit baca</div></td>
                             <td>{{ $article->section?->name ?? 'Bidang dihapus' }}</td>
-                            <td><span class="badge {{ $article->status->badgeClass() }}">{{ $article->status->label() }}</span></td>
+                            <td><span class="badge {{ $article->status->badgeClass() }}">{{ $article->published_at?->isFuture() ? 'Terjadwal' : $article->status->label() }}</span>@if ($article->published_at?->isFuture())<div class="text-xs text-soft"><x-local-time :value="$article->published_at" format="d M Y, H:i" /></div>@endif</td>
                             <td class="num">{{ number_format((int) ($articleViews[$article->id]->readers_count ?? 0), 0, ',', '.') }}</td>
                             <td class="num">{{ number_format((int) ($articleViews[$article->id]->views_count ?? 0), 0, ',', '.') }}</td>
-                            <td>{{ $article->updated_at->format('d M Y, H:i') }}</td>
+                            <td><x-local-time :value="$article->updated_at" format="d M Y, H:i" /></td>
                             <td><div class="btn-row">
                                 <a class="btn btn--ghost btn--sm" href="{{ route('admin.articles.edit', $article) }}" aria-label="Edit {{ $article->title }}"><svg data-icon="pencil"></svg> Edit</a>
                                 <a class="btn btn--ghost btn--sm" href="{{ route('admin.articles.show', $article) }}" aria-label="Preview {{ $article->title }}"><svg data-icon="eye"></svg> Preview</a>

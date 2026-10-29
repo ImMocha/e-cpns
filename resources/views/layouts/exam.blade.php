@@ -1,4 +1,5 @@
 @extends('layouts.base')
+@section('typography-scope', 'member')
 
 @section('body-attributes')
     data-attempt="{{ $attempt->id }}"

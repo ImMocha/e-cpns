@@ -190,16 +190,15 @@
 
     values.forEach((v, i) => {
       const bx = pad.l + slot * i + (slot - bw) / 2;
-      const bh = Math.max(3, (v / max) * plotH);
+      const bh = v > 0 ? Math.max(3, (v / max) * plotH) : 0;
       const by = pad.t + plotH - bh;
       const color = Array.isArray(cfg.colors) ? cfg.colors[i] : (cfg.color || PALETTE[0]);
       const rect = el('rect', {
         x: bx.toFixed(1), y: by.toFixed(1), width: bw.toFixed(1), height: bh.toFixed(1),
         rx: 6, fill: color, stroke: cssVar('--ink', '#16324F'), 'stroke-width': 2
       });
-      svg.appendChild(rect);
       const g = el('g');
-      g.appendChild(rect);
+      if (bh > 0) g.appendChild(rect);
       g.appendChild(el('title')).textContent = `${labels[i]}: ${v}`;
       svg.appendChild(g);
       if (cfg.animate !== false && !REDUCED()) {
@@ -305,16 +304,20 @@
       try { cfg = JSON.parse(host.dataset.chart); } catch (err) { return; }
       const fn = RENDER[cfg.type] || line;
       const isResponsive = cfg.type === 'line' || cfg.type === 'bar';
+      host.dataset.chartType = cfg.type || 'line';
       let lastWidth = 0;
+      let lastHeight = 0;
 
       const render = (width, animate = false, force = false) => {
         const measuredWidth = Math.round(width || host.clientWidth || cfg.width || 720);
+        const measuredHeight = Math.round(host.clientHeight || cfg.height || (cfg.type === 'bar' ? 240 : 260));
 
-        if (!force && isResponsive && measuredWidth === lastWidth && host.firstElementChild) return;
+        if (!force && isResponsive && measuredWidth === lastWidth && measuredHeight === lastHeight && host.firstElementChild) return;
 
         lastWidth = measuredWidth;
+        lastHeight = measuredHeight;
         const chartConfig = isResponsive
-          ? { ...cfg, width: measuredWidth, animate: animate && cfg.animate !== false }
+          ? { ...cfg, width: measuredWidth, height: measuredHeight, animate: animate && cfg.animate !== false }
           : cfg;
         const svg = fn(host, chartConfig);
         svg.setAttribute('aria-label', cfg.aria || 'Grafik');
@@ -329,7 +332,8 @@
       if (isResponsive && typeof ResizeObserver !== 'undefined') {
         const observer = new ResizeObserver((entries) => {
           const width = entries[0]?.contentRect.width || 0;
-          if (width > 0 && Math.abs(Math.round(width) - lastWidth) >= 2) render(width);
+          const height = entries[0]?.contentRect.height || 0;
+          if (width > 0 && (Math.abs(Math.round(width) - lastWidth) >= 2 || Math.abs(Math.round(height) - lastHeight) >= 2)) render(width);
         });
 
         observer.observe(host);

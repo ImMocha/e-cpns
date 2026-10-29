@@ -45,8 +45,7 @@ class QuestionManagementTest extends TestCase
             'image_path' => null, 'video_path' => null, 'published_at' => null, 'correct_option' => 1,
             'body' => '<p>Berapa <strong>12 + 8</strong>?</p>', 'explanation' => '<p>12 + 8 = 20.</p>']);
         $this->get(route('admin.questions.edit', $question))->assertSee('Preview langsung')->assertSee('Pilihan A');
-        $this->get(route('admin.questions.show', $question))->assertRedirect(route('question-bank.show', $question));
-        $this->get(route('question-bank.show', $question))->assertSee('Kunci &amp; Pembahasan', false);
+        $this->get(route('admin.questions.show', $question))->assertSee('Kunci &amp; Pembahasan', false);
     }
 
     public function test_admin_can_publish_edit_return_to_draft_and_archive_question(): void
@@ -143,10 +142,9 @@ class QuestionManagementTest extends TestCase
         $question = Question::factory()->published()->create();
 
         $this->get(route('admin.questions.index'))->assertRedirect(route('login'));
-        $this->get(route('question-bank.show', $question))->assertRedirect(route('login'));
-        $this->post(route('question-bank.answer', $question), ['option' => 1])->assertRedirect(route('login'));
-        $this->get(route('question-bank.image', $question))->assertRedirect(route('login'));
-        $this->get(route('question-bank.video', $question))->assertRedirect(route('login'));
+        $this->get(route('admin.questions.show', $question))->assertRedirect(route('login'));
+        $this->get(route('admin.questions.image', $question))->assertRedirect(route('login'));
+        $this->get(route('admin.questions.video', $question))->assertRedirect(route('login'));
 
         $this->actingAs(User::factory()->create());
         $this->get(route('admin.questions.create'))->assertForbidden();
@@ -155,60 +153,6 @@ class QuestionManagementTest extends TestCase
         $this->delete(route('admin.questions.destroy', $question))->assertForbidden();
         $this->assertModelExists($question);
         $this->assertDatabaseCount('questions', 1);
-    }
-
-    public function test_member_bank_contains_only_visible_questions_without_answer_keys(): void
-    {
-        $visible = Question::factory()->published()->create(['title' => 'Soal Terlihat', 'explanation' => '<p>Rahasia Pembahasan</p>']);
-        $draft = Question::factory()->create(['title' => 'Soal Draft']);
-        $future = Question::factory()->published()->create(['title' => 'Soal Masa Depan', 'published_at' => now()->addDay()]);
-        $inactive = Question::factory()->published()->for(Section::factory()->state(['is_active' => false]))->create(['title' => 'Soal Bidang Nonaktif']);
-        $archived = Question::factory()->published()->create(['title' => 'Soal Arsip']);
-        $archived->delete();
-        $this->actingAs(User::factory()->create());
-
-        $this->get(route('question-bank.index'))->assertSee('Soal Terlihat')->assertDontSee('Soal Draft')
-            ->assertDontSee('Soal Masa Depan')->assertDontSee('Soal Bidang Nonaktif')->assertDontSee('Soal Arsip')
-            ->assertDontSee('Rahasia Pembahasan')->assertViewHas('questionCount', 1);
-        $this->get(route('question-bank.show', $visible))->assertDontSee('Rahasia Pembahasan')->assertDontSee('question-answer-option--correct', false);
-        foreach ([$draft, $future, $inactive, $archived] as $hidden) {
-            $this->get(route('question-bank.show', $hidden))->assertNotFound();
-            $this->post(route('question-bank.answer', $hidden), ['option' => 1, 'revision' => $hidden->revision()])->assertNotFound();
-            $this->get(route('question-bank.image', $hidden))->assertNotFound();
-        }
-    }
-
-    #[DataProvider('answerChoices')]
-    public function test_valid_answer_reveals_feedback_and_key_without_explanation_for_free_members(int $option, string $feedback): void
-    {
-        $question = Question::factory()->published()->create(['explanation' => '<p>Pembahasan Setelah Jawab</p>']);
-        $this->actingAs(User::factory()->create());
-
-        $this->post(route('question-bank.answer', $question), ['option' => $option, 'revision' => $question->revision()])
-            ->assertRedirect(route('question-bank.show', $question))->assertSessionHasNoErrors();
-        $this->get(route('question-bank.show', $question))->assertSee($feedback)->assertDontSee('Pembahasan Setelah Jawab')
-            ->assertSee('Jawaban B')->assertSee('Lihat paket belajar')->assertViewHas('explanationHtml', null);
-    }
-
-    public static function answerChoices(): array
-    {
-        return ['correct' => [1, 'Jawabanmu benar!'], 'wrong' => [0, 'Jawabanmu belum tepat']];
-    }
-
-    public function test_invalid_answer_and_outdated_question_do_not_reveal_explanation(): void
-    {
-        $question = Question::factory()->published()->create(['explanation' => '<p>Pembahasan Rahasia</p>']);
-        $this->actingAs(User::factory()->create());
-
-        $this->from(route('question-bank.show', $question))->post(route('question-bank.answer', $question),
-            ['option' => 9, 'revision' => $question->revision()])->assertSessionHasErrors('option')->assertSessionMissing('question_feedback');
-        $this->get(route('question-bank.show', $question))->assertDontSee('Pembahasan Rahasia');
-
-        $oldRevision = $question->revision();
-        $question->update(['body' => '<p>Pertanyaan baru</p>']);
-        $this->from(route('question-bank.show', $question))->post(route('question-bank.answer', $question),
-            ['option' => 1, 'revision' => $oldRevision])->assertSessionHasErrors(['revision' => 'Soal telah diperbarui. Baca soal terbaru sebelum menjawab lagi.']);
-        $this->get(route('question-bank.show', $question))->assertDontSee('Pembahasan Rahasia');
     }
 
     public function test_question_image_is_private_replaceable_and_not_changed_when_validation_fails(): void
@@ -221,7 +165,7 @@ class QuestionManagementTest extends TestCase
         $question = Question::sole();
         $oldPath = $question->image_path;
         Storage::disk('local')->assertExists($oldPath);
-        $this->get(route('question-bank.image', $question))->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->get(route('admin.questions.image', $question))->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
 
         $this->put(route('admin.questions.update', $question), $this->payload($section, [
             'image' => UploadedFile::fake()->image('replacement.png'), 'correct_option' => 8,
@@ -237,7 +181,7 @@ class QuestionManagementTest extends TestCase
         $this->put(route('admin.questions.update', $question), $this->payload($section, ['remove_image' => 1]))
             ->assertSessionHasNoErrors();
         $this->assertDatabaseHas('questions', ['id' => $question->id, 'image_path' => null]);
-        $this->get(route('question-bank.image', $question))->assertNotFound();
+        $this->get(route('admin.questions.image', $question))->assertNotFound();
     }
 
     public function test_non_image_upload_is_rejected_without_saving_question(): void
@@ -265,8 +209,8 @@ class QuestionManagementTest extends TestCase
         $oldPath = $question->video_path;
         $imagePath = $question->image_path;
         Storage::disk('local')->assertExists([$oldPath, $imagePath]);
-        $this->get(route('admin.questions.edit', $question))->assertSee('Hapus video lama')->assertSee(route('question-bank.video', $question));
-        $this->get(route('question-bank.video', $question))->assertOk()->assertHeader('Content-Type', 'video/mp4')
+        $this->get(route('admin.questions.edit', $question))->assertSee('Hapus video lama')->assertSee(route('admin.questions.video', $question));
+        $this->get(route('admin.questions.video', $question))->assertOk()->assertHeader('Content-Type', 'video/mp4')
             ->assertHeader('Cache-Control', 'no-store, private')->assertHeader('X-Content-Type-Options', 'nosniff');
 
         $this->put(route('admin.questions.update', $question), $this->payload($section))->assertSessionHasNoErrors();
@@ -283,12 +227,12 @@ class QuestionManagementTest extends TestCase
         $newPath = $question->fresh()->video_path;
         Storage::disk('local')->assertMissing($oldPath);
         Storage::disk('local')->assertExists([$newPath, $imagePath]);
-        $this->get(route('question-bank.video', $question))->assertHeader('Content-Type', 'video/webm');
+        $this->get(route('admin.questions.video', $question))->assertHeader('Content-Type', 'video/webm');
         $this->put(route('admin.questions.update', $question), $this->payload($section, ['remove_video' => 1]))->assertSessionHasNoErrors();
         $this->assertDatabaseHas('questions', ['id' => $question->id, 'video_path' => null, 'image_path' => $imagePath]);
         Storage::disk('local')->assertMissing($newPath);
         Storage::disk('local')->assertExists($imagePath);
-        $this->get(route('question-bank.video', $question))->assertNotFound();
+        $this->get(route('admin.questions.video', $question))->assertNotFound();
     }
 
     #[DataProvider('invalidVideos')]
@@ -316,35 +260,7 @@ class QuestionManagementTest extends TestCase
         ];
     }
 
-    public function test_member_can_play_published_video_with_byte_ranges_and_cannot_access_hidden_video(): void
-    {
-        Storage::fake('local');
-        $path = 'questions/videos/clip.mp4';
-        Storage::disk('local')->put($path, str_repeat('a', 100));
-        $question = Question::factory()->published()->create(['video_path' => $path, 'explanation' => '<p>Rahasia video</p>']);
-        $this->actingAs(User::factory()->create())->get(route('question-bank.show', $question))
-            ->assertSee(route('question-bank.video', $question))->assertSee('controls playsinline', false)->assertDontSee('Rahasia video');
-        $this->get(route('question-bank.video', $question), ['Range' => 'bytes=10-19'])
-            ->assertStatus(206)->assertHeader('Content-Range', 'bytes 10-19/100')->assertHeader('Content-Length', '10');
-        $this->get(route('question-bank.video', $question), ['Range' => 'bytes=200-300'])->assertStatus(416);
-
-        $oldRevision = $question->revision();
-        $question->update(['video_path' => 'questions/videos/replacement.mp4']);
-        $this->post(route('question-bank.answer', $question), ['option' => 1, 'revision' => $oldRevision])->assertSessionHasErrors('revision');
-        $this->get(route('question-bank.video', $question))->assertNotFound();
-
-        foreach ([
-            Question::factory()->create(['video_path' => $path]),
-            Question::factory()->published()->create(['video_path' => $path, 'published_at' => now()->addDay()]),
-            Question::factory()->published()->for(Section::factory()->state(['is_active' => false]))->create(['video_path' => $path]),
-        ] as $hidden) {
-            $this->get(route('question-bank.video', $hidden))->assertNotFound();
-        }
-        $question->delete();
-        $this->get(route('question-bank.video', $question))->assertNotFound();
-    }
-
-    public function test_admin_filters_and_totals_use_saved_questions_and_member_filters_work(): void
+    public function test_admin_filters_and_totals_use_saved_questions(): void
     {
         $section = Section::factory()->create();
         $match = Question::factory()->published()->for($section)->create(['title' => 'Pola Bilangan Nyata']);
@@ -356,8 +272,6 @@ class QuestionManagementTest extends TestCase
             ->assertSee($match->title)->assertDontSee('Pola Bilangan Draft')->assertDontSee('Bidang Lain')
             ->assertViewHas('stats', ['total' => 3, 'published' => 2, 'draft' => 1, 'sections' => 2]);
 
-        $this->actingAs(User::factory()->create())->get(route('question-bank.index', ['q' => 'Pola', 'section_id' => $section->id, 'difficulty' => 'easy']))
-            ->assertSee($match->title)->assertDontSee('Bidang Lain');
     }
 
     public function test_example_seeder_does_not_overwrite_admin_edits_or_duplicate_questions(): void

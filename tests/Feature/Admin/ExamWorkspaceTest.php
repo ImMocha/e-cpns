@@ -26,7 +26,7 @@ class ExamWorkspaceTest extends TestCase
         $this->get(route('admin.exams.index'))->assertSee($tryout->title)->assertDontSee($quiz->title)
             ->assertSee('Tambah Tryout')->assertDontSee('Quiz &amp; Tryout', false);
         $this->get(route('admin.materials.quizzes.index'))->assertSee($quiz->title)->assertDontSee($tryout->title)
-            ->assertSee('Tambah Latihan')->assertSee('Latihan umum');
+            ->assertSee('Tambah Latihan')->assertSee('Latihan Soal umum');
         $this->get(route('admin.exams.create'))->assertViewHas('exam', fn (Exam $exam): bool => $exam->kind === 'tryout' && $exam->duration_minutes === 30)
             ->assertSee('Tambah Tryout')->assertDontSee('Topik latihan');
         $this->get(route('admin.materials.quizzes.create'))->assertViewHas('exam', fn (Exam $exam): bool => $exam->kind === 'quiz')
@@ -60,7 +60,7 @@ class ExamWorkspaceTest extends TestCase
         $this->actingAs(User::factory()->admin()->create());
 
         $this->get(route('admin.materials.index', ['topic_id' => $topic->id]))
-            ->assertSee('Latihan Topik')->assertSee($wanted->title)->assertSee('Latihan Numerik Draft')
+            ->assertSee('Latihan Soal Topik')->assertSee($wanted->title)->assertSee('Latihan Numerik Draft')
             ->assertDontSee('Latihan Topik Lain')->assertDontSee('Latihan Arsip')
             ->assertSee(route('admin.materials.quizzes.edit', $wanted));
         $this->get(route('admin.materials.quizzes.index', ['topic_id' => $topic->id, 'q' => 'Numerik', 'status' => 'published']))

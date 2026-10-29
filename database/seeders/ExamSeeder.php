@@ -17,8 +17,8 @@ class ExamSeeder extends Seeder
             return;
         }
         foreach (['quiz' => 'latihan-bank-soal', 'tryout' => 'simulasi-bank-soal'] as $kind => $slug) {
-            $exam = Exam::withTrashed()->firstOrCreate(['slug' => $slug], ['kind' => $kind,
-                'title' => $kind === 'quiz' ? 'Contoh: Latihan Bank Soal' : 'Contoh: Simulasi CAT Bank Soal',
+            $exam = Exam::withTrashed()->firstOrCreate(['slug' => $slug], ['kind' => $kind, 'access_level' => 'premium',
+                'title' => $kind === 'quiz' ? 'Contoh: Latihan Soal' : 'Contoh: Simulasi CAT',
                 'description' => 'Sesi contoh dari soal terbit. Admin dapat mengatur isi, jumlah soal, durasi, dan penilaiannya.',
                 'status' => 'published', 'question_count' => $ids->count(), 'duration_minutes' => $kind === 'quiz' ? 0 : 10,
                 'points_per_correct' => 5, 'penalty_wrong' => 0, 'random_questions' => true, 'random_options' => true]);

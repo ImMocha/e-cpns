@@ -34,12 +34,12 @@
             @else
               <a class="badge badge--amber badge--flat" href="{{ route('verification.notice') }}">Verifikasi email</a>
             @endif
-            <span class="badge badge--primary badge--flat">Bergabung {{ $user->created_at->translatedFormat('M Y') }}</span>
+            <span class="badge badge--primary badge--flat">Bergabung <x-local-time :value="$user->created_at" format="M Y" /></span>
           </div>
         </div>
         <div class="kv" style="min-width:200px">
           <div class="kv__row"><span class="kv__key">Status akun</span><span class="kv__val">{{ $user->status->label() }}</span></div>
-          <div class="kv__row"><span class="kv__key">Terdaftar</span><span class="kv__val">{{ $user->created_at->format('d/m/Y') }}</span></div>
+          <div class="kv__row"><span class="kv__key">Terdaftar</span><span class="kv__val"><x-local-time :value="$user->created_at" format="d/m/Y" /></span></div>
         </div>
       </div>
     </section>

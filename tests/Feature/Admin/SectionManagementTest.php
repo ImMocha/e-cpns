@@ -191,7 +191,7 @@ class SectionManagementTest extends TestCase
         $this->assertSame($countBefore, Section::count(), 'bidang baru tidak boleh tersimpan');
     }
 
-    public function test_create_rejects_duplicate_name_and_slug(): void
+    public function test_create_rejects_duplicate_name(): void
     {
         Section::factory()->create(['name' => 'Sejarah', 'slug' => 'sejarah']);
 
@@ -201,7 +201,7 @@ class SectionManagementTest extends TestCase
                 'slug' => 'sejarah',
                 'code' => 'SEJ',
             ])
-            ->assertSessionHasErrors(['name', 'slug']);
+            ->assertSessionHasErrors('name');
     }
 
     public function test_slug_is_made_unique_when_names_normalise_to_the_same_slug(): void

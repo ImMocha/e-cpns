@@ -20,7 +20,7 @@
           @if ($material->section)
             &middot; bidang <span class="text-mono">{{ $material->section->code }}</span>
           @endif
-          &middot; dibuat {{ $material->created_at->format('d M Y') }}
+          &middot; dibuat <x-local-time :value="$material->created_at" format="d M Y" />
         </p>
       </div>
       <div class="btn-row">
@@ -37,7 +37,7 @@
         @if ($missingSource)
           Belum ada sumber, jadi belum bisa diterbitkan. Unggah PDF atau isi URL video dulu.
         @elseif ($material->isPublished())
-          Terbit {{ $material->published_at?->format('d M Y') }} &mdash; @if ($material->section?->is_active && $material->topic?->is_active) peserta dapat membukanya sesuai hak akses. @else bidang atau topiknya nonaktif, sehingga materi belum tampil untuk peserta. @endif
+          Terbit <x-local-time :value="$material->published_at" format="d M Y" /> &mdash; @if ($material->section?->is_active && $material->topic?->is_active) peserta dapat membukanya sesuai hak akses. @else bidang atau topiknya nonaktif, sehingga materi belum tampil untuk peserta. @endif
         @else
           Belum tampil untuk peserta. Beri status Terbit setelah sumbernya siap.
         @endif

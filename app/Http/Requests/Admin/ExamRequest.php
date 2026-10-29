@@ -8,6 +8,7 @@ use App\Enums\ExamBank;
 use App\Enums\MaterialAccess;
 use App\Enums\QuestionStatus;
 use App\Models\Question;
+use App\UniqueSlug;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -21,10 +22,21 @@ class ExamRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $exam = $this->route('exam');
+        $accessLevel = $this->input('access_level', $exam?->free_claim_enabled ? 'conditional' : MaterialAccess::Premium->value);
+        $slug = $this->input('slug', $exam?->slug);
+        if ($exam === null && is_string($this->input('title')) && trim($this->input('title')) !== ''
+            && ($slug === null || (is_string($slug) && mb_strlen($slug) <= 80))) {
+            $slug = UniqueSlug::resolve('exams', trim((string) $slug) ?: $this->input('title'));
+        }
         $this->merge(['question_ids' => $this->input('question_ids', []),
+            'slug' => $slug,
             'topic_id' => $this->input('topic_id', $this->route('exam')?->topic_id),
             'requires_topic_completion' => $this->input('requires_topic_completion', $this->route('exam')?->requires_topic_completion ?? false),
-            'access_level' => $this->input('access_level', $this->route('exam')?->access_level?->value ?? 'free')]);
+            'access_level' => $accessLevel === 'conditional' ? 'free' : $accessLevel,
+            'free_claim_enabled' => $accessLevel === 'conditional',
+            'free_claim_terms' => $this->input('free_claim_terms', $exam?->free_claim_terms),
+            'free_claim_instagram_url' => $this->input('free_claim_instagram_url', $exam?->free_claim_instagram_url)]);
     }
 
     public function rules(): array
@@ -33,18 +45,27 @@ class ExamRequest extends FormRequest
             'title' => ['required', 'string', 'max:180'],
             'slug' => ['required', 'string', 'max:80', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
                 Rule::unique('exams', 'slug')->ignore($this->route('exam')), Rule::notIn(array_column(ExamBank::cases(), 'value'))],
-            'kind' => ['required', Rule::in($this->routeIs('admin.materials.quizzes.*') ? ['quiz'] : ['tryout'])],
+            'kind' => ['required', Rule::in(match (true) {
+                $this->routeIs('admin.materials.quizzes.*') => ['quiz'],
+                $this->routeIs('admin.practices.*') => ['practice'],
+                default => ['tryout'],
+            })],
             'topic_id' => ['nullable', 'integer', 'prohibited_unless:kind,quiz', Rule::exists('topics', 'id')->whereNull('deleted_at')],
             'requires_topic_completion' => ['required', 'boolean'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'cover' => ['nullable', 'prohibited_if:kind,quiz', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'remove_cover' => ['sometimes', 'boolean', 'prohibited_if:kind,quiz'],
             'question_count' => ['required', 'integer', 'min:1', 'max:200'],
-            'duration_minutes' => ['required', 'integer', 'min:'.($this->input('kind') === 'tryout' ? '1' : '0'), 'max:240'],
+            'duration_minutes' => ['required', 'integer', 'min:'.($this->input('kind') === 'quiz' ? '0' : '1'), 'max:240'],
             'points_per_correct' => ['required', 'integer', 'min:1', 'max:100'],
             'penalty_wrong' => ['required', 'integer', 'min:0', 'max:100'],
             'passing_score' => ['nullable', 'integer', 'min:0'],
             'random_questions' => ['required', 'boolean'], 'random_options' => ['required', 'boolean'],
             'status' => ['required', Rule::enum(QuestionStatus::class)],
-            'access_level' => ['required', Rule::enum(MaterialAccess::class)],
+            'access_level' => ['required', Rule::in([$this->boolean('free_claim_enabled') ? MaterialAccess::Free->value : MaterialAccess::Premium->value])],
+            'free_claim_enabled' => ['required', 'boolean'],
+            'free_claim_terms' => [Rule::requiredIf($this->boolean('free_claim_enabled')), 'nullable', 'string', 'max:5000'],
+            'free_claim_instagram_url' => [Rule::requiredIf($this->boolean('free_claim_enabled')), 'nullable', 'url:https', 'max:255', 'regex:~^https://(?:www\.)?instagram\.com/[A-Za-z0-9_.]+/?$~i'],
             'question_ids' => ['present', 'array', 'list', 'max:2000'],
             'question_ids.*' => ['required', 'integer', 'distinct', Rule::exists('questions', 'id')->whereNull('deleted_at')],
         ];
@@ -53,6 +74,9 @@ class ExamRequest extends FormRequest
     public function after(): array
     {
         return [function (Validator $validator): void {
+            if ($this->boolean('free_claim_enabled') && $this->input('kind') === 'quiz') {
+                $validator->errors()->add('access_level', 'Gratis Bersyarat hanya tersedia untuk tryout dan latihan soal.');
+            }
             if ($this->boolean('requires_topic_completion') && ($this->input('kind') !== 'quiz' || ! $this->filled('topic_id'))) {
                 $validator->errors()->add('requires_topic_completion', 'Pilih topik pada sesi latihan sebelum mewajibkan penyelesaian materi.');
             }
@@ -93,6 +117,8 @@ class ExamRequest extends FormRequest
         return ['title' => 'nama sesi', 'slug' => 'alamat sesi', 'kind' => 'jenis sesi', 'question_count' => 'jumlah soal',
             'duration_minutes' => 'durasi', 'points_per_correct' => 'poin benar', 'penalty_wrong' => 'penalti salah',
             'passing_score' => 'nilai ambang', 'question_ids' => 'pilihan soal', 'topic_id' => 'topik latihan',
-            'requires_topic_completion' => 'syarat penyelesaian materi'];
+            'requires_topic_completion' => 'syarat penyelesaian materi',
+            'free_claim_terms' => 'syarat unlock gratis', 'free_claim_instagram_url' => 'tautan akun Instagram',
+            'cover' => 'gambar kartu', 'remove_cover' => 'hapus gambar kartu'];
     }
 }

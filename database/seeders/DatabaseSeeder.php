@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             ExamSeeder::class,
             TopicQuizSeeder::class,
             PremiumRf05Seeder::class,
+            SessionCatalogSeeder::class,
             LearningPackageSeeder::class,
         ]);
     }

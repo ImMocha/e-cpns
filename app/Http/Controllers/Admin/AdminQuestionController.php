@@ -21,6 +21,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class AdminQuestionController extends Controller
@@ -30,7 +32,7 @@ class AdminQuestionController extends Controller
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:180'],
             'section_id' => ['nullable', 'integer'], 'status' => ['nullable', 'in:draft,published'],
             'difficulty' => ['nullable', 'in:easy,medium,hard'],
-            'usage' => ['nullable', 'in:quiz,tryout,unused'],
+            'usage' => ['nullable', 'in:quiz,tryout,practice,unused'],
             'exam_id' => ['nullable', 'integer', Rule::exists('exams', 'id')->whereNull('deleted_at')]]);
 
         return view('Dashboard.Admin.questions.index', [
@@ -39,10 +41,10 @@ class AdminQuestionController extends Controller
                 ->when($filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
                 ->when($filters['difficulty'] ?? null, fn (Builder $query, string $difficulty) => $query->where('difficulty', $difficulty))
                 ->when(($filters['usage'] ?? null) === 'unused', fn (Builder $query) => $query->whereDoesntHave('exams'))
-                ->when(($filters['exam_id'] ?? null) || in_array($filters['usage'] ?? null, ['quiz', 'tryout'], true),
+                ->when(($filters['exam_id'] ?? null) || in_array($filters['usage'] ?? null, ['quiz', 'tryout', 'practice'], true),
                     fn (Builder $query) => $query->whereHas('exams', fn (Builder $exams) => $exams
                         ->when($filters['exam_id'] ?? null, fn (Builder $examQuery, string|int $id) => $examQuery->whereKey($id))
-                        ->when(in_array($filters['usage'] ?? null, ['quiz', 'tryout'], true), fn (Builder $examQuery) => $examQuery->where('kind', $filters['usage']))))
+                        ->when(in_array($filters['usage'] ?? null, ['quiz', 'tryout', 'practice'], true), fn (Builder $examQuery) => $examQuery->where('kind', $filters['usage']))))
                 ->with(['section', 'author', 'exams' => fn (BelongsToMany $exams) => $exams->select('exams.id', 'title', 'kind', 'status')->orderBy('kind')->orderBy('title')])
                 ->latest('updated_at')->latest('id')->paginate(10)->withQueryString(),
             'sections' => Section::query()->ordered()->get(),
@@ -72,13 +74,33 @@ class AdminQuestionController extends Controller
         return redirect()->route('admin.questions.edit', $question)->with('success', 'Soal berhasil disimpan.');
     }
 
-    public function show(Request $request, Question $question): RedirectResponse|JsonResponse
+    public function show(Request $request, Question $question): View|JsonResponse
     {
         if ($request->expectsJson()) {
             return response()->json($this->editorData($question));
         }
 
-        return redirect()->route('question-bank.show', $question);
+        return view('Dashboard.Admin.questions.show', ['question' => $question->load('section')]);
+    }
+
+    public function image(Question $question): StreamedResponse
+    {
+        abort_unless($question->image_path && Storage::disk('local')->exists($question->image_path), 404);
+
+        return Storage::disk('local')->response($question->image_path, null, [
+            'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    public function video(Question $question): BinaryFileResponse
+    {
+        $disk = Storage::disk('local');
+        abort_unless($question->video_path && $disk->exists($question->video_path), 404);
+
+        return response()->file($disk->path($question->video_path), [
+            'Content-Type' => str_ends_with($question->video_path, '.webm') ? 'video/webm' : 'video/mp4',
+            'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff',
+        ])->setPrivate();
     }
 
     public function edit(Question $question): View
@@ -127,8 +149,8 @@ class AdminQuestionController extends Controller
                 'explanation' => $question->safeExplanation(),
                 'difficulty' => $question->difficulty->value,
                 'status' => $question->status->value,
-                'image_url' => $question->image_path ? route('question-bank.image', $question) : null,
-                'video_url' => $question->video_path ? route('question-bank.video', $question) : null,
+                'image_url' => $question->image_path ? route('admin.questions.image', $question) : null,
+                'video_url' => $question->video_path ? route('admin.questions.video', $question) : null,
                 'usage_count' => $question->exams_count,
                 'update_url' => route('admin.questions.update', $question),
             ],

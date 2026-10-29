@@ -45,7 +45,7 @@ class RawScoreMigrationTest extends TestCase
 
         $this->actingAs($user)->get($attempt->resultUrl())->assertSee('dari 15')->assertSee('Nilai ambang sesi: 10.')
             ->assertDontSee('Hasil dikonversi');
-        $this->get(route('quizzes.index'))->assertSee('10 / 15')
+        $this->get(route('quizzes.topics'))->assertSee('10 / 15')
             ->assertViewHas('banks', fn ($banks): bool => $banks->first()['exam']->maximumScore() === 15);
         $this->get(route('history.index', ['kind' => 'quiz']))->assertSee('10 / 15');
         $this->get(route('statistics.index', ['kind' => 'quiz']))

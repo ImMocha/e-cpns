@@ -10,6 +10,7 @@ function initializeHelp(container) {
   const themeToggle = navbar?.querySelector('[data-theme-toggle]');
   if (themeToggle) themeToggle.after(launcher);
   else if (navbar) navbar.prepend(launcher);
+  else launcher.remove();
   const audience = container.dataset.helpAudience;
   const current = findHelpGuide(container.dataset.helpRoute || '', audience);
   const dialog = container.querySelector('[data-help-dialog]');
@@ -101,7 +102,7 @@ function initializeHelp(container) {
     if (item.fields.length) {
       const fields = node('section', 'help-article-section');
       fields.append(node('h4', '', 'Arti kolom dan kontrol halaman'));
-      fields.append(node('p', '', 'Kolom hanya muncul sesuai mode tambah/edit dan jenis konten. Klik Penjelasan pada formulir untuk membaca bantuan tanpa meninggalkan isian.'));
+      fields.append(node('p', '', 'Kolom hanya muncul sesuai mode tambah/edit dan jenis konten.'));
       for (const [, title, explanation] of item.fields) {
         const detail = node('details', 'help-field-reference');
         detail.append(node('summary', '', title), node('p', '', explanation));
@@ -205,30 +206,6 @@ function initializeHelp(container) {
     }
   }
 
-  function annotateFields(guideItem, scope = document) {
-    for (const [selector, title, description] of guideItem.fields) {
-      for (const target of scope.querySelectorAll(selector)) {
-        const field = target.closest('.field, .question-rich-text, .question-hint');
-        if (!field || field.querySelector('[data-help-field]')) continue;
-        const detail = node('details', 'help-field-explanation');
-        detail.dataset.helpField = '';
-        detail.append(node('summary', '', `Penjelasan: ${title}`), node('p', '', description));
-        field.append(detail);
-      }
-    }
-  }
-
-  const banner = container.querySelector('[data-help-banner]');
-  const heading = document.querySelector('main .page-head');
-  if (heading) {
-    banner.querySelector('[data-help-summary]').textContent = current.summary;
-    heading.after(banner);
-    banner.hidden = false;
-  }
-  annotateFields(current);
-  const inlineQuestions = document.querySelector('[data-inline-question-form]');
-  if (inlineQuestions) annotateFields(helpGuides.find(item => item.id === 'admin-questions'), inlineQuestions);
-
   search.addEventListener('input', renderTopics);
   container.querySelector('[data-help-close]').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => {
@@ -237,7 +214,7 @@ function initializeHelp(container) {
     if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
   });
   document.addEventListener('click', event => {
-    const open = event.target.closest('[data-help-open], [data-help-current]');
+    const open = event.target.closest('[data-help-open]');
     if (open) { event.preventDefault(); openHelp(open.dataset.helpGuide); }
     if (event.target.closest('[data-help-tour]')) { event.preventDefault(); startTour(); }
   });

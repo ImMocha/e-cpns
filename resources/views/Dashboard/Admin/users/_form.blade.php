@@ -186,8 +186,8 @@
             <div class="kv" style="margin-top:.85rem">
                 <div class="kv__row"><span class="kv__key">ID akun</span><span class="kv__val">{{ $isEdit ? '#'.$user->id : 'otomatis' }}</span></div>
                 <div class="kv__row"><span class="kv__key">Inisial avatar</span><span class="kv__val">{{ $user->exists ? $user->initials() : '—' }}</span></div>
-                <div class="kv__row"><span class="kv__key">Login terakhir</span><span class="kv__val">{{ $isEdit ? ($user->last_login_at?->format('d M Y H:i') ?? 'Belum pernah') : '—' }}</span></div>
-                <div class="kv__row"><span class="kv__key">Terdaftar</span><span class="kv__val">{{ $isEdit ? $user->created_at->format('d M Y') : '—' }}</span></div>
+                <div class="kv__row"><span class="kv__key">Login terakhir</span><span class="kv__val"><x-local-time :value="$isEdit ? $user->last_login_at : null" :fallback="$isEdit ? 'Belum pernah' : '—'" /></span></div>
+                <div class="kv__row"><span class="kv__key">Terdaftar</span><span class="kv__val"><x-local-time :value="$isEdit ? $user->created_at : null" format="d M Y" /></span></div>
             </div>
         </section>
 

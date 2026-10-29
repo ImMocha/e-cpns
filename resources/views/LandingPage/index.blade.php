@@ -18,14 +18,14 @@
           Hadapi Tryout <span style="color:var(--primary-700)">Tanpa Panik</span>.
         </h1>
         <p class="lead" style="margin-bottom:1.75rem">
-          Materi PDF, video pembelajaran, bank soal latihan, dan simulasi Try Out CAT
+          Materi PDF, video pembelajaran, latihan soal, dan simulasi Try Out CAT
           dengan timer, autosave, pembahasan, serta grafik perkembangan nilai.
           Semua dalam satu platform.
         </p>
 
         <div class="btn-row" style="margin-bottom:2rem">
           <a class="btn btn--primary btn--lg" href="{{ route('register') }}">
-            Mulai Gratis Sekarang
+            Daftar Gratis Sekarang
             <span class="btn__icon"><svg data-icon="arrow-right"></svg></span>
           </a>
           <a class="btn btn--ghost btn--lg" href="{{ route('tryouts.index') }}">
@@ -40,7 +40,7 @@
           </div>
           <div>
             <div class="hero-stat__num" data-count-to="{{ $questionCount }}">{{ number_format($questionCount, 0, ",", ".") }}</div>
-            <div class="hero-stat__label">Bank Soal</div>
+            <div class="hero-stat__label">Soal Latihan</div>
           </div>
           <div>
             <div class="hero-stat__num" data-count-to="{{ $tryoutCount }}">{{ $tryoutCount }}</div>
@@ -88,7 +88,8 @@
 </div>
 
 {{-- ===================== FITUR ===================== --}}
-<section class="section" id="fitur">
+<section class="section landing-scene landing-scene--features" id="fitur">
+  <x-landing-accents />
   <div class="container container--wide">
     <div class="section-head section-head--center reveal">
       <span class="eyebrow" style="justify-content:center">Semua Yang Kamu Butuh</span>
@@ -102,7 +103,7 @@
         <h3>Materi Ringkas</h3>
         <p class="text-sm text-soft">Materi PDF, video pembelajaran, dan artikel ringkas per kategori. Progress belajar langsung tercatat di dashboard.</p>
         <div class="tile__foot">
-          <span class="badge badge--primary badge--flat">Gratis + Premium</span>
+          <span class="badge badge--primary badge--flat">Konten Premium</span>
           <a class="btn btn--ghost btn--sm" href="{{ route('materials.index') }}">Lihat<svg data-icon="arrow-right"></svg></a>
         </div>
       </article>
@@ -119,11 +120,11 @@
 
       <article class="card card--icon card--pop reveal" data-delay="180">
         <span class="card__icon ico--amber"><svg data-icon="layers"></svg></span>
-        <h3>Bank Soal & Pembahasan</h3>
+        <h3>Latihan Soal & Pembahasan</h3>
         <p class="text-sm text-soft">Soal TWK, TIU, dan TKP dengan pembahasan serta latihan per kategori.</p>
         <div class="tile__foot">
           <span class="badge badge--amber badge--flat">{{ number_format($questionCount, 0, ",", ".") }} soal terbit</span>
-          <a class="btn btn--ghost btn--sm" href="{{ route('question-bank.index') }}">Buka<svg data-icon="arrow-right"></svg></a>
+          <a class="btn btn--ghost btn--sm" href="{{ route('quizzes.index') }}">Buka<svg data-icon="arrow-right"></svg></a>
         </div>
       </article>
 
@@ -163,7 +164,7 @@
 {{-- ===================== ALUR BELAJAR ===================== --}}
 <section class="section section--alt">
   <div class="container container--wide">
-    <div class="split">
+    <div class="split split--equal">
       <div class="reveal">
         <span class="eyebrow">Alur Belajar</span>
         <h2 style="margin:.75rem 0 1rem">Empat Langkah, <span class="underline-squiggle">Selesai</span></h2>
@@ -180,7 +181,7 @@
           </div>
           <div class="acc-item">
             <button class="acc-trigger" aria-expanded="false" aria-controls="s2">
-              <span>2 · Latihan dengan bank soal</span><svg data-icon="chevron-down" class="acc-icon"></svg>
+              <span>2 · Uji pemahaman melalui Latihan Soal</span><svg data-icon="chevron-down" class="acc-icon"></svg>
             </button>
             <div class="acc-panel" id="s2">
               Kerjakan soal latihan per kategori. Jawaban langsung dinilai dan kunci muncul setelah submit. Pembahasan tersedia dengan paket berbayar aktif.
@@ -206,13 +207,29 @@
       </div>
 
       <div class="reveal" data-delay="120">
-        <div class="card card--pop">
-          <h3 class="card__title">Ruang Belajar Kamu</h3>
-          <p class="text-soft" style="margin:.75rem 0 1.25rem">Dashboard mencatat aktivitas belajar dan hasil pengerjaan dari akunmu.</p>
-          <div class="kv">
-            <div class="kv__row"><span class="kv__key">Materi terbit</span><span class="kv__val">{{ $materialCount }}</span></div>
-            <div class="kv__row"><span class="kv__key">Soal tersedia</span><span class="kv__val">{{ $questionCount }}</span></div>
-            <div class="kv__row"><span class="kv__key">Tryout aktif</span><span class="kv__val">{{ $tryoutCount }}</span></div>
+        <div class="card card--pop learning-card">
+          <div class="learning-card__heading">
+            <div><span class="preview-eyebrow">Satu tempat, semua persiapan</span><h3 class="card__title">Ruang Belajar Kamu</h3></div>
+            <span class="preview-emblem" aria-hidden="true"><svg data-icon="book"></svg></span>
+          </div>
+          <p class="text-soft learning-card__description">Dashboard mencatat aktivitas belajar dan hasil pengerjaan dari akunmu.</p>
+          <div class="learning-metrics">
+            <div><svg data-icon="book"></svg><strong>{{ $materialCount }}</strong><span>Materi terbit</span></div>
+            <div><svg data-icon="layers"></svg><strong>{{ $questionCount }}</strong><span>Soal tersedia</span></div>
+            <div><svg data-icon="timer"></svg><strong>{{ $tryoutCount }}</strong><span>Tryout aktif</span></div>
+          </div>
+          <div class="learning-preview" aria-label="Alur di ruang belajar">
+            <div class="learning-preview__intro">
+              <div class="learning-preview__copy">
+                <div class="learning-preview__heading"><span>LANGKAH KECIL, TARGET BESAR</span></div>
+                <p>Bangun ritme belajarmu.</p>
+              </div>
+            </div>
+            <div class="learning-preview__steps">
+              <div><span class="learning-preview__icon"><svg data-icon="book"></svg><small>01</small></span><strong>Pelajari</strong><span>Materi pilihan</span></div>
+              <div><span class="learning-preview__icon"><svg data-icon="pencil"></svg><small>02</small></span><strong>Latih</strong><span>Uji pemahaman</span></div>
+              <div><span class="learning-preview__icon"><svg data-icon="trending-up"></svg><small>03</small></span><strong>Evaluasi</strong><span>Tinjau hasilmu</span></div>
+            </div>
           </div>
           <a class="btn btn--primary btn--block" href="{{ route('dashboard') }}" style="margin-top:1.25rem">Buka Dashboard<svg data-icon="arrow-right"></svg></a>
         </div>
@@ -280,7 +297,7 @@
             <span class="badge {{ $article->section->resolvedTone()->badgeClass() }}">{{ $article->section->name }}</span>
             <h3><a href="{{ route('articles.show', $article) }}">{{ $article->title }}</a></h3>
             <p class="text-soft">{{ $article->summary() }}</p>
-            <div class="article-card-meta"><span>{{ $article->published_at->format('d M Y') }}</span><span>{{ $article->readingMinutes() }} menit baca</span></div>
+            <div class="article-card-meta"><span><x-local-time :value="$article->published_at" format="d M Y" /></span><span>{{ $article->readingMinutes() }} menit baca</span></div>
             <a class="btn btn--outline" href="{{ route('articles.show', $article) }}">Baca artikel <svg data-icon="arrow-right"></svg></a>
           </article>
         @endforeach
@@ -294,22 +311,9 @@
 {{-- ===================== TRYOUT SHOWCASE ===================== --}}
 <section class="section section--alt" id="tryout">
   <div class="container container--wide">
-    <div class="split split--reverse">
-      <div class="reveal">
-        <div class="card card--pop">
-          <span class="badge badge--ink"><svg data-icon="timer"></svg> Tryout CAT</span>
-          <h3 class="card__title" style="margin-top:1.25rem">{{ $referenceTryout?->title ?? 'Persiapkan Diri untuk Seleksi CPNS' }}</h3>
-          @if ($referenceTryout)
-          <div class="kv" style="margin-top:1rem">
-            <div class="kv__row"><span class="kv__key">Jumlah soal</span><span class="kv__val">{{ $referenceTryout->question_count }}</span></div>
-            <div class="kv__row"><span class="kv__key">Durasi</span><span class="kv__val">{{ $referenceTryout->duration_minutes }} menit</span></div>
-            <div class="kv__row"><span class="kv__key">Poin maksimal</span><span class="kv__val">{{ $referenceTryout->maximumScore() }}</span></div>
-          </div>
-          @else
-          <p class="text-soft" style="margin-top:1rem">Periksa katalog tryout untuk memilih sesi belajar sesuai targetmu.</p>
-          @endif
-          <a class="btn btn--primary btn--block" style="margin-top:1.25rem" href="{{ route('tryouts.index') }}">Lihat Tryout<svg data-icon="arrow-right"></svg></a>
-        </div>
+    <div class="split split--equal tryout-showcase">
+      <div class="reveal tryout-showcase__demo">
+        @include('LandingPage._tryout-demo')
       </div>
 
       <div class="reveal" data-delay="100">
@@ -348,7 +352,8 @@
 </section>
 
 {{-- ===================== PAKET / PRICING ===================== --}}
-<section class="section" id="paket">
+<section class="section landing-scene landing-scene--packages" id="paket">
+  <x-landing-accents />
   <div class="container container--wide">
     <div class="section-head section-head--center reveal">
       <span class="eyebrow" style="justify-content:center">Paket Belajar</span>
@@ -356,7 +361,7 @@
       <p>Pilih jumlah percobaan tryout, akses leaderboard, materi, dan latihan sesuai kebutuhanmu.</p>
     </div>
 
-    <div class="grid grid-3" style="--gap:1.75rem;align-items:start">
+    <div class="grid grid-3 price-grid" style="--gap:1.75rem">
 
       @forelse ($packages as $package)
       <article class="card card--pop price {{ $package->leaderboard_access === \App\Enums\LeaderboardAccess::Local ? 'price--featured' : '' }} reveal" data-delay="{{ $loop->index * 90 }}">
@@ -366,17 +371,25 @@
           <p class="text-sm text-soft" style="margin-top:.6rem">{{ $package->description }}</p>
         </div>
         <div>
+          <x-package-original-price :package="$package" />
           <div class="price__amount">{{ $package->formattedPrice() }}</div>
+
           <div class="price__period">{{ $package->duration_days === null ? 'Tanpa batas waktu' : 'Akses '.$package->durationLabel() }}</div>
         </div>
+        @if ($package->tier)
+        <x-package-benefits :package="$package" />
+        @else
         <ul class="price__list">
-          <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'tryout')->count() }} paket soal tryout</li>
+          @if ($package->tryout_tokens === 0 || $package->exams->where('kind', 'tryout')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'tryout')->count() }} paket soal tryout</li>@endif
+          @if ($package->tryout_tokens > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_tokens }} token untuk {{ $package->tryout_tokens }} tryout pilihanmu</li>@endif
           <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Percobaan tryout tanpa batas' : $package->tryout_quota.' percobaan tryout' }}</li>
-          <li><span class="price__check"><svg data-icon="check"></svg></span> Kunci jawaban dan pembahasan</li>
+          @if ($package->price > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> Kunci jawaban dan pembahasan</li>@endif
           @if ($package->materials->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->materials->count() }} materi &amp; video premium</li>@endif
-          @if ($package->exams->where('kind', 'quiz')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'quiz')->count() }} latihan soal</li>@endif
+          @if ($package->exams->where('kind', 'practice')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'practice')->count() }} latihan soal</li>@endif
+          @if ($package->exams->where('kind', 'quiz')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'quiz')->count() }} latihan topik</li>@endif
           @if ($package->leaderboard_access === \App\Enums\LeaderboardAccess::National)<li><span class="price__check"><svg data-icon="check"></svg></span> Progres belajar &amp; statistik nilai</li>@endif
         </ul>
+        @endif
         <div class="price__foot">
           @if ($package->hasAvailableContent())
           <a class="btn btn--primary btn--block" href="{{ route('checkout', ['package' => $package->id]) }}">Pilih {{ $package->name }}<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
@@ -398,12 +411,28 @@
 {{-- ===================== LEADERBOARD ===================== --}}
 <section class="section section--alt">
   <div class="container container--wide">
-    <div class="split">
+    <div class="split split--equal">
       <div class="reveal"><span class="eyebrow">Leaderboard</span><h2 style="margin:.75rem 0 1rem">Pantau Peringkat <span class="underline-squiggle">dan Perkembanganmu</span></h2><p class="lead">Bandingkan poin tryout sesuai acuan tryout aktif. Akses lokal mengikuti provinsimu; paket nasional juga membuka peringkat seluruh Indonesia.</p><a class="btn btn--primary" style="margin-top:1.5rem" href="{{ route('leaderboard.index') }}">Lihat Leaderboard<svg data-icon="arrow-right"></svg></a></div>
-      <div class="card reveal"><h3 class="card__title">Hasil belajar yang bisa ditinjau kembali</h3><p class="text-soft" style="margin-top:.75rem">Buka riwayat untuk meninjau poin per bidang, jawaban, dan hasil sesi. Statistik membantu menentukan materi yang perlu dipelajari berikutnya.</p><a class="btn btn--ghost" style="margin-top:1.25rem" href="{{ route('statistics.index') }}">Buka Statistik<svg data-icon="chart"></svg></a></div>
+      <div class="card reveal results-preview">
+        <h3 class="card__title"><span class="results-preview__icon" aria-hidden="true"><svg data-icon="chart"></svg></span>Hasil belajar yang bisa ditinjau kembali</h3>
+        <p class="text-soft" style="margin-top:.75rem">Buka riwayat untuk meninjau poin per bidang, jawaban, dan hasil sesi. Statistik membantu menentukan materi yang perlu dipelajari berikutnya.</p>
+        <div class="results-preview__visual">
+          <div class="results-preview__caption"><span><svg data-icon="trending-up"></svg> Setiap sesi, selangkah lebih siap.</span><span>Ilustrasi statistik</span></div>
+          <svg class="results-preview__chart" viewBox="0 0 480 72" fill="none" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 18H480M0 42H480M0 70H480" stroke="var(--border-strong)" stroke-dasharray="3 7" />
+            <path d="M8 59C48 59 54 33 88 39S142 61 174 36S224 42 263 25S309 36 347 19S405 26 468 7V72H8Z" fill="var(--primary-100)" />
+            <path d="M8 65C54 65 59 53 96 58S151 45 188 51S245 38 282 42S347 35 379 39S426 24 468 27" stroke="var(--pop-mint)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 5" vector-effect="non-scaling-stroke" />
+            <path d="M8 59C48 59 54 33 88 39S142 61 174 36S224 42 263 25S309 36 347 19S405 26 468 7" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+            <circle cx="468" cy="7" r="6" fill="var(--surface)" stroke="var(--primary)" stroke-width="3" vector-effect="non-scaling-stroke" />
+          </svg>
+        </div>
+        <a class="btn btn--ghost" style="margin-top:1.25rem" href="{{ route('statistics.index') }}">Buka Statistik<svg data-icon="chart"></svg></a>
+      </div>
     </div>
   </div>
 </section>
+
+@include('LandingPage._testimonials')
 
 {{-- ===================== FAQ ===================== --}}
 <section class="section section--alt" id="faq">
@@ -416,7 +445,7 @@
     <div class="acc" data-accordion="single">
       <div class="acc-item reveal">
         <button class="acc-trigger" aria-expanded="true" aria-controls="f1">Apakah materi dan soal ini gratis?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
-        <div class="acc-panel is-open" id="f1">Ada materi dasar dan soal latihan gratis. Materi premium (video, modul lengkap, tryout tambahan) terbuka setelah kamu punya paket yang aktif.</div>
+        <div class="acc-panel is-open" id="f1">Seluruh materi, latihan soal, dan tryout menggunakan akses Premium. Katalog tetap dapat dilihat sebelum membeli paket. Paket Reguler dan Bundling khusus akses tryout, tanpa materi dan latihan soal. Pilih Premium untuk materi lengkap SKD, latihan soal, progress belajar, statistik nilai, dan sertifikat.</div>
       </div>
       <div class="acc-item reveal" data-delay="60">
         <button class="acc-trigger" aria-expanded="false" aria-controls="f2">Bagaimana cara mengikuti Try Out CAT?<svg data-icon="chevron-down" class="acc-icon"></svg></button>
@@ -441,14 +470,17 @@
 {{-- ===================== CTA ===================== --}}
 <section class="section section--tight">
   <div class="container container--wide">
-    <div class="card card--pop pattern-dots-primary" style="text-align:center;padding:clamp(2rem,6vw,3.5rem);border-radius:var(--r-lg)">
-      <span class="deco deco--circle" style="width:120px;height:120px;background:var(--pop-amber);top:-40px;left:-30px"></span>
-      <span class="deco deco--leaf" style="width:90px;height:90px;background:var(--pop-pink);bottom:-30px;right:-20px"></span>
-      <h2 style="position:relative">Siap Mulai <span class="underline-squiggle">Belajar?</span></h2>
-      <p class="lead" style="margin:.85rem auto 1.75rem;position:relative">Daftar gratis, coba tryout pertama, dan lihat sendiri perkembangan nilaimu.</p>
-      <div class="btn-row justify-center" style="position:relative">
-        <a class="btn btn--primary btn--lg" href="{{ route('register') }}">Daftar Gratis<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
-        <a class="btn btn--ghost btn--lg" href="{{ route('login') }}">Saya Sudah Punya Akun</a>
+    <div class="card card--pop landing-cta">
+      <div class="landing-cta__copy">
+        <h2>Siap Mulai <span class="underline-squiggle">Belajar?</span></h2>
+        <p class="lead">Daftar gratis, pilih paket belajar, lalu mulai tryout dan pantau perkembangan nilaimu.</p>
+        <div class="btn-row">
+          <a class="btn btn--primary btn--lg" href="{{ route('register') }}">Daftar Gratis<span class="btn__icon"><svg data-icon="arrow-right"></svg></span></a>
+          <a class="btn btn--ghost btn--lg" href="{{ route('login') }}">Saya Sudah Punya Akun</a>
+        </div>
+      </div>
+      <div class="landing-cta__art" aria-hidden="true">
+        <img src="{{ asset('images/landing-welcome-companion.webp') }}" alt="" width="320" height="480" loading="lazy" decoding="async">
       </div>
     </div>
   </div>

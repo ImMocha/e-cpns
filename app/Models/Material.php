@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\MaterialAccess;
 use App\Enums\MaterialStatus;
 use App\Enums\MaterialType;
+use App\UniqueSlug;
 use Database\Factories\MaterialFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +18,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * Materi pembelajaran: PDF atau video, milik satu bidang (§33).
@@ -69,6 +69,8 @@ class Material extends Model
      *
      * @return array<string, string>
      */
+    protected $attributes = ['access_level' => 'premium'];
+
     protected function casts(): array
     {
         return [
@@ -150,20 +152,7 @@ class Material extends Model
     /** Slug unik dari judul; `$ignoreId` dipakai saat update. */
     public static function makeSlug(string $title, ?int $ignoreId = null): string
     {
-        $base = Str::slug($title) ?: 'materi';
-        $slug = $base;
-        $suffix = 2;
-
-        while (
-            static::where('slug', $slug)
-                ->when($ignoreId, fn (Builder $query) => $query->where('id', '!=', $ignoreId))
-                ->exists()
-        ) {
-            $slug = $base.'-'.$suffix;
-            $suffix++;
-        }
-
-        return $slug;
+        return UniqueSlug::resolve('materials', $title, $ignoreId);
     }
 
     /** Isi slug bila kosong, lalu pastikan unik. Dipanggil dari controller. */
@@ -284,7 +273,11 @@ class Material extends Model
             return true;
         }
 
-        return $this->access_level === MaterialAccess::Free
+        if (! $user->canAccessLearningFeatures()) {
+            return false;
+        }
+
+        return $user->hasPremiumPackage() || $this->access_level === MaterialAccess::Free
             || $this->hasActivePackage($user);
     }
 
@@ -311,6 +304,13 @@ class Material extends Model
     /** Akses mengikuti isi paket saat aktivasi, bukan katalog paket saat ini. */
     public function hasActivePackage(User $user): bool
     {
+        if ($user->hasPremiumPackage()) {
+            return true;
+        }
+        if (! $user->canAccessLearningFeatures()) {
+            return false;
+        }
+
         if ($this->relationLoaded('userPackages')) {
             return $this->userPackages->contains(fn (UserPackage $grant): bool => $grant->user_id === $user->id && $grant->isActive());
         }
@@ -326,6 +326,14 @@ class Material extends Model
     /** @param Builder<Material> $query */
     public function scopeAccessibleTo(Builder $query, User $user): void
     {
+        if ($user->hasPremiumPackage()) {
+            return;
+        }
+        if (! $user->canAccessLearningFeatures()) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
         if (! $user->isAdmin()) {
             $query->where(fn (Builder $access) => $access->where('access_level', MaterialAccess::Free)
                 ->orWhereHas('userPackages', fn (Builder $grants) => $grants->active()->whereBelongsTo($user)));

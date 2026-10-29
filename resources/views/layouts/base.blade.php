@@ -22,6 +22,18 @@
 </script>
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fonts
+@if ($pageTypography)
+    @if ($pageTypography['stylesheet'])
+        <link rel="stylesheet" href="{{ $pageTypography['stylesheet'] }}">
+    @endif
+    <style id="site-typography">
+        :root {
+            --font-display: {!! $pageTypography['heading'] !!};
+            --font-body: {!! $pageTypography['body'] !!};
+            --font-sans: {!! $pageTypography['body'] !!};
+        }
+    </style>
+@endif
 @stack('head')
 </head>
 <body @yield('body-attributes')>

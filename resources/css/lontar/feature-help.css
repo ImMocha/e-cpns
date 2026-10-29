@@ -1,9 +1,3 @@
-.feature-help > .help-launcher { position: fixed; right: 1.25rem; bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px)); z-index: 90; border-radius: 100px; box-shadow: var(--sh-md); }
-.help-banner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; margin-bottom: 1.5rem; background: var(--primary-050); border: 1px solid var(--primary-300); border-radius: var(--r-md); }
-.help-banner[hidden] { display: none; }
-.help-banner > div:first-child { max-width: 75ch; }
-.help-banner p { margin-top: .25rem; font-size: .85rem; line-height: 1.6; color: var(--text-soft); }
-.help-banner .btn-row { flex-shrink: 0; }
 .help-eyebrow { color: var(--primary-700); font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
 .help-center { position: fixed; inset: 0; margin: auto; width: min(1180px, calc(100% - 2rem)); height: min(900px, 90dvh); max-width: none; max-height: 90dvh; padding: 0; color: var(--ink); background: var(--surface); border: 2px solid var(--ink); border-radius: var(--r-lg); box-shadow: var(--sh-lg); overflow: hidden; }
 .help-center:not([open]) { display: none; }
@@ -36,13 +30,9 @@
 .help-workflow li + li { margin-top: .5rem; }
 .help-field-reference { padding: .75rem 0; border-bottom: 1px solid var(--border); font-size: .85rem; }
 .help-field-reference summary { font-weight: 700; cursor: pointer; line-height: 1.6; }
-.help-field-explanation { margin-top: .5rem; padding: .5rem .65rem; background: var(--primary-050); border: 1px solid var(--primary-100); border-radius: var(--r-sm); }
-.help-field-explanation summary { color: var(--primary-700); font-size: .72rem; font-weight: 700; cursor: pointer; line-height: 1.6; }
-.help-field-explanation p { margin-top: .5rem; color: var(--text-soft); font-size: .8rem; line-height: 1.75; }
 .help-context-note { padding: 1rem; margin-top: 1.25rem; background: var(--pop-amber); color: var(--pop-ink); border-radius: var(--r-sm); font-size: .8rem; line-height: 1.8; }
 .help-empty { padding: .75rem; color: var(--text-soft); font-size: .8rem; line-height: 1.8; }
 .help-center__footer { padding: .75rem 1.5rem; border-top: 1px solid var(--border); color: var(--text-soft); font-size: .7rem; line-height: 1.6; flex-shrink: 0; }
-.help-noscript { padding: 1rem; font-size: .8rem; }
 .driver-popover.help-tour { max-width: min(440px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 1.25rem; color: var(--ink); border-radius: var(--r-md); font-family: var(--font-sans); box-shadow: 0 12px 40px rgb(0 0 0 / .2); }
 .help-tour .driver-popover-title { font-family: var(--font-display); font-size: 1.15rem; line-height: 1.4; }
 .help-tour .driver-popover-description { font-size: .85rem; line-height: 1.85; color: var(--text-soft); }
@@ -61,9 +51,7 @@
 [data-theme="dark"] .driver-popover.help-tour .driver-popover-arrow-side-top { border-bottom-color: transparent; border-left-color: transparent; border-right-color: transparent; }
 [data-theme="dark"] .driver-popover.help-tour .driver-popover-arrow-side-bottom { border-top-color: transparent; border-left-color: transparent; border-right-color: transparent; }
 .help-center :focus-visible, .help-tour :focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
-@media (max-width: 900px) { .help-banner { flex-direction: column; align-items: start; } }
 @media (max-width: 640px) {
-  .feature-help > .help-launcher { right: .75rem; bottom: calc(4.9rem + env(safe-area-inset-bottom, 0px)); padding: .65rem 1rem; font-size: .75rem; }
   .help-center { width: calc(100% - 1rem); height: 94dvh; max-height: 94dvh; }
   .help-center__header, .help-center__search { padding: .85rem 1rem; }
   .help-center__layout { grid-template-columns: 1fr; grid-template-rows: minmax(95px, 23%) minmax(0, 1fr); }
@@ -72,6 +60,5 @@
   .help-center__article { padding: 1rem; }
   .help-article-title { font-size: 1.25rem; }
   .help-center__footer { padding: .6rem 1rem; font-size: .65rem; }
-  .help-banner .btn-row { flex-wrap: wrap; }
 }
-@media print { .help-banner, .feature-help, .help-field-explanation, .driver-popover, .driver-overlay { display: none !important; } }
+@media print { .feature-help, .driver-popover, .driver-overlay { display: none !important; } }

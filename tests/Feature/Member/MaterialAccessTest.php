@@ -67,7 +67,8 @@ class MaterialAccessTest extends TestCase
         $this->actingAs($this->peserta())
             ->get(route('materials.index'))
             ->assertOk()
-            ->assertSee($material->title);
+            ->assertSee($material->topic->name)
+            ->assertSee(route('materials.topic', $material->topic), false);
     }
 
     public function test_draft_materials_are_absent_from_the_page_entirely(): void
@@ -134,25 +135,25 @@ class MaterialAccessTest extends TestCase
         $this->actingAs($this->peserta())
             ->get(route('materials.index', ['section_id' => $twk->id]))
             ->assertOk()
-            ->assertSee($wanted->title)
+            ->assertViewHas('topics', fn ($topics): bool => $topics->contains('id', $wanted->topic_id))
             ->assertDontSee('Materi TIU');
     }
 
     public function test_list_can_be_filtered_by_format_and_searched(): void
     {
-        $this->publishedPdf(['title' => 'Modul Matematika Dasar']);
-        Material::factory()->video()->published()->create(['title' => 'Teknik Membaca Tabel']);
+        $pdf = $this->publishedPdf(['title' => 'Modul Matematika Dasar']);
+        $video = Material::factory()->video()->published()->create(['title' => 'Teknik Membaca Tabel']);
 
         $this->actingAs($this->peserta())
             ->get(route('materials.index', ['type' => 'video']))
             ->assertOk()
-            ->assertSee('Teknik Membaca Tabel')
+            ->assertViewHas('topics', fn ($topics): bool => $topics->contains('id', $video->topic_id) && ! $topics->contains('id', $pdf->topic_id))
             ->assertDontSee('Modul Matematika Dasar');
 
         $this->actingAs($this->peserta())
             ->get(route('materials.index', ['q' => 'Matematika']))
             ->assertOk()
-            ->assertSee('Modul Matematika Dasar')
+            ->assertViewHas('topics', fn ($topics): bool => $topics->contains('id', $pdf->topic_id) && ! $topics->contains('id', $video->topic_id))
             ->assertDontSee('Teknik Membaca Tabel');
     }
 
@@ -194,14 +195,15 @@ class MaterialAccessTest extends TestCase
             ->assertSee($material->video_url);
     }
 
-    public function test_premium_material_sends_participant_back_with_an_explanation(): void
+    public function test_premium_material_page_opens_with_its_reader_locked(): void
     {
         $premium = Material::factory()->pdf()->premium()->published()->create(['title' => 'Materi Premium']);
 
         $this->actingAs($this->peserta())
             ->get(route('materials.show', $premium))
-            ->assertRedirect(route('materials.index'))
-            ->assertSessionHas('error');
+            ->assertOk()
+            ->assertViewHas('contentAccessible', false)
+            ->assertDontSee(route('materials.file', $premium));
     }
 
     public function test_premium_material_is_listed_but_marked_locked(): void
@@ -209,7 +211,7 @@ class MaterialAccessTest extends TestCase
         $premium = Material::factory()->pdf()->premium()->published()->create(['title' => 'Materi Premium']);
 
         $this->actingAs($this->peserta())
-            ->get(route('materials.index'))
+            ->get(route('materials.topic', $premium->topic))
             ->assertOk()
             ->assertSee('Materi Premium')
             ->assertSee('Terkunci');
@@ -403,6 +405,18 @@ class MaterialAccessTest extends TestCase
                 "Tombol \"{$label}\" menyediakan jalan mengunduh atau mencetak",
             );
         }
+    }
+
+    public function test_reader_shows_the_material_title_and_has_a_separate_fullscreen_control(): void
+    {
+        $material = $this->publishedPdfWithFile(['title' => 'Rangkuman Pengetahuan Umum']);
+
+        $this->actingAs($this->peserta())->get(route('materials.show', $material))
+            ->assertSee('<span>Rangkuman Pengetahuan Umum</span>', false)
+            ->assertDontSee($material->slug.'.pdf')
+            ->assertSee('id="pdfview-fullscreen"', false)
+            ->assertSee('aria-label="Layar penuh"', false)
+            ->assertSee('aria-label="Sesuaikan lebar halaman"', false);
     }
 
     public function test_reader_marks_the_document_with_the_participant_identity(): void

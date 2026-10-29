@@ -13,6 +13,8 @@
 @import './lontar/certificates.css';
 @import './lontar/feature-help.css';
 @import './lontar/packages.css';
+@import './lontar/dashboard.css';
+@import './lontar/landing.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';

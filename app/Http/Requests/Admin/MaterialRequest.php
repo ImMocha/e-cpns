@@ -41,7 +41,7 @@ abstract class MaterialRequest extends FormRequest
             'topic_id' => ['required', 'integer', Rule::exists('topics', 'id')
                 ->where('section_id', $this->input('section_id'))->whereNull('deleted_at')],
             'type' => ['required', Rule::in(MaterialType::options())],
-            'access_level' => ['required', Rule::in(MaterialAccess::options())],
+            'access_level' => ['required', Rule::in([MaterialAccess::Premium->value])],
             'status' => ['required', Rule::in(MaterialStatus::options())],
             'video_url' => ['nullable', 'url', 'max:500'],
             'duration_minutes' => ['nullable', 'integer', 'min:1', 'max:600'],
@@ -59,7 +59,7 @@ abstract class MaterialRequest extends FormRequest
             'title.unique' => 'Sudah ada materi dengan judul tersebut di bidang ini.',
             'slug.unique' => 'Slug ini sudah dipakai materi lain.',
             'type.in' => 'Format materi tidak dikenal.',
-            'access_level.in' => 'Level akses tidak dikenal.',
+            'access_level.in' => 'Semua materi menggunakan akses Premium.',
             'status.in' => 'Status tidak dikenal.',
             'file.mimes' => 'Berkas harus berformat PDF.',
             'file.max' => 'Ukuran PDF maksimal 20 MB.',
@@ -101,6 +101,7 @@ abstract class MaterialRequest extends FormRequest
         $isVideo = (string) $this->input('type') === MaterialType::Video->value;
 
         $this->merge([
+            'access_level' => $this->input('access_level', MaterialAccess::Premium->value),
             'title' => trim((string) $this->title),
             'summary' => trim((string) $this->summary) ?: null,
             'video_url' => $isVideo ? (trim((string) $this->video_url) ?: null) : null,

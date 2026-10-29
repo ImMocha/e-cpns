@@ -33,20 +33,15 @@
        @if (request()->routeIs('materials.*')) aria-current="page" @endif>
       <svg data-icon="book"></svg><span>Materi</span>
     </a>
+    <a class="side__link{{ request()->routeIs('quizzes.*', 'practices.*') ? ' is-active' : '' }}"
+       href="{{ route('quizzes.index') }}"
+       @if (request()->routeIs('quizzes.*', 'practices.*')) aria-current="page" @endif>
+      <svg data-icon="pen-line"></svg><span>Latihan Soal</span>
+    </a>
     <a class="side__link{{ request()->routeIs('articles.*') ? ' is-active' : '' }}"
        href="{{ route('articles.index') }}"
        @if (request()->routeIs('articles.*')) aria-current="page" @endif>
       <svg data-icon="quote"></svg><span>Artikel</span>
-    </a>
-    <a class="side__link{{ request()->routeIs('question-bank.*') ? ' is-active' : '' }}"
-       href="{{ route('question-bank.index') }}"
-       @if (request()->routeIs('question-bank.*')) aria-current="page" @endif>
-      <svg data-icon="layers"></svg><span>Bank Soal</span>
-    </a>
-    <a class="side__link{{ request()->routeIs('quizzes.*') ? ' is-active' : '' }}"
-       href="{{ route('quizzes.index') }}"
-       @if (request()->routeIs('quizzes.*')) aria-current="page" @endif>
-      <svg data-icon="pen-line"></svg><span>Latihan (Quiz)</span>
     </a>
   </div>
 
@@ -104,9 +99,6 @@
        @if (request()->routeIs('profile.*')) aria-current="page" @endif>
       <svg data-icon="user"></svg><span>Profil Saya</span>
     </a>
-    <a class="side__link" href="{{ route('profile.edit') }}#pengaturan">
-      <svg data-icon="settings"></svg><span>Pengaturan</span>
-    </a>
   </div>
 
   {{-- Admin yang juga peserta butuh jalan pintas ke Admin Panel. --}}
@@ -121,14 +113,4 @@
     </div>
   @endif
 
-  <div class="side__group">
-    <div class="card card--dashed" style="padding:1rem">
-      <div class="flex items-center gap-2" style="margin-bottom:.4rem">
-        <span class="tile__glyph" style="width:34px;height:34px;border-radius:10px"><svg data-icon="megaphone" width="17" height="17"></svg></span>
-        <strong style="font-family:var(--font-display);font-size:var(--fs-sm);color:var(--ink)">Butuh bantuan?</strong>
-      </div>
-      <p class="text-xs text-soft">Tim kami siap bantu soal materi atau paket.</p>
-      <a class="text-xs" href="mailto:{{ config('app.contact_email') }}">{{ config('app.contact_email') }}</a>
-    </div>
-  </div>
 </aside>

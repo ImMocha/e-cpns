@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\MaterialAccess;
 use App\Enums\MaterialType;
 use App\ExamCatalog;
 use App\Models\Material;
@@ -15,7 +14,6 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -32,14 +30,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  *    soft-deleted tidak pernah masuk HTML — bukan sekadar disembunyikan dengan
  *    CSS yang bisa dilewati lewat devtools.
  * 2. **Akses decide di server.** `Material::isAccessibleBy()` satu-satunya
- *    penentu. Kalau materi tidak boleh dibuka, peserta diarahkan kembali ke
- *    daftar dengan penjelasan, bukan diberi halaman kosong.
+ *    penentu. Peserta tetap dapat melihat halaman dan daftar materi, sedangkan
+ *    pembaca serta berkasnya hanya tersedia bagi pemilik akses.
  */
 class MaterialController extends Controller
 {
     private const PER_PAGE = 12;
 
-    public function index(Request $request, ExamCatalog $catalog): View
+    public function index(Request $request): View
     {
         $request->validate(['topic_id' => ['nullable', 'integer', 'min:1']]);
         $filters = [
@@ -50,6 +48,7 @@ class MaterialController extends Controller
         ];
 
         $user = $request->user();
+        $user->load('userPackages');
         $showDrafts = $user->isAdmin() && $request->boolean('show_drafts');
         $filters['show_drafts'] = $showDrafts;
 
@@ -80,8 +79,6 @@ class MaterialController extends Controller
             ->pluck('material_id')
             ->flip()
             ->all();
-        $topicQuizzes = $catalog->listing($user, 'quiz', $topics->getCollection()->modelKeys())['banks']
-            ->groupBy(fn (array $item): int => (int) $item['exam']->topic_id);
 
         return view('Dashboard.User.materials.index', [
             'topics' => $topics,
@@ -90,17 +87,34 @@ class MaterialController extends Controller
             'types' => MaterialType::cases(),
             'counts' => $this->counts($user, $showDrafts),
             'completedMaterialIds' => $completedMaterialIds,
-            'topicQuizzes' => $topicQuizzes,
-            // Callable, bukan array: akses dicek per materi tanpa query ulang,
-            // karena tiap materi bisa beda level.
-            'canOpen' => fn (Material $material): bool => $material->isAccessibleBy($user),
         ]);
     }
 
-    /** Halaman baca: PDF di-embed, video diputar. */
-    public function show(Request $request, Material $material, ExamCatalog $catalog): View|RedirectResponse
+    public function topic(Request $request, Topic $topic, ExamCatalog $catalog): View
     {
         $user = $request->user();
+        $user->load('userPackages');
+        abort_unless($topic->is_active && $topic->section?->is_active, 404);
+        $showDrafts = $user->isAdmin() && $request->boolean('show_drafts');
+        $lessons = $topic->materials()->inActiveTopics()
+            ->when(! $showDrafts, fn (Builder $query) => $query->published())
+            ->with(['userPackages' => fn (Builder|Relation $grants) => $grants->active()->whereBelongsTo($user)])
+            ->orderBy('position')->orderBy('id')->get();
+        abort_if($lessons->isEmpty(), 404);
+        $request->validate(['material' => ['nullable', 'integer', 'min:1']]);
+        $material = $request->filled('material')
+            ? $lessons->firstWhere('id', (int) $request->query('material'))
+            : $lessons->first(fn (Material $lesson): bool => $lesson->isAccessibleBy($user)) ?? $lessons->first();
+        abort_unless($material, 404);
+
+        return $this->show($request, $material, $catalog);
+    }
+
+    /** Halaman baca: PDF di-embed, video diputar. */
+    public function show(Request $request, Material $material, ExamCatalog $catalog): View
+    {
+        $user = $request->user();
+        $user->load('userPackages');
 
         // Materi yang tidak tayang: 404. Keberadaannya juga tidak perlu
         // terungkap ke peserta yang tidak berhak. Admin tetap boleh
@@ -109,25 +123,34 @@ class MaterialController extends Controller
             abort(404);
         }
 
-        if (! $material->isAccessibleBy($user)) {
-            return redirect()
-                ->route('materials.index')
-                ->with('error', $material->accessNotice($user));
-        }
-
         $material->load(['section', 'topic']);
         $progress = null;
 
-        if (! $user->isAdmin() && $material->hasAvailableContent()) {
+        if (! $user->isAdmin() && $material->isAccessibleBy($user) && $material->hasAvailableContent()) {
             $progress = MaterialProgress::query()->updateOrCreate(
                 ['user_id' => $user->id, 'material_id' => $material->id],
                 ['last_viewed_at' => now()],
             );
         }
 
+        $showDrafts = $user->isAdmin() && ($request->boolean('show_drafts') || ! $material->isPublished());
+        $lessons = $material->topic
+            ? $material->topic->materials()->inActiveTopics()
+                ->when(! $showDrafts, fn (Builder $query) => $query->published())
+                ->with(['userPackages' => fn (Builder|Relation $grants) => $grants->active()->whereBelongsTo($user)])
+                ->orderBy('position')->orderBy('id')->get()
+            : collect();
+        $completedMaterialIds = MaterialProgress::query()->whereBelongsTo($user)
+            ->whereIn('material_id', $lessons->pluck('id')->all())->whereNotNull('completed_at')
+            ->pluck('material_id')->flip()->all();
+
         return view('Dashboard.User.materials.show', [
+            'lessons' => $lessons,
+            'completedMaterialIds' => $completedMaterialIds,
+            'showDrafts' => $showDrafts,
+            'canOpen' => fn (Material $lesson): bool => $lesson->isAccessibleBy($user),
+            'contentAccessible' => $material->isAccessibleBy($user),
             'material' => $material,
-            'related' => $this->related($material),
             'progress' => $progress,
             'topicQuizzes' => $material->topic ? $catalog->listing($user, 'quiz', [$material->topic->id])['banks'] : collect(),
         ]);
@@ -143,6 +166,7 @@ class MaterialController extends Controller
     public function file(Request $request, Material $material): StreamedResponse|BinaryFileResponse
     {
         $user = $request->user();
+        $user->load('userPackages');
 
         if (! $this->mayOpen($material, $user)) {
             abort(404);
@@ -172,23 +196,6 @@ class MaterialController extends Controller
     }
 
     /**
-     * Materi lain di bidang yang sama — cara peserta menemukan materi
-     * berikutnya tanpa harus kembali ke daftar.
-     *
-     * @return Collection<int, Material>
-     */
-    private function related(Material $material): Collection
-    {
-        return Material::query()
-            ->visibleToMembers()
-            ->where('section_id', $material->section_id)
-            ->where('id', '!=', $material->getKey())
-            ->ordered()
-            ->limit(4)
-            ->get();
-    }
-
-    /**
      * Bidang yang punya materi terbit, lengkap dengan jumlahnya.
      *
      * `having` disembunyikan supaya bidang kosong tidak muncul sebagai pilihan
@@ -214,8 +221,7 @@ class MaterialController extends Controller
             'total' => $this->visibleQuery($showDrafts)->count(),
             'pdf' => $this->visibleQuery($showDrafts)->where('type', MaterialType::Pdf->value)->count(),
             'video' => $this->visibleQuery($showDrafts)->where('type', MaterialType::Video->value)->count(),
-            'locked' => $user->isAdmin() ? 0 : $this->visibleQuery()->where('access_level', MaterialAccess::Premium->value)
-                ->whereDoesntHave('userPackages', fn (Builder $grants) => $grants->active()->whereBelongsTo($user))->count(),
+            'locked' => $user->isAdmin() ? 0 : $this->visibleQuery()->count() - $this->visibleQuery()->accessibleTo($user)->count(),
         ];
     }
 

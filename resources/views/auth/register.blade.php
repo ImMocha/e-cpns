@@ -131,7 +131,7 @@
         </div>
         <div class="flex items-start gap-3">
           <span class="price__check"><svg data-icon="check"></svg></span>
-          <div><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Latihan soal terbatas</strong><span class="text-sm text-soft">Coba bank soal per kategori beserta kunci jawaban. Pembahasan tersedia dengan paket berbayar aktif.</span></div>
+          <div><strong style="display:block;color:var(--ink);font-family:var(--font-display)">Latihan soal terbatas</strong><span class="text-sm text-soft">Kerjakan sesi latihan per topik beserta kunci jawaban. Pembahasan tersedia dengan paket berbayar aktif.</span></div>
         </div>
         <div class="flex items-start gap-3">
           <span class="price__check"><svg data-icon="check"></svg></span>

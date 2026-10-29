@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('code', '502')
+@section('label', 'Layanan bermasalah')
+@section('title', 'Sambungan layanan sedang terganggu.')
+@section('description', 'Server belum menerima respons yang sesuai dari layanan pendukung. Tunggu beberapa saat, lalu buka kembali halaman yang kamu butuhkan.')

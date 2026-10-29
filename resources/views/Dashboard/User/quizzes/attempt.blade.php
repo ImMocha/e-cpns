@@ -3,7 +3,7 @@
 @section('exam-bar')
 <header class="tryout-bar">
   <div class="container container--wide tryout-bar__inner">
-    <a class="logo" href="{{ route($attempt->kind === 'quiz' ? 'quizzes.index' : 'tryouts.index') }}" aria-label="Daftar sesi"><x-logo :compact="true" /></a>
+    <a class="logo" href="{{ $clientConfig['exitUrl'] }}" aria-label="Daftar sesi"><x-logo :compact="true" /></a>
     <div class="tryout-bar__meta"><strong>{{ $attempt->title }}</strong><span class="exam-note">{{ count($clientConfig['questions']) }} soal · {{ $clientConfig['showTimer'] ? 'Waktu tetap berjalan saat keluar' : 'Tanpa batas waktu' }}</span></div>
     <div class="tryout-bar__right">
       @if ($clientConfig['showTimer'])<div class="timer" id="timerWrap"><svg data-icon="timer"></svg><span id="timer">--:--:--</span></div>@endif

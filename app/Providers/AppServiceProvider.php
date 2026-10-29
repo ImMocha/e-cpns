@@ -15,6 +15,7 @@ use App\Observers\AccountEmailObserver;
 use App\Observers\ContentEmailObserver;
 use App\Observers\PaymentEmailObserver;
 use App\PaymentGatewayContract;
+use App\TypographySettings;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -23,6 +24,7 @@ use Illuminate\Mail\MailManager;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,6 +42,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('layouts.base', function (\Illuminate\View\View $view): void {
+            $typography = $this->app->make(TypographySettings::class);
+            $settings = $typography->current()['settings'];
+            $scope = request()->routeIs('home') ? 'landing' : View::getSection('typography-scope');
+            $active = in_array($scope, ['landing', 'member', 'admin'], true) && $settings[$scope];
+            $view->with('pageTypography', $active ? [
+                'heading' => $typography->stack($settings['heading_font']),
+                'body' => $typography->stack($settings['body_font']),
+                'stylesheet' => $typography->stylesheet([$settings['heading_font'], $settings['body_font']]),
+            ] : null);
+        });
+
         $fallbackMailer = config('mail.integration_fallback', config('mail.default'));
         config([
             'mail.integration_fallback' => $fallbackMailer,

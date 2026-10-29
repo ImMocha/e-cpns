@@ -231,7 +231,7 @@ class AuthenticationTest extends TestCase
     public function test_guest_cannot_reach_member_pages(): void
     {
         foreach ([
-            'dashboard', 'materials.index', 'question-bank.index', 'quizzes.index',
+            'dashboard', 'materials.index', 'quizzes.index',
             'tryouts.index', 'history.index', 'statistics.index', 'leaderboard.index',
             'packages.index', 'checkout', 'certificates.index', 'profile.edit',
         ] as $name) {

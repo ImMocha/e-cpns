@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ColorTone;
+use App\UniqueSlug;
 use Database\Factories\SectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 #[Fillable([
     'name',
@@ -144,20 +144,7 @@ class Section extends Model
      */
     public static function makeSlug(string $name, ?int $ignoreId = null): string
     {
-        $base = Str::slug($name) ?: 'bidang';
-        $slug = $base;
-        $suffix = 2;
-
-        while (
-            static::where('slug', $slug)
-                ->when($ignoreId, fn (Builder $query) => $query->where('id', '!=', $ignoreId))
-                ->exists()
-        ) {
-            $slug = $base.'-'.$suffix;
-            $suffix++;
-        }
-
-        return $slug;
+        return UniqueSlug::resolve('sections', $name, $ignoreId);
     }
 
     /** Isi slug bila kosong, lalu pastikan unik. Dipanggil dari controller. */

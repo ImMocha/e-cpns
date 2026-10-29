@@ -63,7 +63,7 @@ class TopicQuizSeeder extends Seeder
                         'description' => 'Soal contoh untuk topik '.$topic->name.'. Admin dapat mengubah soal dan pengaturan latihan.',
                         'topic_id' => $topic->id,
                         'requires_topic_completion' => $definition['requires_topic_completion'],
-                        'access_level' => MaterialAccess::Free,
+                        'access_level' => MaterialAccess::Premium,
                         'status' => QuestionStatus::Published,
                         'question_count' => count($questionIds),
                         'duration_minutes' => 0,

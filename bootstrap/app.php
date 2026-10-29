@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->preventRequestsDuringMaintenance(except: [
+            'login', 'logout', 'admin', 'admin/*', 'payments/midtrans/notification',
+        ]);
         $middleware->trimStrings(except: ['smtp_password', 'sandbox_server_key', 'production_server_key']);
         $middleware->preventRequestForgery(except: ['payments/midtrans/notification']);
         $middleware->alias([

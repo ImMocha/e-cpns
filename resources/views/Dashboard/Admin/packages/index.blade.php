@@ -3,7 +3,7 @@
 @section('content')
 <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('admin.dashboard') }}">Admin Dashboard</a><span class="crumbs__sep">›</span><span class="crumbs__current">Paket Belajar</span></nav>
 <header class="page-head page-head__row">
-    <div><span class="eyebrow">Akses Peserta</span><h1 style="margin-top:.5rem">Paket Belajar</h1><p>Atur harga, masa aktif, konten, dan total kuota tryout setiap paket.</p></div>
+    <div><span class="eyebrow">Akses Peserta</span><h1 style="margin-top:.5rem">Paket Belajar</h1><p>Kelola jenis paket, benefit, harga, masa aktif, dan kuota percobaan tryout.</p></div>
     <a class="btn btn--primary" href="{{ route('admin.packages.create') }}"><svg data-icon="plus"></svg> Buat paket</a>
 </header>
 <div class="btn-row question-section"><span class="badge badge--primary badge--flat">{{ $activeCount }} paket aktif</span><span class="badge badge--mint badge--flat">{{ $memberCount }} peserta memiliki paket aktif</span></div>
@@ -16,8 +16,8 @@
 <div class="table-wrap"><table class="table"><thead><tr><th>Paket</th><th>Harga</th><th>Masa aktif</th><th>Konten</th><th>Kuota tryout</th><th>Peserta aktif</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
 @forelse ($packages as $package)
 <tr>
-    <td><strong>{{ $package->name }}</strong><p class="text-xs text-soft">{{ $package->leaderboard_access->label() }}</p></td><td>{{ $package->formattedPrice() }}</td><td>{{ $package->durationLabel() }}</td>
-    <td>{{ $package->materials_count }} materi · {{ $package->exams_count }} sesi</td><td>{{ $package->tryout_quota ?? 'Tanpa batas' }}</td><td>{{ $package->active_members_count }}</td>
+    <td><strong>{{ $package->name }}</strong>@if ($package->tier)<p class="text-xs text-soft">{{ $package->tier->label() }}</p>@endif<p class="text-xs text-soft">{{ $package->leaderboard_access->label() }}</p></td><td><x-package-original-price :package="$package" />{{ $package->formattedPrice() }}</td><td>{{ $package->durationLabel() }}</td>
+    <td>{{ $package->materials_count }} materi · {{ $package->exams_count }} sesi @if ($package->tryout_tokens > 0)<p class="text-xs text-soft">{{ $package->tryout_tokens }} token pilihan tryout</p>@endif</td><td>{{ $package->tryout_quota ?? 'Tanpa batas' }}</td><td>{{ $package->active_members_count }}</td>
     <td><span class="badge badge--{{ $package->trashed() ? 'coral' : ($package->is_active ? 'mint' : 'amber') }} badge--flat">{{ $package->trashed() ? 'Diarsipkan' : ($package->is_active ? 'Aktif' : 'Draft / nonaktif') }}</span>
         @if (! $package->trashed() && $package->is_active && ! $package->hasAvailableContent())<p class="text-xs text-soft" style="margin-top:.5rem">Konten belum tersedia. Perbarui isi paket agar dapat dibeli.</p>@endif
     </td>

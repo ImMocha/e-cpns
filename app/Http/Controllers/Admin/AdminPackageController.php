@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\PackageTier;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PackageRequest;
 use App\Models\Exam;
@@ -38,7 +39,7 @@ class AdminPackageController extends Controller
 
     public function create(): View
     {
-        return $this->form(new Package(['is_active' => false, 'position' => 0]));
+        return $this->form(new Package(['tier' => PackageTier::Regular, 'is_active' => false, 'position' => 0]));
     }
 
     public function store(PackageRequest $request): RedirectResponse

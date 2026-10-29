@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('code', (string) $exception->getStatusCode())
+@section('label', 'Gangguan layanan')
+@section('title', 'Layanan sedang terkendala.')
+@section('description', 'Sistem belum dapat memproses permintaanmu saat ini. Silakan coba kembali beberapa saat lagi atau hubungi tim kami jika kendala berlanjut.')

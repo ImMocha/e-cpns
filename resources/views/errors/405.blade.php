@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('code', '405')
+@section('label', 'Permintaan tidak didukung')
+@section('title', 'Jalur ini belum bisa dilalui.')
+@section('description', 'Halaman ini tidak mendukung cara akses yang digunakan. Buka kembali melalui menu website untuk melanjutkan.')

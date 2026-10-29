@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('code', (string) $exception->getStatusCode())
+@section('label', 'Permintaan belum dapat diproses')
+@section('title', 'Ada yang perlu diperiksa.')
+@section('description', 'Permintaan ini belum dapat dilanjutkan. Periksa kembali alamat atau informasi yang kamu kirim, lalu coba melalui menu website.')

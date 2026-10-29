@@ -15,6 +15,7 @@ class CertificateController extends Controller
         ExamAttempt::finalizeExpiredFor($request->user());
 
         return view('Dashboard.User.certificates.index', [
+            'contentAccessible' => $request->user()->canAccessLearningFeatures(),
             'attempts' => ExamAttempt::query()->whereBelongsTo($request->user())
                 ->certifiable()->select(['id', 'user_id', 'title', 'submitted_at', 'score', 'max_score', 'section_scores'])
                 ->orderByDesc('submitted_at')->orderByDesc('id')->paginate(12),
@@ -25,6 +26,10 @@ class CertificateController extends Controller
     {
         $attempt = ExamAttempt::query()->whereBelongsTo($request->user())
             ->certifiable()->findOrFail($examAttempt);
+
+        if (! $request->user()->canAccessLearningFeatures()) {
+            return view('Dashboard.User.certificates.preview', ['attempt' => $attempt]);
+        }
 
         return view('Dashboard.User.certificates.show', [
             'attempt' => $attempt,

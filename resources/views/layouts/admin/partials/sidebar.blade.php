@@ -44,6 +44,8 @@
       <svg data-icon="layers"></svg><span>Soal &amp; Pembahasan</span>
     </a>
     <a class="side__link{{ request()->routeIs('admin.exams.*') ? ' is-active' : '' }}" href="{{ route('admin.exams.index') }}" @if (request()->routeIs('admin.exams.*')) aria-current="page" @endif><svg data-icon="timer"></svg><span>Tryout</span></a>
+    <a class="side__link{{ request()->routeIs('admin.practices.*') ? ' is-active' : '' }}" href="{{ route('admin.practices.index') }}" @if (request()->routeIs('admin.practices.*')) aria-current="page" @endif><svg data-icon="pen-line"></svg><span>Latihan Soal</span></a>
+    <a class="side__link{{ request()->routeIs('admin.exam-claims.*') ? ' is-active' : '' }}" href="{{ route('admin.exam-claims.index') }}" @if (request()->routeIs('admin.exam-claims.*')) aria-current="page" @endif><svg data-icon="check"></svg><span>Unlock Sesi Gratis</span></a>
     <a class="side__link{{ request()->routeIs('admin.articles.*') ? ' is-active' : '' }}"
        href="{{ route('admin.articles.index') }}"
        @if (request()->routeIs('admin.articles.*')) aria-current="page" @endif>
@@ -54,6 +56,11 @@
   {{-- ===================== PENGGUNA ===================== --}}
   <div class="side__group">
     <div class="side__title">Pengguna</div>
+    <a class="side__link{{ request()->routeIs('admin.testimonials.*') ? ' is-active' : '' }}"
+       href="{{ route('admin.testimonials.index') }}"
+       @if (request()->routeIs('admin.testimonials.*')) aria-current="page" @endif>
+      <svg data-icon="quote"></svg><span>Testimoni</span>
+    </a>
     <a class="side__link{{ request()->routeIs('admin.users.*') ? ' is-active' : '' }}"
        href="{{ route('admin.users.index') }}"
        @if (request()->routeIs('admin.users.*')) aria-current="page" @endif>
@@ -90,21 +97,11 @@
   <div class="side__group">
     <div class="side__title">Lainnya</div>
     <a class="side__link{{ request()->routeIs('admin.settings.*') ? ' is-active' : '' }}" href="{{ route('admin.settings.index') }}" @if (request()->routeIs('admin.settings.*')) aria-current="page" @endif>
-      <svg data-icon="settings"></svg><span>Pengaturan Integrasi</span>
+      <svg data-icon="settings"></svg><span>Integrasi &amp; Tampilan</span>
     </a>
     <a class="side__link" href="{{ route('dashboard') }}">
       <svg data-icon="book"></svg><span>Mode Peserta</span>
     </a>
   </div>
 
-  <div class="side__group">
-    <div class="card card--dashed" style="padding:1rem">
-      <div class="flex items-center gap-2" style="margin-bottom:.4rem">
-        <span class="tile__glyph" style="width:34px;height:34px;border-radius:10px"><svg data-icon="megaphone" width="17" height="17"></svg></span>
-        <strong style="font-family:var(--font-display);font-size:var(--fs-sm);color:var(--ink)">Butuh bantuan?</strong>
-      </div>
-      <p class="text-xs text-soft">Pelajari alur admin, arti pengaturan, cara menerbitkan konten, dan solusi kendala akses peserta.</p>
-      <button class="btn btn--ghost btn--sm" type="button" data-help-open style="margin-top:.75rem">Buka panduan admin</button>
-    </div>
-  </div>
 </aside>

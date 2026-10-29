@@ -11,7 +11,7 @@ use DOMText;
 
 class ArticleContent
 {
-    private const TAGS = ['p', 'div', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'span', 'font', 'ul', 'ol', 'li', 'blockquote', 'a', 'hr', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'figure', 'figcaption', 'img'];
+    private const TAGS = ['p', 'div', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'sub', 'sup', 'mark', 'span', 'font', 'ul', 'ol', 'li', 'blockquote', 'a', 'hr', 'pre', 'code', 'table', 'caption', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'figure', 'figcaption', 'img', 'details', 'summary'];
 
     private const DROP = ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'video', 'audio', 'form', 'input', 'textarea', 'button', 'noscript', 'template', 'link', 'meta'];
 
@@ -50,7 +50,7 @@ class ArticleContent
 
     public static function text(?string $html): string
     {
-        $spaced = preg_replace('/<\/(?:p|div|h[1-6]|li|tr|blockquote|figure|figcaption)>|<br\s*\/?\s*>/i', ' ', (string) $html) ?? '';
+        $spaced = preg_replace('/<\/(?:p|div|h[1-6]|li|td|th|tr|blockquote|figure|figcaption|pre|details|summary|caption)>|<br\s*\/?\s*>/i', ' ', (string) $html) ?? '';
 
         return trim(preg_replace('/[\s\x{00A0}\x{200B}]+/u', ' ', html_entity_decode(strip_tags($spaced), ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?? '');
     }
@@ -86,6 +86,31 @@ class ArticleContent
                 }
 
                 $attributes = '';
+                if ($tag === 'div' && in_array($node->getAttribute('data-callout'), ['info', 'tip', 'warning'], true)) {
+                    $attributes .= ' data-callout="'.$node->getAttribute('data-callout').'"';
+                }
+                if ($tag === 'figure') {
+                    foreach (['data-align' => ['left', 'center', 'right'], 'data-width' => ['25', '50', '75', '100']] as $attribute => $values) {
+                        if (in_array($node->getAttribute($attribute), $values, true)) {
+                            $attributes .= ' '.$attribute.'="'.$node->getAttribute($attribute).'"';
+                        }
+                    }
+                }
+                if ($tag === 'ol') {
+                    if (in_array($node->getAttribute('type'), ['1', 'a', 'A', 'i', 'I'], true)) {
+                        $attributes .= ' type="'.$node->getAttribute('type').'" data-list-type="'.$node->getAttribute('type').'"';
+                    }
+                    if (in_array($node->getAttribute('data-list-suffix'), ['period', 'paren'], true)) {
+                        $attributes .= ' data-list-suffix="'.$node->getAttribute('data-list-suffix').'"';
+                    }
+                    $start = $node->getAttribute('start');
+                    if (preg_match('/^\d{1,4}$/', $start) && (int) $start > 0) {
+                        $attributes .= ' start="'.$start.'"';
+                    }
+                }
+                if ($tag === 'li' && preg_match('/^[1-9]\d{0,3}$/', $node->getAttribute('value'))) {
+                    $attributes .= ' value="'.$node->getAttribute('value').'"';
+                }
                 $styles = self::styles($node->getAttribute('style'));
                 if ($tag === 'font') {
                     $tag = 'span';
@@ -105,6 +130,9 @@ class ArticleContent
                     $href = trim($node->getAttribute('href'));
                     if (preg_match('~^(?:https?://|mailto:)[^\s\x00-\x1F\x7F]+$~i', $href)) {
                         $attributes .= ' href="'.htmlspecialchars($href, ENT_QUOTES, 'UTF-8').'" rel="noopener noreferrer"';
+                        if ($node->getAttribute('target') === '_blank') {
+                            $attributes .= ' target="_blank"';
+                        }
                     }
                 }
                 if (in_array($tag, ['td', 'th'], true)) {

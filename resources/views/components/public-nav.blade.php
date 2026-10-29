@@ -5,6 +5,7 @@
         ['label' => 'Artikel', 'href' => route('home').'#artikel'],
         ['label' => 'Tryout', 'href' => route('home').'#tryout'],
         ['label' => 'Paket', 'href' => route('home').'#paket'],
+        ['label' => 'Testimoni', 'href' => route('home').'#testimoni'],
         ['label' => 'FAQ', 'href' => route('home').'#faq'],
     ];
 @endphp

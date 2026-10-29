@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\LeaderboardAccess;
+use App\Enums\PackageTier;
 use App\Enums\Province;
+use App\Enums\TransactionStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use Database\Factories\UserFactory;
@@ -98,6 +100,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->status === UserStatus::Active;
     }
 
+    public function canWriteTestimonial(): bool
+    {
+        return ! $this->isAdmin() && $this->isActive() && $this->hasVerifiedEmail()
+            && $this->transactions()->where('status', TransactionStatus::Paid)
+                ->where('amount', '>', 0)->whereNotNull('package_id')->exists();
+    }
+
     public function wantsEmailNotification(string $preference): bool
     {
         return ! $this->trashed()
@@ -106,9 +115,30 @@ class User extends Authenticatable implements MustVerifyEmail
             && (bool) ($this->notification_preferences[$preference] ?? self::DEFAULT_NOTIFICATION_PREFERENCES[$preference] ?? false);
     }
 
+    public function hasPremiumPackage(): bool
+    {
+        if ($this->relationLoaded('userPackages')) {
+            return $this->isAdmin() || $this->userPackages->contains(
+                fn (UserPackage $package): bool => $package->tier === PackageTier::Premium && $package->isActive(),
+            );
+        }
+
+        return $this->isAdmin() || $this->userPackages()->active()->where('tier', PackageTier::Premium)->exists();
+    }
+
+    public function canAccessLearningFeatures(): bool
+    {
+        if ($this->relationLoaded('userPackages')) {
+            return $this->hasPremiumPackage() || ! $this->userPackages->contains(fn (UserPackage $package): bool => $package->tier !== null);
+        }
+
+        return $this->hasPremiumPackage() || ! $this->userPackages()->whereNotNull('tier')->exists();
+    }
+
     public function canViewExplanations(): bool
     {
-        return $this->isAdmin() || $this->userPackages()->active()->where('price', '>', 0)->exists();
+        return $this->isAdmin() || $this->userPackages()->active()
+            ->where(fn (Builder $query): Builder => $query->whereNotNull('tier')->orWhere('price', '>', 0))->exists();
     }
 
     public function leaderboardAccess(): LeaderboardAccess

@@ -1,0 +1,7 @@
+@extends('errors.layout')
+@section('code', '401')
+@section('label', 'Perlu masuk')
+@section('title', 'Masuk dulu, yuk.')
+@section('description', 'Halaman ini membutuhkan akun yang sudah masuk. Silakan masuk untuk melanjutkan perjalanan belajarmu.')
+@section('action-url', route('login'))
+@section('action', 'Masuk ke akun')

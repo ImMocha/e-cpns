@@ -30,9 +30,6 @@ class PackagePayment
             if (! $user->isActive() || $user->isAdmin() || ! $package->is_active) {
                 throw ValidationException::withMessages(['package_id' => 'Paket ini tidak dapat dibeli.']);
             }
-            if ($user->userPackages()->active()->whereBelongsTo($package)->exists()) {
-                throw ValidationException::withMessages(['package_id' => 'Kamu sudah memiliki paket ini yang masih aktif.']);
-            }
             $pending = Transaction::query()->whereBelongsTo($user)->whereBelongsTo($package)->where('status', TransactionStatus::Pending)->first();
             if ($pending !== null) {
                 if (filled($voucherCode) && Str::upper(trim($voucherCode)) !== $pending->voucher_code) {
@@ -56,8 +53,9 @@ class PackagePayment
                 'voucher_id' => $quote['voucher']?->id, 'voucher_code' => $quote['voucher']?->code, 'discount_amount' => $quote['discount'],
                 'is_production' => $this->settings->midtrans()['is_production'], 'amount' => $quote['amount'],
                 'package_snapshot' => [
-                    'leaderboard_access' => $package->leaderboard_access->value,
+                    'leaderboard_access' => $package->leaderboard_access->value, 'tier' => $package->tier?->value,
                     'name' => $package->name, 'duration_days' => $package->duration_days, 'tryout_quota' => $package->tryout_quota,
+                    'tryout_tokens' => $package->tryout_tokens,
                     'materials' => $materials->map(fn (Material $material): array => ['id' => $material->id, 'title' => $material->title])->all(),
                     'exams' => $exams->map(fn (Exam $exam): array => ['id' => $exam->id, 'title' => $exam->title])->all(),
                 ],
@@ -160,9 +158,10 @@ class PackagePayment
         $snapshot = $transaction->package_snapshot;
         $startsAt = now()->startOfSecond();
         $entitlement = UserPackage::create([
-            'leaderboard_access' => $snapshot['leaderboard_access'] ?? 'none',
+            'leaderboard_access' => $snapshot['leaderboard_access'] ?? 'none', 'tier' => $snapshot['tier'] ?? null,
             'user_id' => $transaction->user_id, 'package_id' => $transaction->package_id, 'name' => $snapshot['name'],
             'price' => $transaction->amount, 'tryout_quota' => $snapshot['tryout_quota'], 'tryouts_used' => 0,
+            'tryout_tokens' => $snapshot['tryout_tokens'] ?? 0,
             'starts_at' => $startsAt,
             'expires_at' => $snapshot['duration_days'] === null ? null : $startsAt->copy()->addDays($snapshot['duration_days']),
             'note' => 'Pembelian '.$transaction->order_id,

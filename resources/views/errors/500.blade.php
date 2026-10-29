@@ -1,0 +1,7 @@
+@extends('errors.layout')
+@section('code', '500')
+@section('label', 'Gangguan server')
+@section('title', 'Ada kendala di server.')
+@section('description', 'Permintaanmu belum dapat kami proses karena terjadi gangguan pada sistem. Silakan coba kembali beberapa saat lagi atau hubungi tim kami jika kendala berlanjut.')
+@section('note', 'Jika sedang bertransaksi, periksa status transaksi sebelum melakukan pembayaran ulang.')
+@section('sticker', 'Istirahat sebentar, ya.')

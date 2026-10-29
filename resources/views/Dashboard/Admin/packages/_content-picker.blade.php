@@ -3,9 +3,9 @@
     $currentSelection = old($isMaterialPicker ? 'material_ids' : 'exam_ids', $selectedIds);
     $currentSelection = is_array($currentSelection) ? $currentSelection : [];
 @endphp
-<section class="card question-form-stack" data-package-picker>
+<section class="card question-form-stack" data-package-picker data-package-picker-type="{{ $pickerType }}">
     <div class="exam-pool-summary">
-        <div><h2 class="card__title">{{ $isMaterialPicker ? 'Materi & video' : 'Latihan & tryout' }}</h2><p class="card__sub">{{ $isMaterialPicker ? 'Pilih materi yang menjadi isi paket.' : 'Pilih sesi latihan dan tryout yang menjadi isi paket.' }}</p></div>
+        <div><h2 class="card__title">{{ $isMaterialPicker ? 'Materi & video' : 'Latihan Soal & tryout' }}</h2><p class="card__sub">{{ $isMaterialPicker ? 'Pilih materi yang menjadi isi paket.' : 'Pilih sesi latihan dan tryout yang menjadi isi paket.' }}</p></div>
         <span class="badge badge--primary badge--flat" data-package-count role="status" aria-live="polite">{{ count($currentSelection) }} dipilih</span>
     </div>
     <div class="grid" style="--gap:.75rem" data-package-tools hidden>
@@ -27,7 +27,8 @@
         <div class="btn-row flex-wrap">
             <button class="btn btn--ghost btn--sm" type="button" data-package-action="all">{{ $isMaterialPicker ? 'Semua materi' : 'Semua sesi' }}</button>
             @unless ($isMaterialPicker)
-                <button class="btn btn--ghost btn--sm" type="button" data-package-action="quiz">Semua latihan</button>
+                <button class="btn btn--ghost btn--sm" type="button" data-package-action="quiz">Semua latihan topik</button>
+                <button class="btn btn--ghost btn--sm" type="button" data-package-action="practice">Semua latihan soal</button>
                 <button class="btn btn--ghost btn--sm" type="button" data-package-action="tryout">Semua tryout</button>
             @endunless
             <button class="btn btn--ghost btn--sm" type="button" data-package-action="premium">Semua premium</button>
@@ -42,8 +43,8 @@
                 $topicName = $isMaterialPicker ? $item->topic?->name : null;
                 $sectionName = $isMaterialPicker ? $item->section?->name : null;
                 $kind = $isMaterialPicker ? $item->type->value : $item->kind;
-                $kindLabel = $isMaterialPicker ? $item->type->label() : ($item->kind === 'quiz' ? 'Latihan' : 'Tryout');
-                $metadata = implode(' · ', array_filter([$sectionName, $topicName, $kindLabel, $item->access_level->label(), $item->status->label()]));
+                $kindLabel = $isMaterialPicker ? $item->type->label() : \App\Enums\ExamKind::from($item->kind)->label();
+                $metadata = implode(' · ', array_filter([$sectionName, $topicName, $kindLabel, $isMaterialPicker ? $item->access_level->label() : $item->accessLabel(), $item->status->label()]));
                 $isAvailable = isset($availableIds[$item->id]);
             @endphp
             <label class="exam-pool-item" data-package-item data-kind="{{ $kind }}" data-access="{{ $item->access_level->value }}" data-topic="{{ $isMaterialPicker ? $item->topic_id : '' }}" data-available="{{ $isAvailable ? '1' : '0' }}" data-search="{{ $item->title.' '.$metadata }}">

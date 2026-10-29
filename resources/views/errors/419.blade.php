@@ -1,0 +1,8 @@
+@extends('errors.layout')
+@section('code', '419')
+@section('label', 'Sesi kedaluwarsa')
+@section('title', 'Sesi kamu perlu disegarkan.')
+@section('description', 'Sesi atau token keamanan halaman ini sudah tidak berlaku. Silakan masuk kembali, lalu buka ulang halaman yang ingin kamu gunakan.')
+@section('action-url', route('login'))
+@section('action', 'Masuk kembali')
+@section('note', 'Jika sebelumnya mengisi formulir, periksa hasilnya sebelum mengirim ulang.')

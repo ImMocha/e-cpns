@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\ArticleContent;
 use App\Enums\ArticleStatus;
+use App\UniqueSlug;
 use Database\Factories\ArticleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -64,14 +65,7 @@ class Article extends Model
 
     public static function resolveSlug(?string $slug, string $title, ?int $ignoreId = null): string
     {
-        $base = Str::limit(Str::slug(trim((string) $slug) ?: $title) ?: 'artikel', 180, '');
-        $candidate = $base;
-        $suffix = 2;
-        while (static::withTrashed()->where('slug', $candidate)->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))->exists()) {
-            $candidate = $base.'-'.$suffix++;
-        }
-
-        return $candidate;
+        return UniqueSlug::resolve('articles', trim((string) $slug) ?: $title, $ignoreId);
     }
 
     public function readingMinutes(): int

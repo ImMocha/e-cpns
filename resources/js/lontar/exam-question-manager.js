@@ -1,6 +1,35 @@
 import { createQuestionOrder } from './exam-question-order.js';
+import { createQuestionPool } from './exam-question-pool.js';
 
 document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
+  const coverInput = sessionForm.querySelector('#exam-cover');
+  const coverPreview = sessionForm.querySelector('.exam-cover-preview');
+  if (coverInput && coverPreview) {
+    const originalCover = coverPreview.src;
+    let previewUrl;
+    coverInput.addEventListener('change', () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = coverInput.files[0] ? URL.createObjectURL(coverInput.files[0]) : null;
+      coverPreview.src = previewUrl || originalCover;
+      const removeCover = sessionForm.querySelector('[name="remove_cover"]');
+      if (previewUrl && removeCover) removeCover.checked = false;
+    });
+    window.addEventListener('pagehide', () => { if (previewUrl) URL.revokeObjectURL(previewUrl); });
+  }
+  const accessSelect = sessionForm.querySelector('#exam-access');
+  const claimSettings = sessionForm.querySelector('[data-exam-claim-settings]');
+  if (accessSelect && claimSettings) {
+    const updateClaimSettings = () => {
+      const requiresProof = accessSelect.value === 'conditional';
+      claimSettings.hidden = !requiresProof;
+      claimSettings.querySelectorAll('input, textarea').forEach((field) => {
+        field.disabled = !requiresProof;
+        field.required = requiresProof;
+      });
+    };
+    accessSelect.addEventListener('change', updateClaimSettings);
+    updateClaimSettings();
+  }
   const dialog = document.querySelector('[data-exam-question-dialog]');
   if (!dialog) return;
   const editor = dialog.querySelector('[data-inline-question-form]');
@@ -20,10 +49,11 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
   let loadSequence = 0;
   let previousOverflow = '';
   let opener = null;
-  const sessionFingerprint = () => new URLSearchParams(new FormData(sessionForm)).toString();
-  const initialFingerprint = sessionFingerprint();
-  const trackSessionChanges = () => { sessionDirty = sessionFingerprint() !== initialFingerprint; };
-  const rows = () => [...pool.querySelectorAll('[data-exam-pool-item]')];
+  const sessionFingerprint = () => JSON.stringify([...new FormData(sessionForm)].map(([name, value]) =>
+    [name, value instanceof File ? (value.name ? [value.name, value.size, value.lastModified] : null) : value]));
+  let initialFingerprint;
+  const trackSessionChanges = () => { sessionDirty = initialFingerprint !== undefined && sessionFingerprint() !== initialFingerprint; };
+  const questionPool = createQuestionPool(sessionForm, pool);
   const questionOrder = createQuestionOrder(sessionForm, pool, trackSessionChanges);
   const notify = (text, isError = false) => {
     message.textContent = text;
@@ -43,17 +73,8 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
     return payload;
   };
   const updatePool = () => {
+    questionPool.update();
     questionOrder.sync();
-    const term = search.value.trim().toLocaleLowerCase('id');
-    const selected = rows().filter(row => row.querySelector('input').checked);
-    const ready = selected.filter(row => row.querySelector('.exam-pool-status.is-ready')).length;
-    sessionForm.querySelector('[data-exam-selected]').textContent = selected.length + ' dipilih · ' + ready + ' terbit';
-    rows().forEach(row => {
-      row.hidden = Boolean((term && !row.textContent.toLocaleLowerCase('id').includes(term))
-        || (sectionFilter.value && row.dataset.sectionId !== sectionFilter.value)
-        || (selectedOnly.checked && !row.querySelector('input').checked));
-    });
-    sessionForm.querySelector('[data-exam-pool-empty]').hidden = rows().some(row => !row.hidden);
   };
   const closeEditor = (force = false) => {
     if (editorBusy) return;
@@ -120,10 +141,10 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
       data.set('_method', 'DELETE');
       try {
         await request(archiveButton.dataset.archiveQuestion, { method: 'POST', body: data });
-        row.remove();
+        questionPool.remove(row.dataset.questionId);
         updatePool();
         trackSessionChanges();
-        notify('Soal diarsipkan dari bank soal. Pastikan jumlah soal terbit sesi tetap mencukupi.');
+        notify('Soal diarsipkan. Pastikan jumlah soal terbit sesi tetap mencukupi.');
       } catch (error) { archiveButton.disabled = false; notify(error.message || 'Soal tidak dapat diarsipkan.', true); }
     };
     window.L.confirmAction({ title: 'Arsipkan soal?',
@@ -171,19 +192,11 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
     editable.forEach(control => { control.contentEditable = 'false'; });
     try {
       const payload = await request(editor.action, { method: 'POST', body: data });
-      const oldRow = rows().find(row => row.dataset.questionId === String(payload.question.id));
-      const isSelected = oldRow ? oldRow.querySelector('input').checked : true;
-      const template = document.createElement('template');
-      template.innerHTML = payload.html.trim();
-      const row = template.content.firstElementChild;
-      row.querySelector('input').checked = isSelected;
-      if (oldRow) oldRow.replaceWith(row);
-      else { pool.prepend(row); search.value = ''; sectionFilter.value = ''; }
-      window.LIcons?.hydrate(row);
+      const wasExisting = questionPool.replace(payload.question.id, payload.html);
       updatePool();
-      if (!oldRow) trackSessionChanges();
+      if (!wasExisting) trackSessionChanges();
       editor.dispatchEvent(new CustomEvent('question-editor:saved'));
-      notify(oldRow ? 'Perubahan soal berhasil disimpan.' : 'Soal baru berhasil disimpan dan dicentang. Simpan sesi untuk menerapkan pilihan soal.');
+      notify(wasExisting ? 'Perubahan soal berhasil disimpan.' : 'Soal baru berhasil disimpan dan dicentang. Simpan sesi untuk menerapkan pilihan soal.');
       editorBusy = false;
       closeEditor(true);
     } catch (error) {
@@ -200,4 +213,5 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
     }
   });
   updatePool();
+  initialFingerprint = sessionFingerprint();
 });

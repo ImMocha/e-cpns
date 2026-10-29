@@ -56,6 +56,52 @@ class PackageManagementTest extends TestCase
         $this->assertDatabaseCount('packages', 0);
     }
 
+    public function test_admin_can_save_update_and_remove_the_crossed_out_price(): void
+    {
+        $payload = $this->payload(['price' => 80000, 'original_price' => 100000]);
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->post(route('admin.packages.store'), $payload)->assertSessionHasNoErrors();
+
+        $package = Package::sole();
+        $this->assertDatabaseHas('packages', ['id' => $package->id, 'price' => 80000, 'original_price' => 100000]);
+        $this->get(route('admin.packages.edit', $package))
+            ->assertSee('Harga diskon/coret (Rp)')->assertSee('Harga sebenarnya (Rp)')
+            ->assertSee('value="100000"', false);
+
+        $this->put(route('admin.packages.update', $package), array_replace($payload, ['original_price' => 120000]))
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('packages', ['id' => $package->id, 'original_price' => 120000]);
+
+        $this->put(route('admin.packages.update', $package), array_replace($payload, ['original_price' => '']))
+            ->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('packages', ['id' => $package->id, 'price' => 80000, 'original_price' => null]);
+    }
+
+    public function test_customers_see_the_crossed_out_price_and_actual_price(): void
+    {
+        $package = Package::factory()->create(['price' => 80000, 'original_price' => 100000]);
+        $package->materials()->attach(Material::factory()->premium()->video()->create());
+
+        $this->get(route('home'))->assertSee('<s>Rp100.000</s>', false)->assertSee('Rp80.000');
+        $this->actingAs(User::factory()->create())->get(route('packages.index'))
+            ->assertSee('<s>Rp100.000</s>', false)->assertSee('Rp80.000');
+        $this->get(route('checkout', ['package' => $package->id]))
+            ->assertSee('<s>Rp100.000</s>', false)->assertSee('Rp80.000');
+    }
+
+    public function test_packages_without_a_discount_only_show_the_actual_price(): void
+    {
+        $package = Package::factory()->create(['price' => 80000]);
+        $package->materials()->attach(Material::factory()->premium()->video()->create());
+
+        $this->get(route('home'))->assertSee('Rp80.000')->assertDontSee('Harga sebelum diskon:');
+        $this->actingAs(User::factory()->create())->get(route('packages.index'))
+            ->assertSee('Rp80.000')->assertDontSee('Harga sebelum diskon:');
+        $this->get(route('checkout', ['package' => $package->id]))
+            ->assertSee('Rp80.000')->assertDontSee('Harga sebelum diskon:');
+    }
+
     public function test_admin_deactivates_package_without_changing_existing_access(): void
     {
         $admin = User::factory()->admin()->create();
@@ -169,6 +215,11 @@ class PackageManagementTest extends TestCase
     public static function invalidPackages(): array
     {
         return ['negative price' => [['price' => -1], 'price'], 'fractional price' => [['price' => '12.5'], 'price'],
+            'negative original price' => [['original_price' => -1], 'original_price'],
+            'fractional original price' => [['original_price' => '100000.5'], 'original_price'],
+            'original price too large' => [['original_price' => 1000000001], 'original_price'],
+            'original price below actual price' => [['original_price' => 70000], 'original_price'],
+            'original price equals actual price' => [['original_price' => 75000], 'original_price'],
             'zero duration' => [['duration_days' => 0], 'duration_days'], 'negative quota' => [['tryout_quota' => -1], 'tryout_quota'],
             'invalid content' => [['material_ids' => [9999]], 'material_ids.0'],
             'empty active package' => [['material_ids' => [], 'exam_ids' => []], 'material_ids']];
@@ -287,6 +338,41 @@ class PackageManagementTest extends TestCase
         $this->actingAs($user)->get(route('packages.index'))->assertSee('Paket Tersedia')->assertSee('Hak Milik Saya')
             ->assertDontSee('Paket Rahasia')->assertDontSee('Paket Arsip')->assertDontSee('Hak Peserta Lain');
         $this->get(route('dashboard'))->assertSee('Hak Milik Saya');
+    }
+
+    public function test_revoked_unlimited_package_shows_its_status_without_a_content_accordion(): void
+    {
+        $user = User::factory()->create();
+        $owned = UserPackage::factory()->for($user)->revoked()->create(['tryout_quota' => null]);
+        $material = Material::factory()->premium()->create(['title' => 'Materi Dalam Paket Dicabut']);
+        $exam = Exam::factory()->create(['title' => 'Tryout Dalam Paket Dicabut']);
+        $owned->materials()->attach($material);
+        $owned->exams()->attach($exam);
+
+        $this->actingAs($user)->get(route('packages.index'))
+            ->assertSee('Kuota tryout tanpa batas')
+            ->assertDontSee('Lihat konten paket')
+            ->assertDontSee($material->title)
+            ->assertDontSee($exam->title)
+            ->assertSee('Status akses: Dicabut. Konten hanya untuk ditinjau.')
+            ->assertDontSee('href="'.route('materials.show', $material).'"', false)
+            ->assertDontSee('Mulai belajar')
+            ->assertDontSee('Pilih tryout')
+            ->assertDontSee('token tanpa batas');
+    }
+
+    public function test_active_package_keeps_its_token_and_catalog_actions_without_content_links(): void
+    {
+        $user = User::factory()->create();
+        $owned = UserPackage::factory()->for($user)->create(['tryout_tokens' => 1]);
+        $material = Material::factory()->premium()->create();
+        $owned->materials()->attach($material);
+
+        $this->actingAs($user)->get(route('packages.index'))
+            ->assertSee('1 token pilihan tryout tersisa')
+            ->assertSee('Pilih tryout')
+            ->assertSee('Mulai belajar')
+            ->assertDontSee('href="'.route('materials.show', $material).'"', false);
     }
 
     public function test_empty_catalog_and_escaped_package_text_render_safely(): void

@@ -39,6 +39,15 @@ test('session shortcuts distinguish quizzes from tryouts', () => {
   assert.deepEqual([...selectPackageContent(items, [], 'tryout')], ['6']);
 });
 
+test('practice shortcut selects standalone practice without mixing topic quizzes or tryouts', () => {
+  const content = [...items,
+    { id: 7, kind: 'practice', available: true },
+    { id: 8, kind: 'practice', available: false },
+  ];
+  assert.deepEqual([...selectPackageContent(content, [], 'practice')], ['7']);
+  assert.deepEqual([...selectPackageContent(content, [], 'quiz')], ['5']);
+});
+
 test('empty filter results preserve the current selection', () => {
   assert.deepEqual([...selectPackageContent(items, ['1'], 'filtered', { search: 'tidak ditemukan' })], ['1']);
 });

@@ -6,7 +6,7 @@
 <thead><tr><th>Pesanan</th><th>Paket</th><th>Total</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
 <tbody>
 @forelse ($transactions as $transaction)
-<tr><td class="text-xs">{{ $transaction->order_id }}</td><td><strong>{{ $transaction->package_snapshot['name'] }}</strong></td><td>{{ $transaction->formattedAmount() }}</td><td><span class="badge badge--{{ $transaction->status === \App\Enums\TransactionStatus::Paid ? 'mint' : 'amber' }} badge--flat">{{ $transaction->status->label() }}</span></td><td>{{ $transaction->created_at->format('d/m/Y H:i') }}</td><td><a class="btn btn--ghost btn--sm" href="{{ route('transactions.show', $transaction) }}">Detail</a></td></tr>
+<tr><td class="text-xs">{{ $transaction->order_id }}</td><td><strong>{{ $transaction->package_snapshot['name'] }}</strong></td><td>{{ $transaction->formattedAmount() }}</td><td><span class="badge badge--{{ $transaction->status === \App\Enums\TransactionStatus::Paid ? 'mint' : 'amber' }} badge--flat">{{ $transaction->status->label() }}</span></td><td><x-local-time :value="$transaction->created_at" format="d/m/Y H:i" /></td><td><a class="btn btn--ghost btn--sm" href="{{ route('transactions.show', $transaction) }}">Detail</a></td></tr>
 @empty<tr><td colspan="6" class="text-soft">Belum ada transaksi. Pilih paket untuk mulai belajar.</td></tr>@endforelse
 </tbody></table></div>
 @if ($transactions->hasPages())<div class="exam-pager"><x-pager :paginator="$transactions" /></div>@endif

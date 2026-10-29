@@ -6,7 +6,7 @@ namespace App;
 
 class ExamScoring
 {
-    public const array PASSING_GRADES = ['TWK' => 65, 'TIU' => 80, 'TKP' => 16];
+    public const array PASSING_GRADES = ['TWK' => 65, 'TIU' => 80, 'TKP' => 166];
 
     /**
      * @param  array<string, mixed>  $definition

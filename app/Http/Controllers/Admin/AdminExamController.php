@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ExamKind;
 use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionStatus;
 use App\Http\Controllers\Controller;
@@ -14,18 +15,23 @@ use App\Models\Section;
 use App\Models\Topic;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class AdminExamController extends Controller
 {
     public function index(Request $request): View|RedirectResponse
     {
-        $filters = $request->validate(['kind' => ['nullable', 'in:quiz,tryout'], 'q' => ['nullable', 'string', 'max:180'],
+        $filters = $request->validate(['kind' => ['nullable', 'in:quiz,tryout,practice'], 'q' => ['nullable', 'string', 'max:180'],
             'topic_id' => ['nullable', 'integer', 'min:1'], 'section_id' => ['nullable', 'integer', 'min:1'],
             'status' => ['nullable', 'in:draft,published']]);
         $isQuiz = $request->routeIs('admin.materials.quizzes.*');
+        $kind = $this->requestKind($request);
         if (! $isQuiz && (($filters['kind'] ?? null) === 'quiz' || $request->filled('topic_id'))) {
             unset($filters['kind']);
 
@@ -37,7 +43,7 @@ class AdminExamController extends Controller
         $selectedSection = $sectionId ? Section::findOrFail($sectionId) : null;
         abort_if($selectedTopic && $selectedTopic->section_id !== $sectionId, 404);
 
-        $query = Exam::query()->where('kind', $isQuiz ? 'quiz' : 'tryout')
+        $query = Exam::query()->where('kind', $kind->value)
             ->when($sectionId, fn (Builder $query): Builder => $query->whereHas('topic', fn (Builder $topic): Builder => $topic->where('section_id', $sectionId)))
             ->when($filters['topic_id'] ?? null, fn ($query, $topic) => $query->where('topic_id', $topic))
             ->when($filters['q'] ?? null, fn ($query, $q) => $query->where('title', 'like', '%'.$q.'%'))
@@ -47,7 +53,8 @@ class AdminExamController extends Controller
             'exams' => $query->with('topic.section')->withCount(['questions as available_count' => fn ($query) => $query->visibleToMembers()])
                 ->latest('id')->paginate(12)->withQueryString(),
             'isQuiz' => $isQuiz,
-            'routePrefix' => $isQuiz ? 'admin.materials.quizzes' : 'admin.exams',
+            'kind' => $kind,
+            'routePrefix' => $kind->adminRoutePrefix(),
             'selectedSection' => $selectedSection,
             'selectedTopic' => $selectedTopic,
             'sections' => $isQuiz ? Section::query()->ordered()->withCount('topics')->get() : collect(),
@@ -65,7 +72,7 @@ class AdminExamController extends Controller
         }
         $topic = $isQuiz && $request->filled('topic_id') ? Topic::findOrFail($request->integer('topic_id')) : null;
 
-        return $this->form(new Exam(['kind' => $isQuiz ? 'quiz' : 'tryout', 'topic_id' => $topic?->id, 'requires_topic_completion' => false,
+        return $this->form(new Exam(['kind' => $this->requestKind($request)->value, 'topic_id' => $topic?->id, 'requires_topic_completion' => false,
             'status' => 'draft', 'question_count' => 1,
             'duration_minutes' => $isQuiz ? 0 : 30, 'points_per_correct' => 5, 'penalty_wrong' => 0, 'random_questions' => true, 'random_options' => true]));
     }
@@ -80,7 +87,7 @@ class AdminExamController extends Controller
 
     public function edit(Request $request, Exam $exam): View|RedirectResponse
     {
-        if ($request->routeIs('admin.materials.quizzes.*') !== ($exam->kind === 'quiz')) {
+        if ($this->requestKind($request)->value !== $exam->kind) {
             return redirect()->route($this->routePrefix($exam).'.edit', $exam);
         }
 
@@ -96,7 +103,7 @@ class AdminExamController extends Controller
 
     public function destroy(Request $request, Exam $exam): RedirectResponse
     {
-        abort_unless($request->routeIs('admin.materials.quizzes.*') === ($exam->kind === 'quiz'), 404);
+        abort_unless($this->requestKind($request)->value === $exam->kind, 404);
         $exam->delete();
 
         return redirect()->route($this->routePrefix($exam).'.index', $exam->kind === 'quiz' && $exam->topic_id ? ['topic_id' => $exam->topic_id] : [])
@@ -109,17 +116,31 @@ class AdminExamController extends Controller
         $selected = $exam->exists ? $exam->questions()->pluck('questions.id')->all() : [];
         $submittedOrder = old('question_ids', $selected);
         $positions = array_flip(array_values(array_filter(is_array($submittedOrder) ? $submittedOrder : [], fn (mixed $id): bool => is_int($id) || is_string($id))));
+        $questions = Question::query()->with(['section', 'exams' => fn (BelongsToMany $exams): BelongsToMany => $exams
+            ->select(['exams.id', 'title', 'kind', 'status'])->orderBy('title')->orderBy('exams.id')])
+            ->withCount('exams')->orderBy('section_id')->orderBy('id')->get()
+            ->sortBy(fn (Question $question): int => $positions[$question->id] ?? PHP_INT_MAX)->values();
+        $questionGroups = $questions->groupBy(fn (Question $question): array => $question->exams->isEmpty()
+            ? ['unassigned'] : $question->exams->map(fn (Exam $source): string => 'exam-'.$source->id)->all())
+            ->map(fn (Collection $items, string $key): array => [
+                'exam' => $key === 'unassigned' ? null : $items->first()->exams->firstWhere('id', (int) substr($key, 5)),
+                'questions' => $items,
+            ])->sortBy(fn (array $group): string => $group['exam']?->title ?? '', SORT_NATURAL | SORT_FLAG_CASE);
+        $unassigned = $questionGroups->pull('unassigned') ?? ['exam' => null, 'questions' => collect()];
+        $questionGroups->put('unassigned', $unassigned);
 
         return view('Dashboard.Admin.exams.form', ['exam' => $exam,
             'isQuiz' => $exam->kind === 'quiz',
+            'kind' => ExamKind::from($exam->kind),
             'routePrefix' => $this->routePrefix($exam),
             'returnUrl' => $exam->kind === 'quiz' && $topic
                 ? route('admin.materials.index', ['section_id' => $topic->section_id, 'topic_id' => $topic->id])
                 : route($this->routePrefix($exam).'.index'),
             'topics' => Topic::query()->whereHas('section')->with('section')->ordered()->get(),
             'selected' => $selected,
-            'questions' => Question::query()->with('section')->withCount('exams')->orderBy('section_id')->orderBy('id')->get()
-                ->sortBy(fn (Question $question): int => $positions[$question->id] ?? PHP_INT_MAX)->values(),
+            'questionOrder' => array_keys($positions),
+            'questions' => $questions,
+            'questionGroups' => $questionGroups,
             'sections' => Section::query()->ordered()->get(),
             'difficulties' => QuestionDifficulty::cases(),
             'inlineQuestion' => new Question(['status' => QuestionStatus::Draft, 'difficulty' => QuestionDifficulty::Medium,
@@ -129,23 +150,53 @@ class AdminExamController extends Controller
 
     private function routePrefix(Exam $exam): string
     {
-        return $exam->kind === 'quiz' ? 'admin.materials.quizzes' : 'admin.exams';
+        return ExamKind::from($exam->kind)->adminRoutePrefix();
+    }
+
+    private function requestKind(Request $request): ExamKind
+    {
+        return match (true) {
+            $request->routeIs('admin.materials.quizzes.*') => ExamKind::Quiz,
+            $request->routeIs('admin.practices.*') => ExamKind::Practice,
+            default => ExamKind::Tryout,
+        };
     }
 
     private function persist(ExamRequest $request, Exam $exam): void
     {
-        DB::transaction(function () use ($request, $exam): void {
-            $data = $request->safe()->except('question_ids');
-            $data['updated_by'] = $request->user()->id;
-            if (! $exam->exists) {
-                $data['created_by'] = $request->user()->id;
+        $newPath = $request->file('cover')?->store('exams/covers', 'public');
+        abort_if($newPath === false, 500, 'Gambar kartu gagal disimpan. Silakan coba lagi.');
+
+        try {
+            $removedPath = DB::transaction(function () use ($request, $exam, $newPath): ?string {
+                if ($exam->exists) {
+                    $exam = Exam::query()->whereKey($exam->id)->lockForUpdate()->firstOrFail();
+                }
+                $oldPath = $exam->cover_path;
+                $data = $request->safe()->except(['question_ids', 'cover', 'remove_cover']);
+                $data['cover_path'] = $newPath ?: ($request->boolean('remove_cover') ? null : $oldPath);
+                $data['updated_by'] = $request->user()->id;
+                if (! $exam->exists) {
+                    $data['created_by'] = $request->user()->id;
+                }
+                $exam->fill($data)->save();
+                $questions = [];
+                foreach ($request->validated('question_ids') as $position => $questionId) {
+                    $questions[$questionId] = ['position' => $position + 1];
+                }
+                $exam->questions()->sync($questions);
+
+                return $oldPath !== $exam->cover_path ? $oldPath : null;
+            });
+        } catch (Throwable $exception) {
+            if ($newPath) {
+                Storage::disk('public')->delete($newPath);
             }
-            $exam->fill($data)->save();
-            $questions = [];
-            foreach ($request->validated('question_ids') as $position => $questionId) {
-                $questions[$questionId] = ['position' => $position + 1];
-            }
-            $exam->questions()->sync($questions);
-        });
+            throw $exception;
+        }
+
+        if ($removedPath) {
+            Storage::disk('public')->delete($removedPath);
+        }
     }
 }

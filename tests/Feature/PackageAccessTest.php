@@ -55,7 +55,7 @@ class PackageAccessTest extends TestCase
         $this->actingAs($user)->get(route('materials.show', $included))->assertOk();
         $this->get(route('materials.file', $included))->assertOk();
         $this->get(route('materials.file', $excluded))->assertForbidden();
-        $this->get(route('materials.show', $excluded))->assertRedirect(route('materials.index'));
+        $this->get(route('materials.show', $excluded))->assertOk()->assertViewHas('contentAccessible', false);
         $this->get(route('materials.index'))->assertOk()->assertViewHas('counts', fn (array $counts): bool => $counts['locked'] === 1);
         $this->post(route('materials.progress.store', $included))->assertRedirect();
         $this->get(route('dashboard'))->assertViewHas('materialCount', 1)->assertViewHas('completedMaterialCount', 1);

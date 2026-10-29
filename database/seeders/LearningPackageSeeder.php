@@ -6,6 +6,7 @@ namespace Database\Seeders;
 
 use App\Enums\LeaderboardAccess;
 use App\Enums\MaterialAccess;
+use App\Enums\PackageTier;
 use App\Models\Exam;
 use App\Models\Material;
 use App\Models\Package;
@@ -25,40 +26,38 @@ class LearningPackageSeeder extends Seeder
             ->get()->filter(fn (Exam $exam): bool => $exam->available_questions_count >= $exam->question_count)
             ->keyBy('slug');
 
-        $firstTryout = $tryouts->get(PremiumTryoutSeeder::SLUGS['TWK']);
-        if ($firstTryout !== null) {
-            $this->createPackage('Paket 1', [
-                'description' => '1 paket soal tryout SKD TWK, 2 percobaan total, kunci jawaban dan pembahasan.',
-                'price' => 15000,
-                'duration_days' => 365,
-                'tryout_quota' => 2,
-                'leaderboard_access' => LeaderboardAccess::None,
-                'position' => 1,
-            ], [$firstTryout->id], []);
-        }
+        $this->createPackage('Paket Reguler', [
+            'tier' => PackageTier::Regular,
+            'description' => '1 token untuk membuka 1 paket soal tryout SKD pilihanmu, 2 percobaan total, kunci jawaban dan pembahasan.',
+            'price' => 15000,
+            'duration_days' => 365,
+            'tryout_quota' => 2,
+            'tryout_tokens' => 1,
+            'leaderboard_access' => LeaderboardAccess::None,
+            'position' => 1,
+        ], [], []);
+
+        $this->createPackage('Paket Bundling', [
+            'tier' => PackageTier::Bundling,
+            'description' => '3 token untuk membuka 3 paket soal tryout SKD pilihanmu, 3 percobaan total, pembahasan, dan perangkingan daerah.',
+            'price' => 35000,
+            'duration_days' => 365,
+            'tryout_quota' => 3,
+            'tryout_tokens' => 3,
+            'leaderboard_access' => LeaderboardAccess::Local,
+            'position' => 2,
+        ], [], []);
 
         if ($tryouts->count() !== 3) {
-            $this->command?->warn('Paket 2 dan 3 belum dibuat karena bundel 3 tryout SKD belum lengkap.');
+            $this->command?->warn('Paket Premium belum dibuat karena konten tryout SKD belum lengkap.');
 
             return;
         }
 
-        $tryoutIds = collect(PremiumTryoutSeeder::SLUGS)
-            ->map(fn (string $slug): int => $tryouts->get($slug)->id)->all();
-
-        $this->createPackage('Paket 2', [
-            'description' => 'Bundling 3 paket soal tryout SKD TWK, TIU, dan TKP; 3 percobaan total, pembahasan, dan leaderboard daerah.',
-            'price' => 35000,
-            'duration_days' => 365,
-            'tryout_quota' => 3,
-            'leaderboard_access' => LeaderboardAccess::Local,
-            'position' => 2,
-        ], $tryoutIds, []);
-
         $materialIds = Material::query()->visibleToMembers()
             ->where('access_level', MaterialAccess::Premium)->pluck('materials.id')->all();
         if ($materialIds === []) {
-            $this->command?->warn('Paket 3 belum dibuat karena materi SKD premium belum tersedia.');
+            $this->command?->warn('Paket Premium belum dibuat karena materi SKD premium belum tersedia.');
 
             return;
         }
@@ -67,8 +66,9 @@ class LearningPackageSeeder extends Seeder
             ->where('slug', '!=', 'contoh-tryout-premium-paket-uji')->pluck('exams.id')->all();
         $quizIds = Exam::query()->visibleToMembers()->where('kind', 'quiz')->pluck('exams.id')->all();
 
-        $this->createPackage('Paket 3', [
-            'description' => 'Seluruh konten premium SKD yang tersedia, latihan soal, tryout tanpa batas, pembahasan, leaderboard nasional dan daerah, progres belajar, analisis pembelajaran, serta statistik nilai.',
+        $this->createPackage('Paket Premium', [
+            'tier' => PackageTier::Premium,
+            'description' => 'Seluruh konten premium SKD yang tersedia, latihan soal, tryout tanpa batas, pembahasan, leaderboard nasional dan daerah, progres belajar, analisis pembelajaran, statistik nilai, serta sertifikat.',
             'price' => 80000,
             'duration_days' => 365,
             'tryout_quota' => null,
@@ -78,7 +78,7 @@ class LearningPackageSeeder extends Seeder
     }
 
     /**
-     * @param  array{description: string, price: int, duration_days: int, tryout_quota: ?int, leaderboard_access: LeaderboardAccess, position: int}  $attributes
+     * @param  array{tier: PackageTier, description: string, price: int, duration_days: int, tryout_quota: ?int, tryout_tokens?: int, leaderboard_access: LeaderboardAccess, position: int}  $attributes
      * @param  list<int>  $examIds
      * @param  list<int>  $materialIds
      */

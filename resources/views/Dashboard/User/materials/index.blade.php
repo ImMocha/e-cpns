@@ -12,16 +12,12 @@
       <div>
         <span class="eyebrow">Konten Belajar</span>
         <h1 style="margin-top:.5rem">Materi Pembelajaran</h1>
-        <p>Pilih bidang, buka topik, lalu pelajari PDF atau video sesuai urutan belajarmu.</p>
+        <p>Pilih bidang, buka topik, lalu pelajari materi sesuai urutan belajarmu.</p>
       </div>
       <div class="card card--tight">
         <div class="flex" style="gap:1.25rem">
           <div><div class="stat__label">Tersedia</div>
             <div class="fw-800" style="font-family:var(--font-display);font-size:1.3rem;color:var(--ink)">{{ number_format($counts['total'], 0, ',', '.') }}</div></div>
-          <div><div class="stat__label">PDF</div>
-            <div class="fw-800" style="font-family:var(--font-display);font-size:1.3rem;color:var(--ink)">{{ number_format($counts['pdf'], 0, ',', '.') }}</div></div>
-          <div><div class="stat__label">Video</div>
-            <div class="fw-800" style="font-family:var(--font-display);font-size:1.3rem;color:var(--ink)">{{ number_format($counts['video'], 0, ',', '.') }}</div></div>
         </div>
       </div>
     </header>
@@ -61,12 +57,6 @@
             <span class="input-group__icon"><svg data-icon="search"></svg></span>
             <input class="input" type="search" name="q" value="{{ $filters['q'] }}" placeholder="Cari topik atau materi..." aria-label="Cari topik atau materi">
           </div>
-          <select class="select" name="type" aria-label="Filter format" style="width:auto">
-            <option value="">Semua format</option>
-            @foreach ($types as $type)
-              <option value="{{ $type->value }}" @selected($filters['type'] === $type->value)>{{ $type->label() }}</option>
-            @endforeach
-          </select>
           <button class="btn btn--ghost" type="submit">Terapkan</button>
           @if(auth()->user()->isAdmin())
             <label class="flex items-center text-sm" style="gap:.5rem"><input type="checkbox" name="show_drafts" value="1" @checked($filters['show_drafts'])> Tampilkan draft (admin only)</label>
@@ -86,56 +76,18 @@
           <h2>{{ $section->name }}</h2>
         </header>
         @foreach ($sectionTopics as $topic)
-          <details class="card card--pop lesson-topic" id="topic-{{ $topic->id }}" @if ($loop->first) open @endif>
-            <summary>
-              <span class="lesson-topic__number">{{ $loop->iteration }}</span>
-              <div class="lesson-topic__heading">
-                <h3>{{ $topic->name }}</h3>
-                <p class="text-xs text-soft">{{ $topic->materials->count() }} materi</p>
-              </div>
-              <span class="lesson-topic__toggle" aria-hidden="true"><svg data-icon="chevron-down"></svg></span>
-            </summary>
-            <div class="lesson-topic__body">
-              @if(auth()->user()->isAdmin())
-                <x-material-publish scope="topic" :topic-id="$topic->id" :label="'Terbitkan topik: '.$topic->name" />
-              @endif
-              @if ($topic->description)
-                <p class="text-sm text-soft lesson-topic__description">{{ $topic->description }}</p>
-              @endif
-              @foreach ($topic->materials as $material)
-                @php($open = $canOpen($material))
-                <a class="lesson-row" href="{{ $open ? route('materials.show', $material) : route('packages.index') }}"
-                   @unless ($open) title="Materi Premium: pilih paket belajar untuk membuka" @endunless>
-                  <span class="lesson-row__icon"><svg data-icon="{{ $open ? $material->type->icon() : 'lock' }}"></svg></span>
-                  <span class="lesson-row__title">{{ $material->title }}</span>
-                  <span class="lesson-row__meta">
-                    @if(auth()->user()->isAdmin())<span class="badge {{ $material->status->badgeClass() }} badge--flat">{{ $material->status->label() }}</span>@endif
-                    @if (isset($completedMaterialIds[$material->id]))<span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Selesai</span>@endif
-                    @unless ($open)<span class="badge badge--amber badge--flat">Terkunci</span>@endunless
-                    <span class="badge {{ $material->type->badgeClass() }} badge--flat">{{ $material->type->shortLabel() }}</span>
-                    <span class="lesson-row__length">
-                      @if ($material->type === MaterialType::Video)
-                        {{ $material->humanDuration() ?? 'Video' }}
-                      @else
-                        {{ $material->page_count ? $material->page_count . ' halaman' : ($material->humanFileSize() ?? 'PDF') }}
-                      @endif
-                    </span>
-                  </span>
-                </a>
-                @if(auth()->user()->isAdmin())
-                  <form method="POST" action="{{ route('admin.materials.status', $material) }}" class="flex flex-wrap items-center" style="gap:.75rem;margin-bottom:.75rem">
-                    @csrf @method('PATCH')
-                    <input type="hidden" name="member_listing" value="1">
-                    <button class="btn btn--ghost btn--sm" type="submit" aria-label="{{ $material->isPublished() ? 'Jadikan draft: ' : 'Terbitkan: ' }}{{ $material->title }}">{{ $material->isPublished() ? 'Jadikan draft' : 'Terbitkan' }}</button>
-                    <a class="text-sm" href="{{ route('admin.materials.edit', $material) }}">Edit materi</a>
-                  </form>
-                @endif
-              @endforeach
-              @if ($topicQuizzes->has($topic->id))
-                <x-topic-quizzes :topic="$topic" :banks="$topicQuizzes->get($topic->id)" />
-              @endif
+          <a class="card card--pop lesson-topic lesson-topic--link" id="topic-{{ $topic->id }}"
+             href="{{ route('materials.topic', ['topic' => $topic, 'show_drafts' => $filters['show_drafts'] ? 1 : null]) }}">
+            <span class="lesson-topic__number">{{ $loop->iteration }}</span>
+            <div class="lesson-topic__heading">
+              <h3>{{ $topic->name }}</h3>
+              @php($lockedCount = $topic->materials->filter(fn ($lesson) => ! $lesson->isAccessibleBy(auth()->user()))->count())
+              @if ($lockedCount > 0)<span class="badge badge--amber badge--flat"><svg data-icon="lock" aria-hidden="true"></svg> {{ $lockedCount }} materi terkunci</span>@endif
+              <p class="text-xs text-soft">{{ $topic->materials->count() }} materi · Buka topik</p>
+              @if ($topic->description)<p class="text-sm text-soft">{{ $topic->description }}</p>@endif
             </div>
-          </details>
+            <span class="lesson-topic__toggle" aria-hidden="true"><svg data-icon="arrow-right"></svg></span>
+          </a>
         @endforeach
       </section>
     @empty

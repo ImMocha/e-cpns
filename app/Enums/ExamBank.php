@@ -38,7 +38,7 @@ enum ExamBank: string
         try {
             return json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
-            throw new \RuntimeException('Bank soal tidak dapat dibaca: '.$this->value, previous: $exception);
+            throw new \RuntimeException('Data soal sesi tidak dapat dibaca: '.$this->value, previous: $exception);
         }
     }
 

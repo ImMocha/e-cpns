@@ -1,0 +1,5 @@
+@extends('errors.layout')
+@section('code', '403')
+@section('label', 'Akses dibatasi')
+@section('title', 'Halaman ini punya akses khusus.')
+@section('description', 'Akunmu belum memiliki izin untuk membuka halaman ini. Kembali ke beranda atau hubungi kami jika kamu merasa seharusnya memiliki akses.')

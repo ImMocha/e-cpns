@@ -14,6 +14,7 @@ test('admin module routes resolve to the correct contextual instructions', () =>
     ['admin.sections.edit', 'admin-sections'],
     ['admin.questions.create', 'admin-questions'],
     ['admin.exams.edit', 'admin-exams'],
+    ['admin.practices.create', 'admin-practices'],
     ['admin.articles.create', 'admin-articles'],
     ['admin.users.edit', 'admin-users'],
     ['admin.packages.edit', 'admin-packages'],
@@ -26,10 +27,11 @@ test('admin module routes resolve to the correct contextual instructions', () =>
 test('member catalogue, active exam, and results have distinct instructions', () => {
   for (const [route, expected] of [
     ['dashboard', 'member-dashboard'], ['materials.show', 'member-materials'],
-    ['question-bank.show', 'member-question-bank'], ['quizzes.index', 'member-quizzes'],
+    ['quizzes.index', 'member-practices'], ['quizzes.topics', 'member-quizzes'],
     ['tryouts.index', 'member-tryouts'], ['quizzes.attempt', 'member-attempt'],
     ['tryouts.attempt', 'member-attempt'], ['quizzes.result', 'member-result'],
     ['tryouts.result', 'member-result'], ['history.index', 'member-history'],
+    ['practices.attempt', 'member-attempt'], ['practices.result', 'member-result'],
     ['statistics.index', 'member-statistics'], ['leaderboard.index', 'member-leaderboard'],
     ['packages.index', 'member-packages'], ['checkout', 'member-checkout'],
     ['transactions.show', 'member-transactions'], ['certificates.show', 'member-certificates'],
@@ -55,4 +57,5 @@ test('search does not leak admin instructions into the member library and handle
   assert.ok(searchHelpGuides('', 'member').every(item => item.audience === 'member'));
   assert.deepEqual(searchHelpGuides('admin-users', 'member'), []);
   assert.deepEqual(searchHelpGuides('kata-yang-tidak-ada-982732', 'admin'), []);
+  assert.deepEqual(searchHelpGuides('bank soal', 'member'), []);
 });

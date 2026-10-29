@@ -16,20 +16,39 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-#[Fillable(['kind', 'slug', 'title', 'description', 'question_count', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'access_level', 'topic_id', 'requires_topic_completion', 'created_by', 'updated_by'])]
+#[Fillable(['kind', 'slug', 'title', 'description', 'cover_path', 'question_count', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'access_level', 'topic_id', 'requires_topic_completion', 'created_by', 'updated_by', 'free_claim_enabled', 'free_claim_terms', 'free_claim_instagram_url'])]
 class Exam extends Model
 {
     /** @use HasFactory<ExamFactory> */
     use HasFactory, SoftDeletes;
+
+    protected $attributes = ['access_level' => 'premium'];
 
     protected function casts(): array
     {
         return ['question_count' => 'integer', 'duration_minutes' => 'integer', 'points_per_correct' => 'integer',
             'penalty_wrong' => 'integer', 'passing_score' => 'integer', 'random_questions' => 'boolean',
             'random_options' => 'boolean', 'status' => QuestionStatus::class, 'access_level' => MaterialAccess::class,
-            'requires_topic_completion' => 'boolean'];
+            'requires_topic_completion' => 'boolean', 'free_claim_enabled' => 'boolean'];
+    }
+
+    public function freeClaimTermsVersion(): string
+    {
+        return hash('sha256', ($this->free_claim_terms ?? '').'|'.($this->free_claim_instagram_url ?? ''));
+    }
+
+    public function accessLabel(): string
+    {
+        return $this->free_claim_enabled ? 'Gratis Bersyarat' : $this->access_level->label();
+    }
+
+    public function coverUrl(): string
+    {
+        return $this->cover_path ? Storage::disk('public')->url($this->cover_path)
+            : asset('images/'.($this->kind === 'tryout' ? 'tryout-card-cover.webp' : 'practice-card-cover.webp'));
     }
 
     public function topic(): BelongsTo
@@ -39,7 +58,7 @@ class Exam extends Model
 
     public function topicIsReadyFor(User $user): bool
     {
-        return $user->isAdmin() || ! $this->requires_topic_completion || $this->topic?->hasCompletedMaterials() === true;
+        return $user->isAdmin() || ($this->kind === 'tryout' && ! $user->canAccessLearningFeatures()) || ! $this->requires_topic_completion || $this->topic?->hasCompletedMaterials() === true;
     }
 
     public function questions(): BelongsToMany
@@ -62,6 +81,16 @@ class Exam extends Model
     public function scopePublished(Builder $query): void
     {
         $query->where('status', QuestionStatus::Published);
+    }
+
+    /** @param Builder<Exam> $query */
+    public function scopeAvailableForTokens(Builder $query): void
+    {
+        $query->visibleToMembers()->where('kind', 'tryout')->where('access_level', MaterialAccess::Premium)
+            ->where('free_claim_enabled', false)
+            ->where('question_count', '<=', Question::query()->visibleToMembers()
+                ->join('exam_question', 'questions.id', '=', 'exam_question.question_id')
+                ->whereColumn('exam_question.exam_id', 'exams.id')->selectRaw('count(*)'));
     }
 
     /** @param Builder<Exam> $query */

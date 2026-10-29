@@ -22,7 +22,7 @@ class StoreSectionRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'min:2', 'max:120', Rule::unique('sections', 'name')],
-            'slug' => ['nullable', 'string', 'max:140', Rule::unique('sections', 'slug')],
+            'slug' => ['nullable', 'string', 'max:140'],
             'code' => [
                 'required',
                 'string',

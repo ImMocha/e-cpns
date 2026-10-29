@@ -95,7 +95,7 @@ class MaterialController extends Controller
                 'section_id' => $request->query('section_id'),
                 'topic_id' => $request->query('topic_id'),
                 'type' => MaterialType::Pdf->value,
-                'access_level' => MaterialAccess::Free->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => MaterialStatus::Draft->value,
                 'position' => Material::max('position') + 1,
             ]),

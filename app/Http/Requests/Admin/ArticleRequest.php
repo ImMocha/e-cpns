@@ -28,6 +28,7 @@ class ArticleRequest extends FormRequest
             'excerpt' => ['nullable', 'string', 'max:500'],
             'body' => ['nullable', 'string', 'max:200000'],
             'status' => ['required', Rule::enum(ArticleStatus::class)],
+            'publish_at' => ['nullable', 'date_format:Y-m-d\TH:i'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'cover_source' => ['nullable', 'string', 'max:255'],
             'cover_source_url' => ['nullable', 'url:http,https', 'max:2048'],
@@ -48,7 +49,7 @@ class ArticleRequest extends FormRequest
     /** @return array<string, string> */
     public function attributes(): array
     {
-        return ['title' => 'judul', 'slug' => 'slug', 'section_id' => 'bidang', 'excerpt' => 'ringkasan', 'body' => 'isi artikel', 'cover' => 'gambar cover', 'cover_source' => 'sumber cover', 'cover_source_url' => 'tautan sumber cover', 'status' => 'status'];
+        return ['title' => 'judul', 'slug' => 'slug', 'section_id' => 'bidang', 'excerpt' => 'ringkasan', 'body' => 'isi artikel', 'cover' => 'gambar cover', 'cover_source' => 'sumber cover', 'cover_source_url' => 'tautan sumber cover', 'status' => 'status', 'publish_at' => 'waktu terbit'];
     }
 
     /** @return array{title: string, slug: string, section_id: int|string, excerpt: ?string, body: string, status: string, cover_source: ?string, cover_source_url: ?string} */

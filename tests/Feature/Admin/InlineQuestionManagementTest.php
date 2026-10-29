@@ -23,7 +23,8 @@ class InlineQuestionManagementTest extends TestCase
     /** @return array<string, array{string, string}> */
     public static function sessionKinds(): array
     {
-        return ['topic quiz' => ['quiz', 'admin.materials.quizzes'], 'tryout' => ['tryout', 'admin.exams']];
+        return ['topic quiz' => ['quiz', 'admin.materials.quizzes'], 'tryout' => ['tryout', 'admin.exams'],
+            'practice' => ['practice', 'admin.practices']];
     }
 
     /** @return array<string, mixed> */
@@ -54,6 +55,57 @@ class InlineQuestionManagementTest extends TestCase
     }
 
     #[DataProvider('sessionKinds')]
+    public function test_question_dropdowns_show_each_source_session_and_keep_unassigned_questions_accessible(string $kind, string $prefix): void
+    {
+        $current = Exam::factory()->create(['kind' => $kind]);
+        $tryout = Exam::factory()->tryout()->create(['title' => 'Tryout A <script>buruk()</script>']);
+        $topicQuiz = Exam::factory()->create(['title' => 'Latihan Topik Nasionalisme']);
+        $practice = Exam::factory()->practice()->create(['title' => 'Latihan Soal Mandiri']);
+        $archived = Exam::factory()->tryout()->create(['title' => 'Sesi sumber arsip']);
+        $shared = Question::factory()->published()->create();
+        $topicQuestion = Question::factory()->published()->create();
+        $practiceQuestion = Question::factory()->published()->create();
+        $unassigned = Question::factory()->create();
+        $archivedQuestion = Question::factory()->published()->create();
+        $shared->exams()->attach([$current->id, $tryout->id]);
+        $topicQuestion->exams()->attach($topicQuiz);
+        $practiceQuestion->exams()->attach($practice);
+        $archivedQuestion->exams()->attach($archived);
+        $archived->delete();
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->get(route($prefix.'.edit', $current))->assertSee('Sumber soal')->assertSee('Buka semua')
+            ->assertSee($tryout->title)->assertDontSee($tryout->title, false)->assertDontSee($archived->title)
+            ->assertSee('Latihan Topik')->assertSee('Latihan Soal')->assertSee('Belum masuk sesi');
+
+        $document = new \DOMDocument;
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        foreach ([$current->id => [$shared->id], $tryout->id => [$shared->id], $topicQuiz->id => [$topicQuestion->id],
+            $practice->id => [$practiceQuestion->id], 'unassigned' => [$unassigned->id, $archivedQuestion->id]] as $source => $ids) {
+            $key = $source === 'unassigned' ? $source : 'exam-'.$source;
+            $nodes = $xpath->query('//details[@data-exam-source="'.$key.'"]//article/@data-question-id');
+            $this->assertSame($ids, array_map(fn (\DOMNode $node): int => (int) $node->nodeValue, iterator_to_array($nodes)));
+        }
+        $this->assertSame(0, $xpath->query('//details[@data-exam-source and @open]')->length);
+    }
+
+    public function test_source_grouping_preserves_submitted_question_order_after_validation_failure(): void
+    {
+        $questions = Question::factory()->published()->count(2)->create();
+        $first = Exam::factory()->tryout()->create(['title' => 'A sumber']);
+        $second = Exam::factory()->tryout()->create(['title' => 'Z sumber']);
+        $first->questions()->attach($questions[0]);
+        $second->questions()->attach($questions[1]);
+        $current = Exam::factory()->create();
+        $order = [$questions[1]->id, $questions[0]->id];
+
+        $this->actingAs(User::factory()->admin()->create())->withSession(['_old_input' => ['question_ids' => $order]])
+            ->get(route('admin.materials.quizzes.edit', $current))->assertViewHas('questionOrder', $order)
+            ->assertSee('data-question-order="'.json_encode($order).'"', false);
+    }
+
+    #[DataProvider('sessionKinds')]
     public function test_inline_creation_returns_selectable_question_with_media_and_links_it_only_when_session_is_saved(string $kind, string $prefix): void
     {
         Storage::fake('local');
@@ -71,7 +123,7 @@ class InlineQuestionManagementTest extends TestCase
         $this->assertSame($question->id, $response->json('question.id'));
         $this->assertStringContainsString('Soal dari Editor Sesi', $response->json('html'));
         Storage::disk('local')->assertExists($question->image_path);
-        $this->assertSame(route('question-bank.image', $question), $response->json('question.image_url'));
+        $this->assertSame(route('admin.questions.image', $question), $response->json('question.image_url'));
         $this->assertSame(0, $exam->questions()->count());
 
         $this->put(route($prefix.'.update', $exam), ['title' => $exam->title, 'slug' => $exam->slug,

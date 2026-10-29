@@ -190,14 +190,13 @@ class WeightedQuestionScoringTest extends TestCase
         $this->get($attempt->resultUrl())->assertSee('Skor 4/5');
     }
 
-    public function test_question_bank_reveals_score_only_after_answer_and_never_calls_tkp_wrong(): void
+    public function test_admin_preview_shows_tkp_option_scores_without_wrong_answer_feedback(): void
     {
         $section = Section::factory()->create(['code' => 'TKP']);
         $question = Question::factory()->published()->weighted()->for($section)->create();
 
-        $this->actingAs(User::factory()->create())->get(route('question-bank.show', $question))->assertDontSee('Skor 4/5');
-        $this->post(route('question-bank.answer', $question), ['option' => 3, 'revision' => $question->revision()])->assertRedirect();
-        $this->get(route('question-bank.show', $question))->assertSee('Skor 4/5')->assertSee('Skor jawabanmu')
-            ->assertDontSee('Jawabanmu belum tepat')->assertDontSee($question->safeExplanation(), false);
+        $this->actingAs(User::factory()->admin()->create())->get(route('admin.questions.show', $question))
+            ->assertSee('Skor 4/5')->assertSee('Skor &amp; Pembahasan', false)
+            ->assertSee($question->safeExplanation(), false)->assertDontSee('Jawabanmu belum tepat');
     }
 }

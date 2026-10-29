@@ -29,6 +29,7 @@
  * `GlobalWorkerOptions.workerSrc` berupa string, bukan objek Worker.
  */
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { bindReaderFullscreen } from './reader-fullscreen.js';
 
 const state = {
     pdf: null,
@@ -491,13 +492,25 @@ $('#pdfview-page-input')?.addEventListener('change', (event) => {
 
 let resizeTimer;
 
+    function resizeReader() {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+            if (state.pdf) resetPages();
+        }, 220);
+    }
+
+    bindReaderFullscreen(state.root, $('#pdfview-fullscreen'), {
+        onChange: () => {
+            hydrateIcons($('#pdfview-fullscreen'));
+            resizeReader();
+        },
+        onError: notify,
+    });
+
     // Berlaku juga saat bukan mode sesuaikan-lebar: zoom dihitung relatif
     // terhadap lebar saat ini, jadi perubahan lebar jendela harus
     // menggambar ulang supaya proporsinya tetap benar.
-    window.addEventListener('resize', () => {
-        window.clearTimeout(resizeTimer);
-        resizeTimer = window.setTimeout(resetPages, 220);
-    });
+    window.addEventListener('resize', resizeReader);
 }
 
 /* ---------------------------------------------------------------------- init */

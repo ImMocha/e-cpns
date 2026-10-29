@@ -5,7 +5,7 @@ export function createQuestionOrder(form, pool, onChange) {
   const random = form.querySelector('input[type="checkbox"][name="random_questions"]');
   const count = form.querySelector('#exam-count');
   const status = panel.querySelector('[data-question-order-status]');
-  let order = [];
+  let order = JSON.parse(form.dataset.questionOrder || '[]').map(String);
   let signature = '';
   let drag = null;
   let frame = null;

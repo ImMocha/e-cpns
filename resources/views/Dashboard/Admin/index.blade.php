@@ -7,7 +7,7 @@
       <div>
         <span class="eyebrow">Ringkasan Platform</span>
         <h1 style="margin-top:.5rem">Admin Dashboard</h1>
-        <p>Data peserta, materi, artikel, dan sesi ujian yang tercatat sampai {{ now()->translatedFormat('d M Y') }}.</p>
+        <p>Data peserta, materi, artikel, dan sesi ujian yang tercatat sampai <x-local-time :value="now()" format="d M Y" />.</p>
       </div>
       <div class="btn-row">
         <button class="btn btn--ghost" type="button" data-print><svg data-icon="printer"></svg> Cetak Laporan</button>
@@ -34,106 +34,106 @@
       </article>
     </section>
 
-    <div class="panes panes--wide" style="--gap:1.5rem">
-      <div class="stack" style="--stack:1.5rem">
-        <section class="card">
-          <div class="card__head"><div><div class="card__title">Sesi Selesai per Bulan</div><div class="card__sub">Quiz dan tryout yang dikumpulkan selama 6 bulan terakhir</div></div></div>
-          @if (array_sum($monthlyChart['values']) > 0)
-            <div style="height:250px" data-chart='@json($monthlyChart)'></div>
-          @else
-            <p class="text-sm text-soft">Belum ada sesi yang selesai dalam enam bulan terakhir.</p>
-          @endif
-        </section>
-
-        <section class="card card--pad-0">
-          <div class="flex items-center justify-between" style="padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
-            <div><div class="card__title">Pengerjaan Terbaru</div><div class="card__sub">Sesi peserta yang benar-benar selesai</div></div>
-          </div>
-          <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
-            <table class="table" style="min-width:620px">
-              <thead><tr><th>Peserta</th><th>Aktivitas</th><th>Tanggal</th><th class="num">Nilai</th></tr></thead>
-              <tbody>
-                @forelse ($recentAttempts as $attempt)
-                  <tr><td><strong style="color:var(--ink)">{{ $attempt->user?->name ?? 'Peserta terhapus' }}</strong></td><td>{{ $attempt->title }} <span class="badge badge--{{ $attempt->kind === 'tryout' ? 'primary' : 'mint' }} badge--flat">{{ $attempt->kind === 'tryout' ? 'Tryout' : 'Latihan' }}</span></td><td>{{ $attempt->submitted_at->translatedFormat('d M Y H:i') }}</td><td class="num">{{ $attempt->score }} / {{ $attempt->max_score }}</td></tr>
-                @empty
-                  <tr><td colspan="4" class="text-soft">Belum ada hasil ujian peserta.</td></tr>
-                @endforelse
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card__head"><div><div class="card__title">Partisipasi per Bank Soal</div><div class="card__sub">Jumlah peserta unik yang menyelesaikan sesi</div></div></div>
-          <div class="grid" style="--gap:1rem">
-            @foreach ($bankActivity as $bank)
-              <div class="scorebar"><span class="fw-700" style="color:var(--ink)">{{ $bank['title'] }}</span><div class="scorebar__track"><div class="scorebar__fill" data-pct="{{ $bankActivity->max('participants') > 0 ? round($bank['participants'] / $bankActivity->max('participants') * 100) : 0 }}"></div></div><span class="scorebar__val">{{ $bank['participants'] }}</span></div>
+    <div class="panes panes--wide panes--equal dashboard-row">
+      <section class="card">
+        <div class="card__head"><div><div class="card__title">Sesi Selesai per Bulan</div><div class="card__sub">Latihan Soal dan tryout yang dikumpulkan selama 6 bulan terakhir</div></div></div>
+        @if (array_sum($monthlyChart['values']) > 0)
+          <div style="height:250px" data-chart='@json($monthlyChart)'></div>
+        @else
+          <p class="text-sm text-soft">Belum ada sesi yang selesai dalam enam bulan terakhir.</p>
+        @endif
+      </section>
+      <section class="card card--pop card--amber">
+        <span class="card__icon ico--coral" style="position:static"><svg data-icon="alert"></svg></span>
+        <h2 class="card__title" style="margin-top:.75rem">Perlu Perhatian</h2>
+        <div class="grid grid-cols-1" style="--gap:.75rem;margin-top:1rem">
+          <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.exam-claims.index') }}"><svg data-icon="check"></svg><div><strong>{{ $pendingClaimCount }} unlock gratis menunggu</strong><p class="text-xs text-soft">Periksa bukti dan konfirmasi akses peserta.</p></div></a>
+          <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.index', ['status' => 'draft']) }}">
+            <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="file"></svg></span>
+            <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $draftMaterialCount }} materi draft</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Tinjau sebelum diterbitkan</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
+          </a>
+          <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.quizzes.index') }}">
+            <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="pencil"></svg></span>
+            <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $quizCount }} latihan materi</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Kelola soal latihan dan hubungkan dengan topik pembelajaran.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
+          </a>
+          <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.practices.index') }}">
+            <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="pen-line"></svg></span>
+            <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $practiceCount }} latihan soal</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Kelola sesi latihan mandiri, durasi, dan penilaian.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
+          </a>
+          <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.exams.index') }}">
+            <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="timer"></svg></span>
+            <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $tryoutCount }} tryout</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Atur simulasi CAT, durasi, dan penilaian peserta.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
+          </a>
+        </div>
+      </section>
+    </div>
+    <div class="panes panes--wide panes--equal dashboard-row">
+      <section class="card card--pad-0">
+        <div class="flex items-center justify-between" style="padding:1.25rem 1.5rem;border-bottom:2px solid var(--border)">
+          <div><div class="card__title">Pengerjaan Terbaru</div><div class="card__sub">Sesi peserta yang benar-benar selesai</div></div>
+        </div>
+        <div class="table-wrap" style="border:none;border-radius:0;box-shadow:none">
+          <table class="table" style="min-width:620px">
+            <thead><tr><th>Peserta</th><th>Aktivitas</th><th>Tanggal</th><th class="num">Nilai</th></tr></thead>
+            <tbody>
+              @forelse ($recentAttempts as $attempt)
+                <tr><td><strong style="color:var(--ink)">{{ $attempt->user?->name ?? 'Peserta terhapus' }}</strong></td><td>{{ $attempt->title }} <span class="badge badge--{{ $attempt->kind === 'tryout' ? 'primary' : 'mint' }} badge--flat">{{ \App\Enums\ExamKind::from($attempt->kind)->label() }}</span></td><td><x-local-time :value="$attempt->submitted_at" format="d M Y H:i" /></td><td class="num">{{ $attempt->score }} / {{ $attempt->max_score }}</td></tr>
+              @empty
+                <tr><td colspan="4" class="text-soft">Belum ada hasil ujian peserta.</td></tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section class="card">
+        <div class="card__head"><div><div class="card__title">Status Peserta</div><div class="card__sub">Akun aktif dan nonaktif</div></div></div>
+        @if ($participantCount > 0)
+          <div style="width:180px;height:180px;margin:0 auto 1.25rem" data-chart='@json($participantStatusChart)'></div>
+          <div class="legend"><div class="legend__item"><span class="legend__swatch" style="background:var(--primary)"></span> Aktif · {{ $activeParticipantCount }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--pop-amber)"></span> Nonaktif · {{ $inactiveParticipantCount }}</div></div>
+        @else
+          <p class="text-sm text-soft">Belum ada akun peserta.</p>
+        @endif
+      </section>
+    </div>
+    <div class="panes panes--wide panes--equal dashboard-row">
+      <section class="card">
+        <div class="card__head"><div><div class="card__title">Partisipasi per Sesi</div><div class="card__sub">Jumlah peserta unik yang menyelesaikan sesi</div></div></div>
+        <div class="grid" style="--gap:1rem">
+          @foreach ($bankActivity as $bank)
+            <div class="scorebar"><span class="fw-700" style="color:var(--ink)">{{ $bank['title'] }}</span><div class="scorebar__track"><div class="scorebar__fill" data-pct="{{ $bankActivity->max('participants') > 0 ? round($bank['participants'] / $bankActivity->max('participants') * 100) : 0 }}"></div></div><span class="scorebar__val">{{ $bank['participants'] }}</span></div>
+          @endforeach
+        </div>
+      </section>
+      <section class="card">
+        <div class="card__head"><div><div class="card__title">Materi Terbaru</div><div class="card__sub">Konten yang baru ditambahkan</div></div></div>
+        <div class="stack" style="--stack:.75rem">
+          @forelse ($recentMaterials as $material)
+            <a class="flex items-center gap-3" href="{{ route('admin.materials.edit', $material) }}"><span class="tile__glyph" style="width:38px;height:38px;border-radius:11px;flex:0 0 38px"><svg data-icon="{{ $material->type->icon() }}"></svg></span><div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $material->title }}</strong><span class="text-xs text-soft">{{ $material->section?->name ?? 'Tanpa bidang' }} · {{ $material->status->label() }}</span></div></a>
+          @empty
+            <p class="text-sm text-soft">Belum ada materi yang ditambahkan.</p>
+          @endforelse
+        </div>
+        <a class="btn btn--ghost btn--block" href="{{ route('admin.materials.index') }}" style="margin-top:1.25rem">Kelola materi<svg data-icon="arrow-right"></svg></a>
+      </section>
+    </div>
+    <div class="panes panes--wide panes--equal dashboard-row">
+      <section class="card">
+        <div class="card__head"><div><div class="card__title">Aktivitas Artikel</div><div class="card__sub">{{ $publishedArticleCount }} artikel dapat dibaca pengunjung</div></div></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><div class="stat__label">Pembaca Unik</div><div class="stat__value">{{ number_format($articleReaderCount, 0, ',', '.') }}</div></div>
+          <div><div class="stat__label">Tayangan</div><div class="stat__value">{{ number_format($articleViewCount, 0, ',', '.') }}</div></div>
+        </div>
+        @if ($mostReadArticles->isNotEmpty())
+          <div class="stack" style="--stack:.7rem;margin-top:1.25rem">
+            <span class="text-xs text-soft">Paling banyak dibaca</span>
+            @foreach ($mostReadArticles as $popularArticle)
+              <a class="flex items-center justify-between gap-3 text-sm" href="{{ route('admin.articles.edit', $popularArticle->id) }}"><strong class="text-primary">{{ $popularArticle->title }}</strong><span class="text-xs text-soft whitespace-nowrap">{{ number_format($popularArticle->views_count, 0, ',', '.') }} tayangan</span></a>
             @endforeach
           </div>
-        </section>
-      </div>
-
-      <aside class="stack" style="--stack:1.5rem">
-        <section class="card card--pop card--amber">
-          <span class="card__icon ico--coral" style="position:static"><svg data-icon="alert"></svg></span>
-          <h2 class="card__title" style="margin-top:.75rem">Perlu Perhatian</h2>
-          <div class="grid grid-cols-1" style="--gap:.75rem;margin-top:1rem">
-            <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.index', ['status' => 'draft']) }}">
-              <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="file"></svg></span>
-              <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $draftMaterialCount }} materi draft</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Tinjau sebelum diterbitkan</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
-            </a>
-            <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.quizzes.index') }}">
-              <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="pencil"></svg></span>
-              <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $quizCount }} latihan materi</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Kelola soal latihan dan hubungkan dengan topik pembelajaran.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
-            </a>
-            <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.exams.index') }}">
-              <span class="price__check" style="background:var(--warning);color:var(--pop-ink)"><svg data-icon="timer"></svg></span>
-              <div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $tryoutCount }} tryout</strong><span class="text-xs text-soft" style="display:block;margin-top:.35rem">Atur simulasi CAT, durasi, dan penilaian peserta.</span></div><svg data-icon="chevron-right" style="width:18px;height:18px;flex-shrink:0;color:var(--text-soft)"></svg>
-            </a>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card__head"><div><div class="card__title">Status Peserta</div><div class="card__sub">Akun aktif dan nonaktif</div></div></div>
-          @if ($participantCount > 0)
-            <div style="width:180px;height:180px;margin:0 auto 1.25rem" data-chart='@json($participantStatusChart)'></div>
-            <div class="legend"><div class="legend__item"><span class="legend__swatch" style="background:var(--primary)"></span> Aktif · {{ $activeParticipantCount }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--pop-amber)"></span> Nonaktif · {{ $inactiveParticipantCount }}</div></div>
-          @else
-            <p class="text-sm text-soft">Belum ada akun peserta.</p>
-          @endif
-        </section>
-
-        <section class="card">
-          <div class="card__head"><div><div class="card__title">Materi Terbaru</div><div class="card__sub">Konten yang baru ditambahkan</div></div></div>
-          <div class="stack" style="--stack:.75rem">
-            @forelse ($recentMaterials as $material)
-              <a class="flex items-center gap-3" href="{{ route('admin.materials.edit', $material) }}"><span class="tile__glyph" style="width:38px;height:38px;border-radius:11px;flex:0 0 38px"><svg data-icon="{{ $material->type->icon() }}"></svg></span><div style="flex:1;min-width:0"><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">{{ $material->title }}</strong><span class="text-xs text-soft">{{ $material->section?->name ?? 'Tanpa bidang' }} · {{ $material->status->label() }}</span></div></a>
-            @empty
-              <p class="text-sm text-soft">Belum ada materi yang ditambahkan.</p>
-            @endforelse
-          </div>
-          <a class="btn btn--ghost btn--block" href="{{ route('admin.materials.index') }}" style="margin-top:1.25rem">Kelola materi<svg data-icon="arrow-right"></svg></a>
-        </section>
-
-        <section class="card">
-          <div class="card__head"><div><div class="card__title">Aktivitas Artikel</div><div class="card__sub">{{ $publishedArticleCount }} artikel dapat dibaca pengunjung</div></div></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div><div class="stat__label">Pembaca Unik</div><div class="stat__value">{{ number_format($articleReaderCount, 0, ',', '.') }}</div></div>
-            <div><div class="stat__label">Tayangan</div><div class="stat__value">{{ number_format($articleViewCount, 0, ',', '.') }}</div></div>
-          </div>
-          @if ($mostReadArticles->isNotEmpty())
-            <div class="stack" style="--stack:.7rem;margin-top:1.25rem">
-              <span class="text-xs text-soft">Paling banyak dibaca</span>
-              @foreach ($mostReadArticles as $popularArticle)
-                <a class="flex items-center justify-between gap-3 text-sm" href="{{ route('admin.articles.edit', $popularArticle->id) }}"><strong class="text-primary">{{ $popularArticle->title }}</strong><span class="text-xs text-soft whitespace-nowrap">{{ number_format($popularArticle->views_count, 0, ',', '.') }} tayangan</span></a>
-              @endforeach
-            </div>
-          @endif
-          <a class="btn btn--ghost btn--block" href="{{ route('admin.articles.index') }}" style="margin-top:1.25rem">Lihat statistik artikel<svg data-icon="arrow-right"></svg></a>
-        </section>
-
-        <section class="card"><h2 class="card__title">Ringkasan Pembayaran</h2><p class="text-sm text-soft" style="margin-top:.5rem">Periksa pesanan, status pembayaran, dan aktivasi paket peserta.</p><a class="btn btn--ghost btn--block" style="margin-top:1rem" href="{{ route('admin.transactions.index') }}">Kelola Transaksi<svg data-icon="arrow-right"></svg></a></section>
-      </aside>
+        @endif
+        <a class="btn btn--ghost btn--block" href="{{ route('admin.articles.index') }}" style="margin-top:1.25rem">Lihat statistik artikel<svg data-icon="arrow-right"></svg></a>
+      </section>
+      <section class="card"><h2 class="card__title">Ringkasan Pembayaran</h2><p class="text-sm text-soft" style="margin-top:.5rem">Periksa pesanan, status pembayaran, dan aktivasi paket peserta.</p><a class="btn btn--ghost btn--block" style="margin-top:1rem" href="{{ route('admin.transactions.index') }}">Kelola Transaksi<svg data-icon="arrow-right"></svg></a></section>
     </div>
 @endsection
 
@@ -146,7 +146,7 @@
     <p class="text-soft text-sm" style="margin-top:.4rem">Pilih jenis konten yang ingin kamu tambahkan.</p>
     <div class="grid grid-2" style="--gap:.75rem;margin-top:1.25rem">
       <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.materials.create') }}" data-modal-close><span class="tile__glyph" style="width:44px;height:44px;border-radius:13px;flex:0 0 44px"><svg data-icon="file"></svg></span><div><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Materi PDF / Video</strong><span class="text-xs text-soft">Tambah materi baru</span></div></a>
-      <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.questions.create') }}" data-modal-close><span class="tile__glyph" style="width:44px;height:44px;border-radius:13px;flex:0 0 44px;background:var(--pop-amber-050);color:#B4830C"><svg data-icon="layers"></svg></span><div><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Soal Baru</strong><span class="text-xs text-soft">Kelola bank soal</span></div></a>
+      <a class="card card--tight card--dashed flex items-center gap-3" href="{{ route('admin.questions.create') }}" data-modal-close><span class="tile__glyph" style="width:44px;height:44px;border-radius:13px;flex:0 0 44px;background:var(--pop-amber-050);color:#B4830C"><svg data-icon="layers"></svg></span><div><strong style="display:block;color:var(--ink);font-size:var(--fs-sm)">Soal Baru</strong><span class="text-xs text-soft">Kelola soal latihan dan tryout</span></div></a>
     </div>
   </div>
 </div>

@@ -8,7 +8,7 @@
 
     <section class="grid grid-4" style="--gap:1.15rem;margin-bottom:1.75rem">
       <article class="stat"><span class="stat__icon"><svg data-icon="timer"></svg></span><div><div class="stat__label">Total Tryout</div><div class="stat__value">{{ $summary['tryoutCount'] }}</div></div></article>
-      <article class="stat"><span class="stat__icon ico--pink"><svg data-icon="pen-line"></svg></span><div><div class="stat__label">Total Latihan</div><div class="stat__value">{{ $summary['quizCount'] }}</div></div></article>
+      <article class="stat"><span class="stat__icon ico--pink"><svg data-icon="pen-line"></svg></span><div><div class="stat__label">Total Latihan Soal</div><div class="stat__value">{{ $summary['practiceCount'] }}</div></div></article>
       <article class="stat"><span class="stat__icon ico--amber"><svg data-icon="gauge"></svg></span><div><div class="stat__label">Total Waktu</div><div class="stat__value">{{ floor($summary['totalSeconds'] / 60) }} mnt</div></div></article>
       <article class="stat"><span class="stat__icon ico--mint"><svg data-icon="target"></svg></span><div><div class="stat__label">Akurasi</div><div class="stat__value">{{ $summary['accuracy'] !== null ? $summary['accuracy'].'%' : '—' }}</div></div></article>
     </section>
@@ -18,7 +18,8 @@
         <div class="pills" aria-label="Filter jenis aktivitas">
           <a class="pill {{ $kind === null ? 'is-active' : '' }}" href="{{ route('history.index', ['status' => $status]) }}">Semua</a>
           <a class="pill {{ $kind === 'tryout' ? 'is-active' : '' }}" href="{{ route('history.index', ['kind' => 'tryout', 'status' => $status]) }}">Tryout</a>
-          <a class="pill {{ $kind === 'quiz' ? 'is-active' : '' }}" href="{{ route('history.index', ['kind' => 'quiz', 'status' => $status]) }}">Latihan</a>
+          <a class="pill {{ $kind === 'quiz' ? 'is-active' : '' }}" href="{{ route('history.index', ['kind' => 'quiz', 'status' => $status]) }}">Latihan Topik</a>
+          <a class="pill {{ $kind === 'practice' ? 'is-active' : '' }}" href="{{ route('history.index', ['kind' => 'practice', 'status' => $status]) }}">Latihan Soal</a>
         </div>
         <span class="text-xs text-soft">{{ $attempts->total() }} sesi ditemukan</span>
         <form method="GET" action="{{ route('history.index') }}">
@@ -32,11 +33,11 @@
           @forelse ($attempts as $attempt)
             <article class="history-item">
               <div class="history-item-main">
-                <span class="history-item-icon"><svg data-icon="{{ $attempt->kind === 'quiz' ? 'pen-line' : 'timer' }}"></svg></span>
+                <span class="history-item-icon"><svg data-icon="{{ $attempt->kind === 'tryout' ? 'timer' : 'pen-line' }}"></svg></span>
                 <div class="history-item-info">
-                  <div class="history-item-labels"><span class="history-kind">{{ $attempt->kind === 'quiz' ? 'Latihan' : 'Tryout CAT' }}</span><span class="badge badge--{{ $attempt->status === 'completed' && ($attempt->kind === 'quiz' || $attempt->hasPassed()) ? 'mint' : 'amber' }} badge--flat">{{ $attempt->status !== 'completed' ? 'Berjalan' : ($attempt->kind === 'tryout' ? ($attempt->hasPassed() ? 'Lulus' : 'Belum Lulus') : 'Selesai') }}</span></div>
+                  <div class="history-item-labels"><span class="history-kind">{{ \App\Enums\ExamKind::from($attempt->kind)->label() }}</span><span class="badge badge--{{ $attempt->status === 'completed' && ($attempt->kind !== 'tryout' || $attempt->hasPassed()) ? 'mint' : 'amber' }} badge--flat">{{ $attempt->status !== 'completed' ? 'Berjalan' : ($attempt->kind === 'tryout' ? ($attempt->hasPassed() ? 'Lulus' : 'Belum Lulus') : 'Selesai') }}</span></div>
                   <h2>{{ $attempt->title }}</h2>
-                  <p class="history-item-meta"><span>{{ ($attempt->submitted_at ?? $attempt->started_at)->translatedFormat('d M Y · H:i') }}</span><span>{{ count($attempt->question_snapshot['questions']) }} soal</span><span>{{ $attempt->status === 'completed' ? floor($attempt->duration_seconds / 60).' menit' : 'Sedang dikerjakan' }}</span></p>
+                  <p class="history-item-meta"><span><x-local-time :value="($attempt->submitted_at ?? $attempt->started_at)" format="d M Y · H:i" /></span><span>{{ count($attempt->question_snapshot['questions']) }} soal</span><span>{{ $attempt->status === 'completed' ? floor($attempt->duration_seconds / 60).' menit' : 'Sedang dikerjakan' }}</span></p>
                 </div>
                 <div class="history-item-score"><small>{{ $attempt->status === 'completed' ? 'Nilai akhir' : 'Progres' }}</small><strong>{{ $attempt->status === 'completed' ? $attempt->score.' / '.$attempt->max_score : count($attempt->answers ?? []).' dijawab' }}</strong></div>
                 <a class="btn {{ $attempt->status === 'completed' ? 'btn--ghost' : 'btn--primary' }} btn--sm" href="{{ $attempt->status === 'completed' ? $attempt->resultUrl() : $attempt->attemptUrl() }}">{{ $attempt->status === 'completed' ? 'Lihat Hasil' : 'Lanjutkan Sesi' }}<svg data-icon="arrow-right"></svg></a>

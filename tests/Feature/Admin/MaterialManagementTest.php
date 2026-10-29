@@ -40,7 +40,7 @@ class MaterialManagementTest extends TestCase
             'title' => 'Rangkuman Penalaran Verbal',
             'summary' => 'Pola kalimat dan logika dasar.',
             'type' => MaterialType::Pdf->value,
-            'access_level' => MaterialAccess::Free->value,
+            'access_level' => MaterialAccess::Premium->value,
             'status' => MaterialStatus::Draft->value,
             'position' => '1',
         ], $override);
@@ -161,7 +161,7 @@ class MaterialManagementTest extends TestCase
         $material = Material::where('title', 'Rangkuman Penalaran Verbal')->sole();
 
         $this->assertSame($material->type, MaterialType::Pdf);
-        $this->assertSame($material->access_level, MaterialAccess::Free);
+        $this->assertSame($material->access_level, MaterialAccess::Premium);
         $this->assertSame($material->status, MaterialStatus::Draft);
         $this->assertSame('rangkuman-penalaran-verbal', $material->slug);
         $this->assertNull($material->published_at);
@@ -439,7 +439,7 @@ class MaterialManagementTest extends TestCase
                 'topic_id' => $material->topic_id,
                 'title' => $material->title,
                 'type' => MaterialType::Pdf->value,
-                'access_level' => $material->access_level->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => MaterialStatus::Published->value,
             ])
             ->assertSessionHasNoErrors();
@@ -462,7 +462,7 @@ class MaterialManagementTest extends TestCase
                 'topic_id' => $material->topic_id,
                 'title' => $material->title,
                 'type' => MaterialType::Pdf->value,
-                'access_level' => $material->access_level->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => MaterialStatus::Published->value,
             ])
             ->assertSessionHasErrors('file');
@@ -482,7 +482,7 @@ class MaterialManagementTest extends TestCase
                 'topic_id' => $material->topic_id,
                 'title' => $material->title,
                 'type' => MaterialType::Pdf->value,
-                'access_level' => $material->access_level->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => $material->status->value,
                 'file' => UploadedFile::fake()->create('baru.pdf', 120, 'application/pdf'),
             ])
@@ -509,7 +509,7 @@ class MaterialManagementTest extends TestCase
                 'topic_id' => $material->topic_id,
                 'title' => $material->title,
                 'type' => MaterialType::Video->value,
-                'access_level' => $material->access_level->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => MaterialStatus::Draft->value,
                 'video_url' => 'https://cdn.example.com/baru.mp4',
                 'duration_minutes' => '18',
@@ -534,7 +534,7 @@ class MaterialManagementTest extends TestCase
                 'title' => 'Judul Tetap',
                 'slug' => 'judul-tetap',
                 'type' => MaterialType::Pdf->value,
-                'access_level' => $material->access_level->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => $material->status->value,
             ])
             ->assertSessionHasNoErrors();
@@ -553,7 +553,7 @@ class MaterialManagementTest extends TestCase
                 'topic_id' => Topic::factory()->create(['section_id' => $target->id])->id,
                 'title' => $material->title,
                 'type' => MaterialType::Pdf->value,
-                'access_level' => $material->access_level->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => $material->status->value,
             ])
             ->assertSessionHasNoErrors();
@@ -571,7 +571,7 @@ class MaterialManagementTest extends TestCase
                 'topic_id' => $material->topic_id,
                 'title' => $material->title,
                 'type' => MaterialType::Pdf->value,
-                'access_level' => $material->access_level->value,
+                'access_level' => MaterialAccess::Premium->value,
                 'status' => MaterialStatus::Draft->value,
             ])
             ->assertSessionHasNoErrors();

@@ -8,6 +8,7 @@ use App\Models\ExamAttempt;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use Tests\TestCase;
 
 class SectionPassingGradeTest extends TestCase
@@ -22,18 +23,18 @@ class SectionPassingGradeTest extends TestCase
         $this->actingAs($user)->postJson(route('exam-attempts.submit', $attempt))->assertOk();
 
         $attempt->refresh();
-        $this->assertSame([161, 165], [$attempt->score, $attempt->max_score]);
-        $this->assertSame([65, 80, 16], array_column($attempt->sectionGrades(), 'score'));
-        $this->assertSame([65, 80, 16], array_column($attempt->sectionGrades(), 'passing_score'));
+        $this->assertSame([311, 315], [$attempt->score, $attempt->max_score]);
+        $this->assertSame([65, 80, 166], array_column($attempt->sectionGrades(), 'score'));
+        $this->assertSame([65, 80, 166], array_column($attempt->sectionGrades(), 'passing_score'));
         $this->assertSame([true, true, true], array_column($attempt->sectionGrades(), 'passed'));
         $this->assertTrue($attempt->hasPassed());
         $this->assertTrue($attempt->canPrintCertificate());
         $this->assertSame(65, $attempt->section_scores['TWK']['score']);
         $this->get($attempt->resultUrl())->assertSee('Lulus')->assertSee('PASS')->assertDontSee('FAIL')
-            ->assertSee('Passing grade: 65')->assertSee('Passing grade: 80')->assertSee('Passing grade: 16')
+            ->assertSee('Passing grade: 65')->assertSee('Passing grade: 80')->assertSee('Passing grade: 166')
             ->assertSee('Cetak Sertifikat');
         $this->get(route('certificates.show', $attempt))
-            ->assertSee('Passing Grade: 65')->assertSee('Passing Grade: 80')->assertSee('Passing Grade: 16')
+            ->assertSee('Passing Grade: 65')->assertSee('Passing Grade: 80')->assertSee('Passing Grade: 166')
             ->assertSee('Ketiga bidang wajib PASS.');
     }
 
@@ -50,7 +51,7 @@ class SectionPassingGradeTest extends TestCase
         } else {
             $question = collect($definition['questions'])->firstWhere('section', $code);
             if ($code === 'TKP') {
-                $answers[$question['id']] = 2;
+                $answers[$question['id']] = 3;
             } else {
                 unset($answers[$question['id']]);
             }
@@ -85,7 +86,7 @@ class SectionPassingGradeTest extends TestCase
         $user = User::factory()->create();
         $attempt = ExamAttempt::factory()->passingTryout()->for($user)->create();
         $definition = $attempt->question_snapshot;
-        $definition['passingScore'] = 165;
+        $definition['passingScore'] = 315;
         $attempt->update(['question_snapshot' => $definition]);
 
         $attempt->complete();
@@ -96,13 +97,13 @@ class SectionPassingGradeTest extends TestCase
 
     public function test_customers_see_the_passing_grade_before_starting_a_tryout(): void
     {
-        $this->get(route('home'))->assertSee('TWK ≥ 65 poin')->assertSee('TIU ≥ 80 poin')->assertSee('TKP ≥ 16 poin')
+        $this->get(route('home'))->assertSee('TWK ≥ 65 poin')->assertSee('TIU ≥ 80 poin')->assertSee('TKP ≥ 166 poin')
             ->assertSee('Wajib PASS di semua bidang');
         $this->actingAs(User::factory()->create())->get(route('tryouts.index'))
-            ->assertSee('TWK ≥ 65 poin')->assertSee('TIU ≥ 80 poin')->assertSee('TKP ≥ 16 poin');
+            ->assertSee('TWK ≥ 65 poin')->assertSee('TIU ≥ 80 poin')->assertSee('TKP ≥ 166 poin');
         $this->get(route('certificates.index'))->assertSee('Wajib PASS di semua bidang');
         $this->actingAs(User::factory()->admin()->create())->get(route('admin.exams.create'))
-            ->assertSee('TWK ≥ 65 poin')->assertSee('TIU ≥ 80 poin')->assertSee('TKP ≥ 16 poin')
+            ->assertSee('TWK ≥ 65 poin')->assertSee('TIU ≥ 80 poin')->assertSee('TKP ≥ 166 poin')
             ->assertDontSee('id="exam-passing"', false);
     }
 
@@ -120,7 +121,7 @@ class SectionPassingGradeTest extends TestCase
         $migration->up();
 
         $attempt->refresh();
-        $this->assertSame([65, 80, 16], array_column($attempt->sectionGrades(), 'score'));
+        $this->assertSame([65, 80, 166], array_column($attempt->sectionGrades(), 'score'));
         $after = $attempt->getAttributes();
         unset($after['section_scores']);
         $this->assertSame($before, $after);
@@ -137,5 +138,28 @@ class SectionPassingGradeTest extends TestCase
         $this->assertFalse($attempt->canPrintCertificate());
         $this->actingAs($user)->get(route('certificates.show', $attempt))->assertNotFound();
         $this->get(route('certificates.index'))->assertSee('Belum ada sertifikat');
+    }
+
+    #[TestWith([16])]
+    #[TestWith([165])]
+    public function test_saved_results_below_166_no_longer_pass_or_appear_in_certificates(int $tkpScore): void
+    {
+        $user = User::factory()->create();
+        $attempt = ExamAttempt::factory()->passingTryout()->for($user)->create();
+        $attempt->complete();
+        $sections = $attempt->section_scores;
+        $sections['TKP']['score'] = $tkpScore;
+        $attempt->update(['section_scores' => $sections, 'score' => 145 + $tkpScore]);
+
+        $attempt->refresh();
+
+        $this->assertFalse($attempt->hasPassed());
+        $this->assertFalse(ExamAttempt::query()->certifiable()->whereKey($attempt->id)->exists());
+        $this->actingAs($user)->get($attempt->resultUrl())
+            ->assertSee('Belum Lulus')->assertSee('Passing grade: 166')->assertDontSee('Cetak Sertifikat');
+        $this->get(route('history.index'))->assertSee('Belum Lulus');
+        $this->get(route('certificates.index'))->assertSee('Belum ada sertifikat');
+        $this->get(route('certificates.show', $attempt))->assertNotFound();
+        $this->assertSame($tkpScore, $attempt->fresh()->section_scores['TKP']['score']);
     }
 }

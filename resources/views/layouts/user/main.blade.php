@@ -1,4 +1,5 @@
 @extends('layouts.base')
+@section('typography-scope', 'member')
 
 @section('body')
     <a class="skip-link" href="#main">Lompat ke konten utama</a>

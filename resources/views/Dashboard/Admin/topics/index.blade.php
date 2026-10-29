@@ -23,8 +23,8 @@
             <details class="content-menu"><summary class="content-icon-button" aria-label="Tindakan untuk topik {{ $topic->name }}"><svg data-icon="more"></svg></summary><div class="content-menu__items">
               <a href="{{ route('admin.topics.edit', [$topic, 'workspace' => 1]) }}"><svg data-icon="pencil"></svg> Edit Topik</a>
               <a href="{{ route('admin.materials.create', ['section_id' => $topic->section_id, 'topic_id' => $topic->id, 'workspace' => 1]) }}"><svg data-icon="plus"></svg> Tambah Materi</a>
-              <a href="{{ route('admin.materials.quizzes.index', ['topic_id' => $topic->id]) }}"><svg data-icon="list-checks"></svg> Kelola Latihan</a>
-              <a href="{{ route('admin.materials.quizzes.create', ['topic_id' => $topic->id]) }}"><svg data-icon="plus"></svg> Tambah Latihan</a>
+              <a href="{{ route('admin.materials.quizzes.index', ['topic_id' => $topic->id]) }}"><svg data-icon="list-checks"></svg> Kelola Latihan Soal</a>
+              <a href="{{ route('admin.materials.quizzes.create', ['topic_id' => $topic->id]) }}"><svg data-icon="plus"></svg> Tambah Latihan Soal</a>
               @if($topic->materials_count === 0 && $topic->quizzes_count === 0)<form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" data-content-confirm data-confirm-title="Hapus topik?" data-confirm-body="Topik &quot;{{ $topic->name }}&quot; akan dihapus jika tidak memiliki materi atau latihan, termasuk konten arsip." data-confirm-ok="Ya, hapus">@csrf @method('DELETE')<input type="hidden" name="workspace" value="1"><button type="submit" class="is-danger"><svg data-icon="trash"></svg> Hapus Topik</button></form>@endif
             </div></details>
           </div>

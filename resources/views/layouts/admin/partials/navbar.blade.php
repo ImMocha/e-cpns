@@ -16,7 +16,7 @@
   <div class="container container--wide appbar__inner">
     <button class="appbar__icon drawer-toggle" data-drawer-toggle aria-label="Buka menu"><svg data-icon="menu"></svg></button>
     <a class="logo" href="{{ route('home') }}">
-      <x-logo sub="Admin Panel" />
+      <x-logo />
     </a>
 
     <div class="appbar__right">
@@ -39,7 +39,6 @@
             <span>{{ $email }}</span>
           </div>
           <a class="side__link" href="{{ route('profile.edit') }}"><svg data-icon="user"></svg>Profil Saya</a>
-          <a class="side__link" href="{{ route('profile.edit') }}#pengaturan"><svg data-icon="settings"></svg>Pengaturan</a>
           <a class="side__link" href="{{ route('dashboard') }}"><svg data-icon="book"></svg>Mode Peserta</a>
           <form method="POST" action="{{ route('logout') }}">
             @csrf

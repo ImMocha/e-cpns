@@ -10,6 +10,7 @@ use App\Models\ExamAttempt;
 use App\Models\Question;
 use App\Models\Section;
 use App\Models\User;
+use App\Models\UserPackage;
 use Database\Seeders\ExamSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -103,7 +104,7 @@ class DatabaseExamTest extends TestCase
         $exam = $this->exam(1, ['title' => 'Sesi Terbit Nyata']);
         Exam::factory()->create(['title' => 'Draft Rahasia', 'status' => 'draft']);
         Exam::factory()->tryout()->create(['title' => 'Tryout Nyata']);
-        $this->actingAs(User::factory()->create())->get(route('quizzes.index'))->assertOk()
+        $this->actingAs(User::factory()->create())->get(route('quizzes.topics'))->assertOk()
             ->assertSee('Sesi Terbit Nyata')->assertDontSee('Draft Rahasia')->assertDontSee('Tryout Nyata');
         $this->get(route('quizzes.attempt', $exam->slug))->assertNotFound();
         $this->post(route('quizzes.start', 'latihan-1'))->assertNotFound();
@@ -172,6 +173,7 @@ class DatabaseExamTest extends TestCase
         $this->assertSame(120, $exam->fresh()->passing_score);
 
         $user = User::factory()->create();
+        UserPackage::factory()->for($user)->create(['tier' => 'premium', 'tryout_quota' => null]);
         $attempt = ExamAttempt::resumeOrStart($user, $exam);
         $this->actingAs($user)->patchJson(route('exam-attempts.save', $attempt), [
             'answers' => array_fill_keys($questions->modelKeys(), 1), 'flags' => [], 'current' => 0,
@@ -180,7 +182,7 @@ class DatabaseExamTest extends TestCase
 
         $attempt->refresh();
         $this->assertSame([150, 150, 120], [$attempt->score, $attempt->max_score, $attempt->passing_score]);
-        $this->get(route('quizzes.index'))->assertSee('150 / 150');
+        $this->get(route('quizzes.topics'))->assertSee('150 / 150');
         $this->get($attempt->resultUrl())->assertSee('dari 150')->assertSee('Di atas ambang');
         $this->get(route('statistics.index', ['kind' => 'quiz']))
             ->assertViewHas('trendChart', fn (array $chart): bool => $chart['values'] === [150]);

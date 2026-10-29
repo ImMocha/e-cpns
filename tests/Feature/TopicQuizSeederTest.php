@@ -39,7 +39,7 @@ class TopicQuizSeederTest extends TestCase
             $this->assertSame($topicName, $exam->topic->name);
             $this->assertSame($sectionCode, $exam->topic->section->code);
             $this->assertSame($requiresCompletion, $exam->requires_topic_completion);
-            $this->assertSame(MaterialAccess::Free, $exam->access_level);
+            $this->assertSame(MaterialAccess::Premium, $exam->access_level);
             $this->assertSame(QuestionStatus::Published, $exam->status);
             $this->assertSame(3, $exam->question_count);
             $this->assertSame(3, $exam->questions()->visibleToMembers()->count());
@@ -48,8 +48,8 @@ class TopicQuizSeederTest extends TestCase
 
         $topic = Topic::query()->where('name', 'Kemampuan Numerik')->firstOrFail();
         Material::factory()->video()->for($topic)->create(['section_id' => $topic->section_id]);
-        $this->actingAs(User::factory()->create())->get(route('materials.index', ['topic_id' => $topic->id]))
-            ->assertSee('Contoh: Latihan Kemampuan Numerik')->assertSee('Mulai latihan');
+        $this->actingAs(User::factory()->create())->get(route('materials.topic', $topic))
+            ->assertSee('Contoh: Latihan Kemampuan Numerik')->assertSee('Memerlukan paket aktif');
     }
 
     public function test_reseeding_preserves_admin_changes_and_archived_quizzes(): void

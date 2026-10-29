@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App;
 
 use App\Enums\MaterialAccess;
+use App\Enums\PackageTier;
 use App\Enums\QuestionScoring;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
+use App\Models\ExamClaim;
 use App\Models\User;
 use App\Models\UserPackage;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +28,15 @@ class ExamCatalog
             ->select(['id', 'bank_slug', 'kind', 'title', 'status', 'answers', 'score', 'max_score', 'submitted_at', 'expires_at'])
             ->latest('id')->get()->groupBy('bank_slug');
         $entitlements = $user->userPackages()->active()->with('exams')->get();
+        $hasPremium = $entitlements->contains(fn (UserPackage $package): bool => $package->tier === PackageTier::Premium);
+        $learningAllowed = $user->canAccessLearningFeatures();
+        $tokenPackages = $kind === 'tryout' && ! $user->isAdmin()
+            ? $entitlements->filter(fn (UserPackage $item): bool => $item->tryout_tokens > 0 && $item->hasTryoutQuota())->sortBy('id')
+            : collect();
+        $tokenExamIds = $tokenPackages->isNotEmpty()
+            ? array_fill_keys(Exam::query()->availableForTokens()->pluck('exams.id')->all(), true) : [];
+        $claims = ExamClaim::query()->whereBelongsTo($user)->select(['id', 'exam_id', 'status', 'review_note'])
+            ->latest('id')->get()->unique('exam_id')->keyBy('exam_id');
 
         $exams = Exam::query()->visibleToMembers()->where('kind', $kind)
             ->when($topicIds !== null, fn (Builder $query): Builder => $query->whereIn('topic_id', $topicIds))
@@ -34,25 +45,35 @@ class ExamCatalog
                 'questions as weighted_available_count' => fn (Builder $query) => $query->visibleToMembers()->where('scoring_type', QuestionScoring::Weighted)])
             ->latest('id')->get();
         $exams->where('random_questions', false)->load(['scoringQuestions' => fn (Builder|Relation $questions): Builder|Relation => $questions->limit(200)]);
-        $banks = $exams->map(function (Exam $exam) use ($attempts, $entitlements, $user): array {
+        $banks = $exams->map(function (Exam $exam) use ($attempts, $entitlements, $user, $claims, $tokenPackages, $tokenExamIds, $learningAllowed, $hasPremium): array {
             $history = $attempts->get($exam->slug, collect());
-            $covering = $entitlements->filter(fn (UserPackage $item): bool => $item->exams->contains('id', $exam->id));
-            $freeAccess = $user->isAdmin() || $exam->access_level === MaterialAccess::Free;
-            $hasAccess = $freeAccess || $covering->isNotEmpty();
+            $covering = $entitlements->filter(fn (UserPackage $item): bool => $item->tier === PackageTier::Premium
+                || (($exam->kind === 'tryout' || $item->tier === null) && $item->exams->contains('id', $exam->id)));
+            $claim = $claims->get($exam->id);
+            $freeAccess = $user->isAdmin() || $hasPremium || ($exam->free_claim_enabled ? $claim?->status === 'approved' : $exam->access_level === MaterialAccess::Free);
+            $hasAccess = $freeAccess || (! $exam->free_claim_enabled && $covering->isNotEmpty());
             $topicReady = $exam->topicIsReadyFor($user);
-            $isAdminPreview = $user->isAdmin() && $exam->requires_topic_completion
-                && $exam->topic?->hasCompletedMaterials() !== true;
-            $canStart = $topicReady && ($freeAccess || $covering->contains(fn (UserPackage $item): bool => $exam->kind === 'quiz' || $item->hasTryoutQuota()));
+            $isAdminPreview = $user->isAdmin() && ($exam->free_claim_enabled || ($exam->requires_topic_completion
+                && $exam->topic?->hasCompletedMaterials() !== true));
+            $canStart = $topicReady && ($freeAccess || (! $exam->free_claim_enabled && $covering->contains(fn (UserPackage $item): bool => $exam->kind !== 'tryout' || $item->hasTryoutQuota())));
+            if ($exam->kind !== 'tryout' && ! $learningAllowed) {
+                $hasAccess = false;
+                $canStart = false;
+            }
             $remaining = $freeAccess || $covering->contains(fn (UserPackage $item): bool => $item->tryout_quota === null)
                 ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts());
 
             return ['exam' => $exam, 'open' => $history->firstWhere('status', ExamAttempt::IN_PROGRESS),
+                'learningLocked' => $exam->kind !== 'tryout' && ! $learningAllowed,
                 'hasAccess' => $hasAccess, 'canStart' => $canStart, 'topicReady' => $topicReady,
+                'tokenPackage' => ! $canStart && $topicReady && isset($tokenExamIds[$exam->id]) ? $tokenPackages->first() : null,
+                'isTokenRefill' => $hasAccess || $history->isNotEmpty(),
                 'isAdminPreview' => $isAdminPreview, 'remainingTryouts' => $remaining,
-                'last' => $history->firstWhere('status', ExamAttempt::COMPLETED)];
+                'claim' => $claim, 'last' => $history->firstWhere('status', ExamAttempt::COMPLETED)];
         });
 
-        return ['banks' => $banks, 'kind' => $kind,
+        return ['banks' => $banks, 'kind' => $kind, 'tokenCount' => $tokenPackages->sum('tryout_tokens'),
+            'learningLocked' => $kind !== 'tryout' && ! $learningAllowed,
             'completedCount' => $attempts->flatten(1)->where('status', ExamAttempt::COMPLETED)->count()];
     }
 
@@ -65,6 +86,8 @@ class ExamCatalog
 
     public function active(User $user, string $kind, string $slug, ?int $id): ExamAttempt
     {
+        abort_if($kind !== 'tryout' && ! $user->canAccessLearningFeatures(), 403, 'Latihan soal tersedia dalam paket Premium.');
+
         return ExamAttempt::query()->whereBelongsTo($user)->where('kind', $kind)->where('bank_slug', $slug)
             ->when($id !== null, fn (Builder $query) => $query->whereKey($id))
             ->when($id === null, fn (Builder $query) => $query->where('status', ExamAttempt::IN_PROGRESS))->latest('id')->firstOrFail();
