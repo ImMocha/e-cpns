@@ -1,5 +1,7 @@
 /* Sky accents are scoped to dashboard content so navigation keeps its palette. */
 .admin-activity { align-self:start; }
+.admin-activity--monthly { align-self:stretch; }
+.admin-activity--monthly > .admin-activity__empty { flex:1; }
 .admin-activity__head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border); }
 .admin-activity__heading { display:flex; align-items:center; gap:.85rem; min-width:0; }
 .admin-activity__icon { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; border:1px solid var(--border-strong); border-radius:14px; color:var(--primary-700); background:var(--primary-050); }
