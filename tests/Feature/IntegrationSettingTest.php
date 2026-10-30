@@ -140,19 +140,110 @@ class IntegrationSettingTest extends TestCase
         $this->assertDatabaseCount('integration_setting_audits', 1);
     }
 
-    public function test_pending_transactions_block_key_replacement_and_removal(): void
+    /** @return array<string, array{bool, bool}> */
+    public static function midtransKeyChanges(): array
+    {
+        return [
+            'replace sandbox' => [false, false],
+            'remove sandbox' => [false, true],
+            'replace production' => [true, false],
+            'remove production' => [true, true],
+        ];
+    }
+
+    #[DataProvider('midtransKeyChanges')]
+    public function test_pending_transactions_keep_their_credentials_after_key_replacement_or_removal(bool $isProduction, bool $removeKey): void
+    {
+        config(['services.midtrans.server_key' => 'existing-key', 'services.midtrans.is_production' => $isProduction]);
+        $legacy = Transaction::factory()->create(['is_production' => $isProduction]);
+        $older = Transaction::factory()->create(['is_production' => $isProduction, 'midtrans_server_key' => 'older-key']);
+        $otherMode = Transaction::factory()->create(['is_production' => ! $isProduction]);
+        $field = $isProduction ? 'production_server_key' : 'sandbox_server_key';
+        $otherField = $isProduction ? 'sandbox_server_key' : 'production_server_key';
+        Http::preventStrayRequests();
+
+        $this->actingAs(User::factory()->admin()->create())->patch(route('admin.settings.update', 'midtrans'), $this->paymentData([
+            'enabled' => ! $removeKey, 'is_production' => $isProduction, $otherField => '',
+            $field => $removeKey ? '' : 'replacement-key', 'remove_'.$field => $removeKey,
+        ]))->assertRedirect(route('admin.settings.index'))->assertSessionHasNoErrors()
+            ->assertSessionHas('success', 'Pengaturan integrasi disimpan.');
+
+        $this->assertSame($removeKey ? '' : 'replacement-key', app(IntegrationSettings::class)->midtrans()[$field]);
+        $this->assertSame('existing-key', $legacy->fresh()->midtrans_server_key);
+        $this->assertSame('older-key', $older->fresh()->midtrans_server_key);
+        $this->assertNull($otherMode->fresh()->midtrans_server_key);
+        $this->assertNotSame('existing-key', DB::table('transactions')->where('id', $legacy->id)->value('midtrans_server_key'));
+        $this->assertArrayNotHasKey('midtrans_server_key', $legacy->fresh()->toArray());
+        $this->assertDatabaseHas('integration_setting_audits', ['key' => 'midtrans', 'action' => 'updated']);
+        Http::assertNothingSent();
+    }
+
+    public function test_key_removal_is_rolled_back_if_checkout_would_remain_enabled_without_a_key(): void
     {
         config(['services.midtrans.server_key' => 'existing-key', 'services.midtrans.is_production' => false]);
-        Transaction::factory()->create();
-        $this->actingAs(User::factory()->admin()->create());
+        $legacy = Transaction::factory()->create();
 
-        $this->patch(route('admin.settings.update', 'midtrans'), $this->paymentData())->assertSessionHasErrors('sandbox_server_key');
-        $this->patch(route('admin.settings.update', 'midtrans'), $this->paymentData([
-            'enabled' => '0', 'sandbox_server_key' => '', 'remove_sandbox_server_key' => '1',
-        ]))->assertSessionHasErrors('sandbox_server_key');
+        $this->actingAs(User::factory()->admin()->create())->patch(route('admin.settings.update', 'midtrans'), $this->paymentData([
+            'sandbox_server_key' => '', 'remove_sandbox_server_key' => '1',
+        ]))->assertSessionHasErrors(['sandbox_server_key' => 'Isi server key untuk mode yang akan diaktifkan.']);
 
         $this->assertSame('existing-key', app(IntegrationSettings::class)->midtrans()['sandbox_server_key']);
+        $this->assertNull($legacy->fresh()->midtrans_server_key);
         $this->assertDatabaseCount('integration_setting_audits', 0);
+    }
+
+    public function test_legacy_webhooks_and_sync_use_saved_credentials_after_all_active_keys_are_removed(): void
+    {
+        $this->freezeTime();
+        config(['services.midtrans.server_key' => 'existing-key', 'services.midtrans.is_production' => false]);
+        $webhookTransaction = Transaction::factory()->create();
+        $syncTransaction = Transaction::factory()->create();
+        $admin = User::factory()->admin()->create();
+        app(IntegrationSettings::class)->update('midtrans', $this->paymentData([
+            'enabled' => false, 'sandbox_server_key' => null, 'production_server_key' => '', 'remove_sandbox_server_key' => true,
+        ]), $admin, null);
+        Http::preventStrayRequests();
+        Http::fake([
+            'https://api.sandbox.midtrans.com/v2/'.$webhookTransaction->order_id.'/status' => Http::response($this->providerPayload($webhookTransaction, 'existing-key')),
+            'https://api.sandbox.midtrans.com/v2/'.$syncTransaction->order_id.'/status' => Http::response($this->providerPayload($syncTransaction, 'existing-key')),
+        ]);
+
+        $this->postJson(route('payments.midtrans.notification'), $this->providerPayload($webhookTransaction, 'existing-key'))->assertOk();
+        $this->artisan('payments:sync-midtrans')->assertExitCode(0);
+
+        $this->assertSame(TransactionStatus::Paid, $webhookTransaction->fresh()->status);
+        $this->assertSame(TransactionStatus::Paid, $syncTransaction->fresh()->status);
+        $this->assertFalse(app(MidtransGateway::class)->configuredFor(false));
+        $this->assertFalse(app(MidtransGateway::class)->configuredFor(true));
+        $this->assertDatabaseCount('user_packages', 2);
+        Http::assertSent(fn (Request $request): bool => $request->hasHeader('Authorization', 'Basic '.base64_encode('existing-key:')));
+        Http::assertSentCount(2);
+    }
+
+    public function test_repeated_key_rotation_preserves_order_signatures_and_paid_transaction_refunds(): void
+    {
+        config(['services.midtrans.server_key' => 'existing-key', 'services.midtrans.is_production' => false]);
+        $legacy = Transaction::factory()->create();
+        $settings = app(IntegrationSettings::class);
+        $admin = User::factory()->admin()->create();
+        $settings->update('midtrans', $this->paymentData(['sandbox_server_key' => 'replacement-key']), $admin, null);
+        $settings->update('midtrans', $this->paymentData(['version' => 1, 'sandbox_server_key' => 'newest-key']), $admin, null);
+        $paidPayload = $this->providerPayload($legacy, 'existing-key');
+        $refundPayload = array_replace($paidPayload, ['transaction_status' => 'refund']);
+        Http::preventStrayRequests();
+        Http::fake([
+            'https://api.sandbox.midtrans.com/v2/'.$legacy->order_id.'/status' => Http::sequence()
+                ->push($paidPayload)->push($refundPayload),
+        ]);
+
+        $this->postJson(route('payments.midtrans.notification'), $this->providerPayload($legacy, 'newest-key'))->assertForbidden();
+        $this->postJson(route('payments.midtrans.notification'), $paidPayload)->assertOk();
+        $this->postJson(route('payments.midtrans.notification'), $refundPayload)->assertOk();
+
+        $this->assertSame('existing-key', $legacy->fresh()->midtrans_server_key);
+        $this->assertSame(TransactionStatus::Refunded, $legacy->fresh()->status);
+        $this->assertNotNull($legacy->fresh()->userPackage->revoked_at);
+        Http::assertSentCount(2);
     }
 
     public function test_pausing_checkout_and_switching_mode_preserves_old_webhooks_and_both_modes_sync(): void

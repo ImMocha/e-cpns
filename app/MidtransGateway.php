@@ -33,13 +33,30 @@ class MidtransGateway implements PaymentGatewayContract
         return $this->settings->midtrans()[$isProduction ? 'production_server_key' : 'sandbox_server_key'];
     }
 
+    public function configuredForTransaction(Transaction $transaction): bool
+    {
+        return $this->transactionServerKey($transaction) !== '';
+    }
+
+    private function transactionServerKey(Transaction $transaction): string
+    {
+        if ($transaction->midtrans_server_key !== null) {
+            return $transaction->midtrans_server_key;
+        }
+
+        $currentKey = $this->serverKey($transaction->is_production);
+
+        return $transaction->fresh()?->midtrans_server_key ?? $currentKey;
+    }
+
     private function client(Transaction $transaction): PendingRequest
     {
-        if (! $this->configuredFor($transaction->is_production)) {
+        $serverKey = $this->transactionServerKey($transaction);
+        if ($serverKey === '') {
             throw new RuntimeException('Konfigurasi Midtrans tidak tersedia untuk transaksi ini.');
         }
 
-        return Http::acceptJson()->asJson()->withBasicAuth($this->serverKey($transaction->is_production), '')
+        return Http::acceptJson()->asJson()->withBasicAuth($serverKey, '')
             ->withoutRedirecting()->connectTimeout(5)->timeout(15);
     }
 
@@ -89,15 +106,17 @@ class MidtransGateway implements PaymentGatewayContract
     }
 
     /** @param array<string, mixed> $payload */
-    public function validSignature(array $payload, ?bool $isProduction = null): bool
+    public function validSignature(array $payload, ?Transaction $transaction = null): bool
     {
         foreach (['order_id', 'status_code', 'gross_amount', 'signature_key'] as $key) {
             if (! isset($payload[$key]) || ! is_string($payload[$key])) {
                 return false;
             }
         }
-        foreach ($isProduction === null ? [false, true] : [$isProduction] as $mode) {
-            $serverKey = $this->serverKey($mode);
+        $serverKeys = $transaction === null
+            ? [$this->serverKey(false), $this->serverKey(true)]
+            : [$this->transactionServerKey($transaction)];
+        foreach ($serverKeys as $serverKey) {
             if ($serverKey !== '' && hash_equals(hash('sha512', $payload['order_id'].$payload['status_code'].$payload['gross_amount'].$serverKey), $payload['signature_key'])) {
                 return true;
             }

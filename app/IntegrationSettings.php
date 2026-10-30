@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App;
 
-use App\Enums\TransactionStatus;
 use App\Models\IntegrationSetting;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -70,10 +70,10 @@ class IntegrationSettings
             if ($key === 'midtrans') {
                 $after['is_production'] = (bool) $after['is_production'];
                 foreach (['sandbox_server_key' => false, 'production_server_key' => true] as $field => $isProduction) {
-                    if ($before[$field] !== '' && $after[$field] !== $before[$field]
-                        && Transaction::query()->where('provider', 'midtrans')->where('is_production', $isProduction)
-                            ->where('status', TransactionStatus::Pending)->exists()) {
-                        throw ValidationException::withMessages([$field => 'Key belum dapat diganti atau dihapus karena masih ada transaksi pending pada mode ini. Sinkronkan dan selesaikan transaksi terlebih dahulu.']);
+                    if ($before[$field] !== '' && $after[$field] !== $before[$field]) {
+                        Transaction::query()->where('provider', 'midtrans')->where('is_production', $isProduction)
+                            ->whereNull('midtrans_server_key')
+                            ->update(['midtrans_server_key' => Crypt::encryptString($before[$field])]);
                     }
                 }
                 $activeField = $after['is_production'] ? 'production_server_key' : 'sandbox_server_key';

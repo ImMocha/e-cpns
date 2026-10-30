@@ -9,6 +9,7 @@ use App\MidtransGateway;
 use App\Models\Transaction;
 use App\PackagePayment;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
@@ -21,7 +22,7 @@ class SyncMidtransTransactions extends Command
     public function handle(PackagePayment $payments, MidtransGateway $gateway): int
     {
         $modes = array_values(array_filter([false, true], fn (bool $mode): bool => $gateway->configuredFor($mode)));
-        if ($modes === []) {
+        if ($modes === [] && ! Transaction::query()->where('provider', 'midtrans')->whereNotNull('midtrans_server_key')->exists()) {
             $this->warn('Midtrans belum dikonfigurasi.');
 
             return self::SUCCESS;
@@ -33,7 +34,9 @@ class SyncMidtransTransactions extends Command
             return self::FAILURE;
         }
         $transactions = Transaction::query()->where('provider', 'midtrans')->where('status', TransactionStatus::Pending)
-            ->whereIn('is_production', $modes)
+            ->where(function (Builder $query) use ($modes): void {
+                $query->whereIn('is_production', $modes)->orWhereNotNull('midtrans_server_key');
+            })
             ->where(fn ($query) => $query->whereNull('checked_at')->orWhere('checked_at', '<=', now()->subMinutes(10)))
             ->orderBy('checked_at')->orderBy('id')->limit($limit)->get();
         $failed = 0;

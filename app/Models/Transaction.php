@@ -14,8 +14,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['order_id', 'user_id', 'package_id', 'user_package_id', 'voucher_id', 'voucher_code', 'discount_amount', 'provider', 'is_production', 'amount', 'package_snapshot', 'status', 'provider_reference', 'provider_status', 'payment_type', 'payment_url', 'expires_at', 'paid_at', 'checked_at', 'raw_payload'])]
-#[Hidden(['raw_payload', 'payment_url'])]
+#[Fillable(['order_id', 'user_id', 'package_id', 'user_package_id', 'voucher_id', 'voucher_code', 'discount_amount', 'provider', 'is_production', 'midtrans_server_key', 'amount', 'package_snapshot', 'status', 'provider_reference', 'provider_status', 'payment_type', 'payment_url', 'expires_at', 'paid_at', 'checked_at', 'raw_payload'])]
+#[Hidden(['raw_payload', 'payment_url', 'midtrans_server_key'])]
 class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */
@@ -25,6 +25,7 @@ class Transaction extends Model
     {
         return [
             'status' => TransactionStatus::class, 'amount' => 'integer', 'discount_amount' => 'integer', 'is_production' => 'boolean',
+            'midtrans_server_key' => 'encrypted',
             'package_snapshot' => 'array', 'raw_payload' => 'array',
             'expires_at' => 'datetime', 'paid_at' => 'datetime', 'checked_at' => 'datetime',
         ];

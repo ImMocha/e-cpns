@@ -40,7 +40,7 @@
         <h2 class="text-xl!">Pembayaran Midtrans</h2>
             <span class="badge badge--{{ $midtrans['enabled'] && $paymentConfigured ? 'mint' : 'amber' }} badge--flat">{{ ! $paymentConfigured ? 'Belum dikonfigurasi' : ($midtrans['enabled'] ? 'Pembelian diaktifkan' : 'Pembelian dijeda') }}</span>
         </div>
-        <p class="text-sm text-soft mb-5!">Saat pembelian dijeda, notifikasi dan sinkronisasi transaksi lama tetap diproses. Key tidak dapat diganti atau dihapus selama masih ada transaksi pending pada mode tersebut.</p>
+        <p class="text-sm text-soft mb-5!">Key dapat diganti meskipun masih ada transaksi menunggu pembayaran. Key baru berlaku untuk pesanan baru. Transaksi lama tetap memakai key sebelumnya yang disimpan terenkripsi. Sebelum menghapus key mode aktif, jeda pembelian baru terlebih dahulu.</p>
         <form method="POST" action="{{ route('admin.settings.update', 'midtrans') }}" class="grid gap-5" autocomplete="off">
             @csrf
             @method('PATCH')

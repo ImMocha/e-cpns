@@ -47,11 +47,13 @@ class PackagePayment
             if ($quote['amount'] > 0 && ! $this->gateway->configured()) {
                 throw ValidationException::withMessages(['package_id' => 'Pembayaran belum tersedia. Silakan hubungi admin.']);
             }
+            $paymentSettings = $this->settings->midtrans();
             $transaction = Transaction::create([
                 'order_id' => 'GANESHA-NUSA-'.Str::uuid(), 'user_id' => $user->id, 'package_id' => $package->id,
                 'provider' => $quote['amount'] === 0 ? 'free' : 'midtrans',
                 'voucher_id' => $quote['voucher']?->id, 'voucher_code' => $quote['voucher']?->code, 'discount_amount' => $quote['discount'],
-                'is_production' => $this->settings->midtrans()['is_production'], 'amount' => $quote['amount'],
+                'is_production' => $paymentSettings['is_production'], 'amount' => $quote['amount'],
+                'midtrans_server_key' => $quote['amount'] === 0 ? null : $paymentSettings[$paymentSettings['is_production'] ? 'production_server_key' : 'sandbox_server_key'],
                 'package_snapshot' => [
                     'leaderboard_access' => $package->leaderboard_access->value, 'tier' => $package->tier?->value,
                     'name' => $package->name, 'duration_days' => $package->duration_days, 'tryout_quota' => $package->tryout_quota,

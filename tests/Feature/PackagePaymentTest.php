@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Enums\LeaderboardAccess;
 use App\Enums\PackageTier;
 use App\Enums\TransactionStatus;
+use App\IntegrationSettings;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Material;
@@ -18,6 +19,7 @@ use App\Models\UserPackage;
 use App\PackagePayment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -123,6 +125,33 @@ class PackagePaymentTest extends TestCase
             && $request->hasHeader('Authorization', 'Basic '.base64_encode('sandbox-test-key:')));
         $this->get(route('transactions.show', $transaction))->assertSee('Bayar di Midtrans')->assertSee('Belum dipilih');
         $this->get(route('transactions.index'))->assertSee($transaction->order_id);
+    }
+
+    public function test_key_rotation_uses_new_credentials_for_new_orders_and_original_credentials_for_existing_orders(): void
+    {
+        $this->configureGateway();
+        $original = $this->order();
+        app(IntegrationSettings::class)->update('midtrans', [
+            'version' => 0, 'sandbox_server_key' => 'new-sandbox-key',
+        ], User::factory()->admin()->create(), null);
+        Http::fake([self::SNAP => Http::response(['token' => 'test-token', 'redirect_url' => self::PAYMENT_URL], 201)]);
+
+        $this->actingAs(User::factory()->create())->post(route('checkout.store'), [
+            'package_id' => $original->package_id, 'midtrans_server_key' => 'attacker-key',
+        ])->assertSessionHasNoErrors();
+        $newOrder = Transaction::query()->latest('id')->firstOrFail();
+        app(PackagePayment::class)->prepare($original);
+
+        $this->assertSame('sandbox-test-key', $original->fresh()->midtrans_server_key);
+        $this->assertSame('new-sandbox-key', $newOrder->midtrans_server_key);
+        $this->assertNotSame('new-sandbox-key', DB::table('transactions')->where('id', $newOrder->id)->value('midtrans_server_key'));
+        $this->assertArrayNotHasKey('midtrans_server_key', $newOrder->toArray());
+        $this->get(route('transactions.show', $newOrder))->assertDontSee('new-sandbox-key')->assertDontSee('sandbox-test-key');
+        Http::assertSent(fn (Request $request): bool => $request['transaction_details']['order_id'] === $original->order_id
+            && $request->hasHeader('Authorization', 'Basic '.base64_encode('sandbox-test-key:')));
+        Http::assertSent(fn (Request $request): bool => $request['transaction_details']['order_id'] === $newOrder->order_id
+            && $request->hasHeader('Authorization', 'Basic '.base64_encode('new-sandbox-key:')));
+        Http::assertSentCount(2);
     }
 
     public function test_free_package_activates_without_calling_midtrans(): void
