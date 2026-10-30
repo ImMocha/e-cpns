@@ -14,9 +14,37 @@ use App\Models\User;
 use App\Models\UserPackage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Collection;
 
 class ExamCatalog
 {
+    /** @return array<string, Collection<int, array{exam: Exam, hasAccess: bool}>> */
+    public function featured(?User $user): array
+    {
+        $entitlements = $user?->userPackages()->active()->with('exams')->get() ?? collect();
+        $hasPremium = $entitlements->contains(fn (UserPackage $package): bool => $package->tier === PackageTier::Premium);
+        $approvedClaims = $user ? ExamClaim::query()->whereBelongsTo($user)->where('status', 'approved')->pluck('exam_id') : collect();
+        $learningAllowed = $user?->canAccessLearningFeatures() === true;
+        $featured = [];
+
+        foreach (['tryout', 'practice'] as $kind) {
+            $featured[$kind] = Exam::query()->visibleToMembers()->where('kind', $kind)
+                ->with('topic.section')->latest('id')->limit(3)->get()
+                ->map(function (Exam $exam) use ($user, $entitlements, $hasPremium, $approvedClaims, $learningAllowed): array {
+                    $hasAccess = $user?->isAdmin() === true || ($exam->free_claim_enabled
+                        ? $hasPremium || $approvedClaims->contains($exam->id)
+                        : $exam->access_level === MaterialAccess::Free || $entitlements->contains(
+                            fn (UserPackage $package): bool => $package->tier === PackageTier::Premium
+                                || (($exam->kind === 'tryout' || $package->tier === null) && $package->exams->contains('id', $exam->id)),
+                        ));
+
+                    return ['exam' => $exam, 'hasAccess' => $hasAccess && ($exam->kind === 'tryout' || $learningAllowed)];
+                });
+        }
+
+        return $featured;
+    }
+
     /**
      * @param  list<int>|null  $topicIds
      * @return array<string, mixed>

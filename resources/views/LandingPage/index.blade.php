@@ -238,35 +238,44 @@
   </div>
 </section>
 
-{{-- ===================== MATERI ===================== --}}
+{{-- ===================== TRYOUT DAN LATIHAN SOAL ===================== --}}
 <section class="section" id="materi">
   <div class="container container--wide">
     <div class="section-head section-head--split reveal">
-      <div><span class="eyebrow">Konten Belajar</span><h2 style="margin:.75rem 0 0">Materi <span class="underline-squiggle">dan Video</span></h2><p>Pelajari konten yang tersedia sesuai bidang dan paket belajarmu.</p></div>
-      <a class="btn btn--ghost" href="{{ route('materials.index') }}">Semua Materi<svg data-icon="arrow-right"></svg></a>
+      <div><span class="eyebrow">Konten Belajar</span><h2 style="margin:.75rem 0 0">Tryout <span class="underline-squiggle">dan Latihan Soal</span></h2><p>Pilih sesi sesuai kebutuhanmu. Akses soal mengikuti paket aktif yang kamu miliki.</p></div>
+      <a class="btn btn--ghost" href="{{ route('tryouts.index') }}">Semua Tryout<svg data-icon="arrow-right"></svg></a>
     </div>
     <div data-tabs>
-      <div class="tabs" role="tablist" aria-label="Format materi">
-        <button class="tab is-active" data-tab="t-pdf" role="tab" aria-selected="true">Materi PDF</button>
-        <button class="tab" data-tab="t-video" role="tab" aria-selected="false">Video Pembelajaran</button>
+      <div class="tabs" role="tablist" aria-label="Jenis sesi">
+        <button class="tab is-active" data-tab="t-tryout" role="tab" aria-selected="true">Tryout</button>
+        <button class="tab" data-tab="t-practice" role="tab" aria-selected="false">Latihan Soal</button>
       </div>
-      @foreach (['pdf' => $featuredPdfs, 'video' => $featuredVideos] as $format => $materials)
-      <div class="tab-panel{{ $loop->first ? ' is-active' : '' }}" id="t-{{ $format }}" data-tab-panel>
+      @foreach ($featuredExams as $kind => $items)
+      <div class="tab-panel{{ $loop->first ? ' is-active' : '' }}" id="t-{{ $kind }}" data-tab-panel>
         <div class="grid-auto grid-auto--lg">
-          @forelse ($materials as $material)
+          @forelse ($items as $item)
+          @php($exam = $item['exam'])
           <article class="card card--pad-0 tile reveal">
-            <div class="tile__media"><span class="tile__glyph"><svg data-icon="{{ $format === 'pdf' ? 'file' : 'play-circle' }}"></svg></span><span class="badge badge--primary tile__badge">{{ $material->access_level->value === 'premium' ? 'Premium' : 'Gratis' }}</span></div>
+            <div class="tile__media">
+              <img class="h-full w-full object-cover" src="{{ $exam->coverUrl() }}" alt="" width="960" height="540" loading="lazy" decoding="async">
+              <span class="badge badge--{{ $item['hasAccess'] ? 'mint' : 'primary' }} tile__badge">@unless ($item['hasAccess'])<svg data-icon="lock"></svg> Terkunci · @endunless{{ $exam->accessLabel() }}</span>
+            </div>
             <div class="tile__body">
-              <span class="tile__cat">{{ $material->section->code }} · {{ $material->topic->name }}</span>
-              <h3 class="tile__title">{{ $material->title }}</h3>
-              <p class="tile__desc">{{ $material->summary }}</p>
-              <div class="tile__foot"><span class="text-xs text-soft">{{ $format === 'pdf' ? ($material->page_count ? $material->page_count.' halaman' : 'Materi PDF') : ($material->humanDuration() ?? 'Video Pembelajaran') }}</span><a class="btn btn--sm btn--primary" href="{{ route('materials.show', $material) }}">Buka<svg data-icon="arrow-right"></svg></a></div>
+              <span class="tile__cat">{{ $kind === 'tryout' ? 'Tryout CAT' : 'Latihan Soal' }}@if ($exam->topic) · {{ $exam->topic->section->code }} · {{ $exam->topic->name }}@endif</span>
+              <h3 class="tile__title">{{ $exam->title }}</h3>
+              <p class="tile__desc">{{ $exam->description }}</p>
+              <p class="text-xs text-soft">{{ $exam->question_count }} soal · {{ $exam->duration_minutes ? $exam->duration_minutes.' menit' : 'Tanpa timer' }}</p>
+              <div class="tile__foot">
+                <span class="text-xs text-soft">{{ $item['hasAccess'] ? 'Akses tersedia' : ($exam->free_claim_enabled ? 'Penuhi syarat untuk membuka' : 'Aktifkan paket yang sesuai') }}</span>
+                <a class="btn btn--sm btn--primary" href="{{ route($kind === 'tryout' ? 'tryouts.index' : 'quizzes.index') }}">Lihat Sesi<svg data-icon="{{ $item['hasAccess'] ? 'arrow-right' : 'lock' }}"></svg></a>
+              </div>
             </div>
           </article>
           @empty
-          <div class="card"><h3 class="card__title">{{ $format === 'pdf' ? 'Materi PDF' : 'Video Pembelajaran' }}</h3><p class="text-soft" style="margin-top:.75rem">Lihat katalog materi untuk konten yang tersedia, atau hubungi admin untuk bantuan memilih bahan belajar.</p><a class="btn btn--ghost btn--sm" style="margin-top:1rem" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a></div>
+          <div class="card"><h3 class="card__title">{{ $kind === 'tryout' ? 'Tryout' : 'Latihan Soal' }} segera hadir</h3><p class="text-soft" style="margin-top:.75rem">Sesi akan tampil setelah diterbitkan. Hubungi kami untuk informasi paket belajar.</p><a class="btn btn--ghost btn--sm" style="margin-top:1rem" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a></div>
           @endforelse
         </div>
+        <a class="btn btn--ghost" style="margin-top:1.5rem" href="{{ route($kind === 'tryout' ? 'tryouts.index' : 'quizzes.index') }}">{{ $kind === 'tryout' ? 'Semua Tryout' : 'Semua Latihan Soal' }}<svg data-icon="arrow-right"></svg></a>
       </div>
       @endforeach
     </div>

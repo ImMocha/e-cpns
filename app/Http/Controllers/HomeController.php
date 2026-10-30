@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Enums\MaterialType;
 use App\Enums\UserRole;
+use App\ExamCatalog;
 use App\Leaderboard;
 use App\Models\Article;
 use App\Models\Exam;
@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function __invoke(Leaderboard $leaderboard, Request $request): View
+    public function __invoke(Leaderboard $leaderboard, Request $request, ExamCatalog $catalog): View
     {
         return view('LandingPage.index', [
             'metaDescription' => 'Platform belajar dan simulasi tryout CAT CPNS: materi PDF, video pembelajaran, latihan soal, pembahasan, statistik nilai, dan leaderboard.',
@@ -27,8 +27,7 @@ class HomeController extends Controller
             'questionCount' => Question::query()->visibleToMembers()->count(),
             'tryoutCount' => Exam::query()->visibleToMembers()->where('kind', 'tryout')->count(),
             'materialCount' => Material::query()->visibleToMembers()->count(),
-            'featuredPdfs' => Material::query()->visibleToMembers()->where('type', MaterialType::Pdf)->ordered()->limit(3)->get(),
-            'featuredVideos' => Material::query()->visibleToMembers()->where('type', MaterialType::Video)->ordered()->limit(3)->get(),
+            'featuredExams' => $catalog->featured($request->user()),
             'referenceTryout' => $leaderboard->referenceTryout(),
             'testimonials' => Testimonial::query()->visible()->latest('id')->get(),
             'canWriteTestimonial' => $request->user()?->canWriteTestimonial() === true,

@@ -44,19 +44,19 @@ class ProductionPresentationTest extends TestCase
         $this->get(route('privacy'))->assertRedirect(rtrim(route('home'), '/').'/#kebijakan-privasi');
     }
 
-    public function test_home_statistics_and_materials_come_from_the_published_catalogue(): void
+    public function test_home_statistics_and_sessions_come_from_the_published_catalogue(): void
     {
         User::factory()->create();
         User::factory()->inactive()->create();
         User::factory()->admin()->create();
         Question::factory()->published()->create();
         Question::factory()->create();
-        Exam::factory()->tryout()->create(['question_count' => 110]);
+        $tryout = Exam::factory()->tryout()->create(['question_count' => 110]);
         Exam::factory()->tryout()->create(['status' => 'draft']);
         $material = Material::factory()->published()->create(['title' => 'Materi Publik Terbaru']);
         Material::factory()->draft()->create(['title' => 'Materi Belum Terbit']);
 
-        $this->get(route('home'))->assertSee($material->title)->assertDontSee('Materi Belum Terbit')
+        $this->get(route('home'))->assertSee($tryout->title)->assertDontSee('Materi Belum Terbit')
             ->assertDontSee('12.480')->assertDontSee('3.200+')->assertDontSee('Dewi Anggraini')
             ->assertViewHas('participantCount', 1)->assertViewHas('questionCount', 1)->assertViewHas('tryoutCount', 1)
             ->assertViewHas('materialCount', 1);
