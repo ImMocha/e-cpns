@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Daftar — Ganesha Nusa CPNS Online')
+@section('title', 'Daftar — Ganesha Nusa')
 
 @section('body-attributes')
     style="min-height:100dvh;display:flex;flex-direction:column"

@@ -143,11 +143,30 @@ class MaterialController extends Controller
         $completedMaterialIds = MaterialProgress::query()->whereBelongsTo($user)
             ->whereIn('material_id', $lessons->pluck('id')->all())->whereNotNull('completed_at')
             ->pluck('material_id')->flip()->all();
+        $lessonIndex = $lessons->search(fn (Material $lesson): bool => $lesson->is($material));
+        $previousMaterial = $lessonIndex !== false && $lessonIndex > 0 ? $lessons->get($lessonIndex - 1) : null;
+        $nextMaterial = $lessonIndex !== false ? $lessons->get($lessonIndex + 1) : null;
+        $isLastMaterial = $lessonIndex !== false && $nextMaterial === null;
+        $nextTopic = null;
+        if ($isLastMaterial && $material->topic) {
+            $currentTopic = $material->topic;
+            $nextTopic = Topic::query()->active()->where('section_id', $material->section_id)
+                ->whereHas('materials', fn (Builder $query) => $query->inActiveTopics()
+                    ->when(! $showDrafts, fn (Builder $query) => $query->published()))
+                ->where(fn (Builder $query) => $query->where('position', '>', $currentTopic->position)
+                    ->orWhere(fn (Builder $query) => $query->where('position', $currentTopic->position)->where('id', '>', $currentTopic->id)))
+                ->ordered()->first();
+        }
 
         return view('Dashboard.User.materials.show', [
             'lessons' => $lessons,
             'completedMaterialIds' => $completedMaterialIds,
             'showDrafts' => $showDrafts,
+            'previousMaterial' => $previousMaterial,
+            'nextMaterial' => $nextMaterial,
+            'isLastMaterial' => $isLastMaterial,
+            'nextTopic' => $nextTopic,
+            'lessonNumber' => $lessonIndex !== false ? $lessonIndex + 1 : null,
             'canOpen' => fn (Material $lesson): bool => $lesson->isAccessibleBy($user),
             'contentAccessible' => $material->isAccessibleBy($user),
             'material' => $material,

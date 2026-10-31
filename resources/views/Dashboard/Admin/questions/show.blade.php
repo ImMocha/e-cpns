@@ -12,7 +12,7 @@
         <div class="question-answer-options">
             @foreach ($question->options as $index => $option)
                 <div class="question-answer-option {{ ! $question->isWeighted() && $index === $question->correct_option ? 'question-answer-option--correct' : '' }}">
-                    <span class="question-answer-letter">{{ chr(65 + $index) }}</span><span class="question-answer-text">{{ $option }}</span>
+                    <span class="question-answer-letter">{{ chr(65 + $index) }}</span><span class="question-answer-text">{{ $option }}@if($question->option_image_paths[$index] ?? null)<img class="question-option-image" src="{{ route('admin.questions.media', [$question, 'option-'.$index]) }}" alt="Gambar pilihan {{ chr(65 + $index) }}">@endif</span>
                     @if ($question->isWeighted())<span class="badge badge--primary badge--flat">Skor {{ $question->option_scores[$index] }}/5</span>@elseif ($index === $question->correct_option)<span class="badge badge--mint badge--flat">Kunci</span>@endif
                 </div>
             @endforeach
@@ -22,6 +22,7 @@
         <h2 class="card__title">{{ $question->isWeighted() ? 'Skor & Pembahasan' : 'Kunci & Pembahasan' }}</h2>
         @unless ($question->isWeighted())<p class="text-sm text-soft question-section">Jawaban {{ chr(65 + $question->correct_option) }}</p>@endunless
         <div class="article-prose question-section">{!! $question->safeExplanation() !!}</div>
+        @if($question->explanation_image_path)<img class="question-explanation-image" src="{{ route('admin.questions.media', [$question, 'explanation-image']) }}" alt="Gambar pembahasan">@endif
     </section>
 </div>
 @endsection

@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 @use('App\Enums\MaterialType')
-@section('title', 'Materi — Ganesha Nusa CPNS Online')
+@section('title', 'Materi — Ganesha Nusa')
 @section('content')
     @include('components.flash')
     <nav class="crumbs" aria-label="Breadcrumb">

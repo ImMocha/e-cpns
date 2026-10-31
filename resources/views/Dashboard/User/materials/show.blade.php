@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', $material->title . ' — Ganesha Nusa CPNS Online')
+@section('title', $material->title . ' — Ganesha Nusa')
 
 @section('content')
     @include('components.flash')
@@ -26,14 +26,14 @@
           @endif
           <h1 style="margin-top:.5rem">{{ $material->title }}</h1>
           <div class="flex items-center gap-2 flex-wrap" style="margin-top:.85rem">
+            @if ($lessonNumber)
+              <span class="badge badge--primary badge--flat">Materi {{ $lessonNumber }} dari {{ $lessons->count() }}</span>
+            @endif
             @if ($material->page_count)
               <span class="badge badge--ink badge--flat">{{ number_format($material->page_count, 0, ',', '.') }} halaman</span>
             @endif
             @if ($material->humanDuration())
               <span class="badge badge--ink badge--flat"><svg data-icon="clock"></svg> {{ $material->humanDuration() }}</span>
-            @endif
-            @if ($material->published_at)
-              <span class="badge badge--mint badge--flat"><svg data-icon="check"></svg> Terbit <x-local-time :value="$material->published_at" format="d M Y" /></span>
             @endif
           </div>
         </header>
@@ -48,6 +48,8 @@
             <a class="btn btn--primary" href="{{ route('packages.index') }}">Lihat paket belajar <svg data-icon="arrow-right"></svg></a>
           </section>
         @endif
+
+        @include('Dashboard.User.materials._navigation')
 
         <div class="btn-row" style="margin-top:1.5rem">
           <a class="btn btn--ghost" href="{{ route('materials.index') }}"><svg data-icon="arrow-left"></svg> Kembali ke daftar materi</a>

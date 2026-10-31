@@ -85,20 +85,32 @@
                 @endphp
                 <div class="question-options-editor" data-option-list>
                     @foreach ($formOptions as $index => $option)
+                        @php
+                            $imageSources = $questionValue('option_image_sources');
+                            $imageSource = is_array($imageSources) ? ($imageSources[$index] ?? null) : $index;
+                            $imageSource = is_scalar($imageSource) && ctype_digit((string) $imageSource) ? (int) $imageSource : null;
+                            $optionImageUrl = $imageSource !== null && ($question->option_image_paths[$imageSource] ?? null)
+                                ? route('admin.questions.media', [$question, 'option-'.$imageSource]) : '';
+                        @endphp
                         <div class="question-option-row" data-option-row>
                             <label class="question-key-picker"><input type="radio" name="correct_option" value="{{ $index }}" @disabled($formScoring === 'weighted') @checked((string) $questionValue('correct_option', $question->correct_option) !== '' && (string) $questionValue('correct_option', $question->correct_option) === (string) $index) aria-label="Jadikan {{ chr(65 + $index) }} jawaban benar"><span data-option-letter>{{ chr(65 + $index) }}</span></label>
-                            <textarea class="textarea" name="options[]" rows="2" maxlength="2000" aria-label="Pilihan {{ chr(65 + $index) }}" required>{{ $option }}</textarea>
+                            <x-question-option-content :index="$index" :value="$option" :image-url="$optionImageUrl" :source="$imageSource" :remove-image="(bool) $questionValue('remove_option_images.'.$index)" />
                             <label class="question-option-score" data-option-score @if($formScoring !== 'weighted') hidden @endif><span>Skor</span><input class="input" type="number" name="option_scores[]" min="1" max="5" step="1" value="{{ $formScores[$index] ?? '' }}" @disabled($formScoring !== 'weighted') aria-label="Skor pilihan {{ chr(65 + $index) }}"></label>
                             <button class="btn btn--ghost btn--square btn--sm" type="button" data-remove-option aria-label="Hapus pilihan {{ chr(65 + $index) }}" hidden><svg data-icon="trash"></svg></button>
                         </div>
                     @endforeach
                 </div>
                 <button class="btn btn--ghost btn--sm question-add-option" type="button" data-add-option hidden><svg data-icon="plus"></svg> Tambah pilihan</button>
-                <template data-option-template><div class="question-option-row" data-option-row><label class="question-key-picker"><input type="radio" name="correct_option"><span data-option-letter></span></label><textarea class="textarea" name="options[]" rows="2" maxlength="2000" required></textarea><label class="question-option-score" data-option-score hidden><span>Skor</span><input class="input" type="number" name="option_scores[]" min="1" max="5" step="1" disabled></label><button class="btn btn--ghost btn--square btn--sm" type="button" data-remove-option><svg data-icon="trash"></svg></button></div></template>
+                <p class="field__hint question-hint">Pilihan dapat berisi teks, gambar, atau keduanya. JPG, PNG, WebP · maksimal 2 MB per gambar.</p>
+                <template data-option-template><div class="question-option-row" data-option-row><label class="question-key-picker"><input type="radio" name="correct_option"><span data-option-letter></span></label><x-question-option-content /><label class="question-option-score" data-option-score hidden><span>Skor</span><input class="input" type="number" name="option_scores[]" min="1" max="5" step="1" disabled></label><button class="btn btn--ghost btn--square btn--sm" type="button" data-remove-option><svg data-icon="trash"></svg></button></div></template>
                 <div class="question-hint"><input type="hidden" name="shuffle_options" value="0"><label class="check"><input type="checkbox" name="shuffle_options" value="1" data-shuffle-options @checked($questionValue('shuffle_options', $question->shuffle_options))> Izinkan pengacakan pilihan pada sesi</label><p class="field__hint">Matikan bila gambar soal sudah memuat label A–E agar pilihan tetap sesuai ilustrasi.</p></div>
             </section>
             <section class="card">
                 <x-question-rich-text name="explanation" label="Pembahasan" :value="$questionValue('explanation', $question->explanation)" />
+                <div class="field question-hint"><label class="label" for="question-explanation-image">Gambar pembahasan <span class="label__opt">(opsional)</span></label><input class="input" id="question-explanation-image" type="file" name="explanation_image" accept="image/jpeg,image/png,image/webp" data-explanation-image><p class="field__hint">JPG, PNG, WebP · maksimal 2 MB. Gambar ditampilkan setelah teks pembahasan.</p>
+                    <label class="check" data-existing-explanation-image-control @if(!$question->explanation_image_path) hidden @endif><input type="checkbox" name="remove_explanation_image" value="1" data-remove-explanation-image @checked($questionValue('remove_explanation_image'))> Hapus gambar lama</label>
+                    <p class="question-error" data-explanation-image-error role="alert" hidden></p>
+                </div>
                 <p class="field__hint question-hint">Pembahasan wajib diisi untuk menerbitkan soal. Peserta dengan paket berbayar aktif melihatnya setelah menyelesaikan sesi latihan atau tryout.</p>
             </section>
             <p class="text-sm text-soft" data-question-save-note>Perubahan disimpan saat Anda menekan Simpan draft atau Terbitkan soal.</p>
@@ -112,7 +124,7 @@
                 <img class="question-image" data-preview-image data-existing-image="{{ $question->image_path ? route('admin.questions.image', $question) : '' }}" alt="Gambar soal" hidden>
                 <video class="question-video" data-preview-video data-existing-video="{{ $question->video_path ? route('admin.questions.video', $question) : '' }}" controls playsinline preload="metadata" aria-label="Preview video soal" hidden>Browser Anda tidak mendukung pemutar video.</video>
                 <div class="question-preview-options" data-preview-options></div>
-                <div class="explain explain--info question-preview-explanation"><div class="explain__title"><svg data-icon="book"></svg> Pembahasan</div><div class="article-prose" data-preview-explanation></div></div>
+                <div class="explain explain--info question-preview-explanation"><div class="explain__title"><svg data-icon="book"></svg> Pembahasan</div><div class="article-prose" data-preview-explanation></div><img class="question-explanation-image" data-preview-explanation-image data-existing-image="{{ $question->explanation_image_path ? route('admin.questions.media', [$question, 'explanation-image']) : '' }}" alt="Gambar pembahasan" hidden></div>
             </section>
             <section class="card card--dashed question-checklist"><div class="card__title">Sebelum diterbitkan</div><ul><li>Bidang dan pertanyaan sudah terisi.</li><li>Semua pilihan berbeda dan jelas.</li><li data-scoring-checklist>Penilaian setiap pilihan telah diperiksa.</li><li>Pembahasan menjelaskan jawaban.</li></ul></section>
         </aside>

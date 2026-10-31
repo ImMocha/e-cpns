@@ -34,6 +34,9 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   const videoError = form.querySelector('[data-video-error]');
   const addOption = form.querySelector('[data-add-option]');
   const scoring = form.querySelector('[data-question-scoring]');
+  const explanationImage = form.querySelector('[data-explanation-image]');
+  const previewExplanationImage = form.querySelector('[data-preview-explanation-image]');
+  const imagePreviews = new Map();
   let imageUrl = null;
   let videoUrl = null;
   let dirty = false;
@@ -44,6 +47,27 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     dirty = true;
     form.dataset.dirty = 'true';
     form.querySelector('[data-question-save-note]').textContent = 'Ada perubahan yang belum disimpan';
+  };
+
+  const imageSource = (input, existingUrl, removed, error) => {
+    const file = input.files[0];
+    const message = file && !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+      ? 'Gunakan gambar JPG, PNG, atau WebP.' : file && file.size > 2 * 1024 * 1024 ? 'Ukuran gambar maksimal 2 MB.' : '';
+    input.setCustomValidity(message);
+    error.textContent = message;
+    error.hidden = !message;
+    const cached = imagePreviews.get(input);
+    if (cached?.file !== file || message) {
+      if (cached) URL.revokeObjectURL(cached.url);
+      imagePreviews.delete(input);
+      if (file && !message) imagePreviews.set(input, { file, url: URL.createObjectURL(file) });
+    }
+    return imagePreviews.get(input)?.url || (removed ? '' : existingUrl);
+  };
+  const showImage = (element, url) => {
+    element.hidden = !url;
+    if (url) element.src = url;
+    else element.removeAttribute('src');
   };
 
   const syncPreview = () => {
@@ -59,7 +83,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       item.source.value = sanitizeArticle(item.content.innerHTML);
       const target = form.querySelector(name === 'body' ? '[data-preview-stem]' : '[data-preview-explanation]');
       target.innerHTML = item.source.value;
-      if (!target.textContent.trim()) {
+      if (!target.textContent.trim() && !target.querySelector('img')) {
         const p = document.createElement('p');
         p.className = 'text-soft';
         p.textContent = name === 'body' ? 'Tulis pertanyaan untuk melihat preview.' : 'Tulis pembahasan untuk menjelaskan jawaban.';
@@ -81,6 +105,18 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       row.querySelector('[data-option-score]').hidden = !weighted;
       row.classList.toggle('is-weighted', weighted);
       const textarea = row.querySelector('textarea');
+      const upload = row.querySelector('[data-option-image]');
+      const removeOptionImage = row.querySelector('[data-remove-option-image]');
+      upload.name = `option_images[${index}]`;
+      upload.setAttribute('aria-label', 'Gambar pilihan ' + letter);
+      removeOptionImage.name = `remove_option_images[${index}]`;
+      removeOptionImage.setAttribute('aria-label', 'Hapus gambar pilihan ' + letter);
+      row.querySelector('[data-option-image-label]').textContent = 'Gambar pilihan ' + letter + ' (opsional)';
+      const optionImageUrl = imageSource(upload, row.querySelector('[data-option-content]').dataset.existingImage, removeOptionImage.checked, row.querySelector('[data-option-image-error]'));
+      const thumbnail = row.querySelector('[data-option-image-preview]');
+      thumbnail.alt = 'Gambar pilihan ' + letter;
+      showImage(thumbnail, optionImageUrl);
+      textarea.required = !optionImageUrl;
       radio.value = index;
       radio.setAttribute('aria-label', 'Jadikan ' + letter + ' jawaban benar');
       textarea.setAttribute('aria-label', 'Pilihan ' + letter);
@@ -95,7 +131,15 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       key.className = 'question-preview-letter';
       key.textContent = letter;
       const text = document.createElement('span');
-      text.textContent = textarea.value.trim() || 'Pilihan ' + letter + ' belum diisi';
+      text.className = 'question-preview-option-content';
+      text.textContent = textarea.value.trim() || (optionImageUrl ? '' : 'Pilihan ' + letter + ' belum diisi');
+      if (optionImageUrl) {
+        const img = document.createElement('img');
+        img.className = 'question-option-image';
+        img.src = optionImageUrl;
+        img.alt = 'Gambar pilihan ' + letter;
+        text.append(img);
+      }
       option.append(key, text);
       if (weighted) {
         const badge = document.createElement('span');
@@ -108,6 +152,11 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     });
     form.querySelector('[data-key-label]').textContent = weighted ? 'Skor per pilihan' : selected ? 'Kunci ' + selected : 'Kunci belum dipilih';
     addOption.disabled = currentRows.length >= 10;
+    const explanationImageUrl = imageSource(explanationImage, previewExplanationImage.dataset.existingImage,
+      form.querySelector('[data-remove-explanation-image]').checked, form.querySelector('[data-explanation-image-error]'));
+    showImage(previewExplanationImage, explanationImageUrl);
+    const explanationPreview = form.querySelector('[data-preview-explanation]');
+    if (explanationImageUrl && !editors.get('explanation').content.textContent.trim()) explanationPreview.replaceChildren();
     const url = imageUrl || (removeImage?.checked ? '' : previewImage.dataset.existingImage);
     previewImage.hidden = !url;
     if (url) previewImage.src = url;
@@ -179,7 +228,11 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   list.addEventListener('click', (event) => {
     const remove = event.target.closest('[data-remove-option]');
     if (!remove || rows().length <= 2) return;
-    remove.closest('[data-option-row]').remove();
+    const row = remove.closest('[data-option-row]');
+    const input = row.querySelector('[data-option-image]');
+    if (imagePreviews.has(input)) URL.revokeObjectURL(imagePreviews.get(input).url);
+    imagePreviews.delete(input);
+    row.remove();
     markDirty();
     syncPreview();
   });
@@ -230,6 +283,8 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   form.addEventListener('question-editor:load', (event) => {
     const question = event.detail || {};
     form.reset();
+    imagePreviews.forEach(({ url }) => URL.revokeObjectURL(url));
+    imagePreviews.clear();
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     if (videoUrl) URL.revokeObjectURL(videoUrl);
     imageUrl = null;
@@ -253,10 +308,15 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       fragment.querySelector('textarea').value = option;
       fragment.querySelector('input').checked = question.correct_option === index;
       fragment.querySelector('[name="option_scores[]"]').value = question.option_scores?.[index] ?? '';
+      fragment.querySelector('[data-option-image-source]').value = index;
+      fragment.querySelector('[data-option-content]').dataset.existingImage = question.option_image_urls?.[index] || '';
+      fragment.querySelector('[data-existing-option-image-control]').hidden = !question.option_image_urls?.[index];
       list.append(fragment);
     });
     previewImage.dataset.existingImage = question.image_url || '';
     previewVideo.dataset.existingVideo = question.video_url || '';
+    previewExplanationImage.dataset.existingImage = question.explanation_image_url || '';
+    form.querySelector('[data-existing-explanation-image-control]').hidden = !question.explanation_image_url;
     form.querySelector('[data-existing-image-control]')?.toggleAttribute('hidden', !question.image_url);
     form.querySelector('[data-existing-video-control]')?.toggleAttribute('hidden', !question.video_url);
     videoError.hidden = true;

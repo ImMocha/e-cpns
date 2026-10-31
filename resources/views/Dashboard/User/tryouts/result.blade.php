@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Hasil '.\App\Enums\ExamKind::from($kind)->label().' — Ganesha Nusa CPNS Online')
+@section('title', 'Hasil '.\App\Enums\ExamKind::from($kind)->label().' — Ganesha Nusa')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">
@@ -140,6 +140,7 @@
                     <li class="exam-review-choice {{ $weighted ? ($chosen === $optionIndex ? 'is-selected' : '') : ($optionIndex === $question['answer'] ? 'is-correct' : ($chosen === $optionIndex ? 'is-wrong' : '')) }}">
                       <span class="exam-review-letter" aria-hidden="true">{{ chr(65 + $optionIndex) }}</span>
                       <div class="exam-review-option-content"><p>{{ $option }}</p>
+                        @if(!empty($question['option_image_paths'][$optionIndex]))<img class="question-option-image" src="{{ route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => 'option-'.$optionIndex]) }}" alt="Gambar pilihan {{ chr(65 + $optionIndex) }}" loading="lazy">@endif
                         @if ($weighted || $optionIndex === $question['answer'] || $chosen === $optionIndex)
                           <div class="exam-review-option-labels">
                             @if ($weighted)<span>Skor {{ $question['optionScores'][$optionIndex] }}/5</span>@elseif ($optionIndex === $question['answer'])<span><svg data-icon="check"></svg> Jawaban benar</span>@endif
@@ -160,6 +161,7 @@
                   <section class="exam-review-explanation" aria-label="Penjelasan soal {{ $index + 1 }}">
                     <h3><svg data-icon="book"></svg> Pembahasan</h3>
                     <div class="article-prose">@if (!empty($question['explainHtml'])){!! \App\ArticleContent::sanitize($question['explainHtml']) !!}@else{{ $question['explain'] ?? '' }}@endif</div>
+                    @if(!empty($question['explanation_image_path']))<img class="question-explanation-image" src="{{ route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => 'explanation-image']) }}" alt="Gambar pembahasan" loading="lazy">@endif
                   </section>
                 @endif
                 </div>

@@ -7,7 +7,7 @@
 @isset($metaDescription)
 <meta name="description" content="{{ $metaDescription }}">
 @endisset
-<title>@yield('title', 'Ganesha Nusa — Belajar & Tryout CPNS Online')</title>
+<title>@yield('title', 'Ganesha Nusa — Belajar & Tryout Online')</title>
 <link rel="icon" type="image/png" href="{{ asset('images/ganesha-nusa-logo.png') }}">
 <link rel="apple-touch-icon" href="{{ asset('images/ganesha-nusa-logo.png') }}">
 <script>

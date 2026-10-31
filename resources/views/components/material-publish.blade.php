@@ -4,5 +4,5 @@
   <input type="hidden" name="scope" value="{{ $scope }}">
   @if($sectionId)<input type="hidden" name="section_id" value="{{ $sectionId }}">@endif
   @if($topicId)<input type="hidden" name="topic_id" value="{{ $topicId }}">@endif
-  <button class="btn btn--ghost btn--sm" type="submit"><svg data-icon="send"></svg> {{ $label }}</button>
+  <button class="btn btn--ghost btn--sm" type="submit"><svg data-icon="send"></svg><span>{{ $label }}</span></button>
 </form>

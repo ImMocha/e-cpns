@@ -8,30 +8,47 @@ export function initTestimonialCarousel(root) {
     const controls = root.querySelector('[data-testimonial-controls]');
     const view = root.ownerDocument.defaultView;
     let drag = null;
-    const step = () => cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : track.clientWidth;
+    let destination = null;
     const maximum = () => Math.max(0, track.scrollWidth - track.clientWidth);
-    const current = () => Math.round(track.scrollLeft / step());
+    const stops = () => [...new Set(cards.map(card => Math.max(0, Math.min(maximum(), card.offsetLeft - cards[0].offsetLeft))))];
+    const current = () => stops().reduce((nearest, offset, index, offsets) =>
+        Math.abs(offset - track.scrollLeft) < Math.abs(offsets[nearest] - track.scrollLeft) ? index : nearest, 0);
     const render = () => {
+        if (destination !== null && Math.abs(track.scrollLeft - stops()[destination]) <= 1) destination = null;
         previous.disabled = track.scrollLeft <= 1;
         next.disabled = track.scrollLeft >= maximum() - 1;
         controls.hidden = maximum() <= 1;
-        position.textContent = `${Math.min(cards.length, current() + 1)} / ${cards.length}`;
+        const visible = cards.map((card, index) => ({ card, index })).filter(({ card }) =>
+            card.offsetLeft >= track.scrollLeft - 1 && card.offsetLeft + card.offsetWidth <= track.scrollLeft + track.clientWidth + 1);
+        const nearestCard = cards.reduce((nearest, card, index) =>
+            Math.abs(card.offsetLeft + card.offsetWidth / 2 - track.scrollLeft - track.clientWidth / 2)
+                < Math.abs(cards[nearest].offsetLeft + cards[nearest].offsetWidth / 2 - track.scrollLeft - track.clientWidth / 2) ? index : nearest, 0);
+        const first = (visible[0]?.index ?? nearestCard) + 1;
+        const last = (visible.at(-1)?.index ?? nearestCard) + 1;
+        position.textContent = `${first === last ? first : `${first}–${last}`} / ${cards.length}`;
     };
-    const goTo = index => track.scrollTo({
-        left: Math.max(0, Math.min(maximum(), index * step())),
-        behavior: view.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-    });
-    previous.addEventListener('click', () => goTo(current() - 1));
-    next.addEventListener('click', () => goTo(current() + 1));
+    const goTo = index => {
+        const offsets = stops();
+        destination = Math.max(0, Math.min(offsets.length - 1, index));
+        track.scrollTo({
+            left: offsets[destination],
+            behavior: view.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+        });
+    };
+    previous.addEventListener('click', () => goTo((destination ?? current()) - 1));
+    next.addEventListener('click', () => goTo((destination ?? current()) + 1));
     track.addEventListener('scroll', render, { passive: true });
+    track.addEventListener('wheel', () => { destination = null; }, { passive: true });
     track.addEventListener('keydown', event => {
         if (event.target !== track) return;
-        const destinations = { ArrowLeft: current() - 1, ArrowRight: current() + 1, Home: 0, End: cards.length - 1 };
+        const index = destination ?? current();
+        const destinations = { ArrowLeft: index - 1, ArrowRight: index + 1, Home: 0, End: stops().length - 1 };
         if (!(event.key in destinations)) return;
         event.preventDefault();
         goTo(destinations[event.key]);
     });
     track.addEventListener('pointerdown', event => {
+        destination = null;
         if (event.pointerType !== 'mouse' || event.button !== 0 || maximum() <= 1) return;
         drag = { x: event.clientX, y: event.clientY, start: track.scrollLeft, active: false, id: event.pointerId };
     });
@@ -59,7 +76,7 @@ export function initTestimonialCarousel(root) {
     track.addEventListener('pointercancel', release);
     track.addEventListener('lostpointercapture', release);
     track.addEventListener('pointerleave', () => { if (drag && !drag.active) release(); });
-    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(render).observe(track);
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => { destination = null; render(); }).observe(track);
     render();
 }
 

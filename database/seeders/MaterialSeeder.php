@@ -79,7 +79,7 @@ class MaterialSeeder extends Seeder
                     'topic_name' => $topic['name'],
                     'title' => $title,
                     'summary' => $isVideo
-                        ? 'Video placeholder untuk menguji pemutar; bukan pembahasan CPNS asli. Durasi label adalah contoh.'
+                        ? 'Video placeholder untuk menguji pemutar; bukan materi pembelajaran asli. Durasi label adalah contoh.'
                         : 'PDF placeholder untuk menguji pembaca pada topik '.$topic['name'].'. Ganti dengan materi asli melalui admin.',
                     'type' => $isVideo ? MaterialType::Video->value : MaterialType::Pdf->value,
                     'access_level' => MaterialAccess::Premium->value,

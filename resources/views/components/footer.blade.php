@@ -5,7 +5,7 @@
         <a class="logo" href="{{ route('home') }}" style="color:#fff">
           <x-logo />
         </a>
-        <p class="text-sm" style="margin-top:1rem;max-width:34ch">Platform belajar dan simulasi tryout CPNS untuk peserta yang mempersiapkan diri dengan cara yang lebih terukur.</p>
+        <p class="text-sm" style="margin-top:1rem;max-width:34ch">Platform belajar dan simulasi tryout untuk berbagai topik, dengan materi dan latihan yang membantu peserta berkembang secara terukur.</p>
         <div class="socials" style="margin-top:1.25rem">
           <a href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer" aria-label="Hubungi Kami"><svg data-icon="send"></svg></a>
           <a href="mailto:{{ config('app.contact_email') }}" aria-label="Email {{ config('app.contact_email') }}"><svg data-icon="mail"></svg></a>
@@ -17,7 +17,7 @@
           <a href="{{ route('materials.index') }}">Materi Pembelajaran</a>
           <a href="{{ route('articles.index') }}">Artikel</a>
           <a href="{{ route('quizzes.index') }}">Latihan Soal</a>
-          <a href="{{ route('tryouts.index') }}">Try Out CAT</a>
+          <a href="{{ route('tryouts.index') }}">Tryout</a>
         </div>
       </div>
       <div>

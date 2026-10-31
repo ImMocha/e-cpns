@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Ganesha Nusa — Belajar & Tryout CPNS Online')
+@section('title', 'Ganesha Nusa — Belajar & Tryout Online')
 
 @section('content')
 {{-- ===================== HERO ===================== --}}
@@ -12,7 +12,7 @@
   <div class="container container--wide">
     <div class="split">
       <div>
-        <span class="eyebrow">Seleksi CPNS 2026</span>
+        <span class="eyebrow">Belajar untuk Berbagai Topik</span>
         <h1 style="margin:1rem 0 1.25rem">
           Belajar Lebih <span class="underline-squiggle">Cerdas</span>,<br>
           Hadapi Tryout <span style="color:var(--primary-700)">Tanpa Panik</span>.
@@ -52,7 +52,7 @@
       <div class="split-media reveal">
         <div class="split-media__blob" aria-hidden="true"></div>
         <div class="split-media__img" style="aspect-ratio:4/3">
-          <img src="{{ asset('images/hero-tryout.jpg') }}" alt="Ilustrasi peserta belajar prepping CPNS dengan buku TWK, TIU, TKP, dan CAT CPNS" width="960" height="720">
+          <img src="{{ asset('images/hero-general-learning.webp') }}" alt="Ilustrasi peserta belajar bersama dengan buku dan laptop" width="960" height="720">
         </div>
 
         <div class="card card--tight card--pop" style="position:absolute;left:-18px;bottom:24px;max-width:210px;z-index:3">
@@ -289,7 +289,7 @@
       <div>
         <span class="eyebrow">Bacaan pilihan</span>
         <h2 style="margin:.75rem 0 0">Artikel <span class="underline-squiggle">Terbaru</span></h2>
-        <p style="max-width:52ch">Panduan dan tips yang bisa kamu baca kapan saja selama persiapan CPNS.</p>
+        <p style="max-width:52ch">Panduan dan tips yang bisa kamu baca kapan saja selama perjalanan belajar.</p>
       </div>
       <a class="btn btn--ghost" href="{{ route('articles.index') }}">Semua Artikel<svg data-icon="arrow-right"></svg></a>
     </div>

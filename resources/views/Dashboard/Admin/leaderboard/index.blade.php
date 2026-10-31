@@ -30,18 +30,18 @@
             @csrf
             @method('PATCH')
             <input type="hidden" name="enabled" value="{{ $simulationEnabled ? '1' : '0' }}">
-            <h3 class="card__title">Jumlah acak per provinsi</h3>
-            <p class="text-sm text-soft" style="margin:.5rem 0 1rem">Setiap provinsi mendapat jumlah acak dalam rentang ini. Jumlah yang sudah sesuai akan dipertahankan agar peringkat stabil.</p>
+            <h3 class="card__title">Jumlah bot nasional dan lokal</h3>
+            <p class="text-sm text-soft" style="margin:.5rem 0 1rem">Jumlah nasional berlaku untuk seluruh Indonesia. Jumlah lokal berlaku untuk setiap provinsi. Profil yang sama dapat dipakai pada kedua cakupan; peserta nyata tetap ikut dihitung.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="field">
-                    <label class="label" for="virtual-minimum">Minimum</label>
-                    <input class="input" id="virtual-minimum" name="minimum_per_province" type="number" min="1" max="100" required value="{{ old('minimum_per_province', $populationRange['minimum']) }}">
-                    @error('minimum_per_province')<p class="field__error">{{ $message }}</p>@enderror
+                    <label class="label" for="virtual-minimum">Nasional</label>
+                    <input class="input" id="virtual-minimum" name="national_bot_count" type="number" min="0" max="5000" required value="{{ old('national_bot_count', $populationCounts['national']) }}">
+                    @error('national_bot_count')<p class="field__error">{{ $message }}</p>@enderror
                 </div>
                 <div class="field">
-                    <label class="label" for="virtual-maximum">Maksimum</label>
-                    <input class="input" id="virtual-maximum" name="maximum_per_province" type="number" min="1" max="100" required value="{{ old('maximum_per_province', $populationRange['maximum']) }}">
-                    @error('maximum_per_province')<p class="field__error">{{ $message }}</p>@enderror
+                    <label class="label" for="virtual-maximum">Lokal per provinsi</label>
+                    <input class="input" id="virtual-maximum" name="local_bot_count" type="number" min="0" max="100" required value="{{ old('local_bot_count', $populationCounts['local']) }}">
+                    @error('local_bot_count')<p class="field__error">{{ $message }}</p>@enderror
                 </div>
             </div>
             <button class="btn btn--ghost" type="submit" style="margin-top:1rem">Simpan jumlah</button>

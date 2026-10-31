@@ -100,6 +100,6 @@
             <span class="sticker">@yield('sticker', 'Semangat belajarnya tetap!')</span>
         </div>
     </main>
-    <footer><div class="footer-inner wrap"><span>Ganesha Nusa &middot; Belajar &amp; Tryout CPNS Online</span><a href="mailto:{{ config('app.contact_email') }}">{{ config('app.contact_email') }}</a></div></footer>
+    <footer><div class="footer-inner wrap"><span>Ganesha Nusa &middot; Belajar &amp; Tryout Online</span><a href="mailto:{{ config('app.contact_email') }}">{{ config('app.contact_email') }}</a></div></footer>
 </body>
 </html>

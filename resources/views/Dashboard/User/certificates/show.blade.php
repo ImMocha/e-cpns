@@ -15,7 +15,7 @@
       <article class="cert certificate-document" aria-label="Sertifikat kelulusan tryout {{ $participant->name }}">
         <div class="cert__frame" aria-hidden="true"></div>
         <div class="certificate-brand">
-          <div class="logo"><x-logo sub="Lembaga Belajar CPNS" /></div>
+          <div class="logo"><x-logo sub="Platform Belajar dan Tryout" /></div>
           <span class="certificate-number">Nomor: {{ $attempt->certificateNumber() }}</span>
         </div>
         <div class="cert__seal"><svg data-icon="award"></svg></div>
@@ -37,9 +37,9 @@
 
         <div class="certificate-footer">
           <div><span class="certificate-kicker">Tanggal Penyelesaian</span><p><x-local-time :value="$attempt->submitted_at->locale('id')" format="d F Y" /></p></div>
-          <div class="certificate-issuer"><strong>Ganesha Nusa</strong><p>Lembaga Belajar CPNS</p></div>
+          <div class="certificate-issuer"><strong>Ganesha Nusa</strong><p>Platform Belajar dan Tryout</p></div>
         </div>
-        <p class="certificate-note">Sertifikat ini merupakan bukti pencapaian passing grade simulasi tryout, bukan bukti kelulusan seleksi CPNS.</p>
+        <p class="certificate-note">Sertifikat ini merupakan bukti pencapaian passing grade simulasi tryout, bukan bukti kelulusan ujian resmi.</p>
       </article>
     </main>
 @endsection

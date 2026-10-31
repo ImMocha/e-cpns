@@ -19,6 +19,7 @@ class LeaderboardSimulationController extends Controller
         return view('Dashboard.Admin.leaderboard.index', [
             'simulationEnabled' => $simulation->enabled(),
             'populationRange' => $simulation->populationRange(),
+            'populationCounts' => $simulation->populationCounts(),
             'botCount' => LeaderboardBot::query()->where('is_visible', true)->count(),
             'provinceCounts' => LeaderboardBot::query()->where('is_visible', true)->select('province')
                 ->selectRaw('COUNT(*) AS total')->groupBy('province')->orderBy('province')->get(),
@@ -30,6 +31,8 @@ class LeaderboardSimulationController extends Controller
     {
         $data = $request->validate([
             'enabled' => ['required', 'boolean'],
+            'national_bot_count' => ['sometimes', 'required', 'integer', 'between:0,5000'],
+            'local_bot_count' => ['sometimes', 'required', 'integer', 'between:0,100'],
             'minimum_per_province' => ['sometimes', 'required', 'integer', 'between:1,100'],
             'maximum_per_province' => ['sometimes', 'required', 'integer', 'between:1,100'],
         ], ['minimum_per_province.between' => 'Jumlah minimum harus antara 1 dan 100.',
@@ -43,7 +46,12 @@ class LeaderboardSimulationController extends Controller
         }
 
         $enabled = $request->boolean('enabled');
-        $simulation->setEnabled($enabled, $minimum, $maximum);
+        if (isset($data['minimum_per_province']) || isset($data['maximum_per_province'])) {
+            $simulation->setEnabled($enabled, $minimum, $maximum);
+        } else {
+            $counts = $simulation->populationCounts();
+            $simulation->setCounts($enabled, (int) ($data['national_bot_count'] ?? $counts['national']), (int) ($data['local_bot_count'] ?? $counts['local']));
+        }
 
         return redirect()->route('admin.leaderboard-simulation.index')
             ->with('success', $enabled ? 'Pengaturan peserta virtual disimpan. Fitur aktif di leaderboard.' : 'Pengaturan disimpan. Peserta virtual disembunyikan dari leaderboard.');

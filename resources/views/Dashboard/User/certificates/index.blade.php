@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Sertifikat — Ganesha Nusa CPNS Online')
+@section('title', 'Sertifikat — Ganesha Nusa')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb">

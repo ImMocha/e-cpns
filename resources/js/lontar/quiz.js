@@ -134,7 +134,8 @@ import { sanitizeArticle } from './article-editor.js';
         (q.videoUrl ? '<video class="exam-question-media" controls playsinline preload="metadata" src="' + esc(q.videoUrl) + '">Browser tidak mendukung video.</video>' : '') +
         '<div class="grid" style="--gap:.7rem;margin-top:1.25rem">' + q.options.map((option, index) =>
           '<button type="button" class="opt" data-opt="' + index + '" aria-pressed="false"><span class="opt__key">' +
-          keys[index].toUpperCase() + '</span><span class="opt__text">' + esc(option) + '</span></button>').join('') + '</div>' +
+          keys[index].toUpperCase() + '</span><span class="opt__text">' + esc(option) +
+          (q.optionImageUrls?.[index] ? '<img class="question-option-image" src="' + esc(q.optionImageUrls[index]) + '" alt="Gambar pilihan ' + keys[index].toUpperCase() + '">' : '') + '</span></button>').join('') + '</div>' +
         '<div class="qfoot"><div class="btn-row"><button type="button" class="btn btn--ghost btn--sm" data-prev' +
         (state.current === 0 ? ' disabled' : '') + '>Sebelumnya</button><button type="button" class="btn btn--ghost btn--sm flag-btn" data-flag>Tandai</button></div>' +
         '<button type="button" class="btn btn--primary" data-next>' + (state.current === total - 1 ? 'Selesaikan' : 'Berikutnya') + '</button></div></section>';

@@ -6,6 +6,7 @@ namespace App;
 
 use App\Enums\Province;
 use App\Models\LeaderboardBot;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class LeaderboardSimulation
@@ -44,8 +45,66 @@ class LeaderboardSimulation
         });
     }
 
+    /** @return array{national: int, local: int} */
+    public function populationCounts(): array
+    {
+        $settings = DB::table('leaderboard_settings')->where('id', 1)->first();
+
+        return ['national' => (int) ($settings?->national_bot_count ?? 5000), 'local' => (int) ($settings?->local_bot_count ?? 100)];
+    }
+
+    public function setCounts(bool $enabled, int $national, int $local): void
+    {
+        DB::transaction(function () use ($enabled, $national, $local): void {
+            DB::table('leaderboard_settings')->updateOrInsert(['id' => 1], [
+                'simulations_enabled' => $enabled, 'national_bot_count' => $national, 'local_bot_count' => $local,
+            ]);
+            $this->seedScopeCounts();
+        });
+    }
+
+    public function bots(?Province $province = null): Builder
+    {
+        $query = LeaderboardBot::query()->where('is_visible', true);
+        $settings = DB::table('leaderboard_settings')->where('id', 1)->first();
+        if ($settings?->national_bot_count === null) {
+            return $query->when($province !== null, fn ($query) => $query->where('province', $province->value));
+        }
+        $counts = $this->populationCounts();
+        $ids = LeaderboardBot::query()->where('is_visible', true)
+            ->when($province !== null, fn ($query) => $query->where('province', $province->value))
+            ->select('id')->orderBy('id')->limit($province === null ? $counts['national'] : $counts['local']);
+
+        return $query->whereIn('id', DB::query()->fromSub($ids, 'selected_bots')->select('id'));
+    }
+
+    private function seedScopeCounts(): void
+    {
+        $counts = $this->populationCounts();
+        $provinces = Province::cases();
+        $usedNames = array_fill_keys(LeaderboardBot::query()->pluck('name')->all(), true);
+        foreach ($provinces as $index => $province) {
+            $target = max($counts['local'], intdiv($counts['national'], count($provinces)) + ($index < $counts['national'] % count($provinces) ? 1 : 0));
+            $profiles = LeaderboardBot::query()->where('province', $province->value)->orderBy('id')->get();
+            for ($place = $profiles->count(); $place < $target; $place++) {
+                $profiles->push(LeaderboardBot::query()->create([
+                    'source_key' => 'scope-'.$province->name.'-'.bin2hex(random_bytes(8)),
+                    'province' => $province,
+                ] + $this->generateProfile($usedNames)));
+            }
+            $visibleIds = $profiles->take($target)->modelKeys();
+            LeaderboardBot::query()->where('province', $province->value)->whereNotIn('id', $visibleIds)->where('is_visible', true)->update(['is_visible' => false]);
+            LeaderboardBot::query()->whereIn('id', $visibleIds)->where('is_visible', false)->update(['is_visible' => true]);
+        }
+    }
+
     public function seedMissing(): void
     {
+        if (DB::table('leaderboard_settings')->where('id', 1)->value('national_bot_count') !== null) {
+            $this->seedScopeCounts();
+
+            return;
+        }
         $range = $this->populationRange();
         $existingProfiles = LeaderboardBot::query()->orderBy('id')->get();
         $usedNames = array_fill_keys($existingProfiles->pluck('name')->all(), true);

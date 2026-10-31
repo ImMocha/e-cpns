@@ -9,7 +9,7 @@
     @foreach ($ownedPackages as $owned)
     <article class="card owned-package" role="group" aria-roledescription="slide" aria-label="{{ $loop->iteration }} dari {{ $ownedPackages->count() }}">
         <header class="owned-package__head">
-            <div class="owned-package__identity"><span class="owned-package__icon" aria-hidden="true"><svg data-icon="package"></svg></span><div><span class="eyebrow">Paket Belajar · #{{ $owned->id }}</span><h3 class="owned-package__name">{{ $owned->name }}</h3></div></div>
+            <div class="owned-package__identity"><span class="owned-package__icon" aria-hidden="true"><svg data-icon="package"></svg></span><div><span class="eyebrow">Paket Belajar</span><h3 class="owned-package__name">{{ $owned->name }}</h3></div></div>
             <span class="badge badge--{{ $owned->isActive() ? 'mint' : 'amber' }} badge--flat">{{ $owned->statusLabel() }}</span>
         </header>
         <div class="owned-package__body">
@@ -18,7 +18,7 @@
                 <div><dt><svg data-icon="clock" aria-hidden="true"></svg> Aktif sejak</dt><dd><x-local-time :value="$owned->starts_at" format="d M Y" /><small><x-local-time :value="$owned->starts_at" format="H:i" /></small></dd></div>
                 <div><dt><svg data-icon="calendar" aria-hidden="true"></svg> Berlaku sampai</dt><dd><x-local-time :value="$owned->expires_at" format="d M Y" fallback="Tanpa batas waktu" />@if ($owned->expires_at)<small><x-local-time :value="$owned->expires_at" format="H:i" /></small>@endif</dd></div>
                 <div><dt><svg data-icon="timer" aria-hidden="true"></svg> Kuota tryout tersisa</dt><dd>{{ $owned->remainingTryouts() ?? 'Tanpa batas' }}@if ($owned->tryout_quota !== null)<small>dari {{ $owned->tryout_quota }} sesi</small>@else<small>Tanpa batas sesi</small>@endif</dd></div>
-                <div><dt><svg data-icon="layers" aria-hidden="true"></svg> Konten belajar</dt><dd>{{ $owned->tier === \App\Enums\PackageTier::Premium ? 'Seluruh konten SKD' : ($owned->materials->count() + $owned->exams->count()).' konten' }}<small>{{ $owned->materials->count() }} materi · {{ $owned->exams->count() }} sesi soal</small></dd></div>
+                <div><dt><svg data-icon="layers" aria-hidden="true"></svg> Akses Belajar</dt><dd>{{ $owned->tier === \App\Enums\PackageTier::Premium ? 'Seluruh konten SKD' : ($owned->materials->count() + $owned->exams->count()).' konten' }}<small>{{ $owned->materials->count() }} materi · {{ $owned->exams->count() }} sesi soal</small></dd></div>
             </dl>
             <div class="owned-package__leaderboard"><span class="owned-package__trophy" aria-hidden="true"><svg data-icon="trophy"></svg></span><div><span>Akses leaderboard</span><strong>{{ $owned->leaderboard_access->label() }}</strong></div></div>
             <div class="owned-package__allowance">

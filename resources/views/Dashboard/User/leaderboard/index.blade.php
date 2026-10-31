@@ -1,5 +1,5 @@
 @extends('layouts.user.main')
-@section('title', 'Leaderboard — Ganesha Nusa CPNS Online')
+@section('title', 'Leaderboard — Ganesha Nusa')
 @section('content')
 <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('dashboard') }}">Dashboard</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">Leaderboard</span></nav>
 <header class="page-head">
@@ -36,7 +36,7 @@
             <article class="card card--pop">
                 <div class="stat__label">Peringkatmu · {{ $scope === 'local' ? $province->value : 'Nasional' }}</div>
                 <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? '#'.$ownRank->position : '—' }}</div>
-                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Dari '.$participants->total().' entri peringkat'.($simulatedCount ? ', termasuk '.$simulatedCount.' virtual.' : ' peserta.') : 'Selesaikan satu tryout untuk mendapatkan peringkat.' }}</p>
+                <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Dari '.$totalParticipants.' entri peringkat'.($simulatedCount ? ', termasuk '.$simulatedCount.' virtual.' : ' peserta.') : 'Selesaikan satu tryout untuk mendapatkan peringkat.' }}</p>
             </article>
             <article class="card">
                 <div class="stat__label">Nilai terbaikmu</div>
@@ -45,7 +45,7 @@
             </article>
             <article class="card">
                 <div class="stat__label">Entri dalam peringkat</div>
-                <div class="stat__value" style="margin-top:.5rem">{{ number_format($participants->total(), 0, ',', '.') }}</div>
+                <div class="stat__value" style="margin-top:.5rem">{{ number_format($totalParticipants, 0, ',', '.') }}</div>
                 <p class="text-sm text-soft" style="margin-top:.5rem">{{ $simulatedCount ? $simulatedCount.' peserta virtual · ' : '' }}{{ $scope === 'local' ? 'Provinsi '.$province->value : 'Seluruh Indonesia' }}</p>
             </article>
         </section>
@@ -60,6 +60,7 @@
             @if ($simulatedCount > 0)
                 <p class="text-xs text-soft" style="margin-bottom:1rem">Peserta virtual memakai nilai contoh berupa poin bulat dengan acuan tryout {{ $maximumScore ?? 550 }} poin dan ikut dihitung dalam peringkat selama fitur aktif.</p>
             @endif
+            <p class="text-sm text-soft" style="margin-bottom:1rem">Daftar menampilkan maksimal {{ number_format($displayLimit, 0, ',', '.') }} peserta. Peringkatmu tetap dihitung dari seluruh peserta dan ditampilkan di atas, termasuk ketika berada di luar daftar.</p>
             <div class="table-wrap" style="border:none;box-shadow:none">
                 <table class="table">
                     <thead><tr><th class="num">Peringkat</th><th>Peserta</th><th>Provinsi</th><th class="num">Skor (poin)</th></tr></thead>

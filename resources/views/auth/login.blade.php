@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Masuk — Ganesha Nusa CPNS Online')
+@section('title', 'Masuk — Ganesha Nusa')
 
 @section('body-attributes')
     style="min-height:100dvh;display:flex;flex-direction:column"
@@ -86,10 +86,10 @@
     <div class="split-media__blob" style="background:var(--primary-100)" aria-hidden="true"></div>
     <div class="card card--pad-0" style="position:relative;z-index:1;border-radius:var(--r-lg);overflow:hidden">
       <div style="aspect-ratio:4/3;overflow:hidden;border-bottom:2px solid var(--ink)">
-        <img src="{{ asset('images/hero-tryout.jpg') }}" alt="Ilustrasi peserta belajar prepping CPNS" style="width:100%;height:100%;object-fit:cover" width="960" height="720">
+        <img src="{{ asset('images/hero-general-learning.webp') }}" alt="Ilustrasi peserta belajar bersama" style="width:100%;height:100%;object-fit:cover" width="960" height="720">
       </div>
       <div style="padding:1.75rem">
-        <h2 class="card__title">Lanjutkan persiapan CPNS kamu</h2>
+        <h2 class="card__title">Lanjutkan perjalanan belajar kamu</h2>
         <p class="text-soft" style="margin-top:.75rem">Akses materi, kerjakan latihan dan tryout, lalu pantau hasil belajarmu dari satu akun.</p>
       </div>
     </div>

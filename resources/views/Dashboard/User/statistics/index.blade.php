@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Statistik — Ganesha Nusa CPNS Online')
+@section('title', 'Statistik — Ganesha Nusa')
 
 @section('content')
     <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('dashboard') }}">Dashboard</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">Statistik</span></nav>

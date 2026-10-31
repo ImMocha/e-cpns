@@ -43,6 +43,16 @@
 .question-options-editor { display: flex; flex-direction: column; gap: .9rem; }
 .question-option-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) 36px; gap: .6rem; align-items: start; }
 .question-option-row .textarea { min-height: 68px; resize: vertical; font-size: 13px; }
+.question-option-content { display: flex; flex-direction: column; gap: .6rem; min-width: 0; padding: .75rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.question-option-upload { display: flex; flex-direction: column; gap: .4rem; min-width: 0; font-size: 12px; color: var(--text-soft); }
+.question-option-upload .input { width: 100%; min-width: 0; padding: .5rem; font-size: 12px; }
+.question-option-content .check { font-size: 12px; }
+.question-option-image, .question-explanation-image { display: block; width: auto; max-width: 100%; height: auto; object-fit: contain; border: 1px solid var(--border); border-radius: 10px; background: white; margin-top: .6rem; }
+.question-option-image { max-height: 260px; }
+.question-explanation-image { max-height: 480px; }
+.question-option-thumbnail { max-height: 140px; align-self: flex-start; margin-top: 0; }
+.question-option-content [hidden], .question-explanation-image[hidden], [data-explanation-image-error][hidden], [data-existing-explanation-image-control][hidden] { display: none; }
+.question-preview-option-content, .opt__text { flex: 1; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 .question-key-picker { display: flex; flex-direction: column; align-items: center; gap: .4rem; cursor: pointer; padding-top: .3rem; }
 .question-key-picker input { width: 16px; height: 16px; accent-color: var(--primary); }
 .question-key-picker span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border-strong); font-weight: 800; }

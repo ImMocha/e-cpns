@@ -137,7 +137,7 @@ class ExamCatalog
         $canViewExplanations = $user->canViewExplanations();
         $reviewQuestions = array_map(
             fn (array $question): array => $canViewExplanations
-                ? $question : array_diff_key($question, array_flip(['explain', 'explainHtml'])),
+                ? $question : array_diff_key($question, array_flip(['explain', 'explainHtml', 'explanation_image_path'])),
             $attempt?->question_snapshot['questions'] ?? [],
         );
 

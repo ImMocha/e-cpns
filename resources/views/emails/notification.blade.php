@@ -42,7 +42,7 @@
                   <td width="52" height="52" align="center" valign="middle" bgcolor="#FFFDF7" style="width:52px;height:52px;background-color:#FFFDF7;border-radius:50%;"><img src="{{ asset('images/ganesha-nusa-logo.png') }}" alt="Logo Ganesha Nusa" width="52" height="52" style="display:block;width:52px;height:52px;border:0;"></td>
                   <td style="padding-left:14px;">
                     <p class="email-brand" style="margin:0;color:#16324F;font-family:'Outfit',Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;line-height:1.2;">{{ config('app.name') }}</p>
-                    <p style="margin:5px 0 0;color:#64809A;font-size:10px;font-weight:700;letter-spacing:1.8px;line-height:1.5;">BELAJAR &amp; TRYOUT CPNS</p>
+                    <p style="margin:5px 0 0;color:#64809A;font-size:10px;font-weight:700;letter-spacing:1.8px;line-height:1.5;">BELAJAR &amp; TRYOUT</p>
                   </td>
                 </tr>
               </table>
@@ -98,7 +98,7 @@
           <tr>
             <td class="email-footer" align="center" style="padding:32px 24px 0;">
               <p style="margin:0;color:#16324F;font-family:'Outfit',Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;line-height:1.6;">Langkah kecil, persiapan lebih baik.</p>
-              <p style="margin:8px 0 0;color:#64809A;font-size:11px;line-height:1.9;">Dikirim otomatis oleh {{ config('app.name') }}.<br>Teman belajar dan persiapan CPNS kamu.</p>
+              <p style="margin:8px 0 0;color:#64809A;font-size:11px;line-height:1.9;">Dikirim otomatis oleh {{ config('app.name') }}.<br>Teman belajar untuk setiap langkahmu.</p>
               <p style="margin:8px 0 0;color:#64809A;font-size:11px;line-height:1.9;">Butuh bantuan? <a href="{{ config('app.contact_whatsapp') }}" style="color:#01609B;text-decoration:underline;">Hubungi Kami</a> atau <a href="mailto:{{ config('app.contact_email') }}" style="color:#01609B;text-decoration:underline;">{{ config('app.contact_email') }}</a></p>
               @if ($preferencesUrl)
                 <p style="margin:16px 0 0;font-size:11px;line-height:1.8;"><a href="{{ $preferencesUrl }}" style="display:inline-block;padding:8px;color:#01609B;text-decoration:underline;">Atur preferensi email</a></p>

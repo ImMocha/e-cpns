@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Lupa Password — Ganesha Nusa CPNS Online')
+@section('title', 'Lupa Password — Ganesha Nusa')
 
 @section('content')
 <header class="nav auth-nav">

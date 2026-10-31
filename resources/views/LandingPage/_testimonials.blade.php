@@ -1,7 +1,7 @@
 <section class="section testimonial-page" id="testimoni">
     <div class="container container--wide testimonial-page__layout">
         <header class="section-head testimonial-page__heading">
-            <div><span class="eyebrow">Cerita Peserta</span><h2>Testimoni Peserta</h2><p class="text-soft">Pengalaman belajar dan persiapan CPNS bersama Ganesha Nusa.</p></div>
+            <div><span class="eyebrow">Cerita Peserta</span><h2>Testimoni Peserta</h2><p class="text-soft">Pengalaman belajar bersama Ganesha Nusa.</p></div>
             <a class="btn btn--primary" href="#kirim-testimoni">Tulis Testimoni <svg data-icon="pen-line"></svg></a>
         </header>
         @if (session('testimonial_success'))<div class="card mb-6" role="status">{{ session('testimonial_success') }}</div>@endif

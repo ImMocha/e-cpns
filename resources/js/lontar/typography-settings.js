@@ -49,14 +49,14 @@ if (settings) {
             preview.style.setProperty('--font-body', enabled ? stack(body) : '"Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif');
             preview.style.fontFamily = 'var(--font-body)';
             preview.querySelector('[data-font-status]').textContent = enabled ? 'Font pilihan' : 'Font bawaan';
-            preview.querySelector('[data-font-preview-text]').textContent = sample.value || 'Contoh teks pembelajaran dan latihan CPNS.';
+            preview.querySelector('[data-font-preview-text]').textContent = sample.value || 'Contoh teks pembelajaran dan latihan.';
         });
     }
 
     settings.querySelectorAll('[data-font-select], [data-font-scope]').forEach(input => input.addEventListener('change', update));
     sample.addEventListener('input', () => {
         settings.querySelectorAll('[data-font-preview-text]').forEach(element => {
-            element.textContent = sample.value || 'Contoh teks pembelajaran dan latihan CPNS.';
+            element.textContent = sample.value || 'Contoh teks pembelajaran dan latihan.';
         });
     });
     settings.querySelector('[data-font-reset]').addEventListener('click', () => {

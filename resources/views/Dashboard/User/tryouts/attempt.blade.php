@@ -1,5 +1,5 @@
 @extends('layouts.exam')
-@section('title', $attempt->title.' — Ganesha Nusa CPNS Online')
+@section('title', $attempt->title.' — Ganesha Nusa')
 @section('exam-bar')
 <header class="tryout-bar">
   <div class="container container--wide tryout-bar__inner">

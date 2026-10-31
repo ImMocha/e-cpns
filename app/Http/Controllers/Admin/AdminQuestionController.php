@@ -103,6 +103,17 @@ class AdminQuestionController extends Controller
         ])->setPrivate();
     }
 
+    public function media(Question $question, string $media): StreamedResponse
+    {
+        $path = $media === 'explanation-image' ? $question->explanation_image_path
+            : (preg_match('/^option-([0-9])$/', $media, $matches) ? ($question->option_image_paths[(int) $matches[1]] ?? null) : null);
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path, null, [
+            'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
     public function edit(Question $question): View
     {
         return $this->form($question);
@@ -151,6 +162,9 @@ class AdminQuestionController extends Controller
                 'status' => $question->status->value,
                 'image_url' => $question->image_path ? route('admin.questions.image', $question) : null,
                 'video_url' => $question->video_path ? route('admin.questions.video', $question) : null,
+                'explanation_image_url' => $question->explanation_image_path ? route('admin.questions.media', [$question, 'explanation-image']) : null,
+                'option_image_urls' => array_map(fn (int $index): ?string => ($question->option_image_paths[$index] ?? null)
+                    ? route('admin.questions.media', [$question, 'option-'.$index]) : null, array_keys($question->options)),
                 'usage_count' => $question->exams_count,
                 'update_url' => route('admin.questions.update', $question),
             ],
@@ -170,7 +184,8 @@ class AdminQuestionController extends Controller
 
     private function persist(QuestionRequest $request, Question $question): void
     {
-        $oldPaths = ['image' => $question->image_path, 'video' => $question->video_path];
+        $oldPaths = ['image' => $question->image_path, 'video' => $question->video_path, 'explanation_image' => $question->explanation_image_path];
+        $oldOptionPaths = $question->option_image_paths ?? [];
         $newPaths = [];
         $attributes = $request->questionAttributes();
         $attributes['published_at'] = $attributes['status'] === QuestionStatus::Published->value ? ($question->published_at ?? now()) : null;
@@ -184,6 +199,12 @@ class AdminQuestionController extends Controller
                 $newPaths[$media] = $request->file($media)?->store('questions/'.$media.'s', 'local');
                 abort_if($newPaths[$media] === false, 500, 'Media soal gagal disimpan. Silakan coba lagi.');
                 $attributes[$media.'_path'] = $newPaths[$media] ?: ($request->boolean('remove_'.$media) ? null : $oldPath);
+            }
+            $attributes['option_image_paths'] = [];
+            foreach (array_keys($attributes['options']) as $index) {
+                $newPaths['option_'.$index] = $request->file('option_images.'.$index)?->store('questions/options', 'local');
+                abort_if($newPaths['option_'.$index] === false, 500, 'Gambar pilihan gagal disimpan. Silakan coba lagi.');
+                $attributes['option_image_paths'][] = $newPaths['option_'.$index] ?: $request->retainedOptionImagePath($index);
             }
             DB::transaction(function () use ($request, $question, $attributes): void {
                 $question->fill($attributes)->save();
@@ -201,8 +222,9 @@ class AdminQuestionController extends Controller
             throw $exception;
         }
 
-        foreach ($oldPaths as $media => $oldPath) {
-            if ($oldPath && $oldPath !== $question->{$media.'_path'}
+        $retainedPaths = [$question->image_path, $question->video_path, $question->explanation_image_path, ...$question->option_image_paths];
+        foreach (array_unique([...array_values($oldPaths), ...$oldOptionPaths]) as $oldPath) {
+            if ($oldPath && ! in_array($oldPath, $retainedPaths, true)
                 && ! ExamAttempt::query()->whereJsonContains('question_snapshot->mediaPaths', $oldPath)->exists()) {
                 Storage::disk('local')->delete($oldPath);
             }

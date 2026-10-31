@@ -90,7 +90,7 @@
     "isDynamicEntry": true
   },
   "node_modules/pdfjs-dist/build/pdf.mjs": {
-    "file": "assets/pdf-BcwnDi8c.js",
+    "file": "assets/pdf-D63GpHIa.js",
     "name": "pdf",
     "src": "node_modules/pdfjs-dist/build/pdf.mjs",
     "isDynamicEntry": true,
@@ -103,7 +103,7 @@
     "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
   },
   "resources/css/app.css": {
-    "file": "assets/app-BzVKQTZs.css",
+    "file": "assets/app-DfvCV_UW.css",
     "name": "app",
     "names": [
       "app.css"
@@ -112,7 +112,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-sKQXxzr9.js",
+    "file": "assets/app-CiC9GgdE.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -129,7 +129,7 @@
     ]
   },
   "resources/js/lontar/feature-help.js": {
-    "file": "assets/feature-help-BiggSPfk.js",
+    "file": "assets/feature-help-BDA3-PHb.js",
     "name": "feature-help",
     "src": "resources/js/lontar/feature-help.js",
     "isDynamicEntry": true,
@@ -159,7 +159,7 @@
     "isDynamicEntry": true
   },
   "resources/js/lontar/typography-settings.js": {
-    "file": "assets/typography-settings-Bw08qNrF.js",
+    "file": "assets/typography-settings-U4Ua_LUF.js",
     "name": "typography-settings",
     "src": "resources/js/lontar/typography-settings.js",
     "isDynamicEntry": true

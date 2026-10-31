@@ -36,14 +36,14 @@ class LeaderboardSimulationTest extends TestCase
         $this->assertDatabaseHas('leaderboard_settings', ['id' => 1, 'simulations_enabled' => true]);
         $counts = LeaderboardBot::query()->selectRaw('province, COUNT(*) AS total')->groupBy('province')->pluck('total', 'province');
         $this->assertCount(38, $counts);
-        $this->assertGreaterThanOrEqual(15, $counts->min());
-        $this->assertLessThanOrEqual(25, $counts->max());
+        $this->assertSame(131, (int) $counts->min());
+        $this->assertSame(132, (int) $counts->max());
         $total = LeaderboardBot::query()->count();
-        $localCount = (int) $counts[Province::KalimantanSelatan->value];
+        $localCount = 100;
         $this->assertDatabaseCount('users', 2);
         $this->actingAs($member)->get(route('leaderboard.index'))
             ->assertSee('Peserta virtual memakai nilai contoh')->assertDontSee('· Virtual')
-            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->total() === $localCount + 1)
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->total() === $localCount)
             ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->score === 80);
 
         $this->actingAs($admin)->patch(route('admin.leaderboard-simulation.update'), ['enabled' => '0'])

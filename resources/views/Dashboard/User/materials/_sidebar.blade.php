@@ -16,7 +16,7 @@
       <a class="topic-study__lesson {{ $lesson->is($material) ? 'is-active' : '' }}"
          href="{{ route('materials.topic', ['topic' => $lesson->topic_id, 'material' => $lesson->id, 'show_drafts' => $showDrafts ? 1 : null]) }}"
          @if ($lesson->is($material)) aria-current="page" @endif>
-        <span class="topic-study__lesson-number">@if (isset($completedMaterialIds[$lesson->id]))<svg data-icon="check"></svg>@else{{ $loop->iteration }}@endif</span>
+        <span class="topic-study__lesson-number {{ isset($completedMaterialIds[$lesson->id]) ? 'is-complete' : '' }}">@if (isset($completedMaterialIds[$lesson->id]))<svg data-icon="check"></svg>@else{{ $loop->iteration }}@endif</span>
         <span class="topic-study__lesson-info">
           <strong>{{ $lesson->title }}</strong>
           <span class="text-xs text-soft"><svg data-icon="{{ $open ? $lesson->type->icon() : 'lock' }}"></svg>

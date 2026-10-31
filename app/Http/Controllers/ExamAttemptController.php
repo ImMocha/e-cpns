@@ -104,9 +104,16 @@ class ExamAttemptController extends Controller
     public function media(Request $request, ExamAttempt $examAttempt, string $question, string $media): BinaryFileResponse
     {
         $this->ensureOwner($request, $examAttempt);
-        abort_unless(in_array($media, ['image', 'video'], true), 404);
         $snapshot = collect($examAttempt->question_snapshot['questions'])->first(fn (array $item): bool => (string) $item['id'] === $question);
-        $path = $snapshot[$media.'_path'] ?? null;
+        $path = null;
+        if (in_array($media, ['image', 'video'], true)) {
+            $path = $snapshot[$media.'_path'] ?? null;
+        } elseif ($media === 'explanation-image') {
+            abort_unless($examAttempt->status === ExamAttempt::COMPLETED && $request->user()->canViewExplanations(), 404);
+            $path = $snapshot['explanation_image_path'] ?? null;
+        } elseif (preg_match('/^option-([0-9])$/', $media, $matches)) {
+            $path = $snapshot['option_image_paths'][(int) $matches[1]] ?? null;
+        }
         $disk = Storage::disk('local');
         abort_unless($path && $disk->exists($path), 404);
         $headers = ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff'];

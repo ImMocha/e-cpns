@@ -42,7 +42,13 @@ class QuestionRequest extends FormRequest
             'section_id' => ['required', 'integer', Rule::exists('sections', 'id')->whereNull('deleted_at')],
             'body' => ['required', 'string', 'max:50000'],
             'options' => ['required', 'array', 'list', 'min:2', 'max:10'],
-            'options.*' => ['required', 'string', 'max:2000', 'distinct:strict'],
+            'options.*' => ['nullable', 'string', 'max:2000'],
+            'option_images' => ['sometimes', 'array:0,1,2,3,4,5,6,7,8,9', 'max:10'],
+            'option_images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'option_image_sources' => ['sometimes', 'array', 'list', 'max:10'],
+            'option_image_sources.*' => ['nullable', 'integer', 'min:0', 'max:9'],
+            'remove_option_images' => ['sometimes', 'array:0,1,2,3,4,5,6,7,8,9', 'max:10'],
+            'remove_option_images.*' => ['boolean'],
             'scoring_type' => ['required', Rule::enum(QuestionScoring::class)],
             'correct_option' => ['exclude_if:scoring_type,weighted', 'required', 'integer', 'min:0', 'max:9'],
             'option_scores' => ['exclude_unless:scoring_type,weighted', 'required', 'array', 'list', 'min:2', 'max:10'],
@@ -53,6 +59,8 @@ class QuestionRequest extends FormRequest
             'status' => ['required', Rule::enum(QuestionStatus::class)],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['sometimes', 'boolean'],
+            'explanation_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_explanation_image' => ['sometimes', 'boolean'],
             'video' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm', 'extensions:mp4,webm', 'max:51200'],
             'remove_video' => ['sometimes', 'boolean'],
             'exam_ids' => ['sometimes', 'array', 'list', 'max:2000'],
@@ -64,6 +72,35 @@ class QuestionRequest extends FormRequest
     public function after(): array
     {
         return [function (Validator $validator): void {
+            if (! $validator->errors()->hasAny(['options', 'options.*', 'option_image_sources', 'option_image_sources.*', 'option_images', 'option_images.*', 'remove_option_images', 'remove_option_images.*'])) {
+                $options = $this->input('options');
+                if ($this->has('option_image_sources') && count($this->input('option_image_sources')) !== count($options)) {
+                    $validator->errors()->add('option_image_sources', 'Urutan gambar pilihan tidak valid.');
+                }
+                $seen = [];
+                foreach ($options as $index => $option) {
+                    $imagePath = $this->retainedOptionImagePath($index);
+                    $hasUpload = $this->hasFile('option_images.'.$index);
+                    if (trim((string) $option) === '' && ! $hasUpload && ! $imagePath) {
+                        $validator->errors()->add('options.'.$index, 'Setiap pilihan jawaban harus diisi.');
+                    }
+                    $signature = json_encode([(string) $option, $imagePath]);
+                    if (! $hasUpload && isset($seen[$signature])) {
+                        $validator->errors()->add('options.'.$index, 'Pilihan jawaban tidak boleh sama.');
+                        $validator->errors()->add('options.'.$seen[$signature], 'Pilihan jawaban tidak boleh sama.');
+                    }
+                    if (! $hasUpload) {
+                        $seen[$signature] = $index;
+                    }
+                }
+                foreach (['option_images', 'remove_option_images'] as $field) {
+                    foreach (array_keys($field === 'option_images' ? $this->file($field, []) : $this->input($field, [])) as $index) {
+                        if (! array_key_exists($index, $options)) {
+                            $validator->errors()->add($field.'.'.$index, 'Pilihan jawaban untuk gambar ini tidak tersedia.');
+                        }
+                    }
+                }
+            }
             if (! $validator->errors()->has('body') && ArticleContent::text(ArticleContent::sanitize($this->input('body'))) === '') {
                 $validator->errors()->add('body', 'Pertanyaan harus berisi teks yang dapat dibaca.');
             }
@@ -83,10 +120,11 @@ class QuestionRequest extends FormRequest
                     }
                 }
             }
-            if (! $validator->errors()->has('explanation') && $this->input('status') === 'published' && ArticleContent::text(ArticleContent::sanitize($this->input('explanation'))) === '') {
+            $question = $this->route('question');
+            $hasExplanationImage = $this->hasFile('explanation_image') || ($question instanceof Question && $question->explanation_image_path && ! $this->boolean('remove_explanation_image'));
+            if (! $validator->errors()->has('explanation') && $this->input('status') === 'published' && ! $hasExplanationImage && ArticleContent::text(ArticleContent::sanitize($this->input('explanation'))) === '') {
                 $validator->errors()->add('explanation', 'Lengkapi pembahasan sebelum menerbitkan soal.');
             }
-            $question = $this->route('question');
             if ($question instanceof Question && $this->has('exam_ids') && ! $validator->errors()->hasAny(['exam_ids', 'exam_ids.*'])
                 && Question::query()->visibleToMembers()->whereKey($question->id)->exists()) {
                 $removedExams = $question->exams()->published()->whereNotIn('exams.id', $this->input('exam_ids'))
@@ -123,7 +161,17 @@ class QuestionRequest extends FormRequest
     {
         return ['title' => 'judul soal', 'section_id' => 'bidang', 'body' => 'pertanyaan', 'difficulty' => 'tingkat kesulitan',
             'status' => 'status', 'explanation' => 'pembahasan', 'image' => 'gambar soal', 'video' => 'video soal', 'correct_option' => 'kunci jawaban',
-            'scoring_type' => 'jenis penilaian', 'option_scores' => 'skor pilihan', 'exam_ids' => 'sesi tujuan'];
+            'scoring_type' => 'jenis penilaian', 'option_scores' => 'skor pilihan', 'exam_ids' => 'sesi tujuan',
+            'option_images.*' => 'gambar pilihan', 'explanation_image' => 'gambar pembahasan'];
+    }
+
+    public function retainedOptionImagePath(int $index): ?string
+    {
+        $question = $this->route('question');
+        $source = $this->has('option_image_sources') ? $this->input('option_image_sources.'.$index) : $index;
+
+        return $question instanceof Question && $source !== null && ! $this->boolean('remove_option_images.'.$index)
+            ? ($question->option_image_paths[$source] ?? null) : null;
     }
 
     /** @return array<string, mixed> */
@@ -133,6 +181,7 @@ class QuestionRequest extends FormRequest
         $data['option_scores'] = $data['scoring_type'] === 'weighted' ? array_map('intval', $data['option_scores']) : null;
         $data['correct_option'] = $data['scoring_type'] === 'weighted' ? null : (int) $data['correct_option'];
         $data['title'] = trim($data['title']);
+        $data['options'] = array_map(fn (?string $option): string => trim((string) $option), $data['options']);
         $data['body'] = ArticleContent::sanitize($data['body']);
         $data['explanation'] = ArticleContent::sanitize($data['explanation'] ?? '');
 

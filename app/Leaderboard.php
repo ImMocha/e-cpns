@@ -9,7 +9,6 @@ use App\Enums\QuestionScoring;
 use App\Enums\UserRole;
 use App\Models\Exam;
 use App\Models\ExamAttempt;
-use App\Models\LeaderboardBot;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder;
@@ -62,8 +61,7 @@ class Leaderboard
         $participants = $realParticipants->toBase();
 
         if ($this->simulation->enabled()) {
-            $simulatedParticipants = LeaderboardBot::query()->where('is_visible', true)
-                ->when($province !== null, fn (EloquentBuilder $query): EloquentBuilder => $query->where('province', $province->value))
+            $simulatedParticipants = $this->simulation->bots($province)
                 ->select(['id', 'name', 'province']);
 
             if ($maximumScore !== null) {

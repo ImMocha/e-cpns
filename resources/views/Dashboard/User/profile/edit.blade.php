@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Profil Saya — Ganesha Nusa CPNS Online')
+@section('title', 'Profil Saya — Ganesha Nusa')
 
 @section('content')
     @include('components.flash')

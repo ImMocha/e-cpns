@@ -1,6 +1,6 @@
 @extends('layouts.user.main')
 
-@section('title', 'Dashboard — Ganesha Nusa CPNS Online')
+@section('title', 'Dashboard — Ganesha Nusa')
 
 @section('content')
     @php($learningAllowed = $user->canAccessLearningFeatures())

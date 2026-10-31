@@ -17,13 +17,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['section_id', 'title', 'body', 'options', 'correct_option', 'scoring_type', 'option_scores', 'shuffle_options', 'source_key', 'explanation', 'image_path', 'video_path', 'difficulty', 'status', 'published_at', 'created_by', 'updated_by'])]
+#[Fillable(['section_id', 'title', 'body', 'options', 'correct_option', 'scoring_type', 'option_scores', 'shuffle_options', 'source_key', 'explanation', 'image_path', 'video_path', 'option_image_paths', 'explanation_image_path', 'difficulty', 'status', 'published_at', 'created_by', 'updated_by'])]
 class Question extends Model
 {
     /** @use HasFactory<QuestionFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $hidden = ['correct_option', 'option_scores', 'explanation'];
+    protected $hidden = ['correct_option', 'option_scores', 'explanation', 'explanation_image_path'];
 
     protected $attributes = ['scoring_type' => 'binary', 'shuffle_options' => true];
 
@@ -40,7 +40,7 @@ class Question extends Model
 
     protected function casts(): array
     {
-        return ['options' => 'array', 'option_scores' => 'array', 'correct_option' => 'integer', 'scoring_type' => QuestionScoring::class,
+        return ['options' => 'array', 'option_image_paths' => 'array', 'option_scores' => 'array', 'correct_option' => 'integer', 'scoring_type' => QuestionScoring::class,
             'shuffle_options' => 'boolean', 'difficulty' => QuestionDifficulty::class,
             'status' => QuestionStatus::class, 'published_at' => 'datetime'];
     }

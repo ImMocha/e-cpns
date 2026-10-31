@@ -22,7 +22,7 @@ class HomeController extends Controller
     public function __invoke(Leaderboard $leaderboard, Request $request, ExamCatalog $catalog): View
     {
         return view('LandingPage.index', [
-            'metaDescription' => 'Platform belajar dan simulasi tryout CAT CPNS: materi PDF, video pembelajaran, latihan soal, pembahasan, statistik nilai, dan leaderboard.',
+            'metaDescription' => 'Platform belajar dan simulasi tryout berbagai topik: materi PDF, video pembelajaran, latihan soal, pembahasan, statistik nilai, dan leaderboard.',
             'participantCount' => User::query()->active()->role(UserRole::User)->whereNotNull('email_verified_at')->count(),
             'questionCount' => Question::query()->visibleToMembers()->count(),
             'tryoutCount' => Exam::query()->visibleToMembers()->where('kind', 'tryout')->count(),

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\SectionController as AdminSectionController;
 use App\Http\Controllers\Admin\SlugController;
 use App\Http\Controllers\Admin\TestimonialController as AdminTestimonialController;
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
+use App\Http\Controllers\Admin\TryoutHistoryController;
 use App\Http\Controllers\Admin\TypographySettingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\UserPackageController;
@@ -135,7 +136,7 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::post('/exam-attempts/{examAttempt}/submit', [ExamAttemptController::class, 'submit'])
         ->name('exam-attempts.submit');
     Route::get('/exam-attempts/{examAttempt}/questions/{question}/media/{media}', [ExamAttemptController::class, 'media'])
-        ->whereIn('media', ['image', 'video'])->name('exam-attempts.media');
+        ->where('media', 'image|video|explanation-image|option-[0-9]')->name('exam-attempts.media');
 
     Route::get('/history', HistoryController::class)->name('history.index');
     Route::get('/statistics', StatisticsController::class)->name('statistics.index');
@@ -194,6 +195,7 @@ Route::prefix('admin')
 
         // Pengelolaan user. `users` sebagai segment URL, `user` sebagai nama
         // parameter supaya generated URL dan route-model binding konsisten.
+        Route::get('users/tryout-history', TryoutHistoryController::class)->name('users.tryout-history');
         Route::patch('users/{user}/status', [AdminUserController::class, 'toggleStatus'])->name('users.status');
         Route::resource('users', AdminUserController::class)->parameters(['users' => 'user']);
         Route::get('leaderboard-simulation', [LeaderboardSimulationController::class, 'index'])->name('leaderboard-simulation.index');
@@ -215,6 +217,8 @@ Route::prefix('admin')
 
         Route::get('questions/{question}/image', [AdminQuestionController::class, 'image'])->name('questions.image');
         Route::get('questions/{question}/video', [AdminQuestionController::class, 'video'])->name('questions.video');
+        Route::get('questions/{question}/media/{media}', [AdminQuestionController::class, 'media'])
+            ->where('media', 'explanation-image|option-[0-9]')->name('questions.media');
         Route::resource('questions', AdminQuestionController::class);
         Route::resource('exams', AdminExamController::class)->except('show');
         Route::resource('practices', AdminExamController::class)->except('show')->parameters(['practices' => 'exam']);

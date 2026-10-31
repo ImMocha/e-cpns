@@ -16,6 +16,7 @@
         <p>Lihat data peserta, ubah informasinya, dan aktifkan atau nonaktifkan akun.</p>
       </div>
       <div class="btn-row">
+        <a class="btn btn--ghost" href="{{ route('admin.users.tryout-history') }}"><svg data-icon="clock"></svg> Riwayat Tryout</a>
         <a class="btn btn--primary" href="{{ route('admin.users.create') }}">
           <svg data-icon="user-plus"></svg> Tambah Peserta
         </a>
@@ -138,6 +139,7 @@
                   </td>
                   <td>
                     <div class="flex" style="--gap:.35rem">
+                      <a class="btn btn--ghost btn--square btn--sm" href="{{ route('admin.users.tryout-history', ['user_id' => $user->id]) }}" aria-label="Riwayat tryout {{ $user->name }}" title="Riwayat tryout"><svg data-icon="clock"></svg></a>
                       <a class="btn btn--ghost btn--square btn--sm" href="{{ route('admin.users.edit', $user) }}" aria-label="Ubah {{ $user->name }}">
                         <svg data-icon="pencil"></svg>
                       </a>

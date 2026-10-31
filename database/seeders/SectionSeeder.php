@@ -9,7 +9,7 @@ use App\Models\Section;
 use Illuminate\Database\Seeder;
 
 /**
- * Bidang dasar CPNS plus beberapa bidang tambahan, untuk menunjukkan bahwa
+ * Bidang pembelajaran dasar plus beberapa bidang tambahan, untuk menunjukkan bahwa
  * daftarnya boleh diperluas — bukan enum tertutup.
  */
 class SectionSeeder extends Seeder

@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             MaterialSeeder::class,
             ArticleSeeder::class,
             QuestionSeeder::class,
+            QuestionImageSeeder::class,
             ExamSeeder::class,
             TopicQuizSeeder::class,
             PremiumRf05Seeder::class,
