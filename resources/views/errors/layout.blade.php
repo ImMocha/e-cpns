@@ -85,6 +85,15 @@
             <span class="eyebrow">@yield('label', 'Sejenak, ada kendala')</span>
             <h1 id="page-title">@yield('title')</h1>
             <p class="description">@yield('description')</p>
+            @isset($diagnostic)
+                <aside style="margin-top:24px; padding:16px; border:1px solid var(--line); border-radius:12px; overflow-wrap:anywhere" aria-label="Diagnostik admin">
+                    <strong>Diagnostik admin</strong>
+                    <p>{{ $diagnostic['reason'] }}</p>
+                    <p>{{ $diagnostic['type'] }} &middot; {{ $diagnostic['source'] }}</p>
+                    <p>Kode referensi <code>{{ $diagnostic['reference'] }}</code></p>
+                    <small>Cari kode ini di storage/logs/laravel.log untuk detail lengkap.</small>
+                </aside>
+            @endisset
             <div class="actions">
                 <a class="button button-primary" href="@yield('action-url', route('home'))">@yield('action', 'Kembali ke beranda') <span aria-hidden="true">&rarr;</span></a>
                 <a class="button" href="{{ config('app.contact_whatsapp') }}" target="_blank" rel="noopener noreferrer">Hubungi Kami</a>

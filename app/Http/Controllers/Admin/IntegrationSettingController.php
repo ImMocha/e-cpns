@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\ErrorDiagnostics;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateErrorDiagnosticsRequest;
 use App\Http\Requests\UpdateIntegrationSettingRequest;
 use App\IntegrationSettings;
 use App\MidtransGateway;
@@ -27,6 +29,7 @@ class IntegrationSettingController extends Controller
         $mail = $settings->mail() ?? $settings->mailDefaults();
 
         return view('Dashboard.Admin.settings.index', [
+            'errorDiagnostics' => app(ErrorDiagnostics::class)->current(),
             'maintenanceEnabled' => app()->isDownForMaintenance(),
             'typography' => $typography->current(),
             'fontOptions' => $typography->fonts(),
@@ -42,6 +45,21 @@ class IntegrationSettingController extends Controller
                 ->select('integration_setting_audits.*', 'users.name as actor_name')
                 ->orderByDesc('integration_setting_audits.id')->paginate(15),
         ]);
+    }
+
+    public function updateDiagnostics(UpdateErrorDiagnosticsRequest $request, IntegrationSettings $settings): RedirectResponse
+    {
+        DB::transaction(function () use ($request, $settings): void {
+            IntegrationSetting::query()->firstOrCreate(['key' => 'error_diagnostics']);
+            $record = IntegrationSetting::query()->lockForUpdate()->findOrFail('error_diagnostics');
+            if ($record->version !== $request->integer('version')) {
+                throw ValidationException::withMessages(['version' => 'Pengaturan sudah berubah. Muat ulang halaman sebelum menyimpan.']);
+            }
+            $record->update(['settings' => ['enabled' => $request->boolean('enabled')], 'version' => $record->version + 1, 'updated_by' => $request->user()->id]);
+            $settings->audit('error_diagnostics', 'updated', ['enabled'], $request->user(), $request->ip());
+        });
+
+        return redirect()->route('admin.settings.index')->with('success', 'Pengaturan diagnostik error disimpan.');
     }
 
     public function update(UpdateIntegrationSettingRequest $request, string $integration, IntegrationSettings $settings): RedirectResponse

@@ -34,6 +34,24 @@
 
 @include('Dashboard.Admin.settings._maintenance')
 
+<section class="card card--static mb-6!" id="error-diagnostics">
+    <h2 class="text-xl!">Diagnostik halaman error</h2>
+    <p class="text-sm text-soft mb-4!">Tampilkan penjelasan penyebab, jenis exception, lokasi kode, dan kode referensi log saat admin membuka halaman error. Detail lengkap tersimpan di log server. Pengunjung dan peserta tetap melihat pesan bantuan umum.</p>
+    <form method="POST" action="{{ route('admin.settings.error-diagnostics.update') }}" class="grid gap-5">
+        @csrf
+        @method('PATCH')
+        <input type="hidden" name="integration" value="error_diagnostics">
+        <input type="hidden" name="version" value="{{ $errorDiagnostics['version'] }}">
+        <input type="hidden" name="enabled" value="0">
+        <label class="switch"><input type="checkbox" name="enabled" value="1" @checked(old('integration') === 'error_diagnostics' ? old('enabled') : $errorDiagnostics['enabled'])><span>Tampilkan diagnostik untuk admin</span></label>
+        <div class="field">
+            <label class="label" for="diagnostics-password">Password akun admin</label>
+            <input class="input" type="password" id="diagnostics-password" name="current_password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn--primary justify-self-start" type="submit">Simpan pengaturan diagnostik</button>
+    </form>
+</section>
+
 <div class="grid gap-6 xl:grid-cols-2">
     <section class="card card--static">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4!">

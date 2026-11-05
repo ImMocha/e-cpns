@@ -182,6 +182,8 @@ Route::prefix('admin')
         Route::get('slugs/preview', SlugController::class)->name('slugs.preview');
 
         Route::middleware(SecureIntegrationSettings::class)->group(function (): void {
+            Route::patch('settings/error-diagnostics', [IntegrationSettingController::class, 'updateDiagnostics'])
+                ->middleware('throttle:integration-settings')->name('settings.error-diagnostics.update');
             Route::patch('settings/maintenance', [MaintenanceController::class, 'update'])
                 ->middleware('throttle:integration-settings')->name('settings.maintenance.update');
             Route::get('settings/integrations', [IntegrationSettingController::class, 'index'])->name('settings.index');

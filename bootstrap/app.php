@@ -1,11 +1,13 @@
 <?php
 
+use App\ErrorDiagnostics;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -33,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             : route('dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->respond(fn (Response $response, Throwable $exception, Request $request) => app(ErrorDiagnostics::class)->respond($response, $exception, $request));
         $exceptions->dontFlash(['smtp_password', 'sandbox_server_key', 'production_server_key']);
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*', 'payments/midtrans/notification') || $request->expectsJson(),
