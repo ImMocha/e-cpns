@@ -29,7 +29,7 @@ class Exam extends Model
 
     protected function casts(): array
     {
-        return ['question_count' => 'integer', 'duration_minutes' => 'integer', 'points_per_correct' => 'integer',
+        return ['position' => 'integer', 'question_count' => 'integer', 'duration_minutes' => 'integer', 'points_per_correct' => 'integer',
             'penalty_wrong' => 'integer', 'passing_score' => 'integer', 'random_questions' => 'boolean',
             'random_options' => 'boolean', 'status' => QuestionStatus::class, 'access_level' => MaterialAccess::class,
             'requires_topic_completion' => 'boolean', 'free_claim_enabled' => 'boolean'];
@@ -43,6 +43,11 @@ class Exam extends Model
     public function accessLabel(): string
     {
         return $this->free_claim_enabled ? 'Gratis Bersyarat' : $this->access_level->label();
+    }
+
+    public function requiresPremiumLearningAccess(): bool
+    {
+        return $this->kind !== 'tryout' && ! ($this->kind === 'practice' && $this->free_claim_enabled);
     }
 
     public function coverUrl(): string
@@ -81,6 +86,12 @@ class Exam extends Model
     public function scopePublished(Builder $query): void
     {
         $query->where('status', QuestionStatus::Published);
+    }
+
+    /** @param Builder<Exam> $query */
+    public function scopeOrdered(Builder $query): void
+    {
+        $query->orderByRaw('position IS NULL')->orderBy('position')->latest('id');
     }
 
     /** @param Builder<Exam> $query */

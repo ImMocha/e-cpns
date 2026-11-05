@@ -3,10 +3,28 @@
 .exam-card-cover { height: clamp(160px, 14vw, 200px); aspect-ratio: auto; }
 .exam-cover-preview { max-width: 420px; }
 .exam-admin-cover { display: block; width: 96px; height: 64px; flex-shrink: 0; object-fit: cover; border: 1px solid var(--border); border-radius: 10px; }
+.exam-catalog-order-help { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5rem 1rem; padding:.85rem 1.5rem; border-bottom:1px solid var(--border); background:var(--primary-050); font-size:var(--fs-xs); color:var(--text-soft); }
+.exam-catalog-order-help [role="status"] { font-weight:700; color:var(--primary-700); }
+.exam-catalog-order-help .is-error { color:var(--danger); }
+.exam-catalog-order-handle { cursor:grab; touch-action:none; }
+.exam-catalog-order-handle svg { fill:currentColor; stroke:none; pointer-events:none; }
+.exam-catalog-order-handle:active { cursor:grabbing; }
+.exam-catalog-order-handle:disabled { cursor:wait; opacity:.5; }
+.content-exam-row.is-order-dragging { opacity:.3; background:var(--primary-050); }
+.exam-catalog-order-preview { position:fixed; top:0; left:0; z-index:1000; pointer-events:none; border:2px solid var(--primary); border-radius:12px; background:var(--surface); box-shadow:0 12px 35px #17344d30; }
+.exam-catalog-dragging, .exam-catalog-dragging * { cursor:grabbing !important; user-select:none; }
 .content-exam-row.content-exam-row--cover { grid-template-columns: 96px minmax(0, 1fr) auto auto; }
+.content-exam-row.content-exam-row--sortable { grid-template-columns: 36px 96px minmax(0, 1fr) auto auto; }
 @media(max-width:640px) {
   .content-exam-row.content-exam-row--cover { grid-template-columns: 64px minmax(0, 1fr) auto; }
   .exam-admin-cover { width: 64px; height: 48px; }
+  .content-exam-row.content-exam-row--sortable { grid-template-columns: 34px 48px minmax(0, 1fr) auto; gap:.6rem; }
+  .content-exam-row--sortable .exam-admin-cover { width:48px; height:40px; }
+  .content-exam-row--sortable .exam-catalog-order-handle { grid-column:1; grid-row:1 / 3; }
+  .content-exam-row--sortable .content-exam-info { grid-column:3; grid-row:1; }
+  .content-exam-row--sortable > .badge { grid-column:3; }
+  .content-exam-row--sortable .content-row-actions { grid-column:4; }
+  .exam-catalog-order-help { padding:.85rem 1rem; }
 }
 [data-exam-claim-settings][hidden] { display: none; }
 .exam-question-manager { display:grid; gap:1.1rem; min-width:0; }

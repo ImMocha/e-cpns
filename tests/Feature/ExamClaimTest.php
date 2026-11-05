@@ -203,6 +203,124 @@ class ExamClaimTest extends TestCase
         $this->assertNull(ExamAttempt::sole()->user_package_id);
     }
 
+    /** @return array<string, array{string, string}> */
+    public static function nonPremiumSessions(): array
+    {
+        return [
+            'regular practice' => ['regular', 'practice'],
+            'bundling practice' => ['bundling', 'practice'],
+            'regular tryout' => ['regular', 'tryout'],
+            'bundling tryout' => ['bundling', 'tryout'],
+        ];
+    }
+
+    #[DataProvider('nonPremiumSessions')]
+    public function test_non_premium_members_keep_conditional_access_and_can_finish_after_approval(string $tier, string $kind): void
+    {
+        Storage::fake('local');
+        $exam = $this->exam($kind);
+        $user = User::factory()->create();
+        $grant = UserPackage::factory()->for($user)->create(['tier' => $tier, 'tryout_quota' => 1, 'tryouts_used' => 1]);
+        $prefix = ExamKind::from($kind)->routePrefix();
+        $catalog = ExamKind::from($kind)->catalogRoute();
+
+        $this->actingAs($user)->get(route($catalog))->assertSee('Gratis Bersyarat')->assertSee('Unlock gratis')
+            ->assertDontSee('Soal terkunci')->assertViewHas('learningLocked', false);
+        $this->post(route($prefix.'.start', $exam->slug))->assertForbidden();
+        $this->post(route('exam-claims.store', $exam), $this->submission($exam))->assertSessionHasNoErrors();
+        $claim = ExamClaim::sole();
+        Storage::disk('local')->assertExists($claim->proof_paths);
+        $this->get(route($catalog))->assertSee('Menunggu verifikasi admin');
+        $this->post(route($prefix.'.start', $exam->slug))->assertForbidden();
+        $this->assertDatabaseCount('exam_attempts', 0);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put(route('admin.exam-claims.update', $claim), ['status' => 'approved'])->assertSessionHasNoErrors();
+        $this->actingAs($user)->get(route($catalog))->assertSee('Sudah terbuka')
+            ->assertViewHas('banks', fn ($banks): bool => $banks->first()['canStart']);
+        $this->get(route('home'))->assertViewHas('featuredExams', fn (array $featured): bool => $featured[$kind]->first()['hasAccess']);
+        $this->post(route($prefix.'.start', $exam->slug))->assertSessionHasNoErrors()->assertRedirect();
+        $attempt = ExamAttempt::sole();
+        $questionId = $attempt->question_snapshot['questions'][0]['id'];
+        $this->get($attempt->attemptUrl())->assertOk();
+        $this->post(route($prefix.'.start', $exam->slug))->assertRedirect($attempt->attemptUrl());
+        $this->patchJson(route('exam-attempts.save', $attempt), ['answers' => [$questionId => 0], 'flags' => [], 'current' => 0])->assertOk();
+        $this->assertSame(0, $attempt->fresh()->answers[$questionId]);
+        $this->post(route('exam-attempts.submit', $attempt))->assertOk();
+        $this->get($attempt->resultUrl())->assertOk();
+        $this->assertDatabaseHas('exam_attempts', ['id' => $attempt->id, 'status' => ExamAttempt::COMPLETED, 'user_package_id' => null]);
+        $this->assertSame(1, $grant->fresh()->tryouts_used);
+    }
+
+    public function test_buying_regular_does_not_lock_an_approved_practice_already_in_progress(): void
+    {
+        $exam = $this->exam('practice');
+        $claim = ExamClaim::factory()->for($exam)->create(['status' => 'approved', 'kind' => 'practice']);
+        $this->actingAs($claim->user)->post(route('practices.start', $exam->slug))->assertRedirect();
+        $attempt = ExamAttempt::sole();
+        UserPackage::factory()->for($claim->user)->create(['tier' => 'regular']);
+
+        $this->get(route('quizzes.index'))->assertSee('Sudah terbuka')->assertSee($attempt->attemptUrl(), false);
+        $this->get($attempt->attemptUrl())->assertOk();
+        $this->post(route('exam-attempts.submit', $attempt))->assertOk();
+        $this->assertDatabaseHas('exam_attempts', ['id' => $attempt->id, 'status' => ExamAttempt::COMPLETED]);
+    }
+
+    public function test_regular_catalog_keeps_premium_practices_locked_beside_conditional_practices(): void
+    {
+        $conditional = $this->exam('practice');
+        $premium = Exam::factory()->practice()->create(['access_level' => 'premium']);
+        $user = User::factory()->create();
+        UserPackage::factory()->for($user)->create(['tier' => 'regular']);
+
+        $this->actingAs($user)->get(route('quizzes.index'))->assertSee('Gratis Bersyarat')->assertSee('Unlock gratis')
+            ->assertSee('Soal terkunci')->assertViewHas('learningLocked', false)
+            ->assertViewHas('banks', function ($banks) use ($conditional, $premium): bool {
+                $this->assertFalse($banks->firstWhere('exam.id', $conditional->id)['learningLocked']);
+                $this->assertTrue($banks->firstWhere('exam.id', $premium->id)['learningLocked']);
+
+                return true;
+            });
+        $this->post(route('practices.start', $premium->slug))->assertForbidden();
+        $this->assertDatabaseCount('exam_attempts', 0);
+    }
+
+    public function test_expired_premium_requires_claim_approval_for_conditional_practice(): void
+    {
+        $this->freezeTime();
+        $exam = $this->exam('practice');
+        $user = User::factory()->create();
+        UserPackage::factory()->for($user)->create(['tier' => 'premium', 'expires_at' => now()->subMinute()]);
+
+        $this->actingAs($user)->get(route('quizzes.index'))->assertSee('Unlock gratis')->assertDontSee('Soal terkunci');
+        $this->post(route('practices.start', $exam->slug))->assertForbidden();
+        $this->assertDatabaseCount('exam_attempts', 0);
+        ExamClaim::factory()->for($exam)->for($user)->create(['status' => 'approved', 'kind' => 'practice']);
+        $this->post(route('practices.start', $exam->slug))->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertDatabaseHas('exam_attempts', ['user_id' => $user->id, 'bank_slug' => $exam->slug, 'user_package_id' => null]);
+    }
+
+    #[DataProvider('kinds')]
+    public function test_premium_bypasses_conditional_claims_for_every_session(string $kind): void
+    {
+        $exam = $this->exam($kind);
+        $user = User::factory()->create();
+        UserPackage::factory()->for($user)->create(['tier' => 'regular']);
+        $grant = UserPackage::factory()->for($user)->create(['tier' => 'premium', 'tryout_quota' => null]);
+        ExamClaim::factory()->for($exam)->for($user)->create(['status' => 'rejected', 'kind' => $kind]);
+
+        $this->actingAs($user)->get(route(ExamKind::from($kind)->catalogRoute()))
+            ->assertDontSee('Unlock gratis')->assertDontSee('Perbaiki bukti')->assertDontSee('Soal terkunci')
+            ->assertViewHas('banks', fn ($banks): bool => $banks->first()['canStart']);
+        $this->get(route('home'))->assertViewHas('featuredExams', fn (array $featured): bool => $featured[$kind]->first()['hasAccess']);
+        $this->post(route(ExamKind::from($kind)->routePrefix().'.start', $exam->slug))->assertSessionHasNoErrors()->assertRedirect();
+        $attempt = ExamAttempt::sole();
+        $this->get($attempt->attemptUrl())->assertOk();
+        $this->post(route('exam-attempts.submit', $attempt))->assertOk();
+        $this->assertDatabaseHas('exam_attempts', ['id' => $attempt->id, 'status' => ExamAttempt::COMPLETED]);
+        $this->assertSame(0, $grant->fresh()->tryouts_used);
+    }
+
     public function test_rejection_requires_reason_and_allows_resubmission_preserving_history(): void
     {
         Storage::fake('local');

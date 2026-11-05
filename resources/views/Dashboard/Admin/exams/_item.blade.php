@@ -1,5 +1,10 @@
 @php($examRoute = \App\Enums\ExamKind::from($exam->kind)->adminRoutePrefix())
-<article @class(['content-exam-row', 'content-exam-row--cover' => $exam->kind !== 'quiz'])>
+<article @class(['content-exam-row', 'content-exam-row--cover' => $exam->kind !== 'quiz', 'content-exam-row--sortable' => $reorderable ?? false]) @if($reorderable ?? false) data-exam-order-item data-exam-id="{{ $exam->id }}" @endif>
+  @if($reorderable ?? false)
+    <button type="button" class="content-icon-button exam-catalog-order-handle" data-exam-order-handle aria-label="Geser urutan {{ $exam->title }}" aria-describedby="exam-order-help" title="Geser untuk mengatur urutan">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/></svg>
+    </button>
+  @endif
   @if($exam->kind !== 'quiz')
   <img class="exam-admin-cover" src="{{ $exam->coverUrl() }}" alt="" width="96" height="64" loading="lazy" decoding="async">
   @else

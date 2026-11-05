@@ -11,6 +11,7 @@ import './lontar/content-workspace.js';
 import './lontar/article-editor.js';
 import './lontar/question-editor.js';
 import './lontar/exam-question-manager.js';
+import './lontar/exam-catalog-order.js';
 import './lontar/quiz.js';
 import './lontar/pdf-reader.js';
 

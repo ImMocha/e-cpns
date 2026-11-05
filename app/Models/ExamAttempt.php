@@ -126,7 +126,8 @@ class ExamAttempt extends Model
             User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
 
             $kind = $bank instanceof Exam ? $bank->kind : $bank->kind();
-            abort_if($kind !== 'tryout' && ! $user->canAccessLearningFeatures(), 403, 'Latihan soal tersedia dalam paket Premium.');
+            $requiresPremiumLearningAccess = $bank instanceof Exam ? $bank->requiresPremiumLearningAccess() : $kind !== 'tryout';
+            abort_if($requiresPremiumLearningAccess && ! $user->canAccessLearningFeatures(), 403, 'Latihan soal tersedia dalam paket Premium.');
 
             $attempt = self::query()
                 ->whereBelongsTo($user)
@@ -194,6 +195,17 @@ class ExamAttempt extends Model
 
             return $attempt;
         });
+    }
+
+    public function learningIsLockedFor(User $user): bool
+    {
+        if ($this->kind === 'tryout' || $user->canAccessLearningFeatures()) {
+            return false;
+        }
+
+        $exam = Exam::query()->where('kind', $this->kind)->where('slug', $this->bank_slug)->first();
+
+        return $exam?->requiresPremiumLearningAccess() ?? true;
     }
 
     public function isExpired(): bool

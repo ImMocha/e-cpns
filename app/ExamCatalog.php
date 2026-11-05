@@ -29,7 +29,7 @@ class ExamCatalog
 
         foreach (['tryout', 'practice'] as $kind) {
             $featured[$kind] = Exam::query()->visibleToMembers()->where('kind', $kind)
-                ->with('topic.section')->latest('id')->limit(3)->get()
+                ->with('topic.section')->ordered()->limit(3)->get()
                 ->map(function (Exam $exam) use ($user, $entitlements, $hasPremium, $approvedClaims, $learningAllowed): array {
                     $hasAccess = $user?->isAdmin() === true || ($exam->free_claim_enabled
                         ? $hasPremium || $approvedClaims->contains($exam->id)
@@ -38,7 +38,7 @@ class ExamCatalog
                                 || (($exam->kind === 'tryout' || $package->tier === null) && $package->exams->contains('id', $exam->id)),
                         ));
 
-                    return ['exam' => $exam, 'hasAccess' => $hasAccess && ($exam->kind === 'tryout' || $learningAllowed)];
+                    return ['exam' => $exam, 'hasAccess' => $hasAccess && (! $exam->requiresPremiumLearningAccess() || $learningAllowed)];
                 });
         }
 
@@ -71,7 +71,7 @@ class ExamCatalog
             ->with(['topic' => fn (Builder|Relation $topic): Builder|Relation => $topic->withLearningProgress($user)])
             ->withCount(['questions as available_count' => fn (Builder $query) => $query->visibleToMembers(),
                 'questions as weighted_available_count' => fn (Builder $query) => $query->visibleToMembers()->where('scoring_type', QuestionScoring::Weighted)])
-            ->latest('id')->get();
+            ->ordered()->get();
         $exams->where('random_questions', false)->load(['scoringQuestions' => fn (Builder|Relation $questions): Builder|Relation => $questions->limit(200)]);
         $banks = $exams->map(function (Exam $exam) use ($attempts, $entitlements, $user, $claims, $tokenPackages, $tokenExamIds, $learningAllowed, $hasPremium): array {
             $history = $attempts->get($exam->slug, collect());
@@ -84,7 +84,8 @@ class ExamCatalog
             $isAdminPreview = $user->isAdmin() && ($exam->free_claim_enabled || ($exam->requires_topic_completion
                 && $exam->topic?->hasCompletedMaterials() !== true));
             $canStart = $topicReady && ($freeAccess || (! $exam->free_claim_enabled && $covering->contains(fn (UserPackage $item): bool => $exam->kind !== 'tryout' || $item->hasTryoutQuota())));
-            if ($exam->kind !== 'tryout' && ! $learningAllowed) {
+            $learningLocked = $exam->requiresPremiumLearningAccess() && ! $learningAllowed;
+            if ($learningLocked) {
                 $hasAccess = false;
                 $canStart = false;
             }
@@ -92,7 +93,7 @@ class ExamCatalog
                 ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts());
 
             return ['exam' => $exam, 'open' => $history->firstWhere('status', ExamAttempt::IN_PROGRESS),
-                'learningLocked' => $exam->kind !== 'tryout' && ! $learningAllowed,
+                'learningLocked' => $learningLocked,
                 'hasAccess' => $hasAccess, 'canStart' => $canStart, 'topicReady' => $topicReady,
                 'tokenPackage' => ! $canStart && $topicReady && isset($tokenExamIds[$exam->id]) ? $tokenPackages->first() : null,
                 'isTokenRefill' => $hasAccess || $history->isNotEmpty(),
@@ -101,7 +102,7 @@ class ExamCatalog
         });
 
         return ['banks' => $banks, 'kind' => $kind, 'tokenCount' => $tokenPackages->sum('tryout_tokens'),
-            'learningLocked' => $kind !== 'tryout' && ! $learningAllowed,
+            'learningLocked' => $kind !== 'tryout' && ! $learningAllowed && ! $banks->contains(fn (array $item): bool => ! $item['learningLocked']),
             'completedCount' => $attempts->flatten(1)->where('status', ExamAttempt::COMPLETED)->count()];
     }
 
@@ -114,11 +115,12 @@ class ExamCatalog
 
     public function active(User $user, string $kind, string $slug, ?int $id): ExamAttempt
     {
-        abort_if($kind !== 'tryout' && ! $user->canAccessLearningFeatures(), 403, 'Latihan soal tersedia dalam paket Premium.');
-
-        return ExamAttempt::query()->whereBelongsTo($user)->where('kind', $kind)->where('bank_slug', $slug)
+        $attempt = ExamAttempt::query()->whereBelongsTo($user)->where('kind', $kind)->where('bank_slug', $slug)
             ->when($id !== null, fn (Builder $query) => $query->whereKey($id))
             ->when($id === null, fn (Builder $query) => $query->where('status', ExamAttempt::IN_PROGRESS))->latest('id')->firstOrFail();
+        abort_if($attempt->learningIsLockedFor($user), 403, 'Latihan soal tersedia dalam paket Premium.');
+
+        return $attempt;
     }
 
     /** @return array<string, mixed> */

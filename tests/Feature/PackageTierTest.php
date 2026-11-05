@@ -140,6 +140,9 @@ class PackageTierTest extends TestCase
         $this->get(route('materials.file', $material))->assertForbidden();
         $this->post(route('materials.progress.store', $material))->assertForbidden();
         $this->post(route('practices.start', $practice->slug))->assertForbidden();
+        $this->get($oldPractice->attemptUrl())->assertForbidden();
+        $this->patchJson(route('exam-attempts.save', $oldPractice), ['answers' => [], 'flags' => [], 'current' => 0])->assertForbidden();
+        $this->post(route('exam-attempts.submit', $oldPractice))->assertForbidden();
         $this->post(route('quizzes.start', $quiz->slug))->assertForbidden();
         $this->get(route('statistics.index'))->assertOk()->assertViewHas('contentAccessible', false)->assertSee('statistik terkunci')->assertDontSee('data-chart=', false);
         $this->get(route('certificates.index'))->assertOk()->assertViewHas('contentAccessible', false)->assertSee($passed->title)->assertDontSee('Lihat &amp; Cetak');

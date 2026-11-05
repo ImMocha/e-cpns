@@ -9,6 +9,7 @@ use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExamRequest;
+use App\Http\Requests\Admin\ReorderExamsRequest;
 use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Section;
@@ -16,11 +17,13 @@ use App\Models\Topic;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class AdminExamController extends Controller
@@ -51,7 +54,7 @@ class AdminExamController extends Controller
 
         return view('Dashboard.Admin.exams.index', [
             'exams' => $query->with('topic.section')->withCount(['questions as available_count' => fn ($query) => $query->visibleToMembers()])
-                ->latest('id')->paginate(12)->withQueryString(),
+                ->ordered()->paginate(12)->withQueryString(),
             'isQuiz' => $isQuiz,
             'kind' => $kind,
             'routePrefix' => $kind->adminRoutePrefix(),
@@ -61,6 +64,31 @@ class AdminExamController extends Controller
             'topics' => $isQuiz ? Topic::query()->whereHas('section')->with('section')
                 ->when($sectionId, fn (Builder $query): Builder => $query->where('section_id', $sectionId))->ordered()->get() : collect(),
         ]);
+    }
+
+    public function reorder(ReorderExamsRequest $request): JsonResponse
+    {
+        $kind = $this->requestKind($request);
+        abort_unless(in_array($kind, [ExamKind::Tryout, ExamKind::Practice], true), 404);
+        $ids = array_map('intval', $request->validated('exam_ids'));
+
+        DB::transaction(function () use ($kind, $ids): void {
+            $exams = Exam::query()->where('kind', $kind->value)->ordered()->lockForUpdate()->get(['id', 'position']);
+            if (count(array_intersect($ids, $exams->modelKeys())) !== count($ids)) {
+                throw ValidationException::withMessages(['exam_ids' => 'Daftar sesi telah berubah. Muat ulang halaman sebelum mengatur urutan.']);
+            }
+
+            $positions = $exams->pluck('position', 'id');
+            $next = 0;
+            foreach ($exams as $position => $exam) {
+                $id = in_array($exam->id, $ids, true) ? $ids[$next++] : $exam->id;
+                if ($positions[$id] !== $position + 1) {
+                    Exam::query()->whereKey($id)->update(['position' => $position + 1]);
+                }
+            }
+        });
+
+        return response()->json(['message' => 'Urutan berhasil disimpan.']);
     }
 
     public function create(Request $request): View|RedirectResponse

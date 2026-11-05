@@ -23,9 +23,12 @@
       <button class="btn btn--ghost btn--sm" type="submit">Cari</button>
       @if(request('q') || request('status'))<a class="content-filter-reset" href="{{ route($routePrefix.'.index', array_filter(['section_id' => $selectedSection?->id, 'topic_id' => $selectedTopic?->id])) }}">Reset filter</a>@endif
     </form>
-    <div class="content-exam-list">
+    @unless($isQuiz)
+      <div class="exam-catalog-order-help"><p id="exam-order-help">Geser pegangan di kiri sesi untuk mengatur urutan. Tersimpan otomatis. Bisa juga memakai tombol panah atas/bawah saat pegangan dipilih.</p><p data-exam-order-status role="status" aria-live="polite"></p></div>
+    @endunless
+    <div class="content-exam-list" @if(!$isQuiz && $exams->count() > 1) data-exam-catalog-order data-order-url="{{ route($routePrefix.'.order') }}" @endif>
       @forelse($exams as $exam)
-        @include('Dashboard.Admin.exams._item', ['exam' => $exam])
+        @include('Dashboard.Admin.exams._item', ['exam' => $exam, 'reorderable' => !$isQuiz && $exams->count() > 1])
       @empty
         <div class="empty content-empty"><span class="empty__icon"><svg data-icon="{{ $isQuiz ? 'list-checks' : 'timer' }}"></svg></span><strong>Belum ada {{ strtolower($kind->label()) }} yang sesuai</strong><p>Coba filter lain atau tambahkan {{ strtolower($kind->label()) }} baru.</p></div>
       @endforelse
