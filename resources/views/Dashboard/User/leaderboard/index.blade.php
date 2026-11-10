@@ -1,5 +1,74 @@
 @extends('layouts.user.main')
 @section('title', 'Leaderboard — Ganesha Nusa')
+
+@push('head')
+    <style>
+        .leaderboard-title {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .leaderboard-help-toggle {
+            display: inline-grid;
+            place-items: center;
+            flex: none;
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid var(--primary-300);
+            border-radius: 50%;
+            background: var(--surface-2);
+            color: var(--ink);
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .leaderboard-help-toggle:hover,
+        .leaderboard-help-toggle[aria-expanded="true"] {
+            background: var(--primary-050);
+        }
+
+        .leaderboard-help-toggle:focus-visible {
+            outline: 2px solid var(--primary-600);
+            outline-offset: 3px;
+        }
+
+        .leaderboard-help-panel {
+            margin-bottom: 1rem;
+            padding: .9rem 1rem;
+            border: 1px solid var(--primary-300);
+            border-radius: var(--r-sm);
+            background: var(--surface-2);
+            line-height: 1.6;
+        }
+
+        .leaderboard-help-panel h3 {
+            margin-bottom: .45rem;
+            color: var(--ink);
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1.35;
+        }
+
+        .leaderboard-help-panel ul {
+            max-width: 90ch;
+            padding-inline-start: 1.15rem;
+            list-style: disc;
+        }
+
+        .leaderboard-help-panel li + li {
+            margin-top: .35rem;
+        }
+
+        @media (pointer: coarse) {
+            .leaderboard-help-toggle {
+                width: 2.75rem;
+                height: 2.75rem;
+            }
+        }
+    </style>
+@endpush
+
 @section('content')
 <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ route('dashboard') }}">Dashboard</a><span class="crumbs__sep"><svg data-icon="chevron-right"></svg></span><span class="crumbs__current">Leaderboard</span></nav>
 <header class="page-head">
@@ -51,17 +120,35 @@
         </section>
 
         <section class="card">
-            <div class="card__head"><div><h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2><p class="card__sub">{{ $referenceTryout ? 'Acuan: '.$referenceTryout->title.' · '.$maximumScore.' poin maksimal' : 'Gabungan seluruh tryout · satu nilai terbaik per peserta' }}</p></div><span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span></div>
-            @if ($referenceTryout)
-                <p class="text-sm text-soft" style="margin-bottom:1rem">Skor maksimal otomatis mengikuti tryout aktif dengan poin maksimal tertinggi. Peringkat memakai poin terbaik dari tryout aktif dengan skor maksimal yang sama. Jika hasilmu hanya dari tryout lama atau sesi yang lebih pendek, nilai awal di sini 0 / {{ $maximumScore }} sampai tryout acuan diselesaikan. Riwayat hasil lama tetap tersimpan.</p>
-            @else
-                <p class="text-sm text-soft" style="margin-bottom:1rem">Peringkat memakai skor poin tertinggi dari tryout yang selesai. Skor ditampilkan sesuai poin yang diperoleh dan skor maksimal sesi.</p>
-            @endif
-            <p class="text-sm text-soft" style="margin-bottom:1rem">Nilai sama mendapat peringkat sama. Skor berikutnya naik satu peringkat, misalnya 1, 1, 2, 3. Nilai latihan tidak masuk leaderboard.</p>
-            @if ($simulatedCount > 0)
-                <p class="text-xs text-soft" style="margin-bottom:1rem">Peserta virtual memakai nilai contoh berupa poin bulat dengan acuan tryout {{ $maximumScore ?? 550 }} poin dan ikut dihitung dalam peringkat selama fitur aktif.</p>
-            @endif
-            <p class="text-sm text-soft" style="margin-bottom:1rem">Daftar menampilkan maksimal {{ number_format($displayLimit, 0, ',', '.') }} peserta. Peringkatmu tetap dihitung dari seluruh peserta dan ditampilkan di atas, termasuk ketika berada di luar daftar.</p>
+            <div data-leaderboard-help>
+                <div class="card__head">
+                    <div>
+                        <div class="leaderboard-title">
+                            <h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2>
+                            <button type="button" class="leaderboard-help-toggle" aria-label="Cara kerja leaderboard" aria-expanded="false" aria-controls="leaderboard-help-panel">
+                                <span aria-hidden="true">?</span>
+                            </button>
+                        </div>
+                        <p class="card__sub">{{ $referenceTryout ? 'Acuan: '.$referenceTryout->title.' · '.$maximumScore.' poin maksimal' : 'Gabungan seluruh tryout · satu nilai terbaik per peserta' }}</p>
+                    </div>
+                    <span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span>
+                </div>
+                <div id="leaderboard-help-panel" class="leaderboard-help-panel text-sm text-soft" hidden>
+                    <h3>Cara kerja leaderboard</h3>
+                    <ul>
+                        @if ($referenceTryout)
+                            <li><strong>Skor acuan.</strong> Sistem memilih skor maksimal tertinggi dari tryout aktif. Nilai terbaikmu dari tryout aktif dengan maksimum yang sama akan dihitung. Jika baru punya hasil dari skala lain atau tryout yang sudah tidak aktif, nilaimu tampil 0 / {{ $maximumScore }}. Hasil lama tetap ada di riwayat.</li>
+                        @else
+                            <li><strong>Skor terbaik.</strong> Sistem mengambil nilai tertinggimu dari tryout yang selesai dan menampilkannya sesuai skor maksimal sesi.</li>
+                        @endif
+                        <li><strong>Urutan peringkat.</strong> Skor sama berbagi peringkat, misalnya 1, 1, 2, 3. Nilai latihan tidak dihitung.</li>
+                        @if ($simulatedCount > 0)
+                            <li><strong>Simulasi.</strong> Peserta virtual memakai nilai contoh pada skala {{ $maximumScore ?? 550 }} poin dan ikut dihitung selama simulasi aktif.</li>
+                        @endif
+                        <li><strong>Cakupan daftar.</strong> Daftar menampilkan maksimal {{ number_format($displayLimit, 0, ',', '.') }} peserta. Peringkatmu tetap dihitung dari seluruh peserta dalam cakupan yang dipilih.</li>
+                    </ul>
+                </div>
+            </div>
             <div class="table-wrap" style="border:none;box-shadow:none">
                 <table class="table">
                     <thead><tr><th class="num">Peringkat</th><th>Peserta</th><th>Provinsi</th><th class="num">Skor (poin)</th></tr></thead>
@@ -85,3 +172,57 @@
     @endif
 @endif
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const help = document.querySelector('[data-leaderboard-help]');
+            if (!help) {
+                return;
+            }
+
+            const toggle = help.querySelector('.leaderboard-help-toggle');
+            const panel = document.getElementById(toggle.getAttribute('aria-controls'));
+            let pinned = false;
+
+            const show = (open) => {
+                panel.hidden = !open;
+                toggle.setAttribute('aria-expanded', String(open));
+            };
+
+            const close = () => {
+                pinned = false;
+                show(false);
+            };
+
+            toggle.addEventListener('pointerenter', (event) => {
+                if (event.pointerType === 'mouse') {
+                    show(true);
+                }
+            });
+
+            help.addEventListener('pointerleave', (event) => {
+                if (event.pointerType === 'mouse' && !pinned) {
+                    show(false);
+                }
+            });
+
+            toggle.addEventListener('click', () => {
+                pinned = !pinned;
+                show(pinned);
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!panel.hidden && !help.contains(event.target)) {
+                    close();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && !panel.hidden) {
+                    close();
+                }
+            });
+        })();
+    </script>
+@endpush
