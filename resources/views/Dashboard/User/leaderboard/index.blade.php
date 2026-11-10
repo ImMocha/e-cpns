@@ -53,10 +53,11 @@
         <section class="card">
             <div class="card__head"><div><h2 class="card__title">{{ $scope === 'local' ? 'Leaderboard '.$province->value : 'Leaderboard Nasional' }}</h2><p class="card__sub">{{ $referenceTryout ? 'Acuan: '.$referenceTryout->title.' · '.$maximumScore.' poin maksimal' : 'Gabungan seluruh tryout · satu nilai terbaik per peserta' }}</p></div><span class="badge badge--primary badge--flat"><svg data-icon="trophy"></svg> {{ $scope === 'local' ? 'Lokal' : 'Nasional' }}</span></div>
             @if ($referenceTryout)
-                <p class="text-sm text-soft" style="margin-bottom:1rem">Skor maksimal otomatis mengikuti tryout aktif dengan poin maksimal tertinggi. Peringkat memakai poin terbaik dari tryout aktif dengan skor maksimal yang sama. Jika hasilmu hanya dari tryout lama atau sesi yang lebih pendek, nilai awal di sini 0 / {{ $maximumScore }} sampai tryout acuan diselesaikan. Riwayat hasil lama tetap tersimpan. Nilai sama mendapat peringkat sama; nilai latihan tidak masuk leaderboard.</p>
+                <p class="text-sm text-soft" style="margin-bottom:1rem">Skor maksimal otomatis mengikuti tryout aktif dengan poin maksimal tertinggi. Peringkat memakai poin terbaik dari tryout aktif dengan skor maksimal yang sama. Jika hasilmu hanya dari tryout lama atau sesi yang lebih pendek, nilai awal di sini 0 / {{ $maximumScore }} sampai tryout acuan diselesaikan. Riwayat hasil lama tetap tersimpan.</p>
             @else
-            <p class="text-sm text-soft" style="margin-bottom:1rem">Peringkat memakai skor poin tertinggi dari tryout yang selesai. Skor ditampilkan sesuai poin yang diperoleh dan skor maksimal sesi. Nilai sama mendapat peringkat sama, misalnya 1, 1, 3. Nilai latihan tidak masuk leaderboard.</p>
+                <p class="text-sm text-soft" style="margin-bottom:1rem">Peringkat memakai skor poin tertinggi dari tryout yang selesai. Skor ditampilkan sesuai poin yang diperoleh dan skor maksimal sesi.</p>
             @endif
+            <p class="text-sm text-soft" style="margin-bottom:1rem">Nilai sama mendapat peringkat sama. Skor berikutnya naik satu peringkat, misalnya 1, 1, 2, 3. Nilai latihan tidak masuk leaderboard.</p>
             @if ($simulatedCount > 0)
                 <p class="text-xs text-soft" style="margin-bottom:1rem">Peserta virtual memakai nilai contoh berupa poin bulat dengan acuan tryout {{ $maximumScore ?? 550 }} poin dan ikut dihitung dalam peringkat selama fitur aktif.</p>
             @endif

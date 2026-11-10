@@ -29,7 +29,7 @@ class LeaderboardLimitsTest extends TestCase
         DB::table('leaderboard_settings')->insert(['id' => 1, 'simulations_enabled' => true]);
         $rows = [];
         for ($index = 0; $index < 6300; $index++) {
-            $rows[] = ['source_key' => 'limit-'.$index, 'name' => 'Peserta '.$index, 'province' => Province::Aceh->value, 'score' => 500];
+            $rows[] = ['source_key' => 'limit-'.$index, 'name' => 'Peserta '.$index, 'province' => Province::Aceh->value, 'score' => $index < 5000 ? 500 : 450];
         }
         foreach (array_chunk($rows, 500) as $chunk) {
             DB::table('leaderboard_bots')->insert($chunk);
@@ -37,12 +37,12 @@ class LeaderboardLimitsTest extends TestCase
         foreach (['national' => 5000, 'local' => 100] as $scope => $limit) {
             $this->actingAs($member)->get(route('leaderboard.index', ['scope' => $scope]))
                 ->assertOk()->assertViewHas('totalParticipants', 6301)
-                ->assertViewHas('ownRank', fn ($rank): bool => (int) $rank->position === 6301)
+                ->assertViewHas('ownRank', fn ($rank): bool => (int) $rank->position === 3)
                 ->assertViewHas('participants', fn ($rows): bool => $rows->total() === $limit)
-                ->assertSee('#6301');
+                ->assertSee('#3');
             $this->get(route('leaderboard.index', ['scope' => $scope, 'page' => intdiv($limit, 25) + 1]))
                 ->assertOk()->assertViewHas('participants', fn ($rows): bool => $rows->count() === 0)
-                ->assertSee('#6301');
+                ->assertSee('#3');
         }
     }
 

@@ -75,7 +75,7 @@ class Leaderboard
 
         $rankings = DB::query()->fromSub($participants, 'participants')
             ->select('participants.*')
-            ->selectRaw('RANK() OVER (ORDER BY participants.score DESC) AS position');
+            ->selectRaw('DENSE_RANK() OVER (ORDER BY participants.score DESC) AS position');
 
         return DB::query()->fromSub($rankings, 'leaderboard')
             ->orderBy('position')->orderBy('participant_type')->orderBy('id');

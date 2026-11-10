@@ -184,8 +184,8 @@ class LeaderboardSimulationTest extends TestCase
         $this->actingAs($member)->get(route('leaderboard.index'))
             ->assertSee('Skor (poin)')->assertSee('10 / 15')->assertSee('400 / 500')->assertSee('350 poin')
             ->assertSee('Dari 15 poin maksimal.')->assertDontSee(' / 100')->assertDontSee('skala 0–100')
-            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 4)
-            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->pluck('position')->map(fn ($position): int => (int) $position)->all() === [1, 1, 3, 4]);
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 3)
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->pluck('position')->map(fn ($position): int => (int) $position)->all() === [1, 1, 2, 3]);
     }
 
     public function test_seeded_national_scores_are_varied_and_stable_across_pages_and_reseeding(): void
@@ -204,7 +204,8 @@ class LeaderboardSimulationTest extends TestCase
         $this->assertLessThanOrEqual(534, (float) $profiles->max('score'));
         $this->assertTrue($profiles->every(fn (LeaderboardBot $profile): bool => (float) $profile->score === (float) (int) $profile->score));
         $rankedProfiles = $profiles->sortByDesc('score')->values();
-        $expectedRanks = $rankedProfiles->map(fn (LeaderboardBot $profile): int => $rankedProfiles->search(fn (LeaderboardBot $candidate): bool => $candidate->score === $profile->score) + 1);
+        $distinctScores = $rankedProfiles->pluck('score')->unique()->values();
+        $expectedRanks = $rankedProfiles->map(fn (LeaderboardBot $profile): int => $distinctScores->search($profile->score, strict: true) + 1);
         $this->get(route('leaderboard.index', ['scope' => 'national']))
             ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === $expectedRanks->take(25)->all());
         $this->get(route('leaderboard.index', ['scope' => 'national', 'page' => 2]))

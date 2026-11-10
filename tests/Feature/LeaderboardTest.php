@@ -141,7 +141,7 @@ class LeaderboardTest extends TestCase
             ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->total() === 3);
     }
 
-    public function test_equal_points_share_rank_despite_different_maximums_and_skip_following_positions(): void
+    public function test_equal_points_share_rank_despite_different_maximums_without_skipping_positions(): void
     {
         $user = User::factory()->create();
         $this->grant($user, LeaderboardAccess::National);
@@ -151,7 +151,7 @@ class LeaderboardTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('leaderboard.index', ['scope' => 'national']));
 
-        $this->assertSame([1, 1, 3], $response['participants']->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all());
+        $this->assertSame([1, 1, 2], $response['participants']->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all());
     }
 
     public function test_participant_name_is_rendered_as_text_instead_of_html(): void
@@ -175,10 +175,10 @@ class LeaderboardTest extends TestCase
         }
 
         $this->actingAs($user)->get(route('leaderboard.index', ['scope' => 'national']))
-            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 27)
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 2)
             ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->count() === 25 && $participants->total() === 27);
         $this->get(route('leaderboard.index', ['scope' => 'national', 'page' => 2]))->assertSee('Kamu')
-            ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->count() === 2);
+            ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === [1, 2]);
     }
 
     public function test_ranking_excludes_inactive_unverified_deleted_and_admin_accounts_and_zero_maximum(): void
