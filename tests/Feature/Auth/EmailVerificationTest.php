@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Tests\TestCase;
@@ -57,6 +58,82 @@ class EmailVerificationTest extends TestCase
         $this->assertAuthenticatedAs($user);
         $this->assertFalse($user->hasVerifiedEmail());
         Exceptions::assertReported(TransportException::class);
+    }
+
+    public function test_retrying_registration_resumes_verification_for_the_existing_account(): void
+    {
+        $registration = $this->registration();
+        $user = User::factory()->unverified()->create([
+            'email' => $registration['email'],
+            'password' => $registration['password'],
+        ]);
+        Notification::fake();
+
+        $this->post(route('register.store'), $registration)
+            ->assertRedirect(route('verification.notice'))->assertSessionHasNoErrors();
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertDatabaseCount('users', 1);
+        $this->assertSame($user->name, $user->fresh()->name);
+        $this->assertFalse($user->fresh()->hasVerifiedEmail());
+        Notification::assertNothingSent();
+    }
+
+    #[DataProvider('blockedRegistrationRetries')]
+    public function test_registration_retry_cannot_sign_in_an_ineligible_account(string $scenario): void
+    {
+        $registration = $this->registration();
+        $factory = User::factory();
+        $factory = match ($scenario) {
+            'verified' => $factory,
+            'inactive' => $factory->unverified()->inactive(),
+            'admin' => $factory->unverified()->admin(),
+            default => $factory->unverified(),
+        };
+        $user = $factory->create([
+            'email' => $registration['email'],
+            'password' => $scenario === 'wrong password' ? 'another-password' : $registration['password'],
+        ]);
+        if ($scenario === 'deleted') {
+            $user->delete();
+        }
+        Notification::fake();
+
+        $this->from(route('register'))->post(route('register.store'), $registration)
+            ->assertRedirect(route('register'))->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+        $this->assertDatabaseCount('users', 1);
+        Notification::assertNothingSent();
+    }
+
+    public static function blockedRegistrationRetries(): array
+    {
+        return [
+            'wrong password' => ['wrong password'],
+            'verified' => ['verified'],
+            'inactive' => ['inactive'],
+            'admin' => ['admin'],
+            'deleted' => ['deleted'],
+        ];
+    }
+
+    public function test_registration_retry_limits_password_attempts(): void
+    {
+        $registration = $this->registration();
+        User::factory()->unverified()->create([
+            'email' => $registration['email'],
+            'password' => $registration['password'],
+        ]);
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post(route('register.store'), array_replace($registration, [
+                'password' => 'wrong-password', 'password_confirmation' => 'wrong-password',
+            ]))->assertSessionHasErrors('email');
+        }
+
+        $this->post(route('register.store'), $registration)->assertSessionHasErrors('email');
+        $this->assertGuest();
     }
 
     public function test_unverified_user_can_resend_the_verification_email(): void

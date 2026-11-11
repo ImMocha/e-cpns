@@ -38,7 +38,7 @@
     <h1 style="font-size:var(--fs-2xl);margin:.75rem 0 .5rem">Buat Akun Peserta</h1>
     <p class="text-soft" style="margin-bottom:1.75rem">Cukup satu email untuk mulai belajar dan mengikuti tryout.</p>
 
-    <form class="card card--pop" method="POST" action="{{ route('register.store') }}">
+    <form id="registrationForm" class="card card--pop" method="POST" action="{{ route('register.store') }}">
       @csrf
       <div class="stack" style="--stack:1.15rem">
 
@@ -98,7 +98,7 @@
         @error('terms')<span class="field__error" style="display:flex"><svg data-icon="alert"></svg><span>{{ $message }}</span></span>@enderror
 
         <button class="btn btn--primary btn--lg btn--block" type="submit">
-          Buat Akun Gratis
+          <span data-submit-label>Buat Akun Gratis</span>
           <span class="btn__icon"><svg data-icon="arrow-right"></svg></span>
         </button>
 
@@ -160,6 +160,28 @@
 </footer>
 
 <script>
+  (function () {
+    var form = document.getElementById('registrationForm');
+    var button = form.querySelector('button[type="submit"]');
+    var label = button.querySelector('[data-submit-label]');
+    var initialLabel = label.textContent;
+
+    form.addEventListener('submit', function (event) {
+      if (button.disabled) {
+        event.preventDefault();
+        return;
+      }
+
+      button.disabled = true;
+      label.textContent = 'Memproses pendaftaran…';
+    });
+
+    window.addEventListener('pageshow', function () {
+      button.disabled = false;
+      label.textContent = initialLabel;
+    });
+  })();
+
   /* Indikator kekuatan password */
   (function () {
     var pw = document.getElementById('password');
