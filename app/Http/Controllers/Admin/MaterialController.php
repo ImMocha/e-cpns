@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 /**
@@ -109,7 +110,7 @@ class MaterialController extends Controller
     {
         $material = Material::create(array_merge(
             $request->materialAttributes(),
-            $this->replacePdf($request->file('file'), null),
+            $this->storePdf($request->file('file')),
             [
                 'published_at' => $this->publishedAt($request->string('status')->toString()),
                 'created_by' => $request->user()?->id,
@@ -142,16 +143,11 @@ class MaterialController extends Controller
 
         $attributes = array_merge(
             $request->materialAttributes(),
-            $this->replacePdf($request->file('file'), $previousPath),
+            $this->storePdf($request->file('file')),
             ['updated_by' => $request->user()?->id],
         );
 
-        // Mode video: berkas PDF lama tidak lagi relevan, jadi dibuang.
         if ($attributes['type'] === MaterialType::Video->value) {
-            if ($previousPath !== null) {
-                Storage::disk(Material::PDF_DISK)->delete($previousPath);
-            }
-
             $attributes['file_path'] = null;
             $attributes['file_size'] = null;
             $attributes['page_count'] = null;
@@ -163,6 +159,10 @@ class MaterialController extends Controller
             $material->published_at,
         );
         $material->save();
+
+        if ($previousPath !== null && $material->wasChanged('file_path')) {
+            Storage::disk(Material::PDF_DISK)->delete($previousPath);
+        }
 
         return redirect()
             ->route('admin.materials.index', $request->boolean('workspace') ? ['section_id' => $material->section_id, 'topic_id' => $material->topic_id] : [])
@@ -244,23 +244,20 @@ class MaterialController extends Controller
     }
 
     /**
-     * Simpan berkas PDF baru dan buang yang lama.
-     *
-     * Berkas lama dihapus hanya setelah yang baru benar-benar tersimpan, jadi
-     * kegagalan di tengah tidak membuat materi kehilangan isinya.
-     *
-     * @return array<string, mixed>
+     * @return array{file_path?: string, file_size?: int|false}
      */
-    private function replacePdf(?UploadedFile $file, ?string $previousPath): array
+    private function storePdf(?UploadedFile $file): array
     {
         if ($file === null) {
-            return $previousPath === null ? [] : ['file_path' => $previousPath];
+            return [];
         }
 
         $path = $file->store(Material::PDF_DIRECTORY, Material::PDF_DISK);
 
-        if ($previousPath !== null) {
-            Storage::disk(Material::PDF_DISK)->delete($previousPath);
+        if ($path === false) {
+            throw ValidationException::withMessages([
+                'file' => 'PDF gagal disimpan di server. Silakan unggah kembali.',
+            ]);
         }
 
         return [

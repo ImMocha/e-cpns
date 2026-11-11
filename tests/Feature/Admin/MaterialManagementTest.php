@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Mockery;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -188,6 +189,23 @@ class MaterialManagementTest extends TestCase
         $this->assertGreaterThan(0, $material->file_size);
         $this->assertSame(48, $material->page_count);
         $this->assertNotNull($material->published_at, 'materi terbit harus punya tanggal terbit');
+    }
+
+    public function test_pdf_write_failure_prevents_creating_the_material(): void
+    {
+        $disk = Mockery::mock(Storage::fake(Material::PDF_DISK));
+        $disk->shouldReceive('putFileAs')->once()->andReturnFalse();
+        Storage::set(Material::PDF_DISK, $disk);
+
+        $this->actingAs($this->admin())
+            ->post(route('admin.materials.store'), $this->payload([
+                'status' => MaterialStatus::Published->value,
+                'file' => UploadedFile::fake()->create('rangkuman.pdf', 900, 'application/pdf'),
+            ]))
+            ->assertSessionHasErrors(['file' => 'PDF gagal disimpan di server. Silakan unggah kembali.'])
+            ->assertSessionMissing('success');
+
+        $this->assertDatabaseCount('materials', 0);
     }
 
     public function test_admin_can_create_a_video_material(): void
@@ -493,6 +511,29 @@ class MaterialManagementTest extends TestCase
         $this->assertNotSame('materials/pdf/lama.pdf', $material->file_path);
         Storage::disk(Material::PDF_DISK)->assertExists($material->file_path);
         Storage::disk(Material::PDF_DISK)->assertMissing('materials/pdf/lama.pdf');
+    }
+
+    public function test_pdf_write_failure_preserves_the_existing_material_and_file(): void
+    {
+        $disk = Storage::fake(Material::PDF_DISK);
+        $oldPath = 'materials/pdf/lama.pdf';
+        $disk->put($oldPath, '%PDF-lama');
+        $material = Material::factory()->pdf()->create(['file_path' => $oldPath, 'file_size' => 9]);
+        $failingDisk = Mockery::mock($disk);
+        $failingDisk->shouldReceive('putFileAs')->once()->andReturnFalse();
+        Storage::set(Material::PDF_DISK, $failingDisk);
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.materials.update', $material), $this->payload([
+                'section_id' => $material->section_id,
+                'topic_id' => $material->topic_id,
+                'file' => UploadedFile::fake()->create('baru.pdf', 120, 'application/pdf'),
+            ]))
+            ->assertSessionHasErrors(['file' => 'PDF gagal disimpan di server. Silakan unggah kembali.'])
+            ->assertSessionMissing('success');
+
+        $this->assertSame($oldPath, $material->fresh()->file_path);
+        $this->assertSame('%PDF-lama', $disk->get($oldPath));
     }
 
     public function test_switching_to_video_discards_the_stored_pdf(): void
