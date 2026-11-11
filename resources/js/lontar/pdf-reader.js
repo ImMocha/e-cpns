@@ -174,11 +174,10 @@ async function renderPage(pageNumber) {
         canvas.style.width = `${Math.floor(base.width * ratio)}px`;
         canvas.style.height = `${Math.floor(base.height * ratio)}px`;
 
-        // Halaman dengan ukuran berbeda dari tebakan awal menyesuaikan cangkangnya
-        // sendiri; yang lain tetap memakai perkiraan yang sudah dipatok.
-        if (Math.abs(base.width - state.baseWidth) > 1) {
-            holder.style.width = `${Math.floor(base.width * ratio)}px`;
-            holder.style.aspectRatio = String(base.height / base.width);
+        // Halaman bisa punya tinggi berbeda meskipun lebarnya sama.
+        holder.style.aspectRatio = `${base.width} / ${base.height}`;
+        if (base.width !== state.baseWidth) {
+            holder.style.width = `calc(var(--pdf-page-width) * ${base.width / state.baseWidth})`;
         }
 
         const context = canvas.getContext('2d', { alpha: false });
@@ -284,7 +283,7 @@ function applyPageRatio(page) {
     const base = page.getViewport({ scale: 1 });
 
     state.baseWidth = base.width;
-    state.container.style.setProperty('--pdf-page-ratio', String(base.height / base.width));
+    state.container.style.setProperty('--pdf-page-ratio', `${base.width} / ${base.height}`);
     state.container.classList.add('pdfview__pages--sized');
 
     applyPageWidth();
