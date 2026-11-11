@@ -37,14 +37,11 @@
             PDF-nya diserahkan sebagai dokumen, mengunduhnya cuma satu klik.
             Di sini PDF-nya dirender pdf.js ke <canvas> dan toolbar-nya kita
             yang menentukan — sehingga tombol tersebut tidak pernah muncul.
-
-            Watermark memakai nama + email peserta supaya salinan yang bocor
-            masih bisa ditelusuri.
         --}}
         <div class="pdfview"
              data-pdf-reader
              data-src="{{ $material->fileUrl() }}"
-             data-watermark="{{ auth()->user()?->name }} — {{ auth()->user()?->email }}"
+             data-watermark="ganeshanusa.com"
              data-start-page="1">
           <div class="pdfview__bar">
             <div class="pdfview__file">
@@ -104,9 +101,7 @@
         <div class="pdfview__note" style="margin-top:.9rem">
           <svg data-icon="info"></svg>
           <div>
-            Setiap halaman diberi watermark nama dan email kamu. Menyalin, mencetak, atau
-            "screenshot" masih tidak bisa dicegah sepenuhnya secara teknis, tapi file yang
-            bocor bisa ditelusuri balik ke pemiliknya.
+            Setiap halaman diberi watermark ganeshanusa.com.
           </div>
         </div>
       @else

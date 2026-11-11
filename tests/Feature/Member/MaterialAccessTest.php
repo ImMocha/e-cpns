@@ -419,21 +419,14 @@ class MaterialAccessTest extends TestCase
             ->assertSee('aria-label="Sesuaikan lebar halaman"', false);
     }
 
-    public function test_reader_marks_the_document_with_the_participant_identity(): void
+    public function test_reader_uses_the_site_domain_as_the_pdf_watermark(): void
     {
-        Storage::fake(Material::PDF_DISK);
-        $peserta = $this->peserta();
-        $material = $this->publishedPdf();
-        $material->update(['file_path' => 'materials/pdf/a.pdf']);
-        Storage::disk(Material::PDF_DISK)->put('materials/pdf/a.pdf', '%PDF-isi');
+        $material = $this->publishedPdfWithFile();
 
-        $body = (string) $this->actingAs($peserta)
+        $this->actingAs($this->peserta())
             ->get(route('materials.show', $material))
             ->assertOk()
-            ->getContent();
-
-        // Watermark ditindaklanjuti pdf.js dari atribut ini.
-        $this->assertStringContainsString('data-watermark="'.$peserta->name.' — '.$peserta->email.'"', $body);
+            ->assertSee('data-watermark="ganeshanusa.com"', false);
     }
 
     public function test_pdf_response_is_not_cached_by_the_browser(): void

@@ -12,8 +12,7 @@
    Batasnya harus jujur disebut: pdf.js tetap menarik byte PDF ke browser untuk
    merendernya. Orang yang bertekad bisa mengambilnya lewat DevTools. Yang hilang
    adalah jalan pintas yang paling sering dipakai tanpa sengaja — tombol unduh,
-   tombol cetak, dan Ctrl+S / Ctrl+P. Untuk salinan yang tetap bocor, tiap
-   halaman diberi watermark identitas peserta.
+   tombol cetak, dan Ctrl+S / Ctrl+P. Tiap halaman diberi watermark situs.
 
    pdf.js di-import dinamis supaya chunk-nya hanya diunduh di halaman baca materi.
    ========================================================================== */
@@ -64,10 +63,7 @@ function notify(message, tone = 'info') {
 /* ------------------------------------------------------------------ watermark */
 
 /**
- * Watermark identitas peserta, digambar di atas tiap halaman.
- *
- * Tidak untuk menghentikan pencuri, tapi supaya salinan yang bocor bisa
- * ditelusuri balik ke pemiliknya.
+ * Watermark situs, digambar di atas tiap halaman.
  */
 function drawWatermark(context, width, height, label) {
     if (!label) return;
