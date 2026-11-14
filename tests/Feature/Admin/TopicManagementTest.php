@@ -46,7 +46,7 @@ class TopicManagementTest extends TestCase
         $this->assertDatabaseCount('topics', 2);
     }
 
-    public function test_topic_with_archived_material_cannot_be_moved_or_deleted(): void
+    public function test_topic_with_archived_material_cannot_be_moved_but_can_be_archived(): void
     {
         $topic = Topic::factory()->create();
         $material = Material::factory()->create(['section_id' => $topic->section_id, 'topic_id' => $topic->id]);
@@ -55,9 +55,10 @@ class TopicManagementTest extends TestCase
         $this->put(route('admin.topics.update', $topic), [
             'section_id' => Section::factory()->create()->id, 'name' => $topic->name, 'is_active' => 1,
         ])->assertSessionHasErrors('section_id');
-        $this->delete(route('admin.topics.destroy', $topic))->assertSessionHas('error');
-        $this->assertNotSoftDeleted($topic);
-        $this->assertSame($topic->section_id, $topic->fresh()->section_id);
+        $this->delete(route('admin.topics.destroy', $topic))->assertSessionHasNoErrors();
+        $this->assertSoftDeleted($topic);
+        $this->assertSoftDeleted($material);
+        $this->assertSame($topic->section_id, Topic::withTrashed()->findOrFail($topic->id)->section_id);
     }
 
     public function test_material_cannot_use_a_topic_from_another_field_or_a_deleted_topic(): void

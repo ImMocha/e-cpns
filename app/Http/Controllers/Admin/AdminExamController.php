@@ -126,7 +126,7 @@ class AdminExamController extends Controller
     {
         $this->persist($request, $exam);
 
-        return redirect()->route($this->routePrefix($exam).'.edit', $exam)->with('success', 'Pengaturan sesi berhasil disimpan. Sesi yang sudah dimulai tetap memakai pengaturan sebelumnya.');
+        return redirect()->route($this->routePrefix($exam).'.edit', $exam)->with('success', 'Pengaturan sesi berhasil disimpan.');
     }
 
     public function destroy(Request $request, Exam $exam): RedirectResponse

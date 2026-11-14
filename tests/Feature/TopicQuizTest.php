@@ -245,7 +245,7 @@ class TopicQuizTest extends TestCase
         $this->post(route('quizzes.start', $quiz->slug))->assertSessionHasErrors('exam');
     }
 
-    public function test_admin_topic_shortcuts_filter_quizzes_and_topics_with_quizzes_cannot_be_deleted_or_moved(): void
+    public function test_admin_topic_shortcuts_filter_quizzes_and_topics_with_quizzes_can_be_archived_but_not_moved(): void
     {
         $topic = Topic::factory()->create();
         $quiz = $this->quiz($topic, ['title' => 'Latihan Topik Pilihan']);
@@ -253,14 +253,13 @@ class TopicQuizTest extends TestCase
         $this->actingAs(User::factory()->admin()->create())->get(route('admin.topics.index'))->assertSee('Kelola Latihan');
         $this->get(route('admin.materials.quizzes.index', ['kind' => 'quiz', 'topic_id' => $topic->id]))
             ->assertSee($quiz->title)->assertDontSee('Latihan Tidak Terkait');
-        $this->delete(route('admin.topics.destroy', $topic))->assertSessionHas('error');
-        $this->assertNotSoftDeleted($topic);
         $this->put(route('admin.topics.update', $topic), ['name' => $topic->name, 'section_id' => Section::factory()->create()->id,
             'is_active' => true, 'position' => 0])->assertSessionHasErrors('section_id');
         $this->assertSame($topic->section_id, $topic->fresh()->section_id);
         $quiz->delete();
-        $this->delete(route('admin.topics.destroy', $topic))->assertSessionHas('error');
-        $this->assertNotSoftDeleted($topic);
+        $this->delete(route('admin.topics.destroy', $topic))->assertSessionHasNoErrors();
+        $this->assertSoftDeleted($topic);
+        $this->assertSoftDeleted($quiz);
     }
 
     public function test_topic_quiz_title_and_description_are_escaped(): void

@@ -75,7 +75,16 @@
 .question-preview-card { max-height: calc(100vh - 115px); overflow: auto; }
 .question-preview-meta { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
 .question-preview-title { font-size: var(--fs-lg); margin-top: 1rem; margin-bottom: .75rem; overflow-wrap: anywhere; }
-.question-stem { overflow-wrap: anywhere; }
+[data-question-alignment="left"] { --question-alignment: left; }
+[data-question-alignment="right"] { --question-alignment: right; }
+.question-stem {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+  text-align: var(--question-alignment, justify);
+}
+/* Apply question formatting to pasted inline styles as well. */
+.question-stem [style*="font-weight"] { font-weight: 700 !important; }
+.question-stem [style*="text-align"] { text-align: var(--question-alignment, justify) !important; }
 .question-image { max-height: 300px; width: auto; max-width: 100%; object-fit: contain; border-radius: 10px; margin-top: 1rem; margin-bottom: 1rem; }
 .question-image.exam-question-figure, .exam-question-media.exam-question-figure { width: 100%; max-height: none; }
 .question-video { display: block; width: 100%; max-height: 360px; object-fit: contain; background: #102d43; border-radius: 10px; margin-top: 1rem; margin-bottom: 1rem; }

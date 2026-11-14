@@ -129,7 +129,7 @@ import { sanitizeArticle } from './article-editor.js';
         '</span><span class="badge badge--primary badge--flat">' + esc(q.section || 'Umum') +
         '</span><span class="text-xs text-soft">' + esc(q.topic) + '</span><span class="autosave" id="autosaveHint"><span></span></span></div>' +
         (q.scoringType === 'weighted' ? '<p class="exam-scoring-notice">TKP berbobot · setiap pilihan bernilai 1–5, jawaban kosong 0.</p>' : '') +
-        '<div class="qstem article-prose">' + (q.stemHtml ? sanitizeArticle(q.stemHtml) : esc(q.stem)) + '</div>' +
+        '<div class="qstem article-prose question-stem">' + (q.stemHtml ? sanitizeArticle(q.stemHtml) : esc(q.stem)) + '</div>' +
         (q.imageUrl ? '<img class="exam-question-media' + (q.fixedOptionOrder ? ' exam-question-figure' : '') + '" src="' + esc(q.imageUrl) + '" alt="Ilustrasi soal">' : '') +
         (q.videoUrl ? '<video class="exam-question-media" controls playsinline preload="metadata" src="' + esc(q.videoUrl) + '">Browser tidak mendukung video.</video>' : '') +
         '<div class="grid" style="--gap:.7rem;margin-top:1.25rem">' + q.options.map((option, index) =>

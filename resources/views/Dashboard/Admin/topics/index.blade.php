@@ -25,7 +25,7 @@
               <a href="{{ route('admin.materials.create', ['section_id' => $topic->section_id, 'topic_id' => $topic->id, 'workspace' => 1]) }}"><svg data-icon="plus"></svg> Tambah Materi</a>
               <a href="{{ route('admin.materials.quizzes.index', ['topic_id' => $topic->id]) }}"><svg data-icon="list-checks"></svg> Kelola Latihan Soal</a>
               <a href="{{ route('admin.materials.quizzes.create', ['topic_id' => $topic->id]) }}"><svg data-icon="plus"></svg> Tambah Latihan Soal</a>
-              @if($topic->materials_count === 0 && $topic->quizzes_count === 0)<form method="POST" action="{{ route('admin.topics.destroy', $topic) }}" data-content-confirm data-confirm-title="Hapus topik?" data-confirm-body="Topik &quot;{{ $topic->name }}&quot; akan dihapus jika tidak memiliki materi atau latihan, termasuk konten arsip." data-confirm-ok="Ya, hapus">@csrf @method('DELETE')<input type="hidden" name="workspace" value="1"><button type="submit" class="is-danger"><svg data-icon="trash"></svg> Hapus Topik</button></form>@endif
+              <a class="is-danger" href="{{ route('admin.trash.show', ['type' => 'topics', 'id' => $topic->id]) }}"><svg data-icon="trash"></svg> Hapus Topik / Lihat Dampak</a>
             </div></details>
           </div>
           <a class="content-topic-card__title" href="{{ route('admin.materials.index', ['section_id' => $topic->section_id, 'topic_id' => $topic->id]) }}">{{ $topic->name }}</a>

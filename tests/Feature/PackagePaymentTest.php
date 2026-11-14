@@ -52,6 +52,28 @@ class PackagePaymentTest extends TestCase
         return app(PackagePayment::class)->checkout($user ?? User::factory()->create(), $package ?? $this->package());
     }
 
+    public function test_archived_pending_payment_is_reused_and_still_processes_notifications(): void
+    {
+        $this->configureGateway();
+        $transaction = $this->order();
+        $transaction->delete();
+        $this->actingAs($transaction->user);
+        $this->get(route('checkout', ['package' => $transaction->package_id]))->assertRedirect(route('transactions.show', $transaction));
+        $this->get(route('transactions.show', $transaction))->assertOk();
+        $reused = app(PackagePayment::class)->checkout($transaction->user, $transaction->package);
+        $this->assertSame($transaction->id, $reused->id);
+        $payload = $this->providerPayload($transaction);
+        Http::fake([$this->statusUrl($transaction) => Http::response($payload)]);
+
+        $this->postJson(route('payments.midtrans.notification'), $this->signed($payload))->assertOk();
+
+        $this->assertDatabaseCount('transactions', 1);
+        $this->assertDatabaseCount('user_packages', 1);
+        $this->assertDatabaseHas('transactions', ['id' => $transaction->id, 'status' => 'paid']);
+        $this->assertSoftDeleted($transaction);
+        Http::assertSentCount(1);
+    }
+
     public function test_paid_activation_uses_the_tier_from_checkout_after_the_catalog_changes(): void
     {
         $this->configureGateway();
@@ -218,7 +240,7 @@ class PackagePaymentTest extends TestCase
         $this->assertDatabaseHas('user_packages', ['id' => $secondGrant->id, 'package_id' => $package->id, 'tryout_tokens' => 1, 'tryouts_used' => 0]);
         $this->assertTrue($secondGrant->expires_at->isAfter($firstGrant->expires_at));
         $this->assertDatabaseMissing('exam_user_package', ['user_package_id' => $secondGrant->id, 'exam_id' => $exam->id]);
-        $this->get(route('packages.index'))->assertSee('1 token pilihan tryout tersisa')->assertSee('Paket Belajar · #'.$secondGrant->id);
+        $this->get(route('packages.index'))->assertSee('1 token pilihan tryout tersisa')->assertSee('2 paket');
         Http::assertSentCount(2);
     }
 

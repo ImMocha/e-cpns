@@ -19,13 +19,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-#[Fillable(['kind', 'slug', 'title', 'description', 'cover_path', 'question_count', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'access_level', 'topic_id', 'requires_topic_completion', 'created_by', 'updated_by', 'free_claim_enabled', 'free_claim_terms', 'free_claim_instagram_url'])]
+#[Fillable(['kind', 'slug', 'title', 'description', 'cover_path', 'question_count', 'question_alignment', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'access_level', 'topic_id', 'requires_topic_completion', 'created_by', 'updated_by', 'free_claim_enabled', 'free_claim_terms', 'free_claim_instagram_url'])]
 class Exam extends Model
 {
     /** @use HasFactory<ExamFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $attributes = ['access_level' => 'premium'];
+    public const QUESTION_ALIGNMENTS = [
+        'left' => 'Rata kiri',
+        'right' => 'Rata kanan',
+        'justify' => 'Rata kiri-kanan',
+    ];
+
+    public const DEFAULT_QUESTION_ALIGNMENT = 'justify';
+
+    protected $attributes = ['access_level' => 'premium', 'question_alignment' => self::DEFAULT_QUESTION_ALIGNMENT];
 
     protected function casts(): array
     {

@@ -30,7 +30,7 @@ class PackagePayment
             if (! $user->isActive() || $user->isAdmin() || ! $package->is_active) {
                 throw ValidationException::withMessages(['package_id' => 'Paket ini tidak dapat dibeli.']);
             }
-            $pending = Transaction::query()->whereBelongsTo($user)->whereBelongsTo($package)->where('status', TransactionStatus::Pending)->first();
+            $pending = Transaction::withTrashed()->whereBelongsTo($user)->whereBelongsTo($package)->where('status', TransactionStatus::Pending)->first();
             if ($pending !== null) {
                 if (filled($voucherCode) && Str::upper(trim($voucherCode)) !== $pending->voucher_code) {
                     throw ValidationException::withMessages(['voucher_code' => 'Paket ini memiliki pesanan menunggu pembayaran. Selesaikan pesanan tersebut sebelum mengganti voucher.']);
@@ -76,7 +76,7 @@ class PackagePayment
     {
         return DB::transaction(function () use ($transaction): Transaction {
             User::withTrashed()->whereKey($transaction->user_id)->lockForUpdate()->firstOrFail();
-            $transaction = Transaction::query()->whereKey($transaction->id)->lockForUpdate()->firstOrFail();
+            $transaction = Transaction::withTrashed()->whereKey($transaction->id)->lockForUpdate()->firstOrFail();
             if ($transaction->status !== TransactionStatus::Pending) {
                 return $transaction;
             }
@@ -100,7 +100,7 @@ class PackagePayment
 
         return DB::transaction(function () use ($transaction): Transaction {
             User::withTrashed()->whereKey($transaction->user_id)->lockForUpdate()->firstOrFail();
-            $transaction = Transaction::query()->whereKey($transaction->id)->lockForUpdate()->firstOrFail();
+            $transaction = Transaction::withTrashed()->whereKey($transaction->id)->lockForUpdate()->firstOrFail();
             $payload = $this->gateway->status($transaction);
             if ($payload === null) {
                 $transaction->update([

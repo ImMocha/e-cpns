@@ -71,7 +71,7 @@ class IntegrationSettings
                 $after['is_production'] = (bool) $after['is_production'];
                 foreach (['sandbox_server_key' => false, 'production_server_key' => true] as $field => $isProduction) {
                     if ($before[$field] !== '' && $after[$field] !== $before[$field]) {
-                        Transaction::query()->where('provider', 'midtrans')->where('is_production', $isProduction)
+                        Transaction::withTrashed()->where('provider', 'midtrans')->where('is_production', $isProduction)
                             ->whereNull('midtrans_server_key')
                             ->update(['midtrans_server_key' => Crypt::encryptString($before[$field])]);
                     }

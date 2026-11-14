@@ -13,13 +13,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['order_id', 'user_id', 'package_id', 'user_package_id', 'voucher_id', 'voucher_code', 'discount_amount', 'provider', 'is_production', 'midtrans_server_key', 'amount', 'package_snapshot', 'status', 'provider_reference', 'provider_status', 'payment_type', 'payment_url', 'expires_at', 'paid_at', 'checked_at', 'raw_payload'])]
 #[Hidden(['raw_payload', 'payment_url', 'midtrans_server_key'])]
 class Transaction extends Model
 {
     /** @use HasFactory<TransactionFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected function casts(): array
     {

@@ -15,7 +15,7 @@
 @endsection
 @section('content')
 <main class="container container--wide tryout-layout" id="main">
-  <div id="questionStage"><noscript><div class="alert alert--danger">Aktifkan JavaScript untuk mengerjakan soal dan menyimpan jawaban.</div></noscript></div>
+  <div id="questionStage" data-question-alignment="{{ $clientConfig['questionAlignment'] }}"><noscript><div class="alert alert--danger">Aktifkan JavaScript untuk mengerjakan soal dan menyimpan jawaban.</div></noscript></div>
   <aside class="qnav" aria-label="Navigasi nomor soal">
     <div class="card card--tight">
       <div class="card__head"><div><div class="card__title">Nomor Soal</div><div class="card__sub">Pilih nomor untuk berpindah</div></div></div>

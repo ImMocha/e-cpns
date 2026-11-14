@@ -12,12 +12,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['code', 'type', 'value', 'starts_on', 'ends_on', 'minimum_amount', 'usage_limit', 'package_id', 'is_active'])]
 class Voucher extends Model
 {
     /** @use HasFactory<VoucherFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected function casts(): array
     {
@@ -32,7 +33,7 @@ class Voucher extends Model
 
     public function transactions(): HasMany
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class)->withTrashed();
     }
 
     #[Scope]

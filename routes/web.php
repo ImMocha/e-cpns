@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\SectionController as AdminSectionController;
 use App\Http\Controllers\Admin\SlugController;
 use App\Http\Controllers\Admin\TestimonialController as AdminTestimonialController;
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
+use App\Http\Controllers\Admin\TrashController;
 use App\Http\Controllers\Admin\TryoutHistoryController;
 use App\Http\Controllers\Admin\TypographySettingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -149,9 +150,9 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('checkout.store');
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
-    Route::post('/transactions/{transaction}/refresh', [TransactionController::class, 'refresh'])->middleware('throttle:10,1')->name('transactions.refresh');
-    Route::post('/transactions/{transaction}/pay', [TransactionController::class, 'pay'])->middleware('throttle:10,1')->name('transactions.pay');
+    Route::get('/transactions/{transaction}', [TransactionController::class, 'show'])->withTrashed()->name('transactions.show');
+    Route::post('/transactions/{transaction}/refresh', [TransactionController::class, 'refresh'])->middleware('throttle:10,1')->withTrashed()->name('transactions.refresh');
+    Route::post('/transactions/{transaction}/pay', [TransactionController::class, 'pay'])->middleware('throttle:10,1')->withTrashed()->name('transactions.pay');
     Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
     Route::get('/certificates/{examAttempt}', [CertificateController::class, 'show'])
         ->whereNumber('examAttempt')->name('certificates.show');
@@ -178,6 +179,12 @@ Route::prefix('admin')
     ->middleware(['auth', 'active', 'role:admin', 'verified'])
     ->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+        Route::get('trash', [TrashController::class, 'index'])->name('trash.index');
+        Route::get('trash/{type}/{id}', [TrashController::class, 'show'])->whereNumber('id')->name('trash.show');
+        Route::post('trash/{type}/{id}/archive', [TrashController::class, 'archive'])->whereNumber('id')->name('trash.archive');
+        Route::post('trash/{type}/{id}/restore', [TrashController::class, 'restore'])->whereNumber('id')->name('trash.restore');
+        Route::delete('trash/{type}/{id}', [TrashController::class, 'destroy'])->whereNumber('id')->name('trash.destroy');
+
         Route::resource('exam-claims', AdminExamClaimController::class)->only(['index', 'show', 'update'])->parameters(['exam-claims' => 'examClaim']);
         Route::get('slugs/preview', SlugController::class)->name('slugs.preview');
 

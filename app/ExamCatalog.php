@@ -145,6 +145,7 @@ class ExamCatalog
 
         return [
             'attempt' => $attempt, 'kind' => $kind, 'exam' => $exam,
+            'questionAlignment' => $exam?->question_alignment ?? $attempt?->questionAlignment() ?? Exam::DEFAULT_QUESTION_ALIGNMENT,
             'canViewExplanations' => $canViewExplanations, 'reviewQuestions' => $reviewQuestions,
             'weightedQuestionCount' => count(array_filter($attempt?->question_snapshot['questions'] ?? [], fn (array $question): bool => ($question['scoringType'] ?? 'binary') === 'weighted')),
             'sections' => $attempt?->sectionBreakdown() ?? [],

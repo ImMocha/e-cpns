@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TopicRequest;
 use App\Models\Section;
 use App\Models\Topic;
+use App\TrashManager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -91,13 +92,9 @@ class TopicController extends Controller
         return redirect()->route('admin.topics.index', $request->boolean('workspace') ? ['section_id' => $topic->section_id] : [])->with('success', 'Topik berhasil diperbarui.');
     }
 
-    public function destroy(Request $request, Topic $topic): RedirectResponse
+    public function destroy(Request $request, Topic $topic, TrashManager $trash): RedirectResponse
     {
-        if ($topic->materials()->withTrashed()->exists() || $topic->quizzes()->withTrashed()->exists()) {
-            return back()->with('error', 'Topik masih memiliki materi atau latihan, termasuk konten arsip. Pindahkan konten atau nonaktifkan topik.');
-        }
-
-        $topic->delete();
+        $trash->archive($topic);
 
         return redirect()->route('admin.topics.index', $request->boolean('workspace') ? ['section_id' => $topic->section_id] : [])->with('success', 'Topik berhasil dihapus.');
     }

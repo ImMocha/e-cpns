@@ -30,7 +30,7 @@ class CheckoutController extends Controller
             'materials' => fn ($query) => $query->visibleToMembers(),
             'exams' => fn ($query) => $query->published(),
         ])->findOrFail($id);
-        $pending = $request->user()->transactions()->whereBelongsTo($package)->where('status', TransactionStatus::Pending)->first();
+        $pending = $request->user()->transactions()->withTrashed()->whereBelongsTo($package)->where('status', TransactionStatus::Pending)->first();
         if ($pending !== null) {
             return redirect()->route('transactions.show', $pending);
         }

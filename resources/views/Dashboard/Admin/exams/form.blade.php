@@ -4,7 +4,7 @@
 <nav class="crumbs" aria-label="Breadcrumb">@if($isQuiz)<a href="{{ route('admin.materials.index') }}">Materi</a><span class="crumbs__sep">›</span>@endif<a href="{{ route($routePrefix.'.index') }}">{{ $kind->label() }}</a><span class="crumbs__sep">›</span><span class="crumbs__current">{{ $exam->exists ? 'Edit' : 'Tambah' }} {{ $kind->label() }}</span></nav>
 <form method="POST" enctype="multipart/form-data" action="{{ $exam->exists ? route($routePrefix.'.update', $exam) : route($routePrefix.'.store') }}" data-exam-form data-question-order="{{ json_encode($questionOrder) }}" data-default-section="{{ $exam->topic_id ? $topics->firstWhere('id', $exam->topic_id)?->section_id : '' }}">
 @csrf @if ($exam->exists) @method('PUT') @endif
-<header class="page-head content-page-head exam-form-head"><div><span class="eyebrow">{{ $kind->label() }}</span><h1>{{ $exam->exists ? 'Edit' : 'Tambah' }} {{ $kind->label() }}</h1><p>Pengaturan baru berlaku untuk pengerjaan berikutnya.</p></div><div class="btn-row"><a class="btn btn--ghost" href="{{ $returnUrl }}">{{ $isQuiz ? 'Kembali ke Materi' : 'Kembali' }}</a><button class="btn btn--outline" name="status" value="draft">Simpan draft</button><button class="btn btn--primary" name="status" value="published">Simpan &amp; terbitkan</button></div></header>
+<header class="page-head content-page-head exam-form-head"><div><span class="eyebrow">{{ $kind->label() }}</span><h1>{{ $exam->exists ? 'Edit' : 'Tambah' }} {{ $kind->label() }}</h1><p>Perubahan soal, durasi, dan penilaian berlaku untuk pengerjaan berikutnya.</p></div><div class="btn-row"><a class="btn btn--ghost" href="{{ $returnUrl }}">{{ $isQuiz ? 'Kembali ke Materi' : 'Kembali' }}</a><button class="btn btn--outline" name="status" value="draft">Simpan draft</button><button class="btn btn--primary" name="status" value="published">Simpan &amp; terbitkan</button></div></header>
 @if ($errors->any())<div class="article-errors" role="alert"><strong>Sesi belum tersimpan:</strong><ul>@foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul></div>@endif
 <div class="exam-admin-layout">
 <div class="question-form-stack">
@@ -54,6 +54,19 @@
 </div>
 <section class="card exam-question-manager" id="soal-sesi">
 <header class="exam-question-manager__head"><div><h2 class="card__title">Kumpulan soal sesi</h2><p class="card__sub">Pilih soal yang dipakai, atau tambah dan edit soal langsung di sini.</p></div><button class="btn btn--primary btn--sm" type="button" data-add-question><svg data-icon="plus"></svg> Tambah Soal</button></header>
+<fieldset class="exam-question-alignment" aria-describedby="exam-question-alignment-help">
+    <legend class="label">Perataan teks soal</legend>
+    @php($alignment = old('question_alignment', $exam->question_alignment))
+    <div class="exam-question-alignment__options">
+        @foreach (\App\Models\Exam::QUESTION_ALIGNMENTS as $value => $label)
+            <label>
+                <input class="sr-only" type="radio" name="question_alignment" value="{{ $value }}" @checked($alignment === $value)>
+                <span><svg data-icon="align-{{ $value }}" aria-hidden="true"></svg>{{ $label }}</span>
+            </label>
+        @endforeach
+    </div>
+    <p class="field__hint" id="exam-question-alignment-help">Simpan sesi untuk menerapkan perataan ke semua pertanyaan di sesi ini.</p>
+</fieldset>
 <div class="exam-question-feedback" data-exam-question-message role="status" hidden></div>
 <section class="exam-question-order" data-question-order hidden aria-labelledby="exam-order-title">
     <div class="exam-question-order__heading"><h3 id="exam-order-title">Urutan soal dipilih</h3><span class="badge badge--primary badge--flat" data-question-order-count>0 soal</span></div>

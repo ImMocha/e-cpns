@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreSectionRequest;
 use App\Http\Requests\Admin\UpdateSectionRequest;
 use App\Models\Section;
+use App\TrashManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -80,9 +81,9 @@ class SectionController extends Controller
             ->with('success', "Perubahan pada bidang {$section->name} disimpan.");
     }
 
-    public function destroy(Section $section): RedirectResponse
+    public function destroy(Section $section, TrashManager $trash): RedirectResponse
     {
-        $section->delete();
+        $trash->archive($section);
 
         return redirect()
             ->route('admin.sections.index')

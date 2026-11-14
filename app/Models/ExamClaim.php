@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['user_id', 'exam_id', 'exam_title', 'kind', 'terms', 'instagram_url', 'instagram_username', 'customer_note', 'proof_paths', 'status', 'review_note', 'reviewed_by', 'reviewed_at'])]
 class ExamClaim extends Model
 {
     /** @use HasFactory<ExamClaimFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected function casts(): array
     {

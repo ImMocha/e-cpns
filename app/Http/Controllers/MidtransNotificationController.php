@@ -18,7 +18,7 @@ class MidtransNotificationController extends Controller
     {
         $orderId = $request->input('order_id');
         abort_unless(is_string($orderId) && strlen($orderId) <= 50, 403, 'Signature tidak valid.');
-        $transaction = Transaction::query()->where('provider', 'midtrans')->where('order_id', $orderId)->first();
+        $transaction = Transaction::withTrashed()->where('provider', 'midtrans')->where('order_id', $orderId)->first();
         $paymentConfigured = $transaction === null
             ? $gateway->configuredFor(false) || $gateway->configuredFor(true)
             : $gateway->configuredForTransaction($transaction);

@@ -7,6 +7,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\ExamBank;
 use App\Enums\MaterialAccess;
 use App\Enums\QuestionStatus;
+use App\Models\Exam;
 use App\Models\Question;
 use App\UniqueSlug;
 use Illuminate\Foundation\Http\FormRequest;
@@ -56,6 +57,7 @@ class ExamRequest extends FormRequest
             'cover' => ['nullable', 'prohibited_if:kind,quiz', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'remove_cover' => ['sometimes', 'boolean', 'prohibited_if:kind,quiz'],
             'question_count' => ['required', 'integer', 'min:1', 'max:200'],
+            'question_alignment' => ['sometimes', 'required', 'string', Rule::in(array_keys(Exam::QUESTION_ALIGNMENTS))],
             'duration_minutes' => ['required', 'integer', 'min:'.($this->input('kind') === 'quiz' ? '0' : '1'), 'max:240'],
             'points_per_correct' => ['required', 'integer', 'min:1', 'max:100'],
             'penalty_wrong' => ['required', 'integer', 'min:0', 'max:100'],
@@ -112,6 +114,11 @@ class ExamRequest extends FormRequest
         }];
     }
 
+    public function messages(): array
+    {
+        return ['question_alignment.in' => 'Pilih rata kiri, rata kanan, atau rata kiri-kanan.'];
+    }
+
     public function attributes(): array
     {
         return ['title' => 'nama sesi', 'slug' => 'alamat sesi', 'kind' => 'jenis sesi', 'question_count' => 'jumlah soal',
@@ -119,6 +126,6 @@ class ExamRequest extends FormRequest
             'passing_score' => 'nilai ambang', 'question_ids' => 'pilihan soal', 'topic_id' => 'topik latihan',
             'requires_topic_completion' => 'syarat penyelesaian materi',
             'free_claim_terms' => 'syarat unlock gratis', 'free_claim_instagram_url' => 'tautan akun Instagram',
-            'cover' => 'gambar kartu', 'remove_cover' => 'hapus gambar kartu'];
+            'cover' => 'gambar kartu', 'remove_cover' => 'hapus gambar kartu', 'question_alignment' => 'perataan teks soal'];
     }
 }

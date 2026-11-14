@@ -30,7 +30,7 @@
   <div class="tryout-demo__workspace" data-demo-workspace hidden>
     <div class="tryout-demo__progress"><span class="badge badge--primary badge--flat" data-demo-category>TWK</span><span class="text-xs text-soft" data-demo-progress></span></div>
     <fieldset class="tryout-demo__question">
-      <legend class="fw-700" data-demo-question tabindex="-1"></legend>
+      <legend class="question-stem" data-demo-question tabindex="-1"></legend>
       <div class="tryout-demo__options" data-demo-options></div>
     </fieldset>
     <div class="tryout-demo__navigation">

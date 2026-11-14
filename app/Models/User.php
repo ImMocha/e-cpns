@@ -103,7 +103,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function canWriteTestimonial(): bool
     {
         return ! $this->isAdmin() && $this->isActive() && $this->hasVerifiedEmail()
-            && $this->transactions()->where('status', TransactionStatus::Paid)
+            && $this->transactions()->withTrashed()->where('status', TransactionStatus::Paid)
                 ->where('amount', '>', 0)->whereNotNull('package_id')->exists();
     }
 

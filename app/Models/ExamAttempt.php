@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -31,7 +32,7 @@ class ExamAttempt extends Model
     protected $hidden = ['question_snapshot'];
 
     /** @use HasFactory<ExamAttemptFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public const IN_PROGRESS = 'in_progress';
 
@@ -213,6 +214,12 @@ class ExamAttempt extends Model
         return $this->expires_at !== null && $this->expires_at->lessThanOrEqualTo(now());
     }
 
+    public function questionAlignment(): string
+    {
+        return Exam::withTrashed()->where('kind', $this->kind)->where('slug', $this->bank_slug)->value('question_alignment')
+            ?? Exam::DEFAULT_QUESTION_ALIGNMENT;
+    }
+
     /** @return array<string, mixed> */
     public function clientConfig(): array
     {
@@ -234,6 +241,7 @@ class ExamAttempt extends Model
             $definition['questions'],
         );
         $definition['attemptId'] = $this->id;
+        $definition['questionAlignment'] = $this->questionAlignment();
         $definition['kind'] = $this->kind;
         $definition['saveUrl'] = route('exam-attempts.save', $this);
         $definition['submitUrl'] = route('exam-attempts.submit', $this);

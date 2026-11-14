@@ -111,7 +111,7 @@
 
       <section class="card exam-review" aria-label="Tinjauan jawaban">
         <div class="card__head"><div><h2 class="card__title">{{ $canViewExplanations ? 'Pembahasan Soal' : 'Kunci Jawaban' }}</h2><p class="card__sub">Buka satu soal untuk melihat pilihanmu{{ $canViewExplanations ? ' dan memahami penjelasannya' : ' dan kunci jawaban' }}.</p></div><span class="badge badge--primary badge--flat">{{ count($reviewQuestions) }} soal</span></div>
-        <div class="exam-review-list">
+        <div class="exam-review-list" data-question-alignment="{{ $questionAlignment }}">
           @unless ($canViewExplanations)
             <x-explanation-lock />
           @endunless
@@ -127,7 +127,7 @@
               </summary>
               <div class="exam-review-body">
                 <div class="exam-review-reading">
-                <div class="exam-review-stem article-prose">@if (!empty($question['stemHtml'])){!! \App\ArticleContent::sanitize($question['stemHtml']) !!}@else{{ $question['stem'] }}@endif</div>
+                <div class="exam-review-stem article-prose question-stem">@if (!empty($question['stemHtml'])){!! \App\ArticleContent::sanitize($question['stemHtml']) !!}@else{{ $question['stem'] }}@endif</div>
                 @foreach (['image', 'video'] as $media)
                   @if (!empty($question[$media.'_path']))
                     @php($mediaUrl = route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => $media]))

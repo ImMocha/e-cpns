@@ -24,7 +24,7 @@ class AdminVoucherController extends Controller
     {
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:40'],
             'state' => ['nullable', Rule::in(['active', 'inactive', 'expired', 'scheduled'])]]);
-        $paid = Transaction::query()->whereNotNull('voucher_id')->whereIn('status', [TransactionStatus::Paid, TransactionStatus::PartiallyRefunded]);
+        $paid = Transaction::withTrashed()->whereNotNull('voucher_id')->whereIn('status', [TransactionStatus::Paid, TransactionStatus::PartiallyRefunded]);
 
         return view('Dashboard.Admin.vouchers.index', [
             'vouchers' => Voucher::query()->with('package')->withCount([
@@ -39,7 +39,7 @@ class AdminVoucherController extends Controller
                 ->orderByDesc('id')->paginate(15)->withQueryString(),
             'filters' => $filters,
             'stats' => ['total' => Voucher::count(), 'paid' => (clone $paid)->count(), 'discount' => (clone $paid)->sum('discount_amount'),
-                'pending' => Transaction::query()->whereNotNull('voucher_id')->where('status', TransactionStatus::Pending)->count()],
+                'pending' => Transaction::withTrashed()->whereNotNull('voucher_id')->where('status', TransactionStatus::Pending)->count()],
         ]);
     }
 

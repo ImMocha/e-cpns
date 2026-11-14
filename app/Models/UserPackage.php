@@ -135,7 +135,7 @@ class UserPackage extends Model
             if ($user->userPackages()->active()->whereBelongsTo($package)->exists()) {
                 throw ValidationException::withMessages(['email' => 'Peserta sudah memiliki paket ini yang masih aktif.']);
             }
-            if ($user->transactions()->whereBelongsTo($package)->where('status', 'pending')->exists()) {
+            if ($user->transactions()->withTrashed()->whereBelongsTo($package)->where('status', 'pending')->exists()) {
                 throw ValidationException::withMessages(['email' => 'Peserta memiliki pembayaran paket yang masih pending. Selesaikan transaksi terlebih dahulu.']);
             }
             $materialIds = $package->materials()->pluck('materials.id')->all();
