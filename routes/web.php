@@ -50,6 +50,7 @@ use App\Http\Controllers\TryoutController;
 use App\Http\Controllers\TryoutResultController;
 use App\Http\Controllers\TryoutTokenController;
 use App\Http\Middleware\SecureIntegrationSettings;
+use App\QuestionExplanation;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -137,7 +138,7 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::post('/exam-attempts/{examAttempt}/submit', [ExamAttemptController::class, 'submit'])
         ->name('exam-attempts.submit');
     Route::get('/exam-attempts/{examAttempt}/questions/{question}/media/{media}', [ExamAttemptController::class, 'media'])
-        ->where('media', 'image|video|explanation-image|option-[0-9]')->name('exam-attempts.media');
+        ->where('media', 'image|video|explanation-image|option-[0-9]|explanation-inline-'.QuestionExplanation::IMAGE_ID_PATTERN)->name('exam-attempts.media');
 
     Route::get('/history', HistoryController::class)->name('history.index');
     Route::get('/statistics', StatisticsController::class)->name('statistics.index');
@@ -227,7 +228,7 @@ Route::prefix('admin')
         Route::get('questions/{question}/image', [AdminQuestionController::class, 'image'])->name('questions.image');
         Route::get('questions/{question}/video', [AdminQuestionController::class, 'video'])->name('questions.video');
         Route::get('questions/{question}/media/{media}', [AdminQuestionController::class, 'media'])
-            ->where('media', 'explanation-image|option-[0-9]')->name('questions.media');
+            ->where('media', 'explanation-image|option-[0-9]|explanation-inline-'.QuestionExplanation::IMAGE_ID_PATTERN)->name('questions.media');
         Route::resource('questions', AdminQuestionController::class);
         Route::patch('exams/order', [AdminExamController::class, 'reorder'])->name('exams.order');
         Route::patch('practices/order', [AdminExamController::class, 'reorder'])->name('practices.order');

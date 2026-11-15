@@ -48,6 +48,20 @@
 .dashboard-row > .card > .btn:last-child { margin-top: auto !important; }
 .dashboard-row > .card > .btn:last-child:not(:first-child) { align-self: stretch; }
 .dashboard-row > .card > .stack:last-of-type { margin-bottom: 1.25rem; }
+.dashboard-participants { display:grid; align-content:center; justify-items:center; gap:1.5rem; flex:1; padding-block:1rem; }
+.dashboard-participants__chart { display:grid; place-items:center; width:min(100%, 180px); aspect-ratio:1; }
+.dashboard-participants__chart > * { grid-area:1 / 1; }
+.dashboard-participants__chart > [data-chart] { width:100%; height:100%; }
+.dashboard-participants__total { display:grid; text-align:center; color:var(--text-soft); font-size:var(--fs-xs); pointer-events:none; }
+.dashboard-participants__total strong { color:var(--ink); font:700 var(--fs-xl)/1.2 var(--font-display); }
+.dashboard-participants > .kv { width:min(100%, 22rem); }
+.dashboard-participants .kv__key { display:flex; align-items:center; gap:.5rem; }
+.member-dashboard__progress { display:grid; align-items:center; gap:1rem; margin-bottom:1.5rem; }
+.member-dashboard__progress:has(.ring) { grid-template-columns:auto minmax(0,1fr); }
+@media (max-width:540px) {
+  .member-dashboard__progress:has(.ring) { grid-template-columns:minmax(0,1fr); }
+  .member-dashboard__progress .ring { justify-self:center; }
+}
 /* Member cards follow independent columns so restricted features leave no empty slots. */
 .member-dashboard__column { display:grid; align-content:start; gap:1.5rem; min-width:0; }
 .member-dashboard__tryout, .member-dashboard__packages, .member-dashboard__upgrade { display:grid; align-content:start; gap:1rem; min-width:0; }

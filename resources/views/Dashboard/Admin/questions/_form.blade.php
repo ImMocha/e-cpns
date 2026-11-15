@@ -20,6 +20,7 @@
         <div><span class="eyebrow">Ruang Soal</span><h1 style="margin-top:.5rem">{{ $question->exists ? 'Edit Soal' : 'Tambah Soal Baru' }}</h1><p>Lengkapi soal di kiri, periksa preview langsung di kanan.</p></div>
         <div class="btn-row"><a class="btn btn--ghost" href="{{ route('admin.questions.index') }}">Kembali</a><button class="btn btn--outline" name="status" value="draft"><svg data-icon="pencil"></svg> Simpan draft</button><button class="btn btn--primary" name="status" value="published"><svg data-icon="send"></svg> {{ $question->exists ? 'Simpan & terbitkan' : 'Terbitkan soal' }}</button></div>
     </header>
+    <div class="article-errors" role="alert" data-question-async-errors hidden></div>
     @endif
     @if (! $inline && $errors->any())
         <div class="article-errors" role="alert"><strong>Soal belum tersimpan. Periksa kembali:</strong><ul>@foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul></div>
@@ -112,13 +113,8 @@
                 <div class="question-hint"><input type="hidden" name="shuffle_options" value="0"><label class="check"><input type="checkbox" name="shuffle_options" value="1" data-shuffle-options @checked($questionValue('shuffle_options', $question->shuffle_options))> Izinkan pengacakan pilihan pada sesi</label><p class="field__hint">Matikan bila gambar soal sudah memuat label A–E agar pilihan tetap sesuai ilustrasi.</p></div>
             </section>
             <section class="card">
-                <x-question-rich-text name="explanation" label="Pembahasan" :value="$questionValue('explanation', $question->explanation)" />
-                <div class="field question-hint" data-file-picker><label class="label" for="question-explanation-image">Gambar pembahasan <span class="label__opt">(opsional)</span></label><input class="input" id="question-explanation-image" type="file" name="explanation_image" accept="image/jpeg,image/png,image/webp" data-explanation-image>
-                    <x-clear-file-button />
-                    <p class="field__hint">JPG, PNG, WebP · maksimal 2 MB. Gambar ditampilkan setelah teks pembahasan.</p>
-                    <label class="check" data-existing-explanation-image-control @if(!$question->explanation_image_path) hidden @endif><input type="checkbox" name="remove_explanation_image" value="1" data-remove-explanation-image data-remove-stored-file @checked($questionValue('remove_explanation_image'))> Hapus gambar pembahasan saat disimpan</label>
-                    <p class="question-error" data-explanation-image-error role="alert" hidden></p>
-                </div>
+                <x-question-rich-text name="explanation" label="Pembahasan" :value="$questionValue('explanation', $question->explanation)" :image-urls="$question->explanationEditorImageUrls()" />
+                <label class="check question-hint" data-existing-explanation-image-control @if(!$question->explanation_image_path) hidden @endif><input type="checkbox" name="remove_explanation_image" value="1" data-remove-explanation-image @checked($questionValue('remove_explanation_image'))> Hapus gambar lampiran lama saat disimpan</label>
                 <p class="field__hint question-hint">Pembahasan wajib diisi untuk menerbitkan soal. Peserta dengan paket berbayar aktif melihatnya setelah menyelesaikan sesi latihan atau tryout.</p>
             </section>
             <p class="text-sm text-soft" data-question-save-note>Perubahan disimpan saat Anda menekan Simpan draft atau Terbitkan soal.</p>

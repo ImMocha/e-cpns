@@ -16,9 +16,9 @@
 .tryout-demo__intro, .tryout-demo__workspace, .tryout-demo__result { display: grid; gap: 1rem; }
 .tryout-demo__intro { padding: 1.25rem; border: 1px dashed var(--border-strong); border-radius: var(--r-md); background: var(--surface-2); }
 .tryout-demo__question { min-width: 0; border: 0; padding: 0; }
-.tryout-demo__question legend { color: var(--ink); font-size: var(--fs-base); line-height: 1.6; margin-bottom: 1rem; }
+.tryout-demo__question legend { color: #000; font-size: var(--fs-base); font-weight: 400; line-height: 1.6; margin-bottom: 1rem; }
 .tryout-demo__options { display: grid; gap: .6rem; }
-.tryout-demo__option { display: flex; align-items: flex-start; gap: .7rem; border: 1px solid var(--border-strong); border-radius: var(--r-sm); padding: .8rem; cursor: pointer; font-size: var(--fs-sm); line-height: 1.5; background: var(--surface); }
+.tryout-demo__option { display: flex; align-items: flex-start; gap: .7rem; border: 1px solid var(--border-strong); border-radius: var(--r-sm); padding: .8rem; cursor: pointer; font-size: var(--fs-sm); font-weight: 500; line-height: 1.5; color: #000; background: var(--surface); }
 .tryout-demo__option input { margin-top: .2rem; accent-color: var(--primary); flex: 0 0 auto; }
 .tryout-demo__option:has(input:checked) { border-color: var(--primary); background: var(--primary-050); }
 .tryout-demo__option:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }

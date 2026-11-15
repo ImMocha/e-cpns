@@ -160,7 +160,7 @@
                 @if ($canViewExplanations)
                   <section class="exam-review-explanation" aria-label="Penjelasan soal {{ $index + 1 }}">
                     <h3><svg data-icon="book"></svg> Pembahasan</h3>
-                    <div class="article-prose" data-question-math>@if (!empty($question['explainHtml'])){!! \App\ArticleContent::sanitize($question['explainHtml']) !!}@else{{ $question['explain'] ?? '' }}@endif</div>
+                    <div class="article-prose" data-question-math>@if (!empty($question['explainHtml'])){!! $question['explainHtml'] !!}@else{{ $question['explain'] ?? '' }}@endif</div>
                     @if(!empty($question['explanation_image_path']))<img class="question-explanation-image" src="{{ route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => 'explanation-image']) }}" alt="Gambar pembahasan" loading="lazy">@endif
                   </section>
                 @endif

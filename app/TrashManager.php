@@ -207,7 +207,7 @@ class TrashManager
     {
         $columns = [
             'materials' => ['local', ['file_path']],
-            'questions' => ['local', ['image_path', 'video_path', 'explanation_image_path', 'option_image_paths']],
+            'questions' => ['local', ['image_path', 'video_path', 'explanation_image_path', 'option_image_paths', 'explanation_inline_image_paths']],
             'exam_claims' => ['local', ['proof_paths']],
             'package_claims' => ['local', ['proof_paths']],
             'articles' => ['public', ['cover_path']],

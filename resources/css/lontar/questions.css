@@ -83,11 +83,13 @@
 [data-question-alignment="right"] { --question-alignment: right; }
 .question-stem {
   overflow-wrap: anywhere;
-  font-weight: 600;
+  font-weight: 400;
+  color: #000;
   text-align: var(--question-alignment, justify);
 }
-/* Apply question formatting to pasted inline styles as well. */
-.question-stem :is(strong, b), .question-stem [style*="font-weight"] { font-weight: 600 !important; }
+.question-stem :is(strong, b, h1, h2, h3, h4, h5, h6, th), .question-stem [style*="font-weight"] { font-weight: 400 !important; }
+.question-stem a { color: #000; }
+.question-stem [style*="color"] { color: #000 !important; }
 .question-stem [style*="text-align"] { text-align: var(--question-alignment, justify) !important; }
 .question-math {
   display: inline-block;
@@ -107,6 +109,10 @@
 .question-video[hidden], [data-video-error][hidden] { display: none; }
 .question-preview-options { display: flex; flex-direction: column; gap: .55rem; margin-top: 1.25rem; }
 .question-preview-option { display: flex; align-items: flex-start; gap: .7rem; padding: .8rem; border: 1px solid var(--border); border-radius: 10px; font-size: 13px; overflow-wrap: anywhere; }
+.question-preview-option-content, .question-answer-text, .opt__text, .exam-review-option-content {
+  color: #000;
+  font-weight: 500;
+}
 .question-preview-option--correct { border-color: var(--success); background: var(--success-050); }
 .question-preview-letter { flex: 0 0 24px; font-weight: 800; }
 .question-preview-explanation { margin-top: 1.5rem; }

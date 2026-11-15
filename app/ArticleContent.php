@@ -29,7 +29,8 @@ class ArticleContent
         return filter_var($url, FILTER_VALIDATE_URL) && in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true) ? $url : null;
     }
 
-    public static function sanitize(?string $html): string
+    /** @param (callable(string): ?string)|null $resolveImageSource */
+    public static function sanitize(?string $html, ?callable $resolveImageSource = null): string
     {
         if (trim((string) $html) === '') {
             return '';
@@ -41,7 +42,7 @@ class ArticleContent
             $document->loadHTML('<?xml encoding="UTF-8"><body>'.$html.'</body>', LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
             $body = $document->getElementsByTagName('body')->item(0);
 
-            return $body ? self::children($body) : '';
+            return $body ? self::children($body, $resolveImageSource) : '';
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors($previous);
@@ -55,7 +56,7 @@ class ArticleContent
         return trim(preg_replace('/[\s\x{00A0}\x{200B}]+/u', ' ', html_entity_decode(strip_tags($spaced), ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?? '');
     }
 
-    private static function children(DOMNode $parent, int $depth = 0): string
+    private static function children(DOMNode $parent, ?callable $resolveImageSource, int $depth = 0): string
     {
         if ($depth > 60) {
             return '';
@@ -72,13 +73,18 @@ class ArticleContent
                 }
                 if ($tag === 'img') {
                     $src = self::imageUrl($node->getAttribute('src'));
+                    if ($src !== null && $resolveImageSource !== null) {
+                        $src = $resolveImageSource($src);
+                    }
                     if ($src !== null) {
-                        $html .= '<img src="'.htmlspecialchars($src, ENT_QUOTES, 'UTF-8').'" alt="'.htmlspecialchars($node->getAttribute('alt'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'" loading="lazy">';
+                        $align = $node->getAttribute('data-align');
+                        $alignment = in_array($align, ['left', 'center', 'right'], true) ? ' data-align="'.$align.'"' : '';
+                        $html .= '<img src="'.htmlspecialchars($src, ENT_QUOTES, 'UTF-8').'" alt="'.htmlspecialchars($node->getAttribute('alt'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'" loading="lazy"'.$alignment.'>';
                     }
 
                     continue;
                 }
-                $content = self::children($node, $depth + 1);
+                $content = self::children($node, $resolveImageSource, $depth + 1);
                 if (! in_array($tag, self::TAGS, true)) {
                     $html .= $content;
 

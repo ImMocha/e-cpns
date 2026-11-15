@@ -21,7 +21,8 @@
     <section class="card question-feedback">
         <h2 class="card__title">{{ $question->isWeighted() ? 'Skor & Pembahasan' : 'Kunci & Pembahasan' }}</h2>
         @unless ($question->isWeighted())<p class="text-sm text-soft question-section">Jawaban {{ chr(65 + $question->correct_option) }}</p>@endunless
-        <div class="article-prose question-section" data-question-math>{!! $question->safeExplanation() !!}</div>
+        @php($inlineImageUrls = $question->explanationEditorImageUrls())
+        <div class="article-prose question-section" data-question-math>{!! \App\QuestionExplanation::transform($question->explanation, fn (string $id): ?string => $inlineImageUrls[$id] ?? null) !!}</div>
         @if($question->explanation_image_path)<img class="question-explanation-image" src="{{ route('admin.questions.media', [$question, 'explanation-image']) }}" alt="Gambar pembahasan">@endif
     </section>
 </div>

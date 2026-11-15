@@ -1577,7 +1577,7 @@
   font-size: var(--fs-sm);
   transition: background-color var(--t), color var(--t);
 }
-.opt__text { padding-top: 0.25rem; font-size: var(--fs-md); line-height: 1.55; color: var(--text); }
+.opt__text { padding-top: 0.25rem; font-size: var(--fs-md); line-height: 1.55; color: #000; font-weight: 500; }
 .opt.is-selected { border-color: var(--primary); background: var(--primary-050); box-shadow: var(--sh-primary); }
 .opt.is-selected .opt__key { background: var(--primary); color: #fff; }
 .opt.is-correct { border-color: var(--success); background: var(--success-050); box-shadow: 5px 5px 0 var(--success); }

@@ -47,6 +47,8 @@
 .article-image-credit a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
 .article-card .article-cover-figure { margin-bottom: 0; }
 .article-prose img { display: block; max-width: 100%; height: auto; margin: 1rem auto; border-radius: 8px; }
+.article-prose img[data-align="left"] { margin-inline: 0 auto; }
+.article-prose img[data-align="right"] { margin-inline: auto 0; }
 .article-prose figure { margin: 1.5rem 0; }
 .article-prose figure > img { margin: 0 auto; }
 .article-editable figure { cursor: pointer; }

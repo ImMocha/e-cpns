@@ -247,7 +247,7 @@ class ExamAttempt extends Model
                     ? route('exam-attempts.media', ['examAttempt' => $this->id, 'question' => $question['id'], 'media' => 'option-'.$index]) : null,
                     array_keys($question['options']));
 
-                return array_diff_key($question, array_flip(['answer', 'optionScores', 'explain', 'explainHtml', 'image_path', 'video_path', 'option_image_paths', 'explanation_image_path']));
+                return array_diff_key($question, array_flip(['answer', 'optionScores', 'explain', 'explainHtml', 'image_path', 'video_path', 'option_image_paths', 'explanation_image_path', 'explanation_inline_image_paths']));
             },
             $definition['questions'],
         );

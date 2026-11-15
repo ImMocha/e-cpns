@@ -10,6 +10,7 @@ use App\Enums\QuestionScoring;
 use App\Enums\QuestionStatus;
 use App\Models\Question;
 use App\Models\Section;
+use App\QuestionExplanation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -60,6 +61,8 @@ class QuestionRequest extends FormRequest
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_image' => ['sometimes', 'boolean'],
             'explanation_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'explanation_inline_images' => ['sometimes', 'array', 'max:'.QuestionExplanation::MAX_IMAGES],
+            'explanation_inline_images.*' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'remove_explanation_image' => ['sometimes', 'boolean'],
             'video' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm', 'extensions:mp4,webm', 'max:51200'],
             'remove_video' => ['sometimes', 'boolean'],
@@ -122,6 +125,18 @@ class QuestionRequest extends FormRequest
             }
             $question = $this->route('question');
             $hasExplanationImage = $this->hasFile('explanation_image') || ($question instanceof Question && $question->explanation_image_path && ! $this->boolean('remove_explanation_image'));
+            if (! $validator->errors()->hasAny(['explanation', 'explanation_inline_images', 'explanation_inline_images.*'])) {
+                $imageIds = QuestionExplanation::imageIds($this->input('explanation'));
+                $uploads = array_keys($this->file('explanation_inline_images', []));
+                $existing = $question instanceof Question ? array_keys($question->explanation_inline_image_paths ?? []) : [];
+                if (count($imageIds) > QuestionExplanation::MAX_IMAGES) {
+                    $validator->errors()->add('explanation', 'Maksimal '.QuestionExplanation::MAX_IMAGES.' gambar sisipan per pembahasan.');
+                } elseif (array_diff($imageIds, $uploads, $existing) || array_diff($uploads, $imageIds)) {
+                    $validator->errors()->add('explanation', 'Ada gambar sisipan yang tidak tersedia. Tempel ulang gambar tersebut.');
+                } else {
+                    $hasExplanationImage = $hasExplanationImage || $imageIds !== [];
+                }
+            }
             if (! $validator->errors()->has('explanation') && $this->input('status') === 'published' && ! $hasExplanationImage && ArticleContent::text(ArticleContent::sanitize($this->input('explanation'))) === '') {
                 $validator->errors()->add('explanation', 'Lengkapi pembahasan sebelum menerbitkan soal.');
             }
@@ -151,6 +166,9 @@ class QuestionRequest extends FormRequest
             'video.mimetypes' => 'Video soal harus berupa file MP4 atau WebM.',
             'video.extensions' => 'Video soal harus menggunakan ekstensi .mp4 atau .webm.',
             'video.max' => 'Ukuran video soal maksimal 50 MB.',
+            'explanation_inline_images.*.max' => 'Ukuran setiap gambar pembahasan maksimal 2 MB.',
+            'explanation_inline_images.*.image' => 'Gunakan gambar pembahasan JPG, PNG, atau WebP.',
+            'explanation_inline_images.*.mimes' => 'Gunakan gambar pembahasan JPG, PNG, atau WebP.',
             'exam_ids.array' => 'Pilihan sesi tidak valid.', 'exam_ids.list' => 'Urutan pilihan sesi tidak valid.',
             'exam_ids.max' => 'Pilih maksimal 2000 sesi.', 'exam_ids.*.required' => 'Pilih sesi yang tersedia.',
             'exam_ids.*.integer' => 'Pilihan sesi tidak valid.', 'exam_ids.*.distinct' => 'Sesi yang sama tidak boleh dipilih dua kali.',

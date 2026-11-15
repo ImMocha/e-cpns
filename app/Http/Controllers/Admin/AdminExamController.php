@@ -102,7 +102,7 @@ class AdminExamController extends Controller
 
         return $this->form(new Exam(['kind' => $this->requestKind($request)->value, 'topic_id' => $topic?->id, 'requires_topic_completion' => false,
             'status' => 'draft', 'question_count' => 1,
-            'duration_minutes' => $isQuiz ? 0 : 30, 'points_per_correct' => 5, 'penalty_wrong' => 0, 'random_questions' => true, 'random_options' => true]));
+            'duration_minutes' => $isQuiz ? 0 : 30, 'points_per_correct' => 5, 'penalty_wrong' => 0, 'random_questions' => false, 'random_options' => false]));
     }
 
     public function store(ExamRequest $request): RedirectResponse

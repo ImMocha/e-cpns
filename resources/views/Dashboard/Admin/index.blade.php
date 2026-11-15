@@ -119,8 +119,16 @@
       <section class="card">
         <div class="card__head"><div><div class="card__title">Status Peserta</div><div class="card__sub">Akun aktif dan nonaktif</div></div></div>
         @if ($participantCount > 0)
-          <div style="width:180px;height:180px;margin:0 auto 1.25rem" data-chart='@json($participantStatusChart)'></div>
-          <div class="legend"><div class="legend__item"><span class="legend__swatch" style="background:var(--primary)"></span> Aktif · {{ $activeParticipantCount }}</div><div class="legend__item"><span class="legend__swatch" style="background:var(--pop-amber)"></span> Nonaktif · {{ $inactiveParticipantCount }}</div></div>
+          <div class="dashboard-participants">
+            <div class="dashboard-participants__chart">
+              <div data-chart='@json($participantStatusChart)'></div>
+              <div class="dashboard-participants__total"><strong>{{ $participantCount }}</strong><span>Peserta</span></div>
+            </div>
+            <dl class="kv">
+              <div class="kv__row"><dt class="kv__key"><span class="legend__swatch" style="background:var(--primary)"></span> Aktif</dt><dd class="kv__val">{{ $activeParticipantCount }}</dd></div>
+              <div class="kv__row"><dt class="kv__key"><span class="legend__swatch" style="background:var(--pop-amber)"></span> Nonaktif</dt><dd class="kv__val">{{ $inactiveParticipantCount }}</dd></div>
+            </dl>
+          </div>
         @else
           <p class="text-sm text-soft">Belum ada akun peserta.</p>
         @endif

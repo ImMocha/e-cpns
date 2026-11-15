@@ -1,4 +1,5 @@
 import { sanitizeArticle } from './article-editor.js';
+import { setupExplanationImages } from './question-explanation-images.js';
 import { renderQuestionMath } from './question-math.js';
 
 document.querySelectorAll('[data-question-exams]').forEach((panel) => {
@@ -36,7 +37,6 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   const videoError = form.querySelector('[data-video-error]');
   const addOption = form.querySelector('[data-add-option]');
   const scoring = form.querySelector('[data-question-scoring]');
-  const explanationImage = form.querySelector('[data-explanation-image]');
   const previewExplanationImage = form.querySelector('[data-preview-explanation-image]');
   const imagePreviews = new Map();
   let videoUrl = null;
@@ -81,15 +81,20 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     form.querySelector('[data-preview-field]').textContent = section.selectedOptions[0]?.value ? section.selectedOptions[0].textContent : 'Bidang';
     form.querySelector('[data-preview-level]').textContent = level.selectedOptions[0]?.textContent || '';
     for (const [name, item] of editors) {
-      item.source.value = sanitizeArticle(item.content.innerHTML);
+      item.source.value = item.images ? item.images.serialize(item.content.innerHTML) : sanitizeArticle(item.content.innerHTML);
       const target = form.querySelector(name === 'body' ? '[data-preview-stem]' : '[data-preview-explanation]');
-      target.innerHTML = item.source.value;
+      target.innerHTML = item.images ? item.images.render(item.source.value) : item.source.value;
       renderQuestionMath(target, { preview: true });
       if (!target.textContent.trim() && !target.querySelector('img')) {
-        const p = document.createElement('p');
-        p.className = 'text-soft';
-        p.textContent = name === 'body' ? 'Tulis pertanyaan untuk melihat preview.' : 'Tulis pembahasan untuk menjelaskan jawaban.';
-        target.replaceChildren(p);
+        const hasLegacyImage = previewExplanationImage.dataset.existingImage && !form.querySelector('[data-remove-explanation-image]').checked;
+        if (name === 'body' || !hasLegacyImage) {
+          const p = document.createElement('p');
+          p.className = 'text-soft';
+          p.textContent = name === 'body' ? 'Tulis pertanyaan untuk melihat preview.' : 'Tulis pembahasan untuk menjelaskan jawaban.';
+          target.replaceChildren(p);
+        } else {
+          target.replaceChildren();
+        }
       }
     }
     previewOptions.replaceChildren();
@@ -155,11 +160,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     });
     form.querySelector('[data-key-label]').textContent = weighted ? 'Skor per pilihan' : selected ? 'Kunci ' + selected : 'Kunci belum dipilih';
     addOption.disabled = currentRows.length >= 10;
-    const explanationImageUrl = imageSource(explanationImage, previewExplanationImage.dataset.existingImage,
-      form.querySelector('[data-remove-explanation-image]').checked, form.querySelector('[data-explanation-image-error]'));
-    showImage(previewExplanationImage, explanationImageUrl);
-    const explanationPreview = form.querySelector('[data-preview-explanation]');
-    if (explanationImageUrl && !editors.get('explanation').content.textContent.trim()) explanationPreview.replaceChildren();
+    showImage(previewExplanationImage, form.querySelector('[data-remove-explanation-image]').checked ? '' : previewExplanationImage.dataset.existingImage);
     showImage(previewImage, imageSource(image, previewImage.dataset.existingImage, removeImage?.checked, imageError));
     const videoSource = videoUrl || (removeVideo?.checked ? '' : previewVideo.dataset.existingVideo);
     previewVideo.hidden = !videoSource;
@@ -176,11 +177,9 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     const content = root.querySelector('[data-rich-content]');
     const toolbar = root.querySelector('[data-rich-toolbar]');
     let selectionRange = null;
-    content.innerHTML = sanitizeArticle(source.value);
     content.hidden = false;
     source.hidden = true;
     toolbar.hidden = false;
-    editors.set(root.dataset.name, { source, content });
     const remember = () => {
       const selection = window.getSelection();
       if (selection?.rangeCount && content.contains(selection.getRangeAt(0).commonAncestorContainer)) {
@@ -193,6 +192,9 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       if (selectionRange && content.contains(selectionRange.commonAncestorContainer)) {
         selection.removeAllRanges();
         selection.addRange(selectionRange);
+      } else if (selection && (!selection.rangeCount || !content.contains(selection.anchorNode))) {
+        selection.selectAllChildren(content);
+        selection.collapseToEnd();
       }
       document.execCommand('defaultParagraphSeparator', false, 'p');
       document.execCommand(command, false, value);
@@ -200,17 +202,32 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       markDirty();
       syncPreview();
     };
+    const images = root.dataset.name === 'explanation' ? setupExplanationImages(root, content, execute, remember) : null;
+    const load = (html) => {
+      selectionRange = null;
+      content.innerHTML = images ? images.render(html) : sanitizeArticle(html);
+    };
+    editors.set(root.dataset.name, { source, content, images, load });
+    load(source.value);
     document.addEventListener('selectionchange', remember);
     toolbar.addEventListener('mousedown', (event) => event.preventDefault());
     toolbar.addEventListener('click', (event) => {
       const button = event.target.closest('[data-rich-command]');
       if (button) execute(button.dataset.richCommand);
+      const alignment = event.target.closest('[data-rich-align]')?.dataset.richAlign;
+      if (alignment && !images.alignSelected(selectionRange, alignment)) {
+        execute({ left: 'justifyLeft', center: 'justifyCenter', right: 'justifyRight' }[alignment]);
+      }
       if (event.target.closest('[data-rich-insert-fraction]')) execute('insertText', '\\(\\frac{1}{2}\\)');
     });
     content.addEventListener('input', remember);
     content.addEventListener('paste', (event) => {
       event.preventDefault();
       remember();
+      if (images) {
+        images.paste(event.clipboardData);
+        return;
+      }
       const html = event.clipboardData.getData('text/html');
       execute(html ? 'insertHTML' : 'insertText', html ? sanitizeArticle(html) : event.clipboardData.getData('text/plain'));
     });
@@ -285,14 +302,14 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     section.value = question.section_id ? String(question.section_id) : '';
     level.value = question.difficulty || 'medium';
     scoring.value = question.scoring_type || 'binary';
-    form.querySelector('[data-shuffle-options]').checked = question.shuffle_options !== false;
+    form.querySelector('[data-shuffle-options]').checked = question.shuffle_options === true;
     form.querySelector('input[name="status"]').value = question.status || 'draft';
     const statusBadge = form.querySelector('[data-editor-status]');
     statusBadge.textContent = question.status === 'published' ? 'Terbit' : 'Draft';
     statusBadge.className = 'badge ' + (question.status === 'published' ? 'badge--mint' : 'badge--amber');
     for (const [name, editor] of editors) {
-      editor.content.innerHTML = sanitizeArticle(question[name] || '');
-      editor.source.value = sanitizeArticle(question[name] || '');
+      editor.images?.reset(question.explanation_inline_image_urls);
+      editor.load(question[name] || '');
     }
     list.replaceChildren();
     (question.options || ['', '', '', '', '']).forEach((option, index) => {
@@ -326,7 +343,45 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     form.dataset.dirty = 'false';
   });
   form.addEventListener('question-editor:submit-failed', () => { submitting = false; });
-  form.addEventListener('submit', () => { syncPreview(); submitting = true; });
+  const inlineImages = editors.get('explanation').images;
+  form.addEventListener('formdata', (event) => inlineImages.appendUploads(event.formData));
+  form.addEventListener('submit', async (event) => {
+    syncPreview();
+    if (form.hasAttribute('data-inline-question-form') || !inlineImages.pendingFiles().length) {
+      submitting = true;
+      return;
+    }
+
+    event.preventDefault();
+    if (submitting) return;
+    submitting = true;
+    const errors = form.querySelector('[data-question-async-errors]');
+    const data = new FormData(form);
+    data.set('status', event.submitter?.value || form.querySelector('input[name="status"]').value);
+    const controls = [...form.querySelectorAll('button, input, select, textarea')].filter(control => !control.disabled);
+    errors.hidden = true;
+    controls.forEach(control => { control.disabled = true; });
+    editors.forEach(({ content }) => { content.contentEditable = 'false'; });
+    try {
+      const response = await fetch(form.action, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload.question?.edit_url) {
+        throw new Error(payload.errors ? [...new Set(Object.values(payload.errors).flat())].join('\n') : 'Soal belum berhasil disimpan. Silakan coba lagi.');
+      }
+      dirty = false;
+      window.location.assign(payload.question.edit_url);
+      return;
+    } catch (error) {
+      errors.textContent = error.message;
+      errors.classList.add('whitespace-pre-line');
+      errors.hidden = false;
+      errors.tabIndex = -1;
+      errors.focus();
+      submitting = false;
+      controls.forEach(control => { control.disabled = false; });
+      editors.forEach(({ content }) => { content.contentEditable = 'true'; });
+    }
+  }, { capture: true });
   window.addEventListener('beforeunload', (event) => {
     if (dirty && !submitting) { event.preventDefault(); event.returnValue = ''; }
   });

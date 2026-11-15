@@ -12,6 +12,7 @@ use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\Question;
 use App\Models\Section;
+use App\QuestionExplanation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -107,6 +108,9 @@ class AdminQuestionController extends Controller
     {
         $path = $media === 'explanation-image' ? $question->explanation_image_path
             : (preg_match('/^option-([0-9])$/', $media, $matches) ? ($question->option_image_paths[(int) $matches[1]] ?? null) : null);
+        if (str_starts_with($media, 'explanation-inline-')) {
+            $path = $question->explanation_inline_image_paths[substr($media, 19)] ?? null;
+        }
         abort_unless($path && Storage::disk('local')->exists($path), 404);
 
         return Storage::disk('local')->response($path, null, [
@@ -158,6 +162,7 @@ class AdminQuestionController extends Controller
                 'option_scores' => $question->option_scores,
                 'shuffle_options' => $question->shuffle_options,
                 'explanation' => $question->safeExplanation(),
+                'explanation_inline_image_urls' => $question->explanationEditorImageUrls(),
                 'difficulty' => $question->difficulty->value,
                 'status' => $question->status->value,
                 'image_url' => $question->image_path ? route('admin.questions.image', $question) : null,
@@ -167,6 +172,7 @@ class AdminQuestionController extends Controller
                     ? route('admin.questions.media', [$question, 'option-'.$index]) : null, array_keys($question->options)),
                 'usage_count' => $question->exams_count,
                 'update_url' => route('admin.questions.update', $question),
+                'edit_url' => route('admin.questions.edit', $question),
             ],
             'html' => view('Dashboard.Admin.exams._question', ['question' => $question, 'isSelected' => false])->render(),
         ];
@@ -186,6 +192,7 @@ class AdminQuestionController extends Controller
     {
         $oldPaths = ['image' => $question->image_path, 'video' => $question->video_path, 'explanation_image' => $question->explanation_image_path];
         $oldOptionPaths = $question->option_image_paths ?? [];
+        $oldInlinePaths = $question->explanation_inline_image_paths ?? [];
         $newPaths = [];
         $attributes = $request->questionAttributes();
         $attributes['published_at'] = $attributes['status'] === QuestionStatus::Published->value ? ($question->published_at ?? now()) : null;
@@ -206,6 +213,12 @@ class AdminQuestionController extends Controller
                 abort_if($newPaths['option_'.$index] === false, 500, 'Gambar pilihan gagal disimpan. Silakan coba lagi.');
                 $attributes['option_image_paths'][] = $newPaths['option_'.$index] ?: $request->retainedOptionImagePath($index);
             }
+            $attributes['explanation_inline_image_paths'] = [];
+            foreach (QuestionExplanation::imageIds($attributes['explanation']) as $id) {
+                $newPaths['explanation_'.$id] = $request->file('explanation_inline_images.'.$id)?->store('questions/explanation-inline', 'local');
+                abort_if($newPaths['explanation_'.$id] === false, 500, 'Gambar pembahasan gagal disimpan. Silakan coba lagi.');
+                $attributes['explanation_inline_image_paths'][$id] = $newPaths['explanation_'.$id] ?? $oldInlinePaths[$id];
+            }
             DB::transaction(function () use ($request, $question, $attributes): void {
                 $question->fill($attributes)->save();
                 if ($request->has('exam_ids')) {
@@ -222,8 +235,9 @@ class AdminQuestionController extends Controller
             throw $exception;
         }
 
-        $retainedPaths = [$question->image_path, $question->video_path, $question->explanation_image_path, ...$question->option_image_paths];
-        foreach (array_unique([...array_values($oldPaths), ...$oldOptionPaths]) as $oldPath) {
+        $retainedPaths = [$question->image_path, $question->video_path, $question->explanation_image_path, ...$question->option_image_paths,
+            ...array_values($question->explanation_inline_image_paths)];
+        foreach (array_unique([...array_values($oldPaths), ...$oldOptionPaths, ...array_values($oldInlinePaths)]) as $oldPath) {
             if ($oldPath && ! in_array($oldPath, $retainedPaths, true)
                 && ! ExamAttempt::query()->whereJsonContains('question_snapshot->mediaPaths', $oldPath)->exists()) {
                 Storage::disk('local')->delete($oldPath);

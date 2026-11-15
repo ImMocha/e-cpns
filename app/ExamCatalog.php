@@ -138,8 +138,19 @@ class ExamCatalog
             ->limit(5)->get()->reverse()->values() : collect();
         $canViewExplanations = $user->canViewExplanations();
         $reviewQuestions = array_map(
-            fn (array $question): array => $canViewExplanations
-                ? $question : array_diff_key($question, array_flip(['explain', 'explainHtml', 'explanation_image_path'])),
+            function (array $question) use ($canViewExplanations, $attempt): array {
+                if (! $canViewExplanations) {
+                    return array_diff_key($question, array_flip(['explain', 'explainHtml', 'explanation_image_path', 'explanation_inline_image_paths']));
+                }
+
+                if (! empty($question['explainHtml'])) {
+                    $question['explainHtml'] = QuestionExplanation::transform($question['explainHtml'], fn (string $id): ?string => isset($question['explanation_inline_image_paths'][$id])
+                        ? route('exam-attempts.media', [$attempt, $question['id'], 'explanation-inline-'.$id]) : null);
+                }
+                unset($question['explanation_inline_image_paths']);
+
+                return $question;
+            },
             $attempt?->question_snapshot['questions'] ?? [],
         );
 

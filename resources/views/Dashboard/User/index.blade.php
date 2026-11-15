@@ -63,7 +63,7 @@
       <section class="card">
         <div class="card__head"><div><div class="card__title">Progres Materi</div><div class="card__sub">Materi yang sudah kamu tandai selesai</div></div><span class="badge badge--mint badge--flat">{{ $materialProgressPercent }}% selesai</span></div>
         @if ($materialCount > 0)
-          <div class="result-hero" style="grid-template-columns:{{ $summary['accuracy'] !== null ? 'auto 1fr' : '1fr' }};gap:1.5rem;justify-items:start;margin-bottom:1.5rem">
+          <div class="member-dashboard__progress">
             <div class="ring" data-pct="{{ $materialProgressPercent }}"><div class="ring__label"><div class="ring__value">{{ $materialProgressPercent }}%</div><div class="ring__unit">Materi</div></div></div>
             <div class="kv" style="width:100%">
               <div class="kv__row"><span class="kv__key">Materi selesai</span><span class="kv__val">{{ $completedMaterialCount }} / {{ $materialCount }}</span></div>
@@ -86,7 +86,7 @@
           @if ($summary['accuracy'] !== null)<span class="badge badge--primary badge--flat">{{ $summary['correct'] + $summary['wrong'] > 0 ? $summary['accuracy'].'% akurasi' : 'Belum ada jawaban' }}</span>@endif
         </div>
         @if ($summary['count'] > 0)
-          <div class="result-hero" style="grid-template-columns:auto 1fr;gap:1.5rem;justify-items:start;margin-bottom:1.5rem">
+          <div class="member-dashboard__progress">
             @if ($summary['accuracy'] !== null)<div class="ring" data-pct="{{ $summary['accuracy'] }}"><div class="ring__label"><div class="ring__value">{{ $summary['accuracy'] }}%</div><div class="ring__unit">Akurasi soal biasa</div></div></div>@endif
             <div class="kv" style="width:100%">
               <div class="kv__row"><span class="kv__key">Soal benar</span><span class="kv__val">{{ $summary['correct'] }}</span></div>

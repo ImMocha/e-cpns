@@ -111,6 +111,9 @@ class ExamAttemptController extends Controller
         } elseif ($media === 'explanation-image') {
             abort_unless($examAttempt->status === ExamAttempt::COMPLETED && $request->user()->canViewExplanations(), 404);
             $path = $snapshot['explanation_image_path'] ?? null;
+        } elseif (str_starts_with($media, 'explanation-inline-')) {
+            abort_unless($examAttempt->status === ExamAttempt::COMPLETED && $request->user()->canViewExplanations(), 404);
+            $path = $snapshot['explanation_inline_image_paths'][substr($media, 19)] ?? null;
         } elseif (preg_match('/^option-([0-9])$/', $media, $matches)) {
             $path = $snapshot['option_image_paths'][(int) $matches[1]] ?? null;
         }

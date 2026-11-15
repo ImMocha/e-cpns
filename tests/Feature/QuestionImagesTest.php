@@ -230,4 +230,77 @@ class QuestionImagesTest extends TestCase
         $this->get($attempt->resultUrl())->assertDontSee($url)
             ->assertViewHas('reviewQuestions', fn (array $questions): bool => ! array_key_exists('explanation_image_path', $questions[0]));
     }
+
+    public function test_admin_can_save_multiple_inline_images_and_remove_one_without_changing_the_attempt_review(): void
+    {
+        Storage::fake('local');
+        $admin = User::factory()->admin()->create();
+        $section = Section::factory()->create();
+        $first = str_repeat('a', 32);
+        $second = str_repeat('b', 32);
+        $firstImage = '<img src="/question-explanation-images/'.$first.'.png" alt="Langkah satu">';
+        $secondImage = '<img src="/question-explanation-images/'.$second.'.png" alt="Langkah dua" data-align="right">';
+        $explanation = '<p><strong>Mulai di sini</strong></p>'.$firstImage.'<p style="text-align:center">Lalu lanjutkan</p>'.$secondImage;
+
+        $this->actingAs($admin)->postJson(route('admin.questions.store'), $this->payload($section, [
+            'explanation' => $explanation,
+            'explanation_inline_images' => [
+                $first => UploadedFile::fake()->image('langkah-satu.png'),
+                $second => UploadedFile::fake()->image('langkah-dua.webp'),
+            ],
+        ]))->assertCreated();
+
+        $question = Question::sole();
+        $paths = $question->explanation_inline_image_paths;
+        Storage::disk('local')->assertExists(array_values($paths));
+        $adminImageUrl = route('admin.questions.media', [$question, 'explanation-inline-'.$first]);
+        $this->getJson(route('admin.questions.show', $question))->assertJsonPath('question.explanation_inline_image_urls.'.$first, $adminImageUrl);
+        $this->get(route('admin.questions.edit', $question))->assertSee($adminImageUrl)->assertSee('Lalu lanjutkan');
+        $this->get($adminImageUrl)->assertOk();
+
+        $exam = Exam::factory()->tryout()->create();
+        $exam->questions()->attach($question);
+        $owner = User::factory()->create();
+        $package = UserPackage::factory()->for($owner)->create();
+        $attempt = ExamAttempt::resumeOrStart($owner, $exam);
+        $firstUrl = route('exam-attempts.media', [$attempt, $question->id, 'explanation-inline-'.$first]);
+        $secondUrl = route('exam-attempts.media', [$attempt, $question->id, 'explanation-inline-'.$second]);
+        $this->assertArrayNotHasKey('explanation_inline_image_paths', $attempt->clientConfig()['questions'][0]);
+        $this->actingAs($owner)->get($firstUrl)->assertNotFound();
+
+        $this->actingAs($admin)->putJson(route('admin.questions.update', $question), $this->payload($section, [
+            'explanation' => $secondImage,
+        ]))->assertOk()->assertJsonPath('question.explanation_inline_image_urls.'.$first, null);
+        $this->assertSame([$second => $paths[$second]], $question->fresh()->explanation_inline_image_paths);
+        $this->get($adminImageUrl)->assertNotFound();
+        Storage::disk('local')->assertExists($paths[$first]);
+
+        $attempt->complete();
+        $this->actingAs(User::factory()->create())->get($firstUrl)->assertNotFound();
+        $this->actingAs($owner)->get($firstUrl)->assertOk();
+        $this->get($attempt->resultUrl())->assertSeeInOrder(['Mulai di sini', $firstUrl, 'Lalu lanjutkan', $secondUrl, 'data-align="right"'], false);
+        $package->update(['revoked_at' => now()]);
+        $this->get($firstUrl)->assertNotFound();
+        $this->get($attempt->resultUrl())->assertDontSee($firstUrl);
+    }
+
+    public function test_unavailable_and_invalid_inline_images_cannot_be_saved(): void
+    {
+        Storage::fake('local');
+        $section = Section::factory()->create();
+        $id = str_repeat('a', 32);
+        $explanation = '<img src="/question-explanation-images/'.$id.'.png">';
+        $this->actingAs(User::factory()->admin()->create());
+
+        $this->postJson(route('admin.questions.store'), $this->payload($section, ['explanation' => $explanation]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['explanation' => 'Ada gambar sisipan yang tidak tersedia. Tempel ulang gambar tersebut.']);
+        $this->postJson(route('admin.questions.store'), $this->payload($section, [
+            'explanation' => $explanation,
+            'explanation_inline_images' => [$id => UploadedFile::fake()->create('bukan-gambar.txt', 12, 'text/plain')],
+        ]))->assertUnprocessable()->assertJsonValidationErrors(['explanation_inline_images.'.$id => 'Gunakan gambar pembahasan JPG, PNG, atau WebP.']);
+
+        $this->assertDatabaseCount('questions', 0);
+        $this->assertSame([], Storage::disk('local')->allFiles());
+    }
 }

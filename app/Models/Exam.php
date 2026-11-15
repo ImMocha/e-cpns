@@ -162,7 +162,8 @@ class Exam extends Model
             'passingScore' => $this->passing_score, 'scoreMode' => 'points',
             'randomQuestions' => $this->random_questions, 'randomOptions' => $this->random_options,
             'mediaPaths' => $selected->flatMap(fn (Question $question): array => [$question->image_path, $question->video_path,
-                $question->explanation_image_path, ...($question->option_image_paths ?? [])])->filter()->values()->all(),
+                $question->explanation_image_path, ...($question->option_image_paths ?? []),
+                ...array_values($question->explanation_inline_image_paths ?? [])])->filter()->values()->all(),
             'questions' => $selected->map(function (Question $question): array {
                 $indices = collect(array_keys($question->options));
                 if ($this->random_options && $question->shuffle_options) {
@@ -180,7 +181,8 @@ class Exam extends Model
                     'answer' => $question->isWeighted() ? null : $indices->search($question->correct_option, true),
                     'explain' => ArticleContent::text($question->safeExplanation()), 'explainHtml' => $question->safeExplanation(),
                     'image_path' => $question->image_path, 'video_path' => $question->video_path,
-                    'explanation_image_path' => $question->explanation_image_path];
+                    'explanation_image_path' => $question->explanation_image_path,
+                    'explanation_inline_image_paths' => $question->explanation_inline_image_paths ?? []];
             })->all(),
         ];
     }

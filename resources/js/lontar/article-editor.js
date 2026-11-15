@@ -11,7 +11,7 @@ const safeWebUrl = (url) => {
 };
 const safeImageUrl = (url) => safeWebUrl(url) || /^\/(?!\/)[a-z0-9/_-]+\.(?:jpe?g|png|webp)$/i.test(url);
 
-export function sanitizeArticle(html) {
+export function sanitizeArticle(html, resolveImageSource = (src, safeSrc) => safeSrc) {
   const input = document.createElement('template');
   input.innerHTML = html;
   const output = document.createElement('div');
@@ -28,11 +28,13 @@ export function sanitizeArticle(html) {
       if (!allowedTags.has(tag)) { walk(node, destination, depth + 1); continue; }
       if (tag === 'img') {
         const src = (node.getAttribute('src') || '').trim();
-        if (safeImageUrl(src)) {
+        const resolved = resolveImageSource(src, safeImageUrl(src) ? src : null);
+        if (resolved) {
           const image = document.createElement('img');
-          image.setAttribute('src', src);
+          image.setAttribute('src', resolved);
           image.setAttribute('alt', node.getAttribute('alt') || '');
           image.setAttribute('loading', 'lazy');
+          if (['left', 'center', 'right'].includes(node.dataset.align)) image.dataset.align = node.dataset.align;
           destination.append(image);
         }
         continue;
