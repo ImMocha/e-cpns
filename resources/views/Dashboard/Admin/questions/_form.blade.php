@@ -29,7 +29,7 @@
             <section class="card">
                 <div class="card__head"><div><div class="card__title">Informasi soal</div><div class="card__sub">Judul singkat untuk memudahkan pencarian</div></div><span class="badge {{ $question->status->badgeClass() }}" data-editor-status>{{ $question->status->label() }}</span></div>
                 <div class="question-fields">
-                    <div class="field question-wide"><label class="label" for="question-title">Judul soal</label><input class="input" id="question-title" name="title" maxlength="180" value="{{ $questionValue('title', $question->title) }}" placeholder="Contoh: Pola Bilangan Berlipat" required></div>
+                    <div class="field question-wide"><label class="label" for="question-title">Judul soal (opsional)</label><input class="input" id="question-title" name="title" maxlength="180" value="{{ $questionValue('title', $question->title) }}" placeholder="Contoh: Pola Bilangan Berlipat"></div>
                     <div class="field"><label class="label" for="question-section">Bidang</label><select class="select" id="question-section" name="section_id" required><option value="">Pilih bidang</option>@foreach ($sections as $section)<option value="{{ $section->id }}" data-code="{{ $section->code }}" @selected((string) $questionValue('section_id', $question->section_id) === (string) $section->id)>{{ $section->name }}{{ $section->is_active ? '' : ' (nonaktif)' }}</option>@endforeach</select></div>
                     <div class="field"><label class="label" for="question-level">Tingkat kesulitan</label><select class="select" id="question-level" name="difficulty">@foreach ($difficulties as $difficulty)<option value="{{ $difficulty->value }}" @selected($questionValue('difficulty', $question->difficulty->value) === $difficulty->value)>{{ $difficulty->label() }}</option>@endforeach</select></div>
                 </div>
@@ -65,16 +65,22 @@
             @endunless
             <section class="card question-form-stack">
                 <x-question-rich-text name="body" label="Pertanyaan" :value="$questionValue('body', $question->body)" />
-                <div class="field"><label class="label" for="question-image">Gambar soal <span class="label__opt">(opsional)</span></label><input class="input" id="question-image" type="file" name="image" accept="image/jpeg,image/png,image/webp"><p class="field__hint">JPG, PNG, WebP · maksimal 2 MB</p>
-                    @if ($question->image_path || $inline)<label class="check" data-existing-image-control @if(!$question->image_path) hidden @endif><input type="checkbox" name="remove_image" value="1" data-remove-image @checked($questionValue('remove_image'))> Hapus gambar lama</label>@endif
+                <div class="field" data-file-picker><label class="label" for="question-image">Gambar soal <span class="label__opt">(opsional)</span></label><input class="input" id="question-image" type="file" name="image" accept="image/jpeg,image/png,image/webp">
+                    <x-clear-file-button />
+                    <p class="field__hint">JPG, PNG, WebP · maksimal 2 MB</p>
+                    @if ($question->image_path || $inline)<label class="check" data-existing-image-control @if(!$question->image_path) hidden @endif><input type="checkbox" name="remove_image" value="1" data-remove-image data-remove-stored-file @checked($questionValue('remove_image'))> Hapus gambar soal saat disimpan</label>@endif
+                    <p class="question-error" data-question-image-error role="alert" hidden></p>
                 </div>
-                <div class="field"><label class="label" for="question-video">Video soal <span class="label__opt">(opsional)</span></label><input class="input" id="question-video" type="file" name="video" accept="video/mp4,video/webm,.mp4,.webm" aria-describedby="question-video-hint"><p class="field__hint" id="question-video-hint">MP4 atau WebM · maksimal 50 MB. Gunakan MP4 dengan codec H.264 untuk kompatibilitas luas.</p>
-                    @if ($question->video_path || $inline)<label class="check" data-existing-video-control @if(!$question->video_path) hidden @endif><input type="checkbox" name="remove_video" value="1" data-remove-video @checked($questionValue('remove_video'))> Hapus video lama</label>@endif
+                <div class="field" data-file-picker><label class="label" for="question-video">Video soal <span class="label__opt">(opsional)</span></label><input class="input" id="question-video" type="file" name="video" accept="video/mp4,video/webm,.mp4,.webm" aria-describedby="question-video-hint">
+                    <x-clear-file-button />
+                    <p class="field__hint" id="question-video-hint">MP4 atau WebM · maksimal 50 MB. Gunakan MP4 dengan codec H.264 untuk kompatibilitas luas.</p>
+                    @if ($question->video_path || $inline)<label class="check" data-existing-video-control @if(!$question->video_path) hidden @endif><input type="checkbox" name="remove_video" value="1" data-remove-video data-remove-stored-file @checked($questionValue('remove_video'))> Hapus video lama saat disimpan</label>@endif
                     <p class="question-error" data-video-error role="alert" hidden></p>
                 </div>
             </section>
             <section class="card">
                 <div class="card__head"><div><div class="card__title">Pilihan &amp; penilaian</div><div class="card__sub" data-scoring-hint>Isi pilihan sesuai jenis penilaian soal.</div></div><span class="badge badge--primary badge--flat" data-key-label>Kunci belum dipilih</span></div>
+                <p class="field__hint">Pilihan jawaban mendukung rumus LaTeX, misalnya <code>\(P = Q + \frac{1}{24}\)</code>.</p>
                 <div class="field question-scoring-control"><label class="label" for="question-scoring">Jenis penilaian</label><select class="select" id="question-scoring" name="scoring_type" data-question-scoring>@foreach (\App\Enums\QuestionScoring::cases() as $scoring)<option value="{{ $scoring->value }}" @selected($formScoring === $scoring->value)>{{ $scoring->label() }}</option>@endforeach</select><p class="field__hint">TKP dapat memakai skor 1–5 untuk setiap pilihan. Jawaban kosong bernilai 0 dan tidak memakai penalti salah.</p></div>
                 @php
                     $formOptions = $questionValue('options', $question->options);
@@ -107,8 +113,10 @@
             </section>
             <section class="card">
                 <x-question-rich-text name="explanation" label="Pembahasan" :value="$questionValue('explanation', $question->explanation)" />
-                <div class="field question-hint"><label class="label" for="question-explanation-image">Gambar pembahasan <span class="label__opt">(opsional)</span></label><input class="input" id="question-explanation-image" type="file" name="explanation_image" accept="image/jpeg,image/png,image/webp" data-explanation-image><p class="field__hint">JPG, PNG, WebP · maksimal 2 MB. Gambar ditampilkan setelah teks pembahasan.</p>
-                    <label class="check" data-existing-explanation-image-control @if(!$question->explanation_image_path) hidden @endif><input type="checkbox" name="remove_explanation_image" value="1" data-remove-explanation-image @checked($questionValue('remove_explanation_image'))> Hapus gambar lama</label>
+                <div class="field question-hint" data-file-picker><label class="label" for="question-explanation-image">Gambar pembahasan <span class="label__opt">(opsional)</span></label><input class="input" id="question-explanation-image" type="file" name="explanation_image" accept="image/jpeg,image/png,image/webp" data-explanation-image>
+                    <x-clear-file-button />
+                    <p class="field__hint">JPG, PNG, WebP · maksimal 2 MB. Gambar ditampilkan setelah teks pembahasan.</p>
+                    <label class="check" data-existing-explanation-image-control @if(!$question->explanation_image_path) hidden @endif><input type="checkbox" name="remove_explanation_image" value="1" data-remove-explanation-image data-remove-stored-file @checked($questionValue('remove_explanation_image'))> Hapus gambar pembahasan saat disimpan</label>
                     <p class="question-error" data-explanation-image-error role="alert" hidden></p>
                 </div>
                 <p class="field__hint question-hint">Pembahasan wajib diisi untuk menerbitkan soal. Peserta dengan paket berbayar aktif melihatnya setelah menyelesaikan sesi latihan atau tryout.</p>

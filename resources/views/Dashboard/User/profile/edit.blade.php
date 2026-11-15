@@ -54,9 +54,13 @@
             <span class="stat__icon" style="width:42px;height:42px;flex-basis:42px;border-radius:12px"><svg data-icon="user"></svg></span>
           </div>
 
-          <div class="field{{ $errors->has('avatar') ? ' is-invalid' : '' }}" style="margin-bottom:1rem">
+          <div class="field{{ $errors->has('avatar') ? ' is-invalid' : '' }}" style="margin-bottom:1rem" data-file-picker>
             <label class="label" for="avatar">Foto Profil <span class="label__opt">(JPG, PNG, atau WebP; maks. 2 MB)</span></label>
             <input class="input" type="file" id="avatar" name="avatar" accept="image/jpeg,image/png,image/webp">
+            <x-clear-file-button />
+            @if ($avatarUrl)
+                <label class="check"><input type="checkbox" name="remove_avatar" value="1" data-remove-stored-file @checked(old('remove_avatar'))> Hapus foto profil saat disimpan</label>
+            @endif
             <span class="field__error"><svg data-icon="alert"></svg><span>{{ $errors->first('avatar') }}</span></span>
           </div>
 

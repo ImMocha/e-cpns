@@ -1,4 +1,5 @@
 import { sanitizeArticle } from './article-editor.js';
+import { renderQuestionMath } from './question-math.js';
 
 document.querySelectorAll('[data-question-exams]').forEach((panel) => {
   const search = panel.querySelector('[data-question-exam-search]');
@@ -28,6 +29,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   const image = form.querySelector('#question-image');
   const previewImage = form.querySelector('[data-preview-image]');
   const removeImage = form.querySelector('[data-remove-image]');
+  const imageError = form.querySelector('[data-question-image-error]');
   const video = form.querySelector('#question-video');
   const previewVideo = form.querySelector('[data-preview-video]');
   const removeVideo = form.querySelector('[data-remove-video]');
@@ -37,7 +39,6 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
   const explanationImage = form.querySelector('[data-explanation-image]');
   const previewExplanationImage = form.querySelector('[data-preview-explanation-image]');
   const imagePreviews = new Map();
-  let imageUrl = null;
   let videoUrl = null;
   let dirty = false;
   let submitting = false;
@@ -83,6 +84,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       item.source.value = sanitizeArticle(item.content.innerHTML);
       const target = form.querySelector(name === 'body' ? '[data-preview-stem]' : '[data-preview-explanation]');
       target.innerHTML = item.source.value;
+      renderQuestionMath(target, { preview: true });
       if (!target.textContent.trim() && !target.querySelector('img')) {
         const p = document.createElement('p');
         p.className = 'text-soft';
@@ -133,6 +135,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       const text = document.createElement('span');
       text.className = 'question-preview-option-content';
       text.textContent = textarea.value.trim() || (optionImageUrl ? '' : 'Pilihan ' + letter + ' belum diisi');
+      renderQuestionMath(text, { preview: true });
       if (optionImageUrl) {
         const img = document.createElement('img');
         img.className = 'question-option-image';
@@ -157,10 +160,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     showImage(previewExplanationImage, explanationImageUrl);
     const explanationPreview = form.querySelector('[data-preview-explanation]');
     if (explanationImageUrl && !editors.get('explanation').content.textContent.trim()) explanationPreview.replaceChildren();
-    const url = imageUrl || (removeImage?.checked ? '' : previewImage.dataset.existingImage);
-    previewImage.hidden = !url;
-    if (url) previewImage.src = url;
-    else previewImage.removeAttribute('src');
+    showImage(previewImage, imageSource(image, previewImage.dataset.existingImage, removeImage?.checked, imageError));
     const videoSource = videoUrl || (removeVideo?.checked ? '' : previewVideo.dataset.existingVideo);
     previewVideo.hidden = !videoSource;
     if ((previewVideo.getAttribute('src') || '') !== (videoSource || '')) {
@@ -205,6 +205,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     toolbar.addEventListener('click', (event) => {
       const button = event.target.closest('[data-rich-command]');
       if (button) execute(button.dataset.richCommand);
+      if (event.target.closest('[data-rich-insert-fraction]')) execute('insertText', '\\(\\frac{1}{2}\\)');
     });
     content.addEventListener('input', remember);
     content.addEventListener('paste', (event) => {
@@ -249,13 +250,6 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
       syncPreview();
     }
   });
-  image.addEventListener('change', () => {
-    if (imageUrl) URL.revokeObjectURL(imageUrl);
-    imageUrl = null;
-    const file = image.files[0];
-    if (file && ['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) imageUrl = URL.createObjectURL(file);
-    syncPreview();
-  });
   video.addEventListener('change', () => {
     if (videoUrl) URL.revokeObjectURL(videoUrl);
     videoUrl = null;
@@ -285,9 +279,7 @@ document.querySelectorAll('[data-question-editor]').forEach((form) => {
     form.reset();
     imagePreviews.forEach(({ url }) => URL.revokeObjectURL(url));
     imagePreviews.clear();
-    if (imageUrl) URL.revokeObjectURL(imageUrl);
     if (videoUrl) URL.revokeObjectURL(videoUrl);
-    imageUrl = null;
     videoUrl = null;
     title.value = question.title || '';
     section.value = question.section_id ? String(question.section_id) : '';

@@ -216,17 +216,28 @@ class ExamAttempt extends Model
 
     public function questionAlignment(): string
     {
-        return Exam::withTrashed()->where('kind', $this->kind)->where('slug', $this->bank_slug)->value('question_alignment')
-            ?? Exam::DEFAULT_QUESTION_ALIGNMENT;
+        return $this->questionPresentationSettings()?->question_alignment ?? Exam::DEFAULT_QUESTION_ALIGNMENT;
+    }
+
+    private function questionPresentationSettings(): ?Exam
+    {
+        return Exam::withTrashed()->where('kind', $this->kind)->where('slug', $this->bank_slug)
+            ->first(['question_alignment', 'show_question_topic']);
     }
 
     /** @return array<string, mixed> */
     public function clientConfig(): array
     {
+        $presentation = $this->questionPresentationSettings();
+        $showQuestionTopic = $presentation?->show_question_topic ?? true;
         $definition = $this->question_snapshot;
         unset($definition['mediaPaths']);
         $definition['questions'] = array_map(
-            function (array $question): array {
+            function (array $question) use ($showQuestionTopic): array {
+                if (! $showQuestionTopic || blank($question['topic'] ?? null)) {
+                    unset($question['topic']);
+                }
+
                 foreach (['image', 'video'] as $media) {
                     if ($question[$media.'_path'] ?? null) {
                         $question[$media.'Url'] = route('exam-attempts.media', ['examAttempt' => $this->id, 'question' => $question['id'], 'media' => $media]);
@@ -241,7 +252,7 @@ class ExamAttempt extends Model
             $definition['questions'],
         );
         $definition['attemptId'] = $this->id;
-        $definition['questionAlignment'] = $this->questionAlignment();
+        $definition['questionAlignment'] = $presentation?->question_alignment ?? Exam::DEFAULT_QUESTION_ALIGNMENT;
         $definition['kind'] = $this->kind;
         $definition['saveUrl'] = route('exam-attempts.save', $this);
         $definition['submitUrl'] = route('exam-attempts.submit', $this);

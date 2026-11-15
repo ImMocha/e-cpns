@@ -58,6 +58,7 @@ class ExamRequest extends FormRequest
             'remove_cover' => ['sometimes', 'boolean', 'prohibited_if:kind,quiz'],
             'question_count' => ['required', 'integer', 'min:1', 'max:200'],
             'question_alignment' => ['sometimes', 'required', 'string', Rule::in(array_keys(Exam::QUESTION_ALIGNMENTS))],
+            'show_question_topic' => ['sometimes', 'required', 'boolean'],
             'duration_minutes' => ['required', 'integer', 'min:'.($this->input('kind') === 'quiz' ? '0' : '1'), 'max:240'],
             'points_per_correct' => ['required', 'integer', 'min:1', 'max:100'],
             'penalty_wrong' => ['required', 'integer', 'min:0', 'max:100'],
@@ -116,7 +117,10 @@ class ExamRequest extends FormRequest
 
     public function messages(): array
     {
-        return ['question_alignment.in' => 'Pilih rata kiri, rata kanan, atau rata kiri-kanan.'];
+        return [
+            'question_alignment.in' => 'Pilih rata kiri, rata kanan, atau rata kiri-kanan.',
+            'show_question_topic.boolean' => 'Pilih apakah label topik soal ditampilkan atau disembunyikan.',
+        ];
     }
 
     public function attributes(): array
@@ -126,6 +130,7 @@ class ExamRequest extends FormRequest
             'passing_score' => 'nilai ambang', 'question_ids' => 'pilihan soal', 'topic_id' => 'topik latihan',
             'requires_topic_completion' => 'syarat penyelesaian materi',
             'free_claim_terms' => 'syarat unlock gratis', 'free_claim_instagram_url' => 'tautan akun Instagram',
-            'cover' => 'gambar kartu', 'remove_cover' => 'hapus gambar kartu', 'question_alignment' => 'perataan teks soal'];
+            'cover' => 'gambar kartu', 'remove_cover' => 'hapus gambar kartu', 'question_alignment' => 'perataan teks soal',
+            'show_question_topic' => 'tampilan label topik soal'];
     }
 }

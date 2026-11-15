@@ -31,7 +31,13 @@
                 @csrf
                 <input type="hidden" name="terms_version" value="{{ $exam->freeClaimTermsVersion() }}">
                 <div class="field"><label class="label" for="instagram-username">Username Instagram kamu</label><input class="input" id="instagram-username" name="instagram_username" value="{{ old('instagram_username') }}" maxlength="30" placeholder="username tanpa @" required></div>
-                <div class="field"><label class="label" for="claim-proofs">Screenshot bukti follow dan upload</label><input class="input" id="claim-proofs" type="file" name="proofs[]" accept="image/jpeg,image/png,image/webp" multiple required aria-describedby="proof-hint"><p class="field__hint" id="proof-hint">Pilih 1–5 gambar JPG, PNG, atau WebP, maksimal 4 MB per gambar. Pastikan username dan bukti terlihat jelas. Bukti hanya dapat dilihat oleh kamu dan admin.</p></div>
+                <div class="field" data-file-picker>
+                    <label class="label" for="claim-proofs">Screenshot bukti follow dan upload</label>
+                    <input class="input" id="claim-proofs" type="file" name="proofs[]" accept="image/jpeg,image/png,image/webp" multiple required aria-describedby="proof-hint">
+                    <ul class="grid gap-1" data-selected-files hidden></ul>
+                    <x-clear-file-button label="Batalkan semua pilihan file" />
+                    <p class="field__hint" id="proof-hint">Pilih 1–5 gambar JPG, PNG, atau WebP, maksimal 4 MB per gambar. Pastikan username dan bukti terlihat jelas. Bukti hanya dapat dilihat oleh kamu dan admin.</p>
+                </div>
                 <div class="field"><label class="label" for="customer-note">Catatan untuk admin (opsional)</label><textarea class="textarea" id="customer-note" name="customer_note" rows="3" maxlength="1000">{{ old('customer_note') }}</textarea></div>
                 <label class="check"><input type="checkbox" name="accept_terms" value="1" required @checked(old('accept_terms'))> Saya sudah membaca dan memenuhi syarat di atas serta mengirim bukti yang benar.</label>
                 <button class="btn btn--primary">Kirim bukti untuk unlock</button>

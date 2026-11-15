@@ -6,14 +6,18 @@ document.querySelectorAll('[data-exam-form]').forEach((sessionForm) => {
   const coverPreview = sessionForm.querySelector('.exam-cover-preview');
   if (coverInput && coverPreview) {
     const originalCover = coverPreview.src;
+    const removeCover = sessionForm.querySelector('[name="remove_cover"]');
     let previewUrl;
+    const updatePreview = () => {
+      coverPreview.src = previewUrl || (removeCover?.checked ? coverPreview.dataset.defaultCover : originalCover);
+    };
     coverInput.addEventListener('change', () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       previewUrl = coverInput.files[0] ? URL.createObjectURL(coverInput.files[0]) : null;
-      coverPreview.src = previewUrl || originalCover;
-      const removeCover = sessionForm.querySelector('[name="remove_cover"]');
-      if (previewUrl && removeCover) removeCover.checked = false;
+      updatePreview();
     });
+    removeCover?.addEventListener('change', updatePreview);
+    updatePreview();
     window.addEventListener('pagehide', () => { if (previewUrl) URL.revokeObjectURL(previewUrl); });
   }
   const accessSelect = sessionForm.querySelector('#exam-access');

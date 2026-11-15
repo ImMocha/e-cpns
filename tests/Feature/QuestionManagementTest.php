@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\QuestionStatus;
+use App\Models\Exam;
+use App\Models\ExamAttempt;
 use App\Models\Question;
 use App\Models\Section;
 use App\Models\User;
@@ -74,6 +76,53 @@ class QuestionManagementTest extends TestCase
         $this->get(route('admin.questions.edit', $question))->assertNotFound();
     }
 
+    public function test_latex_source_survives_editing_and_is_available_for_attempt_and_review_rendering(): void
+    {
+        $section = Section::factory()->create();
+        $admin = User::factory()->admin()->create();
+        $body = '<p>Hitung \[P=\frac{5}{6}+\frac{3}{8}-\frac{7}{12}\]</p>';
+        $option = '\(P=Q+\frac{1}{24}\)';
+        $explanation = '<p>Samakan penyebut menjadi \(\frac{20}{24}\).</p>';
+
+        $this->actingAs($admin)->post(route('admin.questions.store'), $this->payload($section, [
+            'body' => $body, 'options' => [$option, 'P = Q'], 'correct_option' => 0,
+            'explanation' => $explanation, 'status' => 'published',
+        ]))->assertSessionHasNoErrors();
+        $question = Question::sole();
+        $this->assertSame($body, $question->body);
+        $this->assertSame($option, $question->options[0]);
+        $this->assertSame($explanation, $question->explanation);
+        $this->get(route('admin.questions.show', $question))->assertSee('data-question-math', false);
+
+        $exam = Exam::factory()->tryout()->create(['random_options' => false]);
+        $exam->questions()->attach($question);
+        $attempt = ExamAttempt::resumeOrStart($admin, $exam);
+
+        $this->get($attempt->attemptUrl())->assertViewHas('clientConfig', function (array $config) use ($body, $option): bool {
+            return $config['questions'][0]['stemHtml'] === $body
+                && $config['questions'][0]['options'][0] === $option;
+        })->assertDontSee('\frac{20}{24}');
+
+        $attempt->complete();
+        $this->get($attempt->resultUrl())
+            ->assertSee('data-question-math', false)
+            ->assertSee($option)
+            ->assertSee('\frac{20}{24}');
+    }
+
+    public function test_admin_can_clear_the_title_of_an_existing_question(): void
+    {
+        $question = Question::factory()->create(['title' => 'Pola Bilangan Berlipat']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->put(route('admin.questions.update', $question), $this->payload($question->section, ['title' => '   ']))
+            ->assertRedirect(route('admin.questions.edit', $question))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('questions', ['id' => $question->id, 'title' => null]);
+        $this->get(route('admin.questions.index'))->assertSeeText('Soal #'.$question->id);
+    }
+
     #[DataProvider('invalidQuestions')]
     public function test_invalid_question_is_not_saved(array $overrides, string $field, ?string $message = null): void
     {
@@ -88,7 +137,7 @@ class QuestionManagementTest extends TestCase
     public static function invalidQuestions(): array
     {
         return [
-            'empty title' => [['title' => ''], 'title'],
+            'title too long' => [['title' => str_repeat('A', 181)], 'title'],
             'missing body' => [['body' => ''], 'body'],
             'unreadable body' => [['body' => '<script>alert(1)</script>'], 'body', 'Pertanyaan harus berisi teks yang dapat dibaca.'],
             'missing field' => [['section_id' => 999999], 'section_id'],

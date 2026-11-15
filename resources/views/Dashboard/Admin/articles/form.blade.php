@@ -71,12 +71,13 @@
                         <label class="label" for="article-slug">Slug</label>
                         <input class="input" id="article-slug" name="slug" data-auto-slug="articles" data-slug-url="{{ route('admin.slugs.preview') }}" data-slug-id="{{ $article->id }}" maxlength="180" value="{{ old('slug', $article->slug) }}" placeholder="Otomatis dari judul">
                     </div>
-                    <div class="field">
+                    <div class="field" data-file-picker>
                         <label class="label" for="article-cover">Gambar cover</label>
                         <input class="input article-cover-input" id="article-cover" type="file" name="cover" accept="image/jpeg,image/png,image/webp">
+                        <x-clear-file-button />
                         <p class="hint">JPG, PNG, WebP · maksimal 5 MB</p>
                         @if ($article->cover_path)
-                            <label class="check"><input type="checkbox" name="remove_cover" value="1" data-remove-cover @checked(old('remove_cover'))> Hapus cover lama</label>
+                            <label class="check"><input type="checkbox" name="remove_cover" value="1" data-remove-cover data-remove-stored-file @checked(old('remove_cover'))> Hapus cover saat disimpan</label>
                         @endif
                     </div>
                 </div>
@@ -208,9 +209,10 @@
         <form data-image-form>
             <h2 id="article-image-title">Sisipkan gambar</h2>
             <p>Unggah gambar, lalu cantumkan sumbernya. Klik gambar di editor untuk mengubahnya kembali.</p>
-            <div class="field">
+            <div class="field" data-file-picker>
                 <label class="label" for="article-inline-image">File gambar</label>
                 <input class="input article-cover-input" id="article-inline-image" type="file" accept="image/jpeg,image/png,image/webp">
+                <x-clear-file-button />
                 <p class="hint">JPG, PNG, WebP · maksimal 5 MB. Saat mengedit, kosongkan untuk memakai gambar yang sama.</p>
             </div>
             <div class="field">

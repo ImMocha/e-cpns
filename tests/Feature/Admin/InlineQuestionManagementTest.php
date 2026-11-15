@@ -133,6 +133,23 @@ class InlineQuestionManagementTest extends TestCase
         $this->assertSame([$question->id], $exam->questions()->pluck('questions.id')->all());
     }
 
+    public function test_inline_editor_can_publish_a_question_without_a_title(): void
+    {
+        $data = $this->payload(Section::factory()->create());
+        unset($data['title']);
+
+        $response = $this->actingAs(User::factory()->admin()->create())
+            ->postJson(route('admin.questions.store'), $data)
+            ->assertCreated()
+            ->assertJsonPath('question.status', 'published')
+            ->assertJsonPath('question.title', null);
+
+        $question = Question::sole();
+        $this->assertDatabaseHas('questions', ['id' => $question->id, 'title' => null]);
+        $this->assertStringContainsString('Soal #'.$question->id, $response->json('html'));
+        $this->assertStringContainsString('Berapa hasil 12 + 8?', $response->json('html'));
+    }
+
     public function test_admin_can_load_editable_content_and_updates_preserve_other_session_assignments_and_attempt_snapshot(): void
     {
         $question = Question::factory()->published()->create();

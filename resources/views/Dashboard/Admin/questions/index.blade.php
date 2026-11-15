@@ -26,8 +26,9 @@
             <thead><tr><th>Soal</th><th>Bidang &amp; level</th><th>Digunakan di</th><th>Status</th><th>Aksi</th></tr></thead>
             <tbody>
                 @forelse ($questions as $question)
+                    @php($displayTitle = $question->displayTitle())
                     <tr>
-                        <td class="question-title-cell"><a class="font-bold text-primary" href="{{ route('admin.questions.edit', $question) }}">{{ $question->title }}</a><div class="text-sm text-soft">{{ \Illuminate\Support\Str::limit(\App\ArticleContent::text($question->body), 95) }}</div><div class="text-xs text-soft">Kunci {{ chr(65 + $question->correct_option) }} · {{ $question->author?->name ?? 'Admin' }} · <x-local-time :value="$question->updated_at" format="d M Y" /></div></td>
+                        <td class="question-title-cell"><a class="font-bold text-primary" href="{{ route('admin.questions.edit', $question) }}">{{ $displayTitle }}</a><div class="text-sm text-soft">{{ \Illuminate\Support\Str::limit(\App\ArticleContent::text($question->body), 95) }}</div><div class="text-xs text-soft">Kunci {{ chr(65 + $question->correct_option) }} · {{ $question->author?->name ?? 'Admin' }} · <x-local-time :value="$question->updated_at" format="d M Y" /></div></td>
                         <td data-label="Bidang & level"><strong>{{ $question->section?->name ?? 'Bidang dihapus' }}</strong><div class="text-xs text-soft">{{ $question->difficulty->label() }}</div></td>
                         <td class="question-usage-cell" data-label="Digunakan di">
                             <div class="question-usage-list">
@@ -41,9 +42,9 @@
                         </td>
                         <td data-label="Status"><span class="badge {{ $question->status->badgeClass() }}">{{ $question->status->label() }}</span></td>
                         <td class="question-management-actions"><div class="btn-row question-actions">
-                            <a class="btn btn--ghost btn--sm" href="{{ route('admin.questions.edit', $question) }}" aria-label="Edit {{ $question->title }}"><svg data-icon="pencil"></svg> Edit</a>
-                            <a class="btn btn--ghost btn--square btn--sm" href="{{ route('admin.questions.show', $question) }}" aria-label="Preview {{ $question->title }}"><svg data-icon="eye"></svg></a>
-                            <form method="POST" action="{{ route('admin.questions.destroy', $question) }}" data-content-confirm data-confirm-title="Hapus soal?" data-confirm-body="Soal ini akan diarsipkan dan tidak digunakan pada pengerjaan baru. Riwayat peserta tetap tersimpan.">@csrf @method('DELETE')<button class="btn btn--ghost btn--square btn--sm" aria-label="Hapus {{ $question->title }}"><svg data-icon="trash"></svg></button></form>
+                            <a class="btn btn--ghost btn--sm" href="{{ route('admin.questions.edit', $question) }}" aria-label="Edit {{ $displayTitle }}"><svg data-icon="pencil"></svg> Edit</a>
+                            <a class="btn btn--ghost btn--square btn--sm" href="{{ route('admin.questions.show', $question) }}" aria-label="Preview {{ $displayTitle }}"><svg data-icon="eye"></svg></a>
+                            <form method="POST" action="{{ route('admin.questions.destroy', $question) }}" data-content-confirm data-confirm-title="Hapus soal?" data-confirm-body="Soal ini akan diarsipkan dan tidak digunakan pada pengerjaan baru. Riwayat peserta tetap tersimpan.">@csrf @method('DELETE')<button class="btn btn--ghost btn--square btn--sm" aria-label="Hapus {{ $displayTitle }}"><svg data-icon="trash"></svg></button></form>
                         </div></td>
                     </tr>
                 @empty

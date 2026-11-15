@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-#[Fillable(['kind', 'slug', 'title', 'description', 'cover_path', 'question_count', 'question_alignment', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'access_level', 'topic_id', 'requires_topic_completion', 'created_by', 'updated_by', 'free_claim_enabled', 'free_claim_terms', 'free_claim_instagram_url'])]
+#[Fillable(['kind', 'slug', 'title', 'description', 'cover_path', 'question_count', 'question_alignment', 'show_question_topic', 'duration_minutes', 'points_per_correct', 'penalty_wrong', 'passing_score', 'random_questions', 'random_options', 'status', 'access_level', 'topic_id', 'requires_topic_completion', 'created_by', 'updated_by', 'free_claim_enabled', 'free_claim_terms', 'free_claim_instagram_url'])]
 class Exam extends Model
 {
     /** @use HasFactory<ExamFactory> */
@@ -33,14 +33,14 @@ class Exam extends Model
 
     public const DEFAULT_QUESTION_ALIGNMENT = 'justify';
 
-    protected $attributes = ['access_level' => 'premium', 'question_alignment' => self::DEFAULT_QUESTION_ALIGNMENT];
+    protected $attributes = ['access_level' => 'premium', 'question_alignment' => self::DEFAULT_QUESTION_ALIGNMENT, 'show_question_topic' => true];
 
     protected function casts(): array
     {
         return ['position' => 'integer', 'question_count' => 'integer', 'duration_minutes' => 'integer', 'points_per_correct' => 'integer',
             'penalty_wrong' => 'integer', 'passing_score' => 'integer', 'random_questions' => 'boolean',
             'random_options' => 'boolean', 'status' => QuestionStatus::class, 'access_level' => MaterialAccess::class,
-            'requires_topic_completion' => 'boolean', 'free_claim_enabled' => 'boolean'];
+            'requires_topic_completion' => 'boolean', 'free_claim_enabled' => 'boolean', 'show_question_topic' => 'boolean'];
     }
 
     public function freeClaimTermsVersion(): string
@@ -61,7 +61,12 @@ class Exam extends Model
     public function coverUrl(): string
     {
         return $this->cover_path ? Storage::disk('public')->url($this->cover_path)
-            : asset('images/'.($this->kind === 'tryout' ? 'tryout-card-cover.webp' : 'practice-card-cover.webp'));
+            : $this->defaultCoverUrl();
+    }
+
+    public function defaultCoverUrl(): string
+    {
+        return asset('images/'.($this->kind === 'tryout' ? 'tryout-card-cover.webp' : 'practice-card-cover.webp'));
     }
 
     public function topic(): BelongsTo

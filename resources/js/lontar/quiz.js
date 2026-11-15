@@ -1,4 +1,5 @@
 import { sanitizeArticle } from './article-editor.js';
+import { renderQuestionMath } from './question-math.js';
 
 (function () {
   'use strict';
@@ -21,6 +22,104 @@ import { sanitizeArticle } from './article-editor.js';
       return;
     }
     const total = cfg.questions.length;
+    const questionNav = $('.qnav');
+    const paletteCard = $('.qnav > .card');
+    const dialog = document.createElement('dialog');
+    dialog.className = 'exam-dialog';
+    dialog.id = 'exam-detail';
+    dialog.setAttribute('aria-labelledby', 'exam-detail-title');
+    dialog.innerHTML = '<div class="exam-dialog__head"><strong id="exam-detail-title"></strong>' +
+      '<form method="dialog"><button class="btn btn--ghost btn--sm" autofocus>Tutup</button></form></div>' +
+      '<div class="exam-dialog__body"></div>';
+    document.body.append(dialog);
+    const dialogBody = $('.exam-dialog__body', dialog);
+    function resetDetail() {
+      if (dialog.open) return;
+      if (paletteCard && dialogBody.contains(paletteCard)) questionNav.prepend(paletteCard);
+      dialogBody.replaceChildren();
+    }
+    dialog.addEventListener('close', resetDetail);
+
+    function openDetail(title, content) {
+      resetDetail();
+      $('#exam-detail-title', dialog).textContent = title;
+      dialogBody.replaceChildren(content);
+      dialogBody.scrollTop = 0;
+      dialog.showModal();
+    }
+
+    function showQuestionImage(preview) {
+      const content = document.createElement('div');
+      content.className = 'exam-image-detail';
+      content.innerHTML = '<div class="btn-row" aria-label="Pembesaran gambar" role="group">' +
+        '<button class="btn btn--ghost btn--sm" type="button" data-zoom-out aria-label="Perkecil gambar" disabled>−</button>' +
+        '<button class="btn btn--ghost btn--sm" type="button" data-zoom-fit disabled>Pas layar</button>' +
+        '<button class="btn btn--ghost btn--sm" type="button" data-zoom-in aria-label="Perbesar gambar" disabled>+</button></div>' +
+        '<p class="text-sm text-soft" role="status">Memuat gambar…</p>' +
+        '<div class="exam-image-detail__scroll" tabindex="-1" role="region" aria-label="Ilustrasi soal"></div>';
+      const viewport = $('.exam-image-detail__scroll', content);
+      const status = $('[role="status"]', content);
+      const zoomOut = $('[data-zoom-out]', content);
+      const zoomFit = $('[data-zoom-fit]', content);
+      const zoomIn = $('[data-zoom-in]', content);
+      const levels = [1, 1.25, 1.5, 2, 2.5, 3];
+      let level = 0;
+      const image = preview.cloneNode();
+      image.className = '';
+      viewport.append(image);
+      openDetail('Ilustrasi soal', content);
+
+      function setZoom(next) {
+        const focusedControl = document.activeElement;
+        const centerX = (viewport.scrollLeft + viewport.clientWidth / 2) / (viewport.scrollWidth || 1);
+        const centerY = (viewport.scrollTop + viewport.clientHeight / 2) / (viewport.scrollHeight || 1);
+        level = next;
+        const zoomed = level > 0;
+        viewport.toggleAttribute('data-zoomed', zoomed);
+        viewport.style.setProperty('--exam-image-zoom', levels[level]);
+        viewport.scrollLeft = zoomed ? centerX * viewport.scrollWidth - viewport.clientWidth / 2 : 0;
+        viewport.scrollTop = zoomed ? centerY * viewport.scrollHeight - viewport.clientHeight / 2 : 0;
+
+        zoomOut.disabled = zoomFit.disabled = !zoomed;
+        zoomIn.disabled = level === levels.length - 1;
+        if (!zoomed && (focusedControl === zoomOut || focusedControl === zoomFit)) zoomIn.focus();
+        if (zoomIn.disabled && focusedControl === zoomIn) zoomOut.focus();
+        const canScroll = viewport.scrollWidth > viewport.clientWidth || viewport.scrollHeight > viewport.clientHeight;
+        viewport.tabIndex = canScroll ? 0 : -1;
+        status.textContent = zoomed
+          ? 'Pembesaran ' + Math.round(levels[level] * 100) + '% dari pas layar.' + (canScroll ? ' Geser untuk melihat detail.' : '')
+          : 'Seluruh gambar ditampilkan. Gunakan + untuk melihat detail.';
+      }
+
+      function onImageReady() {
+        if (!image.naturalWidth || !image.naturalHeight) {
+          status.textContent = 'Gambar belum bisa dimuat. Tutup lalu coba buka kembali.';
+          return;
+        }
+        viewport.style.setProperty('--exam-image-width', image.naturalWidth + 'px');
+        viewport.style.setProperty('--exam-image-ratio', image.naturalWidth / image.naturalHeight);
+        setZoom(0);
+      }
+
+      zoomIn.addEventListener('click', () => setZoom(level + 1));
+      zoomOut.addEventListener('click', () => setZoom(level - 1));
+      zoomFit.addEventListener('click', () => setZoom(0));
+      if (image.complete) onImageReady();
+      else {
+        image.addEventListener('load', onImageReady, { once: true });
+        image.addEventListener('error', onImageReady, { once: true });
+      }
+    }
+
+    function showQuestionPalette() {
+      if (!paletteCard) return;
+      openDetail('Nomor soal', paletteCard);
+      const current = $('.pal.is-current:not([hidden])', paletteCard);
+      if (current) {
+        dialogBody.scrollTop = current.getBoundingClientRect().top - dialogBody.getBoundingClientRect().top - dialogBody.clientHeight / 2;
+      }
+    }
+
     const cacheKey = 'lontar:attempt:' + cfg.attemptId;
     const cached = storage.get(cacheKey);
     const state = { answers: { ...cfg.state.answers }, flags: { ...cfg.state.flags }, current: cfg.state.current };
@@ -125,20 +224,26 @@ import { sanitizeArticle } from './article-editor.js';
     }
     function renderQuestion() {
       const q = currentQuestion();
-      stage.innerHTML = '<section class="card card--static"><div class="qhead"><span class="qnum">Soal ' + (state.current + 1) +
+      const imageOnlyOptions = q.options.length > 1 && q.options.every((option, index) => !String(option ?? '').trim() && q.optionImageUrls?.[index]);
+      stage.innerHTML = '<section class="card card--static"><div class="qhead"><span class="qnum" tabindex="-1">Soal ' + (state.current + 1) +
         '</span><span class="badge badge--primary badge--flat">' + esc(q.section || 'Umum') +
-        '</span><span class="text-xs text-soft">' + esc(q.topic) + '</span><span class="autosave" id="autosaveHint"><span></span></span></div>' +
+        '</span>' + (q.topic ? '<span class="qtopic text-xs text-soft">' + esc(q.topic) + '</span>' : '') + '<div class="qhead__actions">' +
+        '<span class="autosave" id="autosaveHint"><span></span></span>' +
+        '<button type="button" class="btn btn--ghost btn--sm exam-palette-open" aria-haspopup="dialog" aria-controls="exam-detail">Nomor soal</button></div></div>' +
         (q.scoringType === 'weighted' ? '<p class="exam-scoring-notice">TKP berbobot · setiap pilihan bernilai 1–5, jawaban kosong 0.</p>' : '') +
-        '<div class="qstem article-prose question-stem">' + (q.stemHtml ? sanitizeArticle(q.stemHtml) : esc(q.stem)) + '</div>' +
-        (q.imageUrl ? '<img class="exam-question-media' + (q.fixedOptionOrder ? ' exam-question-figure' : '') + '" src="' + esc(q.imageUrl) + '" alt="Ilustrasi soal">' : '') +
+        '<div class="qstem article-prose question-stem" data-question-math>' + (q.stemHtml ? sanitizeArticle(q.stemHtml) : esc(q.stem)) + '</div>' +
+        (q.imageUrl ? '<button type="button" class="exam-image-preview" aria-haspopup="dialog" aria-controls="exam-detail">' +
+          '<img class="exam-question-media' + (q.fixedOptionOrder ? ' exam-question-figure' : '') + '" src="' + esc(q.imageUrl) + '" alt="Ilustrasi soal">' +
+          '<span>Perbesar gambar</span></button>' : '') +
         (q.videoUrl ? '<video class="exam-question-media" controls playsinline preload="metadata" src="' + esc(q.videoUrl) + '">Browser tidak mendukung video.</video>' : '') +
-        '<div class="grid" style="--gap:.7rem;margin-top:1.25rem">' + q.options.map((option, index) =>
+        '<div class="exam-options' + (imageOnlyOptions ? ' exam-options--image-only' : '') + '">' + q.options.map((option, index) =>
           '<button type="button" class="opt" data-opt="' + index + '" aria-pressed="false"><span class="opt__key">' +
-          keys[index].toUpperCase() + '</span><span class="opt__text">' + esc(option) +
+          keys[index].toUpperCase() + '</span><span class="opt__text" data-question-math>' + esc(option) +
           (q.optionImageUrls?.[index] ? '<img class="question-option-image" src="' + esc(q.optionImageUrls[index]) + '" alt="Gambar pilihan ' + keys[index].toUpperCase() + '">' : '') + '</span></button>').join('') + '</div>' +
         '<div class="qfoot"><div class="btn-row"><button type="button" class="btn btn--ghost btn--sm" data-prev' +
         (state.current === 0 ? ' disabled' : '') + '>Sebelumnya</button><button type="button" class="btn btn--ghost btn--sm flag-btn" data-flag>Tandai</button></div>' +
         '<button type="button" class="btn btn--primary" data-next>' + (state.current === total - 1 ? 'Selesaikan' : 'Berikutnya') + '</button></div></section>';
+      $$('[data-question-math]', stage).forEach(element => renderQuestionMath(element));
       $$('[data-opt]', stage).forEach(button => button.addEventListener('click', () => {
         if (finished || submitting || (cfg.showTimer && secondsLeft() === 0)) return;
         const index = Number(button.dataset.opt);
@@ -154,6 +259,8 @@ import { sanitizeArticle } from './article-editor.js';
       });
       $('[data-prev]', stage).addEventListener('click', () => go(state.current - 1));
       $('[data-next]', stage).addEventListener('click', () => state.current === total - 1 ? openSubmitDialog() : go(state.current + 1));
+      $('.exam-palette-open', stage).addEventListener('click', showQuestionPalette);
+      $('.exam-image-preview', stage)?.addEventListener('click', event => showQuestionImage($('img', event.currentTarget)));
       refreshSelection(); renderPalette(); updateStats(); saveHint();
     }
     function renderPalette() {
@@ -167,6 +274,9 @@ import { sanitizeArticle } from './article-editor.js';
           (answered ? ', sudah dijawab' : ', belum dijawab') + (flagged ? ', ditandai' : '') + '"' +
           (current ? ' aria-current="step"' : '') + (filter && answered ? ' hidden' : '') + '>' + (index + 1) + '</button>';
       }).join('');
+      if (!palette.querySelector(':not([hidden])')) {
+        palette.innerHTML = '<p class="palette__empty text-sm" role="status">Semua soal sudah dijawab.</p>';
+      }
       $$('[data-go]', palette).forEach(button => button.addEventListener('click', () => go(Number(button.dataset.go))));
     }
     function updateStats() {
@@ -177,8 +287,11 @@ import { sanitizeArticle } from './article-editor.js';
     }
     function go(index) {
       if (finished || submitting || index < 0 || index >= total) return;
+      if (dialog.open) { dialog.close(); resetDetail(); }
       state.current = index; persist(); renderQuestion();
-      stage.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      stage.style.scrollMarginTop = (($('.tryout-bar')?.offsetHeight || 0) + 12) + 'px';
+      $('.qnum', stage).focus({ preventScroll: true });
+      stage.scrollIntoView({ block: 'start', behavior: 'instant' });
     }
     function secondsLeft() {
       return Math.max(0, Math.ceil((cfg.expiresAt - cfg.serverNow - (performance.now() - initialTick)) / 1000));
@@ -221,7 +334,7 @@ import { sanitizeArticle } from './article-editor.js';
     $('#filterUnanswered')?.addEventListener('click', function () {
       const active = this.getAttribute('aria-pressed') !== 'true';
       this.setAttribute('aria-pressed', String(active)); this.classList.toggle('btn--amber', active); renderPalette();
-      if (active) {
+      if (active && !dialog.open) {
         const next = cfg.questions.findIndex(q => state.answers[q.id] == null);
         if (next >= 0) go(next); else window.toast('Semua soal sudah dijawab.', 'success');
       }
@@ -234,7 +347,7 @@ import { sanitizeArticle } from './article-editor.js';
     }));
     document.addEventListener('keydown', event => {
       if (finished || submitting || document.body.classList.contains('driver-active') || event.target.closest('input,textarea,select,[contenteditable="true"]') || event.metaKey || event.ctrlKey || event.altKey ||
-          $('.modal.is-open') || $$('[role="dialog"]').some(dialog => dialog.getClientRects().length && dialog.getAttribute('aria-hidden') !== 'true')) return;
+          $('dialog[open], .modal.is-open') || $$('[role="dialog"]').some(dialog => dialog.getClientRects().length && dialog.getAttribute('aria-hidden') !== 'true')) return;
       const key = event.key.toLowerCase(), q = currentQuestion();
       if (key === 'arrowright' || key === 'arrowleft') { event.preventDefault(); go(state.current + (key === 'arrowright' ? 1 : -1)); }
       else if (key === 'f' && (event.shiftKey || q.options.length <= 5)) { event.preventDefault(); $('[data-flag]', stage)?.click(); }

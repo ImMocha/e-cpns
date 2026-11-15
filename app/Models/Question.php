@@ -75,6 +75,11 @@ class Question extends Model
         }
     }
 
+    public function displayTitle(): string
+    {
+        return filled($this->title) ? $this->title : 'Soal #'.$this->id;
+    }
+
     public function safeBody(): string
     {
         return ArticleContent::sanitize($this->body);

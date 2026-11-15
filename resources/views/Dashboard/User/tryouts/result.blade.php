@@ -127,7 +127,7 @@
               </summary>
               <div class="exam-review-body">
                 <div class="exam-review-reading">
-                <div class="exam-review-stem article-prose question-stem">@if (!empty($question['stemHtml'])){!! \App\ArticleContent::sanitize($question['stemHtml']) !!}@else{{ $question['stem'] }}@endif</div>
+                <div class="exam-review-stem article-prose question-stem" data-question-math>@if (!empty($question['stemHtml'])){!! \App\ArticleContent::sanitize($question['stemHtml']) !!}@else{{ $question['stem'] }}@endif</div>
                 @foreach (['image', 'video'] as $media)
                   @if (!empty($question[$media.'_path']))
                     @php($mediaUrl = route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => $media]))
@@ -139,7 +139,7 @@
                   @foreach ($question['options'] as $optionIndex => $option)
                     <li class="exam-review-choice {{ $weighted ? ($chosen === $optionIndex ? 'is-selected' : '') : ($optionIndex === $question['answer'] ? 'is-correct' : ($chosen === $optionIndex ? 'is-wrong' : '')) }}">
                       <span class="exam-review-letter" aria-hidden="true">{{ chr(65 + $optionIndex) }}</span>
-                      <div class="exam-review-option-content"><p>{{ $option }}</p>
+                      <div class="exam-review-option-content"><p data-question-math>{{ $option }}</p>
                         @if(!empty($question['option_image_paths'][$optionIndex]))<img class="question-option-image" src="{{ route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => 'option-'.$optionIndex]) }}" alt="Gambar pilihan {{ chr(65 + $optionIndex) }}" loading="lazy">@endif
                         @if ($weighted || $optionIndex === $question['answer'] || $chosen === $optionIndex)
                           <div class="exam-review-option-labels">
@@ -160,7 +160,7 @@
                 @if ($canViewExplanations)
                   <section class="exam-review-explanation" aria-label="Penjelasan soal {{ $index + 1 }}">
                     <h3><svg data-icon="book"></svg> Pembahasan</h3>
-                    <div class="article-prose">@if (!empty($question['explainHtml'])){!! \App\ArticleContent::sanitize($question['explainHtml']) !!}@else{{ $question['explain'] ?? '' }}@endif</div>
+                    <div class="article-prose" data-question-math>@if (!empty($question['explainHtml'])){!! \App\ArticleContent::sanitize($question['explainHtml']) !!}@else{{ $question['explain'] ?? '' }}@endif</div>
                     @if(!empty($question['explanation_image_path']))<img class="question-explanation-image" src="{{ route('exam-attempts.media', ['examAttempt' => $attempt->id, 'question' => $question['id'], 'media' => 'explanation-image']) }}" alt="Gambar pembahasan" loading="lazy">@endif
                   </section>
                 @endif

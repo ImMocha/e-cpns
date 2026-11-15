@@ -8,12 +8,17 @@ import './lontar/local-time.js';
 import './lontar/legal-dialogs.js';
 import './lontar/navbar-search.js';
 import './lontar/content-workspace.js';
+import './lontar/file-picker.js';
 import './lontar/article-editor.js';
 import './lontar/question-editor.js';
 import './lontar/exam-question-manager.js';
 import './lontar/exam-catalog-order.js';
 import './lontar/quiz.js';
+import './lontar/tryout-ready.js';
 import './lontar/pdf-reader.js';
+import { renderQuestionMath } from './lontar/question-math.js';
+
+document.querySelectorAll('[data-question-math]').forEach(element => renderQuestionMath(element));
 
 if (document.querySelector('[data-tryout-demo]')) {
     import('./lontar/tryout-demo.js');

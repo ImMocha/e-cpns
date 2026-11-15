@@ -41,6 +41,35 @@ class ExamAttemptTest extends TestCase
         $this->assertSame($firstAttempt->id, ExamAttempt::query()->sole()->id);
     }
 
+    public function test_tryout_catalog_prepares_a_new_attempt_without_starting_its_timer(): void
+    {
+        $this->travelTo(now()->startOfSecond());
+        $participant = User::factory()->create();
+        $exam = Exam::factory()->tryout()->create([
+            'title' => 'Simulasi Kesiapan', 'question_count' => 2, 'duration_minutes' => 25,
+        ]);
+        $exam->questions()->attach(Question::factory()->published()->count(2)->create());
+        $catalog = route('tryouts.index');
+
+        $this->actingAs($participant)->get($catalog)
+            ->assertSee('Siap mulai tryout?')
+            ->assertSee('data-tryout-start="Simulasi Kesiapan"', false)
+            ->assertSee('data-question-count="2"', false)
+            ->assertSee('data-duration-minutes="25"', false);
+        $this->assertDatabaseCount('exam_attempts', 0);
+
+        $this->travel(5)->minutes();
+        $response = $this->post(route('tryouts.start', $exam->slug));
+
+        $attempt = ExamAttempt::sole();
+        $response->assertRedirect($attempt->attemptUrl());
+        $this->assertTrue($attempt->started_at->equalTo(now()));
+        $this->assertTrue($attempt->expires_at->equalTo(now()->addMinutes(25)));
+        $this->get($catalog)
+            ->assertSee($attempt->attemptUrl(), false)
+            ->assertDontSee('data-tryout-start="Simulasi Kesiapan"', false);
+    }
+
     public function test_saved_answers_are_scored_on_the_server_and_result_is_available(): void
     {
         $user = User::factory()->create();

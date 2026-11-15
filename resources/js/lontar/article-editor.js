@@ -128,8 +128,9 @@ document.querySelectorAll('[data-article-editor]').forEach((form) => {
   const imageError = imageDialog.querySelector('[data-image-error]');
   const imageSubmit = imageDialog.querySelector('[data-image-submit]');
   const imageRemove = imageDialog.querySelector('[data-image-remove]');
+  const imageCancel = imageDialog.querySelector('[data-image-cancel]');
   let editingImage = null;
-  let uploadingImage = false;
+  let imageUpload = null;
   let range = null;
   let coverObjectUrl = null;
   let dirty = false;
@@ -433,9 +434,19 @@ document.querySelectorAll('[data-article-editor]').forEach((form) => {
     link.append(fragment);
     dialog.close(); execute('insertHTML', sanitizeArticle(link.outerHTML));
   });
-  imageDialog.querySelector('[data-image-cancel]').addEventListener('click', () => { imageDialog.close(); restoreSelection(); });
+  const cancelImageDialog = () => {
+    if (imageUpload) {
+      imageUpload.abort();
+    } else {
+      imageDialog.close();
+      restoreSelection();
+    }
+  };
+  imageCancel.addEventListener('click', cancelImageDialog);
+  imageFile.addEventListener('change', () => { imageError.textContent = ''; });
   imageDialog.addEventListener('cancel', (event) => {
-    if (uploadingImage) event.preventDefault(); else restoreSelection();
+    event.preventDefault();
+    cancelImageDialog();
   });
   imageRemove.addEventListener('click', () => {
     imageDialog.close();
@@ -443,7 +454,7 @@ document.querySelectorAll('[data-article-editor]').forEach((form) => {
   });
   imageForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (uploadingImage) return;
+    if (imageUpload) return;
     imageError.textContent = '';
     const file = imageFile.files[0];
     const sourceUrl = imageSourceUrl.value.trim();
@@ -453,20 +464,24 @@ document.querySelectorAll('[data-article-editor]').forEach((form) => {
     }
     if (sourceUrl && !safeWebUrl(sourceUrl)) { imageError.textContent = 'Tautan sumber harus berupa alamat http:// atau https:// yang valid.'; imageSourceUrl.focus(); return; }
     const submitLabel = imageSubmit.textContent;
-    uploadingImage = true;
-    imageForm.querySelectorAll('input, select, button').forEach((input) => { input.disabled = true; });
+    imageUpload = new AbortController();
+    const controls = imageForm.querySelectorAll('input, select, button:not([data-image-cancel])');
+    controls.forEach((input) => { input.disabled = true; });
     imageSubmit.textContent = 'Menyimpan gambar…';
+    imageCancel.textContent = 'Batalkan unggahan';
     try {
       let imageUrl = editingImage?.getAttribute('src');
       if (file) {
         const data = new FormData();
         data.append('image', file);
+        const signal = AbortSignal.any([imageUpload.signal, AbortSignal.timeout(60000)]);
         const response = await fetch(form.dataset.imageUploadUrl, {
           method: 'POST', credentials: 'same-origin', body: data,
           headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': form.querySelector('[name="_token"]').value },
-          signal: AbortSignal.timeout(60000),
+          signal,
         });
         const result = await response.json().catch(() => null);
+        signal.throwIfAborted();
         if (!response.ok) {
           const errorText = response.status === 419 ? 'Sesi telah berakhir. Salin isi artikel sebelum memuat ulang halaman.' : response.status === 413 ? 'Gambar terlalu besar untuk server. Pilih file yang lebih kecil.' : response.status === 429 ? 'Terlalu banyak unggahan. Tunggu sebentar lalu coba lagi.' : result?.errors?.image?.[0] || 'Gambar gagal diunggah. Silakan coba lagi.';
           throw new Error(errorText);
@@ -502,11 +517,17 @@ document.querySelectorAll('[data-article-editor]').forEach((form) => {
       if (replacing) replaceElement(editingImage.closest('figure') || editingImage, figure.outerHTML);
       else insertBlock(figure.outerHTML + '<p><br></p>');
     } catch (error) {
-      imageError.textContent = ['TimeoutError', 'TypeError'].includes(error.name) ? 'Unggahan belum berhasil. Periksa koneksi lalu coba lagi.' : error.message;
+      if (imageUpload.signal.aborted) {
+        imageDialog.close();
+        restoreSelection();
+      } else {
+        imageError.textContent = ['TimeoutError', 'TypeError'].includes(error.name) ? 'Unggahan belum berhasil. Periksa koneksi lalu coba lagi.' : error.message;
+      }
     } finally {
-      uploadingImage = false;
-      imageForm.querySelectorAll('input, select, button').forEach((input) => { input.disabled = false; });
+      imageUpload = null;
+      controls.forEach((input) => { input.disabled = false; });
       imageSubmit.textContent = submitLabel;
+      imageCancel.textContent = 'Batal';
     }
   });
   let selectedCell = null;
@@ -664,7 +685,7 @@ document.querySelectorAll('[data-article-editor]').forEach((form) => {
   });
   window.addEventListener('pagehide', () => { if (!submitting) saveLocalDraft(); });
   form.addEventListener('submit', (event) => {
-    if (uploadingImage) { event.preventDefault(); notify('Tunggu sampai unggahan gambar selesai.'); return; }
+    if (imageUpload) { event.preventDefault(); notify('Tunggu sampai unggahan gambar selesai.'); return; }
     const wordCount = sync();
     const status = event.submitter?.value || form.querySelector('input[name="status"]').value;
     if (!title.value.trim() || !section.value) {

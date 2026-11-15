@@ -38,7 +38,7 @@ class QuestionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:180'],
+            'title' => ['nullable', 'string', 'max:180'],
             'section_id' => ['required', 'integer', Rule::exists('sections', 'id')->whereNull('deleted_at')],
             'body' => ['required', 'string', 'max:50000'],
             'options' => ['required', 'array', 'list', 'min:2', 'max:10'],
@@ -180,7 +180,6 @@ class QuestionRequest extends FormRequest
         $data = $this->safe()->only(['title', 'section_id', 'body', 'options', 'correct_option', 'scoring_type', 'option_scores', 'shuffle_options', 'explanation', 'difficulty', 'status']);
         $data['option_scores'] = $data['scoring_type'] === 'weighted' ? array_map('intval', $data['option_scores']) : null;
         $data['correct_option'] = $data['scoring_type'] === 'weighted' ? null : (int) $data['correct_option'];
-        $data['title'] = trim($data['title']);
         $data['options'] = array_map(fn (?string $option): string => trim((string) $option), $data['options']);
         $data['body'] = ArticleContent::sanitize($data['body']);
         $data['explanation'] = ArticleContent::sanitize($data['explanation'] ?? '');

@@ -32,7 +32,19 @@
 @elseif (! $item['canStart'])
     <span class="badge badge--amber badge--flat">Kuota tryout habis</span><a class="btn btn--ghost" href="{{ route('packages.index') }}">Beli paket lagi</a>
 @elseif ($exam->available_count >= $exam->question_count)
-    <form method="POST" action="{{ route(\App\Enums\ExamKind::from($kind)->routePrefix().'.start', $exam->slug) }}">@csrf<button class="btn btn--primary">{{ $item['isAdminPreview'] ? 'Pratinjau sebagai admin' : 'Mulai '.strtolower(\App\Enums\ExamKind::from($kind)->label()) }} <svg data-icon="arrow-right"></svg></button></form>
+    <form method="POST" action="{{ route(\App\Enums\ExamKind::from($kind)->routePrefix().'.start', $exam->slug) }}"
+        @if ($kind === 'tryout')
+            id="tryout-start-{{ $exam->id }}"
+            data-tryout-start="{{ $exam->title }}"
+            data-question-count="{{ $exam->question_count }}"
+            data-duration-minutes="{{ $exam->duration_minutes }}"
+        @endif
+    >
+        @csrf
+        <button class="btn btn--primary" type="submit" @if ($kind === 'tryout') aria-haspopup="dialog" aria-controls="tryout-ready" @endif>
+            {{ $item['isAdminPreview'] ? 'Pratinjau sebagai admin' : 'Mulai '.strtolower(\App\Enums\ExamKind::from($kind)->label()) }} <svg data-icon="arrow-right"></svg>
+        </button>
+    </form>
 @else
     <span class="badge badge--amber badge--flat">Belum cukup soal terbit</span>
 @endif

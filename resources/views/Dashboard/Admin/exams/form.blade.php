@@ -14,13 +14,14 @@
 <div class="field question-wide"><label class="label" for="exam-slug">Alamat sesi</label><input class="input" id="exam-slug" name="slug" data-auto-slug="exams" data-slug-url="{{ route('admin.slugs.preview') }}" data-slug-id="{{ $exam->id }}" value="{{ old('slug', $exam->slug) }}" placeholder="Otomatis dari judul" maxlength="80" pattern="[a-z0-9]+(-[a-z0-9]+)*" @readonly($exam->exists)><p class="field__hint">Terisi otomatis dari judul, dengan akhiran jika sudah dipakai. Alamat tetap setelah sesi dibuat.</p></div>
 <div class="field question-wide"><label class="label" for="exam-description">Deskripsi</label><textarea class="textarea" id="exam-description" name="description" rows="3" maxlength="2000">{{ old('description', $exam->description) }}</textarea></div>
 @unless($isQuiz)
-<div class="field question-wide">
+<div class="field question-wide" data-file-picker>
     <label class="label" for="exam-cover">Gambar kartu {{ strtolower($kind->label()) }}</label>
-    <img class="exam-cover-preview" src="{{ $exam->coverUrl() }}" alt="Pratinjau gambar kartu {{ $exam->title ?: strtolower($kind->label()) }}" width="960" height="540">
+    <img class="exam-cover-preview" src="{{ $exam->coverUrl() }}" data-default-cover="{{ $exam->defaultCoverUrl() }}" alt="Pratinjau gambar kartu {{ $exam->title ?: strtolower($kind->label()) }}" width="960" height="540">
     <input class="input" id="exam-cover" type="file" name="cover" accept="image/jpeg,image/png,image/webp" aria-describedby="exam-cover-help">
+    <x-clear-file-button />
     <p class="field__hint" id="exam-cover-help">JPG, PNG, atau WebP, maksimal 5 MB. Disarankan gambar mendatar 16:9. Tanpa unggahan, kartu memakai ilustrasi bawaan.</p>
     @error('cover')<p class="field__hint" role="alert">{{ $message }}</p>@enderror
-    @if($exam->cover_path)<label class="check"><input type="checkbox" name="remove_cover" value="1" @checked(old('remove_cover'))> Hapus gambar unggahan dan gunakan ilustrasi bawaan</label>@endif
+    @if($exam->cover_path)<label class="check"><input type="checkbox" name="remove_cover" value="1" data-remove-stored-file @checked(old('remove_cover'))> Gunakan ilustrasi bawaan saat disimpan</label>@endif
 </div>
 @endunless
 @php($selectedAccess = old('access_level', $exam->free_claim_enabled ? 'conditional' : 'premium'))
@@ -67,6 +68,14 @@
     </div>
     <p class="field__hint" id="exam-question-alignment-help">Simpan sesi untuk menerapkan perataan ke semua pertanyaan di sesi ini.</p>
 </fieldset>
+<div class="field">
+    <input type="hidden" name="show_question_topic" value="0">
+    <label class="switch">
+        <input type="checkbox" role="switch" name="show_question_topic" value="1" aria-describedby="exam-question-topic-help" @checked(old('show_question_topic', $exam->show_question_topic))>
+        <span>Tampilkan judul soal</span>
+    </label>
+    <p class="field__hint" id="exam-question-topic-help">Simpan sesi untuk mengatur tampilan judul seperti “Nasionalisme” di samping label TWK saat peserta mengerjakan soal.</p>
+</div>
 <div class="exam-question-feedback" data-exam-question-message role="status" hidden></div>
 <section class="exam-question-order" data-question-order hidden aria-labelledby="exam-order-title">
     <div class="exam-question-order__heading"><h3 id="exam-order-title">Urutan soal dipilih</h3><span class="badge badge--primary badge--flat" data-question-order-count>0 soal</span></div>

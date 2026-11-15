@@ -48,9 +48,13 @@
 .question-option-upload .input { width: 100%; min-width: 0; padding: .5rem; font-size: 12px; }
 .question-option-content .check { font-size: 12px; }
 .question-option-image, .question-explanation-image { display: block; width: auto; max-width: 100%; height: auto; object-fit: contain; border: 1px solid var(--border); border-radius: 10px; background: white; margin-top: .6rem; }
-.question-option-image { max-height: 260px; }
+.question-option-image {
+  width: min(100%, var(--question-option-image-size, 220px));
+  aspect-ratio: 1;
+  object-position: center;
+}
 .question-explanation-image { max-height: 480px; }
-.question-option-thumbnail { max-height: 140px; align-self: flex-start; margin-top: 0; }
+.question-option-thumbnail { --question-option-image-size: 140px; align-self: flex-start; margin-top: 0; }
 .question-option-content [hidden], .question-explanation-image[hidden], [data-explanation-image-error][hidden], [data-existing-explanation-image-control][hidden] { display: none; }
 .question-preview-option-content, .opt__text { flex: 1; min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 .question-key-picker { display: flex; flex-direction: column; align-items: center; gap: .4rem; cursor: pointer; padding-top: .3rem; }
@@ -79,12 +83,24 @@
 [data-question-alignment="right"] { --question-alignment: right; }
 .question-stem {
   overflow-wrap: anywhere;
-  font-weight: 700;
+  font-weight: 600;
   text-align: var(--question-alignment, justify);
 }
 /* Apply question formatting to pasted inline styles as well. */
-.question-stem [style*="font-weight"] { font-weight: 700 !important; }
+.question-stem :is(strong, b), .question-stem [style*="font-weight"] { font-weight: 600 !important; }
 .question-stem [style*="text-align"] { text-align: var(--question-alignment, justify) !important; }
+.question-math {
+  display: inline-block;
+  max-inline-size: 100%;
+  vertical-align: middle;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: .15em;
+  white-space: nowrap;
+}
+.question-math--block { display: block; margin-block: .5em; }
+.question-math--block > math { inline-size: max-content; margin-inline: auto; }
+.question-math-invalid { text-decoration: underline wavy var(--danger); overflow-wrap: anywhere; }
 .question-image { max-height: 300px; width: auto; max-width: 100%; object-fit: contain; border-radius: 10px; margin-top: 1rem; margin-bottom: 1rem; }
 .question-image.exam-question-figure, .exam-question-media.exam-question-figure { width: 100%; max-height: none; }
 .question-video { display: block; width: 100%; max-height: 360px; object-fit: contain; background: #102d43; border-radius: 10px; margin-top: 1rem; margin-bottom: 1rem; }
@@ -133,5 +149,6 @@
     .question-filter .field:not(.question-filter-search) { flex: 1 1 130px; }
     .question-filter .btn-row { width: 100%; }
     .question-answer-option { gap: .55rem; padding: .75rem; flex-wrap: wrap; }
+    .question-answer-options, .question-preview-options, .exam-review-options { --question-option-image-size: 132px; }
     .question-answer-footer .btn { width: 100%; }
 }
