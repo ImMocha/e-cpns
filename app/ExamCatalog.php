@@ -56,10 +56,11 @@ class ExamCatalog
             ->select(['id', 'bank_slug', 'kind', 'title', 'status', 'answers', 'score', 'max_score', 'submitted_at', 'expires_at'])
             ->latest('id')->get()->groupBy('bank_slug');
         $entitlements = $user->userPackages()->active()->with('exams')->get();
+        $tryoutUsage = $kind === 'tryout' && $entitlements->isNotEmpty() ? ExamAttempt::tryoutUsage($user) : collect();
         $hasPremium = $entitlements->contains(fn (UserPackage $package): bool => $package->tier === PackageTier::Premium);
         $learningAllowed = $user->canAccessLearningFeatures();
         $tokenPackages = $kind === 'tryout' && ! $user->isAdmin()
-            ? $entitlements->filter(fn (UserPackage $item): bool => $item->tryout_tokens > 0 && $item->hasTryoutQuota())->sortBy('id')
+            ? $entitlements->filter(fn (UserPackage $item): bool => $item->tryout_tokens > 0 && $item->offersTryoutAttempts())->sortBy('id')
             : collect();
         $tokenExamIds = $tokenPackages->isNotEmpty()
             ? array_fill_keys(Exam::query()->availableForTokens()->pluck('exams.id')->all(), true) : [];
@@ -73,7 +74,7 @@ class ExamCatalog
                 'questions as weighted_available_count' => fn (Builder $query) => $query->visibleToMembers()->where('scoring_type', QuestionScoring::Weighted)])
             ->ordered()->get();
         $exams->where('random_questions', false)->load(['scoringQuestions' => fn (Builder|Relation $questions): Builder|Relation => $questions->limit(200)]);
-        $banks = $exams->map(function (Exam $exam) use ($attempts, $entitlements, $user, $claims, $tokenPackages, $tokenExamIds, $learningAllowed, $hasPremium): array {
+        $banks = $exams->map(function (Exam $exam) use ($attempts, $entitlements, $user, $claims, $tokenPackages, $tokenExamIds, $learningAllowed, $hasPremium, $tryoutUsage): array {
             $history = $attempts->get($exam->slug, collect());
             $covering = $entitlements->filter(fn (UserPackage $item): bool => $item->tier === PackageTier::Premium
                 || (($exam->kind === 'tryout' || $item->tier === null) && $item->exams->contains('id', $exam->id)));
@@ -83,19 +84,22 @@ class ExamCatalog
             $topicReady = $exam->topicIsReadyFor($user);
             $isAdminPreview = $user->isAdmin() && ($exam->free_claim_enabled || ($exam->requires_topic_completion
                 && $exam->topic?->hasCompletedMaterials() !== true));
-            $canStart = $topicReady && ($freeAccess || (! $exam->free_claim_enabled && $covering->contains(fn (UserPackage $item): bool => $exam->kind !== 'tryout' || $item->hasTryoutQuota())));
+            $usage = $tryoutUsage->get($exam->slug, collect());
+            $remaining = $freeAccess || $covering->contains(fn (UserPackage $item): bool => $item->tryout_quota === null)
+                ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts($usage->get($item->id, 0)));
+            $canStart = $topicReady && ($freeAccess || (! $exam->free_claim_enabled && $hasAccess && ($exam->kind !== 'tryout' || $remaining !== 0)));
             $learningLocked = $exam->requiresPremiumLearningAccess() && ! $learningAllowed;
             if ($learningLocked) {
                 $hasAccess = false;
                 $canStart = false;
             }
-            $remaining = $freeAccess || $covering->contains(fn (UserPackage $item): bool => $item->tryout_quota === null)
-                ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts());
+            $tokenPackage = ! $canStart && $topicReady && isset($tokenExamIds[$exam->id])
+                ? $tokenPackages->first(fn (UserPackage $item): bool => ! $item->exams->contains('id', $exam->id)) : null;
 
             return ['exam' => $exam, 'open' => $history->firstWhere('status', ExamAttempt::IN_PROGRESS),
                 'learningLocked' => $learningLocked,
                 'hasAccess' => $hasAccess, 'canStart' => $canStart, 'topicReady' => $topicReady,
-                'tokenPackage' => ! $canStart && $topicReady && isset($tokenExamIds[$exam->id]) ? $tokenPackages->first() : null,
+                'tokenPackage' => $tokenPackage,
                 'isTokenRefill' => $hasAccess || $history->isNotEmpty(),
                 'isAdminPreview' => $isAdminPreview, 'remainingTryouts' => $remaining,
                 'claim' => $claim, 'last' => $history->firstWhere('status', ExamAttempt::COMPLETED)];

@@ -13,7 +13,7 @@
     <button class="btn btn--primary">Cari</button>
 </form>
 <section class="card">
-<div class="table-wrap"><table class="table"><thead><tr><th>Paket</th><th>Harga</th><th>Masa aktif</th><th>Konten</th><th>Kuota tryout</th><th>Peserta aktif</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
+<div class="table-wrap"><table class="table"><thead><tr><th>Paket</th><th>Harga</th><th>Masa aktif</th><th>Konten</th><th>Kuota per tryout</th><th>Peserta aktif</th><th>Status</th><th>Aksi</th></tr></thead><tbody>
 @forelse ($packages as $package)
 <tr>
     <td><strong>{{ $package->name }}</strong>@if ($package->tier)<p class="text-xs text-soft">{{ $package->tier->label() }}</p>@endif<p class="text-xs text-soft">{{ $package->leaderboard_access->label() }}</p></td><td><x-package-original-price :package="$package" />{{ $package->formattedPrice() }}</td><td>{{ $package->durationLabel() }}</td>

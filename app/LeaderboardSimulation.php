@@ -7,6 +7,7 @@ namespace App;
 use App\Enums\Province;
 use App\Models\LeaderboardBot;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 
 class LeaderboardSimulation
@@ -76,6 +77,32 @@ class LeaderboardSimulation
             ->select('id')->orderBy('id')->limit($province === null ? $counts['national'] : $counts['local']);
 
         return $query->whereIn('id', DB::query()->fromSub($ids, 'selected_bots')->select('id'));
+    }
+
+    public function scoresForLeaderboard(?Province $province, ?int $maximumScore): QueryBuilder
+    {
+        $bots = $this->bots($province)->select(['id', 'name', 'province']);
+
+        if ($maximumScore === null) {
+            $bots->addSelect('score')->selectRaw('NULL AS max_score');
+        } else {
+            $bots->selectRaw('ROUND(score * ? / 550.0) AS score, ? AS max_score', [$maximumScore, $maximumScore]);
+        }
+
+        $scale = $maximumScore ?? 550;
+        $scores = DB::query()->fromSub($bots, 'bot_scores')->select('bot_scores.*')
+            ->selectRaw('CASE WHEN score < ? THEN score * (? - score) / (? * 10.0) ELSE 0 END AS variation', [$scale, $scale, $scale]);
+
+        // Divide points near the SKD proportions (225 TKP, 175 TIU, 150 TWK), with a stable offset per bot.
+        $roundDown = $scores->getConnection()->getDriverName() === 'sqlite' ? 'CAST(%s AS INTEGER)' : 'FLOOR(%s)';
+        $sectionScores = DB::query()->fromSub($scores, 'bot_variation')
+            ->select(['id', 'name', 'province', 'score', 'max_score'])
+            ->selectRaw(sprintf($roundDown, 'score * 225.0 / 550 + (CAST(id % 7 AS DECIMAL(10, 0)) - 3) * variation / 3.0').' AS tkp_score')
+            ->selectRaw(sprintf($roundDown, 'score * 400.0 / 550 + (CAST(id % 11 AS DECIMAL(10, 0)) - 5) * variation / 5.0').' AS tkp_tiu_score');
+
+        return DB::query()->fromSub($sectionScores, 'bot_section_scores')
+            ->select(['id', 'name', 'province', 'score', 'max_score', 'tkp_score'])
+            ->selectRaw('tkp_tiu_score - tkp_score AS tiu_score, score - tkp_tiu_score AS twk_score, ? AS participant_type', ['simulation']);
     }
 
     private function seedScopeCounts(): void

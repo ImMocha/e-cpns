@@ -141,17 +141,77 @@ class LeaderboardTest extends TestCase
             ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->total() === 3);
     }
 
-    public function test_equal_points_share_rank_despite_different_maximums_without_skipping_positions(): void
+    public function test_identical_scores_and_names_still_receive_distinct_positions_in_id_order(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['name' => 'Nama yang Sama']);
+        $peer = User::factory()->create(['name' => 'Nama yang Sama']);
         $this->grant($user, LeaderboardAccess::National);
         $this->createCompletedTryout($user, 400);
-        $this->createCompletedTryout(User::factory()->create(), 400, 400);
+        $this->createCompletedTryout($peer, 400, 400);
         $this->createCompletedTryout(User::factory()->create(), 300);
 
         $response = $this->actingAs($user)->get(route('leaderboard.index', ['scope' => 'national']));
 
-        $this->assertSame([1, 1, 2], $response['participants']->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all());
+        $rows = $response['participants']->getCollection();
+        $this->assertSame([1, 2, 3], $rows->pluck('position')->map(fn ($position): int => (int) $position)->all());
+        $this->assertSame([$user->id, $peer->id], $rows->take(2)->pluck('id')->map(fn ($id): int => (int) $id)->all());
+    }
+
+    public function test_equal_totals_are_ranked_by_subtest_scores_from_the_best_attempt_then_name(): void
+    {
+        $province = Province::KalimantanSelatan;
+        $user = User::factory()->create(['name' => 'Zaki', 'province' => $province]);
+        $this->grant($user, LeaderboardAccess::National);
+        $this->createCompletedTryout($user, 400, overrides: [
+            'section_scores' => ['TKP' => ['score' => 185], 'TIU' => ['score' => 120], 'TWK' => ['score' => 95]],
+            'submitted_at' => now()->subDay(),
+        ]);
+        $this->createCompletedTryout($user, 400, overrides: [
+            'section_scores' => ['TKP' => ['score' => 190], 'TIU' => ['score' => 115], 'TWK' => ['score' => 95]],
+        ]);
+
+        foreach ([
+            'Total tertinggi' => [401, null],
+            'TKP tertinggi' => [400, ['TKP' => ['score' => 200], 'TIU' => ['score' => 90], 'TWK' => ['score' => 110]]],
+            'aldi' => [400, ['TKP' => ['score' => 190], 'TIU' => ['score' => 115], 'TWK' => ['score' => 95]]],
+            'TWK lebih rendah' => [400, ['TKP' => ['score' => 190], 'TIU' => ['score' => 115], 'TWK' => ['score' => 90]]],
+            'TIU lebih rendah' => [400, ['TKP' => ['score' => 190], 'TIU' => ['score' => 95], 'TWK' => ['score' => 115]]],
+            'TKP nol' => [400, ['TKP' => ['score' => 0], 'TIU' => ['score' => null]]],
+            'Rincian kosong' => [400, null],
+        ] as $name => [$total, $sections]) {
+            $peer = User::factory()->create(['name' => $name, 'province' => $province]);
+            $this->createCompletedTryout($peer, $total, overrides: ['section_scores' => $sections]);
+        }
+
+        LeaderboardBot::factory()->create(['name' => 'Peserta virtual uji', 'province' => $province, 'score' => 400]);
+        DB::table('leaderboard_settings')->insert(['id' => 1, 'simulations_enabled' => true]);
+
+        $this->actingAs($user);
+        foreach (['local', 'national'] as $scope) {
+            $response = $this->get(route('leaderboard.index', ['scope' => $scope]))
+                ->assertOk()
+                ->assertSeeTextInOrder(['Peringkat', 'Peserta', 'Provinsi', 'TKP', 'TIU', 'TWK', 'Skor Total'])
+                ->assertSeeTextInOrder(['TKP 190', 'TIU 115', 'TWK 95'])
+                ->assertSeeTextInOrder(['TWK lebih rendah', '190', '115', '90', '400 / 500']);
+
+            $rows = $response['participants']->getCollection();
+            $this->assertSame([
+                'Total tertinggi' => 1,
+                'TKP tertinggi' => 2,
+                'aldi' => 3,
+                'Zaki' => 4,
+                'TWK lebih rendah' => 5,
+                'TIU lebih rendah' => 6,
+                'Peserta virtual uji' => 7,
+                'TKP nol' => 8,
+                'Rincian kosong' => 9,
+            ], $rows->mapWithKeys(fn (stdClass $row): array => [$row->name => (int) $row->position])->all());
+            $this->assertSame(4, (int) $response['ownRank']->position);
+            $zeroTkp = $rows->firstWhere('name', 'TKP nol');
+            $this->assertNotNull($zeroTkp->tkp_score);
+            $this->assertSame(0, (int) $zeroTkp->tkp_score);
+            $this->assertNull($zeroTkp->tiu_score);
+        }
     }
 
     public function test_participant_name_is_rendered_as_text_instead_of_html(): void
@@ -175,10 +235,10 @@ class LeaderboardTest extends TestCase
         }
 
         $this->actingAs($user)->get(route('leaderboard.index', ['scope' => 'national']))
-            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 2)
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 27)
             ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->count() === 25 && $participants->total() === 27);
         $this->get(route('leaderboard.index', ['scope' => 'national', 'page' => 2]))->assertSee('Kamu')
-            ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === [1, 2]);
+            ->assertViewHas('participants', fn (LengthAwarePaginator $participants): bool => $participants->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === [26, 27]);
     }
 
     public function test_ranking_excludes_inactive_unverified_deleted_and_admin_accounts_and_zero_maximum(): void

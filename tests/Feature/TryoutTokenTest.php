@@ -65,7 +65,7 @@ class TryoutTokenTest extends TestCase
         $new = UserPackage::factory()->for($user)->for($package)->create(['tryout_tokens' => 1, 'tryout_quota' => 2]);
 
         $this->get(route('tryouts.index'))->assertSee('Isi ulang dengan 1 token');
-        $this->post(route('tryouts.start', $exam->slug))->assertInvalid(['exam' => 'Kuota tryout paket sudah habis.']);
+        $this->post(route('tryouts.start', $exam->slug))->assertInvalid(['exam' => 'Kuota percobaan untuk tryout ini sudah habis.']);
         $this->post(route('tryout-tokens.redeem', [$new, $exam]))
             ->assertRedirect(route('tryouts.index'))->assertSessionHasNoErrors();
 
@@ -76,7 +76,7 @@ class TryoutTokenTest extends TestCase
         $this->post(route('tryout-tokens.redeem', [$new, $exam]))->assertSessionHasNoErrors();
         $third = $this->completeTryout($exam);
         $fourth = $this->completeTryout($exam);
-        $this->post(route('tryouts.start', $exam->slug))->assertInvalid(['exam' => 'Kuota tryout paket sudah habis.']);
+        $this->post(route('tryouts.start', $exam->slug))->assertInvalid(['exam' => 'Kuota percobaan untuk tryout ini sudah habis.']);
 
         $this->assertDatabaseHas('exam_attempts', ['id' => $first->id, 'status' => ExamAttempt::COMPLETED, 'user_package_id' => $old->id]);
         $this->assertDatabaseHas('exam_attempts', ['id' => $second->id, 'status' => ExamAttempt::COMPLETED, 'user_package_id' => $old->id]);
@@ -156,6 +156,11 @@ class TryoutTokenTest extends TestCase
         $old = $this->grant($user);
         $old->exams()->attach($exam);
         $old->update(['tryout_tokens' => 0, 'tryouts_used' => 2]);
+        ExamAttempt::factory()->tryout()->for($user)->count(2)->create([
+            'user_package_id' => $old->id,
+            'bank_slug' => $exam->slug,
+            'status' => ExamAttempt::COMPLETED,
+        ]);
         $firstNew = UserPackage::factory()->for($user)->for($old->package)->create(['tryout_tokens' => 1]);
         $secondNew = UserPackage::factory()->for($user)->for($old->package)->create(['tryout_tokens' => 1]);
 
@@ -197,7 +202,7 @@ class TryoutTokenTest extends TestCase
         $this->post(route('tryouts.start', $chosen->slug))->assertRedirect();
         $secondAttempt = ExamAttempt::query()->latest('id')->firstOrFail();
         $this->post(route('exam-attempts.submit', $secondAttempt))->assertOk();
-        $this->post(route('tryouts.start', $chosen->slug))->assertInvalid(['exam' => 'Kuota tryout paket sudah habis.']);
+        $this->post(route('tryouts.start', $chosen->slug))->assertInvalid(['exam' => 'Kuota percobaan untuk tryout ini sudah habis.']);
 
         $this->assertDatabaseCount('exam_attempts', 2);
         $this->assertDatabaseCount('exam_user_package', 1);
@@ -288,7 +293,7 @@ class TryoutTokenTest extends TestCase
         $this->actingAs($user)->post(route('tryout-tokens.redeem', [$anotherGrant, $exam]))
             ->assertInvalid(['exam' => 'Tryout ini masih memiliki kuota percobaan. Gunakan percobaan yang tersedia terlebih dahulu.']);
         $grant->exams()->detach();
-        $anotherGrant->update(['tryouts_used' => 2]);
+        $anotherGrant->update(['tryout_quota' => 0]);
         $this->post(route('tryout-tokens.redeem', [$anotherGrant, $exam]))
             ->assertInvalid(['exam' => 'Token atau kuota percobaan paket sudah habis.']);
 

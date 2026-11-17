@@ -49,9 +49,9 @@
                         <span class="mt-1! block text-xs leading-snug text-[var(--text-soft)]">Sejak akses aktif</span>
                     </div>
                     <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-                        <span class="mb-2! flex items-center gap-2 text-sm font-semibold text-[var(--text-soft)]"><svg data-icon="timer" class="size-4"></svg> Jatah tryout</span>
-                        <strong class="block font-[var(--font-display)] text-lg leading-snug font-extrabold text-[var(--ink)]">{{ $package->tryout_quota === null ? 'Tanpa batas' : $package->tryout_quota.' sesi' }}</strong>
-                        <span class="mt-1! block text-xs leading-snug text-[var(--text-soft)]">Untuk sesi premium baru</span>
+                        <span class="mb-2! flex items-center gap-2 text-sm font-semibold text-[var(--text-soft)]"><svg data-icon="timer" class="size-4"></svg> Kuota per tryout</span>
+                        <strong class="block font-[var(--font-display)] text-lg leading-snug font-extrabold text-[var(--ink)]">{{ $package->tryout_quota === null ? 'Tanpa batas' : $package->tryout_quota.' percobaan' }}</strong>
+                        <span class="mt-1! block text-xs leading-snug text-[var(--text-soft)]">Untuk tiap tryout premium</span>
                     </div>
                     <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
                         <span class="mb-2! flex items-center gap-2 text-sm font-semibold text-[var(--text-soft)]"><svg data-icon="layers" class="size-4"></svg> Isi paket</span>
@@ -107,7 +107,7 @@
                     @if ($package->tryout_tokens > 0)
                         <div class="checkout-benefits__tokens">
                             <span class="checkout-benefits__token-icon" aria-hidden="true"><svg data-icon="key"></svg></span>
-                            <div><strong>{{ $package->tryout_tokens }} token pilihan tryout</strong><p>Setelah paket aktif, pilih tryout premium yang ingin dibuka di halaman Tryout CAT. 1 token membuka 1 paket soal; pilihan yang sudah dikonfirmasi tidak bisa ditukar. Kamu mendapat {{ $package->tryout_quota ?? 'tanpa batas' }} percobaan total sesuai kuota paket.</p></div>
+                            <div><strong>{{ $package->tryout_tokens }} token pilihan tryout</strong><p>Setelah paket aktif, pilih tryout premium yang ingin dibuka di halaman Tryout CAT. 1 token membuka 1 paket soal; pilihan yang sudah dikonfirmasi tidak bisa ditukar. Setiap tryout yang dibuka punya jatah percobaannya sendiri.</p></div>
                         </div>
                     @endif
                     @if (! $package->tier && $package->materials->isEmpty() && $package->exams->isEmpty() && $package->tryout_tokens === 0)

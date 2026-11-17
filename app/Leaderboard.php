@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\DB;
 
 class Leaderboard
 {
+    private const string SCORE_ORDER = 'score DESC, COALESCE(tkp_score, -1) DESC, COALESCE(tiu_score, -1) DESC, COALESCE(twk_score, -1) DESC';
+
     public function __construct(private readonly LeaderboardSimulation $simulation) {}
 
     public function referenceTryout(): ?Exam
@@ -44,11 +46,19 @@ class Leaderboard
                 ->whereIn('bank_slug', Exam::query()->visibleToMembers()->where('kind', 'tryout')->select('slug'));
         }
 
-        $attempts->select(['user_id', 'score', 'max_score'])
-            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY score DESC, submitted_at ASC, id ASC) AS attempt_order');
+        $attempts->select(['id', 'user_id', 'submitted_at', 'score', 'max_score']);
+        $grammar = $attempts->getQuery()->getGrammar();
+        foreach (['TKP' => 'tkp_score', 'TIU' => 'tiu_score', 'TWK' => 'twk_score'] as $section => $column) {
+            $selector = $grammar->wrap("section_scores->{$section}->score");
+            $attempts->selectRaw("CAST(NULLIF({$selector}, 'null') AS DECIMAL(10, 0)) AS {$column}");
+        }
 
-        $bestScores = DB::query()->fromSub($attempts, 'results')->where('attempt_order', 1)
-            ->select(['user_id', 'score', 'max_score']);
+        $orderedAttempts = DB::query()->fromSub($attempts, 'eligible_attempts')
+            ->select('*')
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY '.self::SCORE_ORDER.', submitted_at ASC, id ASC) AS attempt_order');
+
+        $bestScores = DB::query()->fromSub($orderedAttempts, 'results')->where('attempt_order', 1)
+            ->select(['user_id', 'score', 'max_score', 'tkp_score', 'tiu_score', 'twk_score']);
 
         $realParticipants = User::query()->active()->role(UserRole::User)->whereNotNull('email_verified_at')
             ->joinSub($completedParticipants, 'completed_tryouts', 'users.id', '=', 'completed_tryouts.user_id')
@@ -56,28 +66,19 @@ class Leaderboard
             ->when($province !== null, fn (EloquentBuilder $query): EloquentBuilder => $query->where('users.province', $province->value))
             ->select(['users.id', 'users.name', 'users.province'])
             ->selectRaw('COALESCE(best_scores.score, 0) AS score, COALESCE(best_scores.max_score, ?) AS max_score', [$maximumScore ?? 0])
+            ->addSelect(['best_scores.tkp_score', 'best_scores.tiu_score', 'best_scores.twk_score'])
             ->selectRaw('? AS participant_type', ['real']);
 
         $participants = $realParticipants->toBase();
 
         if ($this->simulation->enabled()) {
-            $simulatedParticipants = $this->simulation->bots($province)
-                ->select(['id', 'name', 'province']);
-
-            if ($maximumScore !== null) {
-                $simulatedParticipants->selectRaw('ROUND(score * ? / 550) AS score, ? AS max_score, ? AS participant_type', [$maximumScore, $maximumScore, 'simulation']);
-            } else {
-                $simulatedParticipants->addSelect('score')->selectRaw('NULL AS max_score, ? AS participant_type', ['simulation']);
-            }
-
-            $participants->unionAll($simulatedParticipants->toBase());
+            $participants->unionAll($this->simulation->scoresForLeaderboard($province, $maximumScore));
         }
 
         $rankings = DB::query()->fromSub($participants, 'participants')
             ->select('participants.*')
-            ->selectRaw('DENSE_RANK() OVER (ORDER BY participants.score DESC) AS position');
+            ->selectRaw('ROW_NUMBER() OVER (ORDER BY '.self::SCORE_ORDER.', LOWER(name) ASC, participant_type ASC, id ASC) AS position');
 
-        return DB::query()->fromSub($rankings, 'leaderboard')
-            ->orderBy('position')->orderBy('participant_type')->orderBy('id');
+        return DB::query()->fromSub($rankings, 'leaderboard')->orderBy('position');
     }
 }

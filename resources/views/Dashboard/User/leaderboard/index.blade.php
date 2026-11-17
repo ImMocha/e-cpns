@@ -110,6 +110,13 @@
             <article class="card">
                 <div class="stat__label">Nilai terbaikmu</div>
                 <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? number_format((float) $ownRank->score, 0, ',', '.') : ($maximumScore !== null ? '0' : '—') }}{{ $maximumScore !== null ? ' / '.$maximumScore : '' }}</div>
+                @if ($ownRank)
+                    <p class="text-sm" style="margin-top:.5rem">
+                        <span class="whitespace-nowrap">TKP {{ $ownRank->tkp_score === null ? '—' : (int) $ownRank->tkp_score }}</span> ·
+                        <span class="whitespace-nowrap">TIU {{ $ownRank->tiu_score === null ? '—' : (int) $ownRank->tiu_score }}</span> ·
+                        <span class="whitespace-nowrap">TWK {{ $ownRank->twk_score === null ? '—' : (int) $ownRank->twk_score }}</span>
+                    </p>
+                @endif
                 <p class="text-sm text-soft" style="margin-top:.5rem">{{ $maximumScore !== null ? 'Mengikuti '.$referenceTryout->title.'.' : ($ownRank ? 'Dari '.$ownRank->max_score.' poin maksimal.' : 'Nilai tryoutmu akan tampil di sini.') }}</p>
             </article>
             <article class="card">
@@ -141,9 +148,10 @@
                         @else
                             <li><strong>Skor terbaik.</strong> Sistem mengambil nilai tertinggimu dari tryout yang selesai dan menampilkannya sesuai skor maksimal sesi.</li>
                         @endif
-                        <li><strong>Urutan peringkat.</strong> Skor sama berbagi peringkat, misalnya 1, 1, 2, 3. Nilai latihan tidak dihitung.</li>
+                        <li><strong>Urutan peringkat.</strong> Jika skor total sama, sistem membandingkan skor TKP, lalu TIU, kemudian TWK. Jika semua skor sama, nama diurutkan dari A sampai Z. Setiap peserta mendapat nomor peringkat tersendiri. Nilai latihan tidak dihitung.</li>
+                        <li><strong>Rincian subtes.</strong> Tanda ‘—’ berarti skor subtes tidak tersedia. Saat total sama, skor yang tercatat diutamakan pada subtes yang sedang dibandingkan.</li>
                         @if ($simulatedCount > 0)
-                            <li><strong>Simulasi.</strong> Peserta virtual memakai nilai contoh pada skala {{ $maximumScore ?? 550 }} poin dan ikut dihitung selama simulasi aktif.</li>
+                            <li><strong>Simulasi.</strong> Skor subtes peserta virtual dihitung dari total nilai simulasi pada skala {{ $maximumScore ?? 550 }} poin.</li>
                         @endif
                         <li><strong>Cakupan daftar.</strong> Daftar menampilkan maksimal {{ number_format($displayLimit, 0, ',', '.') }} peserta. Peringkatmu tetap dihitung dari seluruh peserta dalam cakupan yang dipilih.</li>
                     </ul>
@@ -151,17 +159,30 @@
             </div>
             <div class="table-wrap" style="border:none;box-shadow:none">
                 <table class="table">
-                    <thead><tr><th class="num">Peringkat</th><th>Peserta</th><th>Provinsi</th><th class="num">Skor (poin)</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th scope="col" class="num">Peringkat</th>
+                            <th scope="col">Peserta</th>
+                            <th scope="col">Provinsi</th>
+                            <th scope="col" class="num">TKP</th>
+                            <th scope="col" class="num">TIU</th>
+                            <th scope="col" class="num">TWK</th>
+                            <th scope="col" class="num">Skor Total</th>
+                        </tr>
+                    </thead>
                     <tbody>
                     @forelse ($participants as $entry)
                         <tr @if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) class="bg-[var(--primary-050)]" @endif>
                             <td class="num"><span class="lb-rank leaderboard-rank{{ (int) $entry->position <= 3 ? ' lb-rank--'.$entry->position : '' }}" aria-label="Peringkat {{ $entry->position }}">{{ $entry->position }}</span></td>
                             <td><strong>{{ $entry->name }}</strong>@if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) <span class="badge badge--mint badge--flat">Kamu</span>@endif</td>
                             <td>{{ $entry->province ?? 'Belum diisi' }}</td>
+                            @foreach ([$entry->tkp_score, $entry->tiu_score, $entry->twk_score] as $sectionScore)
+                                <td class="num">{{ $sectionScore === null ? '—' : rtrim(rtrim(number_format((float) $sectionScore, 2, ',', '.'), '0'), ',') }}</td>
+                            @endforeach
                             <td class="num"><strong>{{ rtrim(rtrim(number_format((float) $entry->score, 2, ',', '.'), '0'), ',') }}{{ $entry->max_score !== null ? ' / '.$entry->max_score : ' poin' }}</strong></td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="text-soft">Belum ada peserta yang menyelesaikan tryout{{ $scope === 'local' ? ' di provinsi ini' : '' }}. Jadilah yang pertama!</td></tr>
+                        <tr><td colspan="7" class="text-soft">Belum ada peserta yang menyelesaikan tryout{{ $scope === 'local' ? ' di provinsi ini' : '' }}. Jadilah yang pertama!</td></tr>
                     @endforelse
                     </tbody>
                 </table>

@@ -118,7 +118,7 @@ class PackageAccessTest extends TestCase
         $this->assertDatabaseCount('exam_attempts', 0);
     }
 
-    public function test_new_tryout_consumes_once_resume_does_not_and_quota_is_total_across_tryouts(): void
+    public function test_new_tryout_consumes_its_own_quota_and_resume_does_not(): void
     {
         $this->freezeTime();
         $user = User::factory()->create();
@@ -135,10 +135,10 @@ class PackageAccessTest extends TestCase
         $this->get($attempt->attemptUrl())->assertOk();
         $this->assertDatabaseCount('exam_attempts', 1);
         $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryouts_used' => 1]);
-        $this->post(route('tryouts.start', $second->slug))->assertSessionHasErrors('exam');
         $this->post(route('exam-attempts.submit', $attempt))->assertOk();
         $this->post(route('tryouts.start', $first->slug))->assertSessionHasErrors('exam');
-        $this->assertDatabaseCount('exam_attempts', 1);
+        $this->post(route('tryouts.start', $second->slug))->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertDatabaseCount('exam_attempts', 2);
         $this->get($attempt->resultUrl())->assertOk()->assertSee('Lihat sesi &amp; kuota', false);
         $this->get(route('tryouts.index'))->assertSee('Kuota tryout habis');
     }
@@ -188,11 +188,17 @@ class PackageAccessTest extends TestCase
         $exam = $this->exam();
         $exhausted = $this->grant($user, exam: $exam, overrides: ['tryout_quota' => 1]);
         $exhausted->update(['tryouts_used' => 1]);
+        ExamAttempt::factory()->tryout()->for($user)->create([
+            'user_package_id' => $exhausted->id,
+            'bank_slug' => $exam->slug,
+            'status' => ExamAttempt::COMPLETED,
+            'deleted_at' => now(),
+        ]);
         $available = $this->grant($user, exam: $exam, overrides: ['tryout_quota' => 1]);
 
         $this->actingAs($user)->post(route('tryouts.start', $exam->slug))->assertRedirect();
 
-        $this->assertDatabaseHas('exam_attempts', ['user_package_id' => $available->id]);
+        $this->assertSame($available->id, ExamAttempt::sole()->user_package_id);
         $this->assertDatabaseHas('user_packages', ['id' => $available->id, 'tryouts_used' => 1]);
         $this->assertDatabaseHas('user_packages', ['id' => $exhausted->id, 'tryouts_used' => 1]);
     }

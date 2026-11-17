@@ -37,12 +37,12 @@ class LeaderboardLimitsTest extends TestCase
         foreach (['national' => 5000, 'local' => 100] as $scope => $limit) {
             $this->actingAs($member)->get(route('leaderboard.index', ['scope' => $scope]))
                 ->assertOk()->assertViewHas('totalParticipants', 6301)
-                ->assertViewHas('ownRank', fn ($rank): bool => (int) $rank->position === 3)
+                ->assertViewHas('ownRank', fn ($rank): bool => (int) $rank->position === 6301)
                 ->assertViewHas('participants', fn ($rows): bool => $rows->total() === $limit)
-                ->assertSee('#3');
+                ->assertSee('#6301');
             $this->get(route('leaderboard.index', ['scope' => $scope, 'page' => intdiv($limit, 25) + 1]))
                 ->assertOk()->assertViewHas('participants', fn ($rows): bool => $rows->count() === 0)
-                ->assertSee('#3');
+                ->assertSee('#6301');
         }
     }
 

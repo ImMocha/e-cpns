@@ -16,13 +16,13 @@
         <a class="btn exam-actions__unlock" href="{{ route('exam-claims.create', $exam) }}"><svg data-icon="lock"></svg> Unlock gratis</a>
     @endif
 @elseif ($item['tokenPackage'] ?? null)
-    <form class="exam-actions__token-form" method="POST" action="{{ route('tryout-tokens.redeem', [$item['tokenPackage'], $exam]) }}" data-content-confirm data-confirm-title="{{ $item['isTokenRefill'] ? 'Isi ulang percobaan dengan 1 token?' : 'Buka tryout dengan 1 token?' }}" data-confirm-body="Kamu memilih {{ $exam->title }} menggunakan 1 token dari {{ $item['tokenPackage']->name }} (pembelian #{{ $item['tokenPackage']->id }}). {{ $item['tokenPackage']->remainingTryouts() ?? 'Tanpa batas' }} percobaan dari pembelian ini tersedia untuk tryout pilihanmu. Pilihan tidak bisa ditukar; riwayat sebelumnya tetap tersimpan." data-confirm-ok="Ya, gunakan 1 token">
+    <form class="exam-actions__token-form" method="POST" action="{{ route('tryout-tokens.redeem', [$item['tokenPackage'], $exam]) }}" data-content-confirm data-confirm-title="{{ $item['isTokenRefill'] ? 'Isi ulang percobaan dengan 1 token?' : 'Buka tryout dengan 1 token?' }}" data-confirm-body="Kamu memilih {{ $exam->title }} menggunakan 1 token dari {{ $item['tokenPackage']->name }} (pembelian #{{ $item['tokenPackage']->id }}). Jatah untuk tryout ini: {{ $item['tokenPackage']->tryout_quota === null ? 'tanpa batas' : $item['tokenPackage']->tryout_quota.' percobaan' }}. Pilihan tidak bisa ditukar; riwayat sebelumnya tetap tersimpan." data-confirm-ok="Ya, gunakan 1 token">
         @csrf
         <button class="btn btn--primary" type="submit"><svg data-icon="{{ $item['isTokenRefill'] ? 'timer' : 'lock' }}"></svg> {{ $item['isTokenRefill'] ? 'Isi ulang dengan 1 token' : 'Buka dengan 1 token' }}</button>
     </form>
     <div class="exam-actions__token-info">
         <span>Token dari <strong>{{ $item['tokenPackage']->name }}</strong> · pembelian #{{ $item['tokenPackage']->id }}</span>
-        <span class="exam-actions__remaining">{{ $item['tokenPackage']->remainingTryouts() ?? 'Tanpa batas' }} percobaan tersisa</span>
+        <span class="exam-actions__remaining">{{ $item['tokenPackage']->tryout_quota === null ? 'Percobaan tanpa batas' : $item['tokenPackage']->tryout_quota.' percobaan untuk tryout ini' }}</span>
     </div>
 @elseif (! $item['hasAccess'])
     <span class="badge badge--amber badge--flat">Memerlukan paket aktif</span><a class="btn btn--ghost" href="{{ route('packages.index') }}">Lihat paket</a>

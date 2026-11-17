@@ -43,7 +43,7 @@ class LeaderboardController extends Controller
             $ownRank = (clone $rankings)->where('id', $user->id)->where('participant_type', 'real')->first();
             $totalParticipants = (clone $rankings)->count();
             $participants = DB::query()->fromSub($rankings->limit($displayLimit), 'displayed_leaderboard')
-                ->orderBy('position')->orderBy('participant_type')->orderBy('id')->paginate(25)->withQueryString();
+                ->orderBy('position')->paginate(25)->withQueryString();
 
             if ($simulation->enabled()) {
                 $simulatedCount = $simulation->bots($scope === 'local' ? $user->province : null)->count();

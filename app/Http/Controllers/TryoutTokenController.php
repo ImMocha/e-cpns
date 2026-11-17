@@ -15,6 +15,6 @@ class TryoutTokenController extends Controller
     {
         $userPackage->redeemTryoutToken($request->user(), $exam);
 
-        return redirect()->route('tryouts.index')->with('success', 'Tryout siap dikerjakan dengan kuota dari paket pilihanmu. Token terpakai 1; kuota percobaan belum berkurang.');
+        return redirect()->route('tryouts.index')->with('success', 'Tryout terbuka dengan jatah percobaannya sendiri. Satu token telah digunakan.');
     }
 }

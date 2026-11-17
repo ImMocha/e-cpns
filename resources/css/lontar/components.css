@@ -1014,6 +1014,13 @@
   letter-spacing: -0.03em;
 }
 .ring__unit { font-size: var(--fs-xs); font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.1em; }
+.ring--accuracy .ring__unit {
+  display: block;
+  margin-top: .35rem;
+  font-size: .625rem;
+  line-height: 1.3;
+  letter-spacing: .04em;
+}
 .ring--sm { width: 108px; height: 108px; flex-basis: 108px; }
 .ring--sm::before { inset: 11px; }
 .ring--sm .ring__value { font-size: 1.6rem; }
@@ -1947,7 +1954,17 @@
 .lb-rank--1 { background: var(--pop-amber); color: var(--pop-ink); box-shadow: 3px 3px 0 var(--ink); }
 .lb-rank--2 { background: #DCE7EF; color: var(--pop-ink); box-shadow: 3px 3px 0 var(--ink); }
 .lb-rank--3 { background: var(--pop-coral); color: #fff; box-shadow: 3px 3px 0 var(--ink); }
-.leaderboard-rank { width: 36px; height: 36px; display: inline-grid; font-size: var(--fs-sm); vertical-align: middle; }
+.leaderboard-rank {
+  width: max-content;
+  min-width: 36px;
+  height: 36px;
+  padding-inline: 6px;
+  display: inline-grid;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  vertical-align: middle;
+}
 .lb-name { font-family: var(--font-display); font-weight: 700; color: var(--ink); line-height: 1.3; }
 .lb-meta { font-size: var(--fs-xs); color: var(--text-soft); font-weight: 600; }
 .lb-score { font-family: var(--font-display); font-weight: 800; font-size: var(--fs-lg); color: var(--primary-700); letter-spacing: -0.02em; }

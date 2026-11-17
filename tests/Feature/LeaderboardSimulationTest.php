@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Enums\LeaderboardAccess;
 use App\Enums\Province;
+use App\Models\Exam;
 use App\Models\ExamAttempt;
 use App\Models\LeaderboardBot;
 use App\Models\User;
@@ -13,6 +14,7 @@ use App\Models\UserPackage;
 use Database\Seeders\LeaderboardBotSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
 use stdClass;
 use Tests\TestCase;
@@ -42,7 +44,7 @@ class LeaderboardSimulationTest extends TestCase
         $localCount = 100;
         $this->assertDatabaseCount('users', 2);
         $this->actingAs($member)->get(route('leaderboard.index'))
-            ->assertSee('Peserta virtual memakai nilai contoh')->assertDontSee('· Virtual')
+            ->assertSee('Skor subtes peserta virtual dihitung dari total nilai simulasi')->assertDontSee('· Virtual')
             ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->total() === $localCount)
             ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->score === 80);
 
@@ -71,7 +73,7 @@ class LeaderboardSimulationTest extends TestCase
 
         $this->actingAs($member)->get(route('leaderboard.index'))
             ->assertSee('Contoh Lokal')->assertDontSee('Contoh Nasional')
-            ->assertSee('Peserta virtual memakai nilai contoh')->assertDontSee('· Virtual')
+            ->assertSee('Skor subtes peserta virtual dihitung dari total nilai simulasi')->assertDontSee('· Virtual')
             ->assertViewHas('ownRank', fn (stdClass $rank): bool => $rank->participant_type === 'real' && (int) $rank->position > 1);
         $this->get(route('leaderboard.index', ['scope' => 'national']))
             ->assertSee('Contoh Nasional')
@@ -182,10 +184,46 @@ class LeaderboardSimulationTest extends TestCase
         ])->assertRedirect();
 
         $this->actingAs($member)->get(route('leaderboard.index'))
-            ->assertSee('Skor (poin)')->assertSee('10 / 15')->assertSee('400 / 500')->assertSee('350 poin')
+            ->assertSee('Skor Total')->assertSee('10 / 15')->assertSee('400 / 500')->assertSee('350 poin')
             ->assertSee('Dari 15 poin maksimal.')->assertDontSee(' / 100')->assertDontSee('skala 0–100')
-            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 3)
-            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->pluck('position')->map(fn ($position): int => (int) $position)->all() === [1, 1, 2, 3]);
+            ->assertViewHas('ownRank', fn (stdClass $rank): bool => (int) $rank->position === 4)
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->pluck('position')->map(fn ($position): int => (int) $position)->all() === [1, 2, 3, 4]);
+    }
+
+    public function test_existing_bots_have_stable_subtest_scores_that_sum_to_the_scaled_total(): void
+    {
+        $province = Province::KalimantanSelatan;
+        $member = User::factory()->create(['province' => $province]);
+        UserPackage::factory()->for($member)->create(['leaderboard_access' => LeaderboardAccess::National]);
+        $reference = Exam::factory()->tryout()->create(['question_count' => 110]);
+        $profiles = LeaderboardBot::factory()->count(4)->sequence(
+            ['score' => 550],
+            ['score' => 511],
+            ['score' => 511],
+            ['score' => 0],
+        )->create(['province' => $province]);
+        DB::table('leaderboard_settings')->insert(['id' => 1, 'simulations_enabled' => true]);
+
+        $local = $this->actingAs($member)->get(route('leaderboard.index'))->assertOk()
+            ->assertSeeTextInOrder([$profiles[0]->name, '225', '175', '150', '550 / 550']);
+        $this->assertSame([1, 2, 3, 4], $local['participants']->getCollection()->pluck('position')->map(fn ($position): int => (int) $position)->all());
+        $national = $this->get(route('leaderboard.index', ['scope' => 'national']))->assertOk();
+        $sections = fn (stdClass $row): array => [(int) $row->tkp_score, (int) $row->tiu_score, (int) $row->twk_score];
+        $localScores = $local['participants']->getCollection()->map($sections)->all();
+        $this->assertSame($localScores, $national['participants']->getCollection()->map($sections)->all());
+        $this->assertNotSame($localScores[1], $localScores[2]);
+
+        $reference->update(['question_count' => 100]);
+        $scaled = $this->get(route('leaderboard.index', ['scope' => 'national']))->assertOk();
+        $rows = $scaled['participants']->getCollection();
+        $this->assertSame([500, 465, 465, 0], $rows->pluck('score')->map(fn ($score): int => (int) $score)->all());
+        foreach ($rows as $row) {
+            $this->assertNotNull($row->tkp_score);
+            $this->assertNotNull($row->tiu_score);
+            $this->assertNotNull($row->twk_score);
+            $this->assertSame((int) $row->score, array_sum($sections($row)));
+        }
+        $this->assertSame(['550.00', '511.00', '511.00', '0.00'], LeaderboardBot::query()->orderBy('id')->pluck('score')->all());
     }
 
     public function test_seeded_national_scores_are_varied_and_stable_across_pages_and_reseeding(): void
@@ -203,13 +241,10 @@ class LeaderboardSimulationTest extends TestCase
         $this->assertGreaterThanOrEqual(231, (float) $profiles->min('score'));
         $this->assertLessThanOrEqual(534, (float) $profiles->max('score'));
         $this->assertTrue($profiles->every(fn (LeaderboardBot $profile): bool => (float) $profile->score === (float) (int) $profile->score));
-        $rankedProfiles = $profiles->sortByDesc('score')->values();
-        $distinctScores = $rankedProfiles->pluck('score')->unique()->values();
-        $expectedRanks = $rankedProfiles->map(fn (LeaderboardBot $profile): int => $distinctScores->search($profile->score, strict: true) + 1);
         $this->get(route('leaderboard.index', ['scope' => 'national']))
-            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === $expectedRanks->take(25)->all());
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === range(1, 25));
         $this->get(route('leaderboard.index', ['scope' => 'national', 'page' => 2]))
-            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === $expectedRanks->slice(25, 25)->values()->all());
+            ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->getCollection()->map(fn (stdClass $row): int => (int) $row->position)->all() === range(26, 50));
         $this->get(route('leaderboard.index', ['scope' => 'local']))
             ->assertViewHas('participants', fn (LengthAwarePaginator $rows): bool => $rows->count() === 25);
         $this->get(route('admin.leaderboard-simulation.index'))->assertSee('231–534 poin')->assertDontSee('variasi dua angka desimal');

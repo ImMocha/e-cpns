@@ -57,7 +57,7 @@ enum PackageTier: string
     {
         $benefits = [
             $this === self::Premium ? 'Akses paket soal Tryout SKD unlimited' : $tokens.' token pilihan paket soal Tryout SKD',
-            $quota === null ? 'Akses percobaan unlimited' : 'Dapat akses '.$quota.' x percobaan total',
+            $quota === null ? 'Akses percobaan unlimited' : $quota.' percobaan per tryout',
             'Kunci jawaban dan pembahasan',
         ];
         if ($this === self::Premium) {

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -121,6 +122,18 @@ class ExamAttempt extends Model
         return 'GN-'.$this->submitted_at->format('Y').'-'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
     }
 
+    /** @return Collection<string, Collection<int, int>> */
+    public static function tryoutUsage(User $user, ?string $slug = null): Collection
+    {
+        return self::withTrashed()->whereBelongsTo($user)->where('kind', 'tryout')
+            ->whereNotNull('user_package_id')
+            ->when($slug !== null, fn (Builder $query) => $query->where('bank_slug', $slug))
+            ->select(['bank_slug', 'user_package_id'])->selectRaw('COUNT(*) AS attempts_used')
+            ->groupBy('bank_slug', 'user_package_id')->toBase()->get()
+            ->groupBy('bank_slug')
+            ->map(fn (Collection $attempts): Collection => $attempts->pluck('attempts_used', 'user_package_id')->map(fn ($count): int => (int) $count));
+    }
+
     public static function resumeOrStart(User $user, Exam|ExamBank $bank): self
     {
         return DB::transaction(function () use ($user, $bank): self {
@@ -168,9 +181,10 @@ class ExamAttempt extends Model
                             ->whereHas('exams', fn (Builder $query): Builder => $query->whereKey($bank->id))))
                     ->orderBy('id')->lockForUpdate()->get();
                 abort_if($entitlements->isEmpty(), 403, 'Sesi ini membutuhkan paket aktif yang memuatnya.');
-                $entitlement = $entitlements->first(fn (UserPackage $item): bool => $bank->kind !== 'tryout' || $item->hasTryoutQuota());
+                $usage = $bank->kind === 'tryout' ? self::tryoutUsage($user, $bank->slug)->get($bank->slug, collect()) : null;
+                $entitlement = $entitlements->first(fn (UserPackage $item): bool => $usage === null || $item->remainingTryouts($usage->get($item->id, 0)) !== 0);
                 if ($entitlement === null) {
-                    throw ValidationException::withMessages(['exam' => 'Kuota tryout paket sudah habis. Beli paket lagi dan gunakan token untuk mengisi ulang tryout, atau pilih paket lain.']);
+                    throw ValidationException::withMessages(['exam' => 'Kuota percobaan untuk tryout ini sudah habis. Buka katalog Tryout CAT untuk melihat pilihan yang tersedia.']);
                 }
             }
             $definition = $bank->definition();

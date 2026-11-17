@@ -85,7 +85,7 @@
                 </div>
                 <div class="mt-3! flex flex-col gap-1 text-sm text-[var(--text)]">
                     <p>@if ($transaction->userPackage->expires_at)Akses sampai <x-local-time :value="$transaction->userPackage->expires_at" format="d/m/Y H:i" />@else Tanpa batas waktu @endif</p>
-                    <p>Sisa kuota tryout: <strong>{{ $transaction->userPackage->remainingTryouts() ?? 'Tanpa batas' }}</strong></p>
+                    <p>Lihat sisa percobaan masing-masing sesi di <a href="{{ route('tryouts.index') }}">Tryout CAT</a>.</p>
                 </div>
                 <a class="btn btn--primary btn--sm mt-4!" href="{{ route('packages.index') }}">Buka paket saya <svg data-icon="arrow-right"></svg></a>
             </div>
@@ -105,8 +105,8 @@
                 <dd class="mt-2! font-[var(--font-display)] text-lg font-extrabold text-[var(--ink)]">{{ $transaction->package_snapshot['duration_days'] === null ? 'Tanpa batas waktu' : ($transaction->package_snapshot['duration_days'] === 365 ? '1 tahun akses' : $transaction->package_snapshot['duration_days'].' hari akses') }}</dd>
             </div>
             <div class="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-4">
-                <dt class="flex items-center gap-2 text-sm text-[var(--text-soft)]"><svg data-icon="timer" class="size-4" aria-hidden="true"></svg> Kuota tryout</dt>
-                <dd class="mt-2! font-[var(--font-display)] text-lg font-extrabold text-[var(--ink)]">{{ $transaction->package_snapshot['tryout_quota'] === null ? 'Tanpa batas' : $transaction->package_snapshot['tryout_quota'].' sesi tryout' }}</dd>
+                <dt class="flex items-center gap-2 text-sm text-[var(--text-soft)]"><svg data-icon="timer" class="size-4" aria-hidden="true"></svg> Kuota per tryout</dt>
+                <dd class="mt-2! font-[var(--font-display)] text-lg font-extrabold text-[var(--ink)]">{{ $transaction->package_snapshot['tryout_quota'] === null ? 'Tanpa batas' : $transaction->package_snapshot['tryout_quota'].' percobaan' }}</dd>
             </div>
         </dl>
 

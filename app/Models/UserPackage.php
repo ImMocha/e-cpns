@@ -65,14 +65,14 @@ class UserPackage extends Model
             && ($this->expires_at === null || $this->expires_at->isAfter(now()));
     }
 
-    public function remainingTryouts(): ?int
+    public function remainingTryouts(int $attemptsUsed): ?int
     {
-        return $this->tryout_quota === null ? null : max(0, $this->tryout_quota - $this->tryouts_used);
+        return $this->tryout_quota === null ? null : max(0, $this->tryout_quota - $attemptsUsed);
     }
 
-    public function hasTryoutQuota(): bool
+    public function offersTryoutAttempts(): bool
     {
-        return $this->tryout_quota === null || $this->tryouts_used < $this->tryout_quota;
+        return $this->tryout_quota === null || $this->tryout_quota > 0;
     }
 
     public function redeemTryoutToken(User $user, Exam $exam): void
@@ -87,13 +87,14 @@ class UserPackage extends Model
             if ($entitlement->exams()->whereKey($exam->id)->exists()) {
                 return;
             }
-            if ($entitlement->tryout_tokens < 1 || ! $entitlement->hasTryoutQuota()) {
+            if ($entitlement->tryout_tokens < 1 || ! $entitlement->offersTryoutAttempts()) {
                 throw ValidationException::withMessages(['exam' => 'Token atau kuota percobaan paket sudah habis.']);
             }
+            $usage = ExamAttempt::tryoutUsage($user, $exam->slug)->get($exam->slug, collect());
             if ($user->userPackages()->active()
-                ->whereHas('exams', fn (Builder $query) => $query->whereKey($exam->id))
-                ->where(fn (Builder $quota) => $quota->whereNull('tryout_quota')->orWhereColumn('tryouts_used', '<', 'tryout_quota'))
-                ->exists()) {
+                ->where(fn (Builder $access) => $access->where('tier', PackageTier::Premium)
+                    ->orWhereHas('exams', fn (Builder $query) => $query->whereKey($exam->id)))
+                ->get()->contains(fn (self $package): bool => $package->remainingTryouts($usage->get($package->id, 0)) !== 0)) {
                 throw ValidationException::withMessages(['exam' => 'Tryout ini masih memiliki kuota percobaan. Gunakan percobaan yang tersedia terlebih dahulu.']);
             }
             if (ExamAttempt::query()->whereBelongsTo($user)->where('kind', 'tryout')->where('bank_slug', $exam->slug)

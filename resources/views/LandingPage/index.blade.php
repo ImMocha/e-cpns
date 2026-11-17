@@ -391,7 +391,7 @@
         <ul class="price__list">
           @if ($package->tryout_tokens === 0 || $package->exams->where('kind', 'tryout')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'tryout')->count() }} paket soal tryout</li>@endif
           @if ($package->tryout_tokens > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_tokens }} token untuk {{ $package->tryout_tokens }} tryout pilihanmu</li>@endif
-          <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Percobaan tryout tanpa batas' : $package->tryout_quota.' percobaan tryout' }}</li>
+          <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Percobaan tryout tanpa batas' : $package->tryout_quota.' percobaan per tryout' }}</li>
           @if ($package->price > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> Kunci jawaban dan pembahasan</li>@endif
           @if ($package->materials->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->materials->count() }} materi &amp; video premium</li>@endif
           @if ($package->exams->where('kind', 'practice')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'practice')->count() }} latihan soal</li>@endif

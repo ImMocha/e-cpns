@@ -106,7 +106,7 @@ class PackageRequest extends FormRequest
     {
         return ['name' => 'nama paket', 'price' => 'harga sebenarnya', 'original_price' => 'harga diskon/coret', 'duration_days' => 'masa aktif',
             'leaderboard_access' => 'akses leaderboard',
-            'tryout_quota' => 'kuota tryout', 'tryout_tokens' => 'token pilihan tryout', 'material_ids' => 'materi paket', 'exam_ids' => 'sesi paket'];
+            'tryout_quota' => 'kuota percobaan per tryout', 'tryout_tokens' => 'token pilihan tryout', 'material_ids' => 'materi paket', 'exam_ids' => 'sesi paket'];
     }
 
     public function messages(): array

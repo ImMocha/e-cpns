@@ -36,7 +36,7 @@ class PackageTierTest extends TestCase
     {
         return [
             'regular' => [PackageTier::Regular, 1, 2, 'none'],
-            'bundling' => [PackageTier::Bundling, 3, 3, 'local'],
+            'bundling' => [PackageTier::Bundling, 4, 3, 'local'],
         ];
     }
 
@@ -74,7 +74,7 @@ class PackageTierTest extends TestCase
         $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryout_quota' => 8,
             'tryout_tokens' => 4, 'leaderboard_access' => 'local']);
         $this->get(route('packages.index'))->assertSee('4 token pilihan paket soal Tryout SKD')
-            ->assertSee('Dapat akses 8 x percobaan total')->assertSee('Perangkingan Daerah');
+            ->assertSee('8 percobaan per tryout')->assertSee('Perangkingan Daerah');
         $this->put(route('admin.packages.update', $package), array_replace($payload, ['tryout_quota' => null]))
             ->assertSessionHasNoErrors();
         $this->assertNull($package->fresh()->tryout_quota);
@@ -89,16 +89,19 @@ class PackageTierTest extends TestCase
     {
         $user = User::factory()->create();
         $exam = $this->exam();
+        $otherExam = $this->exam();
         $package = Package::factory()->create(['tier' => PackageTier::Premium, 'tryout_quota' => 1]);
         $grant = UserPackage::grant($user, $package, User::factory()->admin()->create(), 'Premium terbatas');
         $this->actingAs($user)->post(route('tryouts.start', $exam->slug))->assertSessionHasNoErrors();
         $attempt = ExamAttempt::sole();
         $this->post(route('exam-attempts.submit', $attempt))->assertOk();
 
-        $this->get(route('tryouts.index'))->assertViewHas('banks', fn ($banks): bool => ! $banks->firstWhere('exam.id', $exam->id)['canStart']);
+        $this->get(route('tryouts.index'))->assertViewHas('banks', fn ($banks): bool => ! $banks->firstWhere('exam.id', $exam->id)['canStart']
+            && $banks->firstWhere('exam.id', $otherExam->id)['remainingTryouts'] === 1);
         $this->post(route('tryouts.start', $exam->slug))->assertSessionHasErrors('exam');
         $this->assertSame(1, $grant->fresh()->tryouts_used);
-        $this->assertDatabaseCount('exam_attempts', 1);
+        $this->post(route('tryouts.start', $otherExam->slug))->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertDatabaseCount('exam_attempts', 2);
     }
 
     #[DataProvider('limitedPackages')]
@@ -222,27 +225,46 @@ class PackageTierTest extends TestCase
     }
 
     #[DataProvider('limitedPackages')]
-    public function test_token_selection_and_total_attempts_follow_the_limited_package(PackageTier $tier, int $count, int $attempts, string $leaderboard): void
+    public function test_each_tryout_unlocked_by_a_token_gets_its_own_attempt_limit(PackageTier $tier, int $count, int $attempts, string $leaderboard): void
     {
         $user = User::factory()->create();
         $exams = collect(range(1, $count))->map(fn (): Exam => $this->exam());
         $package = Package::factory()->create(['tier' => $tier, 'tryout_tokens' => $count, 'tryout_quota' => $attempts]);
         $grant = UserPackage::grant($user, $package, User::factory()->admin()->create(), 'Akses tryout');
-        $this->actingAs($user);
-        foreach ($exams as $exam) {
+        $first = $exams->shift();
+        $this->actingAs($user)->post(route('tryout-tokens.redeem', [$grant, $first]))->assertSessionHasNoErrors();
+        foreach ($exams->slice(0, -1) as $exam) {
             $this->post(route('tryout-tokens.redeem', [$grant, $exam]))->assertSessionHasNoErrors();
         }
-        $this->post(route('tryout-tokens.redeem', [$grant, $this->exam()]))->assertSessionHasErrors('exam');
 
         for ($index = 0; $index < $attempts; $index++) {
-            $exam = $exams[$index % $count];
-            $this->post(route('tryouts.start', $exam->slug))->assertSessionHasNoErrors()->assertRedirect();
+            $this->post(route('tryouts.start', $first->slug))->assertSessionHasNoErrors()->assertRedirect();
             $attempt = ExamAttempt::query()->whereBelongsTo($user)->latest('id')->firstOrFail();
             $this->post(route('exam-attempts.submit', $attempt))->assertOk();
         }
-        $this->post(route('tryouts.start', $exams->first()->slug))->assertSessionHasErrors('exam');
-        $this->assertDatabaseCount('exam_attempts', $attempts);
-        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tier' => $tier->value, 'tryouts_used' => $attempts, 'tryout_tokens' => 0]);
+        $this->post(route('tryouts.start', $first->slug))->assertSessionHasErrors('exam');
+        $this->get(route('tryouts.index'))->assertViewHas('banks', function ($banks) use ($first, $exams, $attempts, $grant): bool {
+            $byExam = $banks->keyBy('exam.id');
+
+            return $byExam[$first->id]['remainingTryouts'] === 0
+                && $byExam[$first->id]['tokenPackage'] === null
+                && $exams->slice(0, -1)->every(fn (Exam $exam): bool => $byExam[$exam->id]['remainingTryouts'] === $attempts)
+                && $exams->slice(-1)->every(fn (Exam $exam): bool => $byExam[$exam->id]['tokenPackage']?->id === $grant->id);
+        });
+        foreach ($exams->slice(-1) as $last) {
+            $this->post(route('tryout-tokens.redeem', [$grant, $last]))->assertSessionHasNoErrors();
+        }
+        $this->post(route('tryout-tokens.redeem', [$grant, $this->exam()]))->assertSessionHasErrors('exam');
+        foreach ($exams as $exam) {
+            for ($index = 0; $index < $attempts; $index++) {
+                $this->post(route('tryouts.start', $exam->slug))->assertSessionHasNoErrors()->assertRedirect();
+                $attempt = ExamAttempt::query()->whereBelongsTo($user)->latest('id')->firstOrFail();
+                $this->post(route('exam-attempts.submit', $attempt))->assertOk();
+            }
+            $this->post(route('tryouts.start', $exam->slug))->assertSessionHasErrors('exam');
+        }
+        $this->assertDatabaseCount('exam_attempts', $count * $attempts);
+        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryout_tokens' => 0]);
     }
 
     public function test_admin_can_activate_premium_without_selecting_content_and_set_its_quota(): void

@@ -17,20 +17,20 @@
             <dl class="owned-package__stats">
                 <div><dt><svg data-icon="clock" aria-hidden="true"></svg> Aktif sejak</dt><dd><x-local-time :value="$owned->starts_at" format="d M Y" /><small><x-local-time :value="$owned->starts_at" format="H:i" /></small></dd></div>
                 <div><dt><svg data-icon="calendar" aria-hidden="true"></svg> Berlaku sampai</dt><dd><x-local-time :value="$owned->expires_at" format="d M Y" fallback="Tanpa batas waktu" />@if ($owned->expires_at)<small><x-local-time :value="$owned->expires_at" format="H:i" /></small>@endif</dd></div>
-                <div><dt><svg data-icon="timer" aria-hidden="true"></svg> Kuota tryout tersisa</dt><dd>{{ $owned->remainingTryouts() ?? 'Tanpa batas' }}@if ($owned->tryout_quota !== null)<small>dari {{ $owned->tryout_quota }} sesi</small>@else<small>Tanpa batas sesi</small>@endif</dd></div>
+                <div><dt><svg data-icon="timer" aria-hidden="true"></svg> Kuota per tryout</dt><dd>{{ $owned->tryout_quota ?? 'Tanpa batas' }}@if ($owned->tryout_quota !== null)<small>percobaan</small>@endif</dd></div>
                 <div><dt><svg data-icon="layers" aria-hidden="true"></svg> Akses Belajar</dt><dd>{{ $owned->tier === \App\Enums\PackageTier::Premium ? 'Seluruh konten SKD' : ($owned->materials->count() + $owned->exams->count()).' konten' }}<small>{{ $owned->materials->count() }} materi · {{ $owned->exams->count() }} sesi soal</small></dd></div>
             </dl>
             <div class="owned-package__leaderboard"><span class="owned-package__trophy" aria-hidden="true"><svg data-icon="trophy"></svg></span><div><span>Akses leaderboard</span><strong>{{ $owned->leaderboard_access->label() }}</strong></div></div>
             <div class="owned-package__allowance">
                 @if ($owned->tryout_tokens > 0)
                     <strong>{{ $owned->tryout_tokens }} token pilihan tryout{{ $owned->isActive() ? ' tersisa' : '' }}</strong>
-                    <p>Gunakan 1 token untuk membuka 1 tryout premium pilihanmu. Kuota percobaan terpisah dari token dan mengikuti status akses paket.</p>
+                    <p>Gunakan 1 token untuk membuka 1 tryout premium pilihanmu. Setiap tryout yang dibuka mendapat jatah percobaan sendiri.</p>
                 @elseif ($owned->tryout_quota === null)
                     <strong>Kuota tryout tanpa batas</strong>
                     <p>Percobaan tryout dalam paket ini tidak dibatasi. Akses tetap mengikuti status dan masa aktif paket.</p>
                 @else
                     <strong>Tryout dalam paket</strong>
-                    <p>{{ $owned->remainingTryouts() }} percobaan tersisa dari {{ $owned->tryout_quota }} sesi. Pilih tryout yang tercantum dalam konten paket saat akses aktif.</p>
+                    <p>Lihat sisa percobaan masing-masing sesi di halaman Tryout CAT.</p>
                 @endif
                 @if ($owned->isActive() && $owned->tryout_tokens > 0)
                     <a class="btn btn--primary btn--sm" href="{{ route('tryouts.index') }}">Pilih tryout</a>
@@ -72,7 +72,7 @@
             @if ($package->exams->where('kind', 'quiz')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'quiz')->count() }} latihan topik</li>@endif
             @if ($package->tryout_tokens === 0 || $package->exams->where('kind', 'tryout')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'tryout')->count() }} paket soal tryout</li>@endif
             @if ($package->tryout_tokens > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_tokens }} token untuk {{ $package->tryout_tokens }} tryout pilihanmu</li>@endif
-            <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Kuota tryout tanpa batas' : 'Total kuota '.$package->tryout_quota.' sesi tryout' }}</li>
+            <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Kuota tryout tanpa batas' : $package->tryout_quota.' percobaan per tryout' }}</li>
             @if ($package->price > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> Kunci jawaban &amp; pembahasan</li>@endif
         </ul>
         @endif
@@ -90,5 +90,5 @@
     @endforelse
     </div>
 </section>
-<section class="card" style="margin-top:1.5rem"><div class="card__title">Cara kerja paket</div><p class="text-sm text-soft" style="margin-top:.75rem">Kamu boleh membeli paket yang sama maupun paket lain berulang kali. Setiap pembelian menyimpan ketentuan, token, kuota percobaan, dan masa aktifnya sendiri. Akses aktif setelah pembayaran terverifikasi. Jika paketmu berisi token, gunakan 1 token untuk membuka 1 tryout premium pilihanmu atau mengisi ulang tryout yang percobaannya sudah habis, menggunakan kuota dari pembelian baru. Pilihan yang dikonfirmasi tidak bisa ditukar. Kuota percobaan dipakai saat memulai tryout premium baru; lanjut sesi yang sama dan latihan tidak memotong kuota. Riwayat hasil tryout sebelumnya tetap tersimpan.</p></section>
+<section class="card" style="margin-top:1.5rem"><div class="card__title">Cara kerja paket</div><p class="text-sm text-soft" style="margin-top:.75rem">Kamu boleh membeli paket yang sama maupun paket lain berulang kali. Setiap pembelian menyimpan ketentuan, token, kuota percobaan, dan masa aktifnya sendiri. Akses aktif setelah pembayaran terverifikasi. Jika paketmu berisi token, gunakan 1 token untuk membuka 1 tryout premium pilihanmu atau mengisi ulang tryout yang percobaannya sudah habis, menggunakan kuota dari pembelian baru. Pilihan yang dikonfirmasi tidak bisa ditukar. Setiap tryout memiliki jatah percobaan sendiri. Jatah tryout itu berkurang saat kamu memulai percobaan baru. Melanjutkan sesi dan mengerjakan latihan tidak memakai jatah. Riwayat hasil tryout sebelumnya tetap tersimpan.</p></section>
 @endsection

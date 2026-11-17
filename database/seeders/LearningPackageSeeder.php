@@ -28,7 +28,7 @@ class LearningPackageSeeder extends Seeder
 
         $this->createPackage('Paket Reguler', [
             'tier' => PackageTier::Regular,
-            'description' => '1 token untuk membuka 1 paket soal tryout SKD pilihanmu, 2 percobaan total, kunci jawaban dan pembahasan.',
+            'description' => '1 token untuk membuka 1 paket soal tryout SKD pilihanmu, 2 percobaan untuk tryout tersebut, kunci jawaban dan pembahasan.',
             'price' => 15000,
             'duration_days' => 365,
             'tryout_quota' => 2,
@@ -39,7 +39,7 @@ class LearningPackageSeeder extends Seeder
 
         $this->createPackage('Paket Bundling', [
             'tier' => PackageTier::Bundling,
-            'description' => '3 token untuk membuka 3 paket soal tryout SKD pilihanmu, 3 percobaan total, pembahasan, dan perangkingan daerah.',
+            'description' => '3 token untuk membuka 3 paket soal tryout SKD pilihanmu, 3 percobaan per tryout, pembahasan, dan perangkingan daerah.',
             'price' => 35000,
             'duration_days' => 365,
             'tryout_quota' => 3,

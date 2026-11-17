@@ -87,7 +87,7 @@
         </div>
         @if ($summary['count'] > 0)
           <div class="member-dashboard__progress">
-            @if ($summary['accuracy'] !== null)<div class="ring" data-pct="{{ $summary['accuracy'] }}"><div class="ring__label"><div class="ring__value">{{ $summary['accuracy'] }}%</div><div class="ring__unit">Akurasi soal biasa</div></div></div>@endif
+            @if ($summary['accuracy'] !== null)<div class="ring ring--accuracy" data-pct="{{ $summary['accuracy'] }}"><div class="ring__label"><div class="ring__value">{{ $summary['accuracy'] }}%</div><div class="ring__unit">Akurasi<br>soal biasa</div></div></div>@endif
             <div class="kv" style="width:100%">
               <div class="kv__row"><span class="kv__key">Soal benar</span><span class="kv__val">{{ $summary['correct'] }}</span></div>
               <div class="kv__row"><span class="kv__key">Soal salah</span><span class="kv__val">{{ $summary['wrong'] }}</span></div>
@@ -142,7 +142,7 @@
       <section class="card member-dashboard__packages">
         <div class="card__title">Paket Aktif</div>
         @forelse ($activePackages as $activePackage)
-        <div class="card card--tight card--dashed"><strong>{{ $activePackage->name }}</strong><p class="text-xs text-soft" style="margin-top:.4rem">@if ($activePackage->expires_at)Berlaku sampai <x-local-time :value="$activePackage->expires_at" format="d M Y, H:i" />@else Tanpa batas waktu @endif · Kuota tryout: {{ $activePackage->remainingTryouts() ?? 'Tanpa batas' }}</p></div>
+        <div class="card card--tight card--dashed"><strong>{{ $activePackage->name }}</strong><p class="text-xs text-soft" style="margin-top:.4rem">@if ($activePackage->expires_at)Berlaku sampai <x-local-time :value="$activePackage->expires_at" format="d M Y, H:i" />@else Tanpa batas waktu @endif · Kuota per tryout: {{ $activePackage->tryout_quota === null ? 'Tanpa batas' : $activePackage->tryout_quota.' percobaan' }}</p></div>
         @empty<p class="text-sm text-soft">Belum ada paket aktif. Kamu dapat melihat katalog dan memilih paket untuk membuka kontennya.</p>@endforelse
         <a class="btn btn--ghost btn--sm" href="{{ route('packages.index') }}">Lihat paket belajar</a>
       </section>
