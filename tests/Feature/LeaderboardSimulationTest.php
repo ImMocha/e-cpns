@@ -41,7 +41,7 @@ class LeaderboardSimulationTest extends TestCase
         $this->assertSame(131, (int) $counts->min());
         $this->assertSame(132, (int) $counts->max());
         $total = LeaderboardBot::query()->count();
-        $localCount = 100;
+        $localCount = 101;
         $this->assertDatabaseCount('users', 2);
         $this->actingAs($member)->get(route('leaderboard.index'))
             ->assertSee('Skor subtes peserta virtual dihitung dari total nilai simulasi')->assertDontSee('· Virtual')

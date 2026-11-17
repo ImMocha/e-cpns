@@ -9,7 +9,6 @@ use App\Leaderboard;
 use App\LeaderboardSimulation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class LeaderboardController extends Controller
 {
@@ -29,7 +28,6 @@ class LeaderboardController extends Controller
         }
 
         $needsProvince = $scope === 'local' && $user->province === null;
-        $displayLimit = $scope === 'national' ? 5000 : 100;
         $totalParticipants = 0;
         $participants = null;
         $ownRank = null;
@@ -41,9 +39,12 @@ class LeaderboardController extends Controller
             $maximumScore = $referenceTryout?->maximumScore();
             $rankings = $leaderboard->rankings($scope === 'local' ? $user->province : null, $referenceTryout);
             $ownRank = (clone $rankings)->where('id', $user->id)->where('participant_type', 'real')->first();
-            $totalParticipants = (clone $rankings)->count();
-            $participants = DB::query()->fromSub($rankings->limit($displayLimit), 'displayed_leaderboard')
-                ->orderBy('position')->paginate(25)->withQueryString();
+            $perPage = 25;
+            $rankPage = $ownRank && $request->boolean('mine')
+                ? intdiv((int) $ownRank->position - 1, $perPage) + 1
+                : null;
+            $participants = $rankings->paginate($perPage, page: $rankPage)->appends(['scope' => $scope]);
+            $totalParticipants = $participants->total();
 
             if ($simulation->enabled()) {
                 $simulatedCount = $simulation->bots($scope === 'local' ? $user->province : null)->count();
@@ -53,7 +54,7 @@ class LeaderboardController extends Controller
         return view('Dashboard.User.leaderboard.index', [
             'access' => $access, 'scope' => $scope, 'hasAccess' => $hasAccess,
             'needsProvince' => $needsProvince, 'province' => $user->province,
-            'displayLimit' => $displayLimit, 'totalParticipants' => $totalParticipants,
+            'totalParticipants' => $totalParticipants,
             'participants' => $participants, 'ownRank' => $ownRank,
             'simulatedCount' => $simulatedCount,
             'referenceTryout' => $referenceTryout, 'maximumScore' => $maximumScore,

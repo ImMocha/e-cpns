@@ -9,6 +9,10 @@
             gap: .5rem;
         }
 
+        #peringkat-saya {
+            scroll-margin-top: 6rem;
+        }
+
         .leaderboard-help-toggle {
             display: inline-grid;
             place-items: center;
@@ -106,6 +110,11 @@
                 <div class="stat__label">Peringkatmu · {{ $scope === 'local' ? $province->value : 'Nasional' }}</div>
                 <div class="stat__value" style="margin-top:.5rem">{{ $ownRank ? '#'.$ownRank->position : '—' }}</div>
                 <p class="text-sm text-soft" style="margin-top:.5rem">{{ $ownRank ? 'Dari '.$totalParticipants.' entri peringkat'.($simulatedCount ? ', termasuk '.$simulatedCount.' virtual.' : ' peserta.') : 'Selesaikan satu tryout untuk mendapatkan peringkat.' }}</p>
+                @if ($ownRank)
+                    <div style="margin-top:1rem">
+                        <a class="btn btn--outline btn--sm" href="{{ route('leaderboard.index', ['scope' => $scope, 'mine' => 1]) }}#peringkat-saya">Lihat Rangking Saya</a>
+                    </div>
+                @endif
             </article>
             <article class="card">
                 <div class="stat__label">Nilai terbaikmu</div>
@@ -153,7 +162,7 @@
                         @if ($simulatedCount > 0)
                             <li><strong>Simulasi.</strong> Skor subtes peserta virtual dihitung dari total nilai simulasi pada skala {{ $maximumScore ?? 550 }} poin.</li>
                         @endif
-                        <li><strong>Cakupan daftar.</strong> Daftar menampilkan maksimal {{ number_format($displayLimit, 0, ',', '.') }} peserta. Peringkatmu tetap dihitung dari seluruh peserta dalam cakupan yang dipilih.</li>
+                        <li><strong>Cakupan daftar.</strong> Semua entri dalam cakupan yang dipilih dapat dilihat, {{ $participants->perPage() }} per halaman.</li>
                     </ul>
                 </div>
             </div>
@@ -172,9 +181,10 @@
                     </thead>
                     <tbody>
                     @forelse ($participants as $entry)
-                        <tr @if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) class="bg-[var(--primary-050)]" @endif>
+                        @php($isOwnRank = $entry->participant_type === 'real' && (int) $entry->id === auth()->id())
+                        <tr @if ($isOwnRank) id="peringkat-saya" tabindex="-1" class="bg-[var(--primary-050)]" @endif>
                             <td class="num"><span class="lb-rank leaderboard-rank{{ (int) $entry->position <= 3 ? ' lb-rank--'.$entry->position : '' }}" aria-label="Peringkat {{ $entry->position }}">{{ $entry->position }}</span></td>
-                            <td><strong>{{ $entry->name }}</strong>@if ($entry->participant_type === 'real' && (int) $entry->id === auth()->id()) <span class="badge badge--mint badge--flat">Kamu</span>@endif</td>
+                            <td><strong>{{ $entry->name }}</strong>@if ($isOwnRank) <span class="badge badge--mint badge--flat">Kamu</span>@endif</td>
                             <td>{{ $entry->province ?? 'Belum diisi' }}</td>
                             @foreach ([$entry->tkp_score, $entry->tiu_score, $entry->twk_score] as $sectionScore)
                                 <td class="num">{{ $sectionScore === null ? '—' : rtrim(rtrim(number_format((float) $sectionScore, 2, ',', '.'), '0'), ',') }}</td>

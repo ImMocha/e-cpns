@@ -19,7 +19,7 @@ class LeaderboardLimitsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_lists_are_capped_but_own_rank_and_population_include_every_participant(): void
+    public function test_both_scopes_paginate_all_entries_and_jump_to_the_members_rank(): void
     {
         $member = User::factory()->create(['province' => Province::Aceh]);
         UserPackage::factory()->for($member)->create(['leaderboard_access' => LeaderboardAccess::National]);
@@ -28,21 +28,27 @@ class LeaderboardLimitsTest extends TestCase
         ]);
         DB::table('leaderboard_settings')->insert(['id' => 1, 'simulations_enabled' => true]);
         $rows = [];
-        for ($index = 0; $index < 6300; $index++) {
-            $rows[] = ['source_key' => 'limit-'.$index, 'name' => 'Peserta '.$index, 'province' => Province::Aceh->value, 'score' => $index < 5000 ? 500 : 450];
+        for ($index = 0; $index < 9230; $index++) {
+            $rows[] = ['source_key' => 'entry-'.$index, 'name' => 'Peserta '.$index, 'province' => Province::Aceh->value, 'score' => 500];
         }
         foreach (array_chunk($rows, 500) as $chunk) {
             DB::table('leaderboard_bots')->insert($chunk);
         }
-        foreach (['national' => 5000, 'local' => 100] as $scope => $limit) {
+        foreach (['national', 'local'] as $scope) {
+            $rankUrl = route('leaderboard.index', ['scope' => $scope, 'mine' => 1]);
+
             $this->actingAs($member)->get(route('leaderboard.index', ['scope' => $scope]))
-                ->assertOk()->assertViewHas('totalParticipants', 6301)
-                ->assertViewHas('ownRank', fn ($rank): bool => (int) $rank->position === 6301)
-                ->assertViewHas('participants', fn ($rows): bool => $rows->total() === $limit)
-                ->assertSee('#6301');
-            $this->get(route('leaderboard.index', ['scope' => $scope, 'page' => intdiv($limit, 25) + 1]))
-                ->assertOk()->assertViewHas('participants', fn ($rows): bool => $rows->count() === 0)
-                ->assertSee('#6301');
+                ->assertOk()->assertViewHas('totalParticipants', 9231)
+                ->assertViewHas('participants', fn ($rows): bool => $rows->count() === 25 && $rows->lastPage() === 370)
+                ->assertSee('#9231')
+                ->assertSee($rankUrl.'#peringkat-saya')
+                ->assertDontSee('id="peringkat-saya"', false);
+
+            $this->get($rankUrl)
+                ->assertOk()->assertViewHas('participants', fn ($rows): bool => $rows->currentPage() === 370
+                    && $rows->count() === 6 && (int) $rows->last()->id === $member->id
+                    && ! str_contains($rows->previousPageUrl(), 'mine='))
+                ->assertSee('id="peringkat-saya"', false);
         }
     }
 
