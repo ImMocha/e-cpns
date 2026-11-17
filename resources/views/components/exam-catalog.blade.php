@@ -10,7 +10,7 @@
 <aside class="card card--tight" aria-label="Token pilihan tryout">
     <span class="badge badge--mint badge--flat">{{ $tokenCount }} token tersedia</span>
     <h2 class="card__title exam-card-title">Pilih tryout yang ingin kamu buka</h2>
-    <p class="text-sm text-soft">1 token membuka 1 paket soal tryout premium pilihanmu. Jika percobaan tryout lama habis, gunakan token dari pembelian lain untuk mengisi ulang percobaannya. Setelah dikonfirmasi, pilihan tersimpan dan tidak bisa ditukar. Setiap tryout punya jatah percobaan sendiri, yang berkurang saat kamu memulai percobaan baru.</p>
+    <p class="text-sm text-soft">Gunakan 1 token untuk membuka tryout premium atau mengisi ulang tryout yang kuotanya habis. Kamu bisa memakai token tersisa dari paket yang sama selama masih aktif. Jatah percobaan mengikuti paket asal token dan berkurang setiap kali kamu memulai percobaan baru.</p>
 </aside>
 @endif
 @unless ($learningLocked)

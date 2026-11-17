@@ -154,7 +154,7 @@
                     <div class="card card--tight flex flex-col items-start gap-4 p-5! sm:p-6!">
                         <div class="flex flex-col gap-2">
                             <strong class="text-sm text-[var(--ink)]">{{ $transaction->package_snapshot['tryout_tokens'] }} token pilihan tryout</strong>
-                            <p class="text-sm leading-relaxed text-soft">Setelah pembayaran terverifikasi, token tersedia di akunmu untuk membuka tryout premium pilihanmu.</p>
+                            <p class="text-sm leading-relaxed text-soft">Setelah pembayaran terverifikasi, token tersedia di akunmu untuk membuka tryout premium atau mengisi ulang tryout yang kuotanya habis.</p>
                         </div>
                         <a class="btn btn--ghost btn--sm" href="{{ route('tryouts.index') }}">Pilih tryout</a>
                     </div>

@@ -24,7 +24,7 @@
             <div class="owned-package__allowance">
                 @if ($owned->tryout_tokens > 0)
                     <strong>{{ $owned->tryout_tokens }} token pilihan tryout{{ $owned->isActive() ? ' tersisa' : '' }}</strong>
-                    <p>Gunakan 1 token untuk membuka 1 tryout premium pilihanmu. Setiap tryout yang dibuka mendapat jatah percobaan sendiri.</p>
+                    <p>Gunakan 1 token untuk membuka tryout premium atau mengisi ulang tryout yang kuotanya habis.</p>
                 @elseif ($owned->tryout_quota === null)
                     <strong>Kuota tryout tanpa batas</strong>
                     <p>Percobaan tryout dalam paket ini tidak dibatasi. Akses tetap mengikuti status dan masa aktif paket.</p>
@@ -71,7 +71,7 @@
             @if ($package->exams->where('kind', 'practice')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'practice')->count() }} latihan soal</li>@endif
             @if ($package->exams->where('kind', 'quiz')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'quiz')->count() }} latihan topik</li>@endif
             @if ($package->tryout_tokens === 0 || $package->exams->where('kind', 'tryout')->isNotEmpty())<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->exams->where('kind', 'tryout')->count() }} paket soal tryout</li>@endif
-            @if ($package->tryout_tokens > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_tokens }} token untuk {{ $package->tryout_tokens }} tryout pilihanmu</li>@endif
+            @if ($package->tryout_tokens > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_tokens }} token untuk membuka atau mengisi ulang tryout</li>@endif
             <li><span class="price__check"><svg data-icon="check"></svg></span> {{ $package->tryout_quota === null ? 'Kuota tryout tanpa batas' : $package->tryout_quota.' percobaan per tryout' }}</li>
             @if ($package->price > 0)<li><span class="price__check"><svg data-icon="check"></svg></span> Kunci jawaban &amp; pembahasan</li>@endif
         </ul>
@@ -90,5 +90,5 @@
     @endforelse
     </div>
 </section>
-<section class="card" style="margin-top:1.5rem"><div class="card__title">Cara kerja paket</div><p class="text-sm text-soft" style="margin-top:.75rem">Kamu boleh membeli paket yang sama maupun paket lain berulang kali. Setiap pembelian menyimpan ketentuan, token, kuota percobaan, dan masa aktifnya sendiri. Akses aktif setelah pembayaran terverifikasi. Jika paketmu berisi token, gunakan 1 token untuk membuka 1 tryout premium pilihanmu atau mengisi ulang tryout yang percobaannya sudah habis, menggunakan kuota dari pembelian baru. Pilihan yang dikonfirmasi tidak bisa ditukar. Setiap tryout memiliki jatah percobaan sendiri. Jatah tryout itu berkurang saat kamu memulai percobaan baru. Melanjutkan sesi dan mengerjakan latihan tidak memakai jatah. Riwayat hasil tryout sebelumnya tetap tersimpan.</p></section>
+<section class="card" style="margin-top:1.5rem"><div class="card__title">Cara kerja paket</div><p class="text-sm text-soft" style="margin-top:.75rem">Kamu boleh membeli paket yang sama maupun paket lain berulang kali. Setiap pembelian menyimpan ketentuan, token, kuota percobaan, dan masa aktifnya sendiri. Akses aktif setelah pembayaran terverifikasi. Jika paketmu berisi token, gunakan 1 token untuk membuka 1 tryout premium pilihanmu atau mengisi ulang tryout yang percobaannya sudah habis, dengan jatah percobaan dari paket asal token. Pilihan yang dikonfirmasi tidak bisa ditukar. Setiap tryout memiliki jatah percobaan sendiri. Jatah tryout itu berkurang saat kamu memulai percobaan baru. Melanjutkan sesi dan mengerjakan latihan tidak memakai jatah. Riwayat hasil tryout sebelumnya tetap tersimpan.</p></section>
 @endsection

@@ -13,8 +13,10 @@ class TryoutTokenController extends Controller
 {
     public function __invoke(Request $request, UserPackage $userPackage, Exam $exam): RedirectResponse
     {
-        $userPackage->redeemTryoutToken($request->user(), $exam);
+        $redeemed = $userPackage->redeemTryoutToken($request->user(), $exam);
 
-        return redirect()->route('tryouts.index')->with('success', 'Tryout terbuka dengan jatah percobaannya sendiri. Satu token telah digunakan.');
+        return redirect()->route('tryouts.index')->with('success', $redeemed
+            ? 'Kuota percobaan tryout siap digunakan. Satu token telah digunakan.'
+            : 'Tryout ini masih memiliki kuota percobaan.');
     }
 }

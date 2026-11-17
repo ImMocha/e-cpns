@@ -107,7 +107,7 @@
                     @if ($package->tryout_tokens > 0)
                         <div class="checkout-benefits__tokens">
                             <span class="checkout-benefits__token-icon" aria-hidden="true"><svg data-icon="key"></svg></span>
-                            <div><strong>{{ $package->tryout_tokens }} token pilihan tryout</strong><p>Setelah paket aktif, pilih tryout premium yang ingin dibuka di halaman Tryout CAT. 1 token membuka 1 paket soal; pilihan yang sudah dikonfirmasi tidak bisa ditukar. Setiap tryout yang dibuka punya jatah percobaannya sendiri.</p></div>
+                            <div><strong>{{ $package->tryout_tokens }} token pilihan tryout</strong><p>Setelah paket aktif, gunakan 1 token di halaman Tryout CAT untuk membuka tryout premium atau mengisi ulang tryout yang kuotanya habis. Jatah percobaan mengikuti paket asal token.</p></div>
                         </div>
                     @endif
                     @if (! $package->tier && $package->materials->isEmpty() && $package->exams->isEmpty() && $package->tryout_tokens === 0)
@@ -166,7 +166,7 @@
             </div>
 
             @if ($alreadyOwned)
-                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]">Kamu bisa membeli paket ini lagi. Setiap pembelian memberikan token, kuota, dan masa aktif tersendiri sesuai ketentuan paket. Untuk tryout pilihan, gunakan token baru untuk membuka tryout lain atau mengisi ulang tryout yang percobaannya habis.</p>
+                <p class="mt-5! text-sm leading-relaxed text-[var(--text)]">Kamu bisa membeli paket ini lagi. Setiap pembelian memberikan token, kuota, dan masa aktif tersendiri sesuai ketentuan paket. Gunakan token yang tersedia untuk membuka tryout premium atau mengisi ulang tryout yang percobaannya habis.</p>
             @endif
             @if (! $contentAvailable)
                 <p class="mt-5! text-sm leading-relaxed text-[var(--text)]" role="status">Paket ini belum bisa dibeli karena kontennya sedang tidak tersedia. Silakan pilih paket lain atau hubungi admin.</p>

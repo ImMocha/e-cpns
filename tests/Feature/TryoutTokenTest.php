@@ -108,6 +108,40 @@ class TryoutTokenTest extends TestCase
         $this->assertDatabaseHas('user_packages', ['id' => $new->id, 'tryouts_used' => 1]);
     }
 
+    public function test_remaining_tokens_from_the_same_package_can_refill_only_the_exhausted_tryout(): void
+    {
+        $exam = $this->tryout();
+        $otherExam = $this->tryout();
+        $user = User::factory()->create();
+        $grant = $this->grant($user);
+        $grant->update(['tryout_tokens' => 3]);
+        $grant->exams()->attach($otherExam);
+        $redeem = route('tryout-tokens.redeem', [$grant, $exam]);
+        $this->actingAs($user)->post($redeem)->assertSessionHasNoErrors();
+        $first = $this->completeTryout($exam);
+        $this->completeTryout($exam);
+        $this->completeTryout($otherExam);
+
+        $this->get(route('tryouts.index'))->assertSee('2 token tersedia')->assertSee('Isi ulang dengan 1 token');
+        $this->post($redeem)->assertSessionHasNoErrors();
+        $this->post($redeem)->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryout_tokens' => 1, 'tryouts_used' => 3]);
+        $this->get(route('tryouts.index'))->assertViewHas('banks', fn ($banks): bool => $banks->firstWhere('exam.id', $exam->id)['remainingTryouts'] === 2
+            && $banks->firstWhere('exam.id', $otherExam->id)['remainingTryouts'] === 1);
+        $this->completeTryout($exam);
+        $this->completeTryout($exam);
+        $this->post(route('tryouts.start', $exam->slug))->assertInvalid(['exam']);
+
+        $this->post($redeem)->assertSessionHasNoErrors();
+        $this->get(route('tryouts.index'))->assertViewHas('banks', fn ($banks): bool => $banks->firstWhere('exam.id', $exam->id)['remainingTryouts'] === 2);
+        $this->assertDatabaseHas('user_packages', ['id' => $grant->id, 'tryout_tokens' => 0, 'tryouts_used' => 5]);
+        $this->assertDatabaseHas('exam_user_package', ['user_package_id' => $grant->id, 'exam_id' => $exam->id, 'extra_tryout_attempts' => 4]);
+        $this->assertDatabaseCount('exam_user_package', 2);
+        $this->assertDatabaseCount('exam_attempts', 5);
+        $this->get($first->resultUrl())->assertOk();
+    }
+
     public function test_running_last_attempt_blocks_refill_until_it_expires(): void
     {
         $this->freezeTime();
@@ -313,7 +347,7 @@ class TryoutTokenTest extends TestCase
 
         $this->assertDatabaseHas('packages', ['name' => 'Paket Reguler', 'tryout_tokens' => 1, 'tryout_quota' => 2]);
         $this->assertDatabaseCount('exam_package', 0);
-        $this->get(route('home'))->assertSee('1 token untuk 1 tryout pilihanmu');
+        $this->get(route('home'))->assertSee('1 token untuk membuka atau mengisi ulang tryout');
         $this->actingAs(User::factory()->create())->get(route('checkout', ['package' => Package::sole()->id]))
             ->assertSee('1 token pilihan tryout')->assertDontSee('Daftar konten belum tersedia.');
     }

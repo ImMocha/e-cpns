@@ -86,7 +86,7 @@ class ExamCatalog
                 && $exam->topic?->hasCompletedMaterials() !== true));
             $usage = $tryoutUsage->get($exam->slug, collect());
             $remaining = $freeAccess || $covering->contains(fn (UserPackage $item): bool => $item->tryout_quota === null)
-                ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts($usage->get($item->id, 0)));
+                ? null : $covering->sum(fn (UserPackage $item): int => $item->remainingTryouts($exam, $usage->get($item->id, 0)));
             $canStart = $topicReady && ($freeAccess || (! $exam->free_claim_enabled && $hasAccess && ($exam->kind !== 'tryout' || $remaining !== 0)));
             $learningLocked = $exam->requiresPremiumLearningAccess() && ! $learningAllowed;
             if ($learningLocked) {
@@ -94,7 +94,7 @@ class ExamCatalog
                 $canStart = false;
             }
             $tokenPackage = ! $canStart && $topicReady && isset($tokenExamIds[$exam->id])
-                ? $tokenPackages->first(fn (UserPackage $item): bool => ! $item->exams->contains('id', $exam->id)) : null;
+                ? $tokenPackages->first() : null;
 
             return ['exam' => $exam, 'open' => $history->firstWhere('status', ExamAttempt::IN_PROGRESS),
                 'learningLocked' => $learningLocked,

@@ -16,7 +16,7 @@
         <a class="btn exam-actions__unlock" href="{{ route('exam-claims.create', $exam) }}"><svg data-icon="lock"></svg> Unlock gratis</a>
     @endif
 @elseif ($item['tokenPackage'] ?? null)
-    <form class="exam-actions__token-form" method="POST" action="{{ route('tryout-tokens.redeem', [$item['tokenPackage'], $exam]) }}" data-content-confirm data-confirm-title="{{ $item['isTokenRefill'] ? 'Isi ulang percobaan dengan 1 token?' : 'Buka tryout dengan 1 token?' }}" data-confirm-body="Kamu memilih {{ $exam->title }} menggunakan 1 token dari {{ $item['tokenPackage']->name }} (pembelian #{{ $item['tokenPackage']->id }}). Jatah untuk tryout ini: {{ $item['tokenPackage']->tryout_quota === null ? 'tanpa batas' : $item['tokenPackage']->tryout_quota.' percobaan' }}. Pilihan tidak bisa ditukar; riwayat sebelumnya tetap tersimpan." data-confirm-ok="Ya, gunakan 1 token">
+    <form class="exam-actions__token-form" method="POST" action="{{ route('tryout-tokens.redeem', [$item['tokenPackage'], $exam]) }}" data-content-confirm data-confirm-title="{{ $item['isTokenRefill'] ? 'Isi ulang percobaan dengan 1 token?' : 'Buka tryout dengan 1 token?' }}" data-confirm-body="Gunakan 1 token dari {{ $item['tokenPackage']->name }} (pembelian #{{ $item['tokenPackage']->id }}) untuk {{ $exam->title }}. Jatah yang siap dipakai: {{ $item['tokenPackage']->tryout_quota === null ? 'tanpa batas' : $item['tokenPackage']->tryout_quota.' percobaan' }}. Riwayat sebelumnya tetap tersimpan." data-confirm-ok="Ya, gunakan 1 token">
         @csrf
         <button class="btn btn--primary" type="submit"><svg data-icon="{{ $item['isTokenRefill'] ? 'timer' : 'lock' }}"></svg> {{ $item['isTokenRefill'] ? 'Isi ulang dengan 1 token' : 'Buka dengan 1 token' }}</button>
     </form>

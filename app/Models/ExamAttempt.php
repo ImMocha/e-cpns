@@ -179,10 +179,11 @@ class ExamAttempt extends Model
                         ->orWhere(fn (Builder $selected): Builder => $selected
                             ->when($bank->kind !== 'tryout', fn (Builder $legacy): Builder => $legacy->whereNull('tier'))
                             ->whereHas('exams', fn (Builder $query): Builder => $query->whereKey($bank->id))))
+                    ->with(['exams' => fn (Relation $exams) => $exams->whereKey($bank->id)])
                     ->orderBy('id')->lockForUpdate()->get();
                 abort_if($entitlements->isEmpty(), 403, 'Sesi ini membutuhkan paket aktif yang memuatnya.');
                 $usage = $bank->kind === 'tryout' ? self::tryoutUsage($user, $bank->slug)->get($bank->slug, collect()) : null;
-                $entitlement = $entitlements->first(fn (UserPackage $item): bool => $usage === null || $item->remainingTryouts($usage->get($item->id, 0)) !== 0);
+                $entitlement = $entitlements->first(fn (UserPackage $item): bool => $usage === null || $item->remainingTryouts($bank, $usage->get($item->id, 0)) !== 0);
                 if ($entitlement === null) {
                     throw ValidationException::withMessages(['exam' => 'Kuota percobaan untuk tryout ini sudah habis. Buka katalog Tryout CAT untuk melihat pilihan yang tersedia.']);
                 }

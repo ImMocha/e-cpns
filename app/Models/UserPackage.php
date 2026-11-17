@@ -49,7 +49,7 @@ class UserPackage extends Model
 
     public function exams(): BelongsToMany
     {
-        return $this->belongsToMany(Exam::class);
+        return $this->belongsToMany(Exam::class)->withPivot('extra_tryout_attempts');
     }
 
     /** @param Builder<UserPackage> $query */
@@ -65,9 +65,11 @@ class UserPackage extends Model
             && ($this->expires_at === null || $this->expires_at->isAfter(now()));
     }
 
-    public function remainingTryouts(int $attemptsUsed): ?int
+    public function remainingTryouts(Exam $exam, int $attemptsUsed): ?int
     {
-        return $this->tryout_quota === null ? null : max(0, $this->tryout_quota - $attemptsUsed);
+        $extraAttempts = $this->exams->find($exam->id)?->pivot->extra_tryout_attempts ?? 0;
+
+        return $this->tryout_quota === null ? null : max(0, $this->tryout_quota + $extraAttempts - $attemptsUsed);
     }
 
     public function offersTryoutAttempts(): bool
@@ -75,26 +77,30 @@ class UserPackage extends Model
         return $this->tryout_quota === null || $this->tryout_quota > 0;
     }
 
-    public function redeemTryoutToken(User $user, Exam $exam): void
+    public function redeemTryoutToken(User $user, Exam $exam): bool
     {
         abort_unless($this->user_id === $user->id && ! $user->isAdmin(), 404);
 
-        DB::transaction(function () use ($user, $exam): void {
+        return DB::transaction(function () use ($user, $exam): bool {
             User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $entitlement = self::query()->whereKey($this->id)->whereBelongsTo($user)->lockForUpdate()->firstOrFail();
             abort_unless($entitlement->isActive(), 403, 'Paket sudah tidak aktif.');
             $exam = Exam::query()->availableForTokens()->whereKey($exam->id)->sharedLock()->firstOrFail();
-            if ($entitlement->exams()->whereKey($exam->id)->exists()) {
-                return;
+            $examRelation = ['exams' => fn (BelongsToMany $exams) => $exams->whereKey($exam->id)];
+            $entitlement->load($examRelation);
+            $linkedExam = $entitlement->exams->find($exam->id);
+            $usage = ExamAttempt::tryoutUsage($user, $exam->slug)->get($exam->slug, collect());
+            $attemptsUsed = $usage->get($entitlement->id, 0);
+            if ($linkedExam !== null && $entitlement->remainingTryouts($exam, $attemptsUsed) !== 0) {
+                return false;
             }
             if ($entitlement->tryout_tokens < 1 || ! $entitlement->offersTryoutAttempts()) {
                 throw ValidationException::withMessages(['exam' => 'Token atau kuota percobaan paket sudah habis.']);
             }
-            $usage = ExamAttempt::tryoutUsage($user, $exam->slug)->get($exam->slug, collect());
             if ($user->userPackages()->active()
                 ->where(fn (Builder $access) => $access->where('tier', PackageTier::Premium)
                     ->orWhereHas('exams', fn (Builder $query) => $query->whereKey($exam->id)))
-                ->get()->contains(fn (self $package): bool => $package->remainingTryouts($usage->get($package->id, 0)) !== 0)) {
+                ->with($examRelation)->get()->contains(fn (self $package): bool => $package->remainingTryouts($exam, $usage->get($package->id, 0)) !== 0)) {
                 throw ValidationException::withMessages(['exam' => 'Tryout ini masih memiliki kuota percobaan. Gunakan percobaan yang tersedia terlebih dahulu.']);
             }
             if (ExamAttempt::query()->whereBelongsTo($user)->where('kind', 'tryout')->where('bank_slug', $exam->slug)
@@ -106,8 +112,15 @@ class UserPackage extends Model
             if (! $exam->topicIsReadyFor($user)) {
                 throw ValidationException::withMessages(['exam' => 'Selesaikan semua materi pada topik ini sebelum membuka tryout.']);
             }
-            $entitlement->exams()->attach($exam);
+            if ($linkedExam === null) {
+                $entitlement->exams()->attach($exam, ['extra_tryout_attempts' => $attemptsUsed ?: null]);
+            } else {
+                $previousCapacity = $entitlement->tryout_quota + ($linkedExam->pivot->extra_tryout_attempts ?? 0);
+                $entitlement->exams()->updateExistingPivot($exam->id, ['extra_tryout_attempts' => max($attemptsUsed, $previousCapacity)]);
+            }
             $entitlement->decrement('tryout_tokens');
+
+            return true;
         });
     }
 

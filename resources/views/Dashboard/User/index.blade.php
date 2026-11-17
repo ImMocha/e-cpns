@@ -37,7 +37,7 @@
       @else
       <article class="stat reveal" data-delay="140">
         <span class="stat__icon ico--amber"><svg data-icon="key"></svg></span>
-        <div><div class="stat__label">Token Pilihan Tryout</div><div class="stat__value">{{ $activePackages->sum('tryout_tokens') }}</div><div class="stat__delta text-soft">Tersedia untuk membuka tryout pilihanmu</div></div>
+        <div><div class="stat__label">Token Pilihan Tryout</div><div class="stat__value">{{ $activePackages->sum('tryout_tokens') }}</div><div class="stat__delta text-soft">Untuk membuka atau mengisi ulang tryout</div></div>
       </article>
       <article class="stat reveal" data-delay="210">
         <span class="stat__icon ico--mint"><svg data-icon="package"></svg></span>

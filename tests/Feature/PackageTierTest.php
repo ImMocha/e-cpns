@@ -247,7 +247,7 @@ class PackageTierTest extends TestCase
             $byExam = $banks->keyBy('exam.id');
 
             return $byExam[$first->id]['remainingTryouts'] === 0
-                && $byExam[$first->id]['tokenPackage'] === null
+                && $byExam[$first->id]['tokenPackage']?->id === ($exams->isEmpty() ? null : $grant->id)
                 && $exams->slice(0, -1)->every(fn (Exam $exam): bool => $byExam[$exam->id]['remainingTryouts'] === $attempts)
                 && $exams->slice(-1)->every(fn (Exam $exam): bool => $byExam[$exam->id]['tokenPackage']?->id === $grant->id);
         });
